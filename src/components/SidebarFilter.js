@@ -1,0 +1,461 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Star, ChevronDown, ChevronUp, X, ChevronLeft, ShoppingCart, Check } from "lucide-react";
+
+// ─── Filter Section Header ──────────────────────────────────────
+function SectionTitle({ title }) {
+  return (
+    <h3 className="text-[14px] font-bold text-[#0F1111] mb-1.5 mt-4 tracking-tight select-none">
+      {title}
+    </h3>
+  );
+}
+
+// ─── Amazon Star Rating Row ──────────────────────────────────────────
+function StarRow({ stars, selected, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-1 py-0.5 w-full group transition-all text-left select-none cursor-pointer"
+    >
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map(i => (
+          <Star
+            key={i}
+            size={16}
+            className={i <= stars ? "fill-[#FF9900] text-[#FF9900]" : "fill-transparent text-[#CCCCCC]"}
+            strokeWidth={1.5}
+          />
+        ))}
+      </div>
+      <span className={`text-[13px] mr-1 transition-colors ${selected ? "text-[#9b2c41] font-bold" : "text-[#0F1111] group-hover:text-[#9b2c41]"}`}>
+        وأعلى
+      </span>
+    </button>
+  );
+}
+
+// ─── Amazon Checkbox Component ──────────────────────────────────────
+function AmazonCheckbox({ label, count, checked, onChange }) {
+  return (
+    <div 
+      className="flex items-center gap-2 group cursor-pointer py-0.5 select-none animate-in fade-in duration-200" 
+      onClick={onChange}
+    >
+      <div className={`w-[14px] h-[14px] border rounded-[3px] flex items-center justify-center transition-all shrink-0 ${
+        checked 
+          ? 'bg-[#007185] border-[#007185] shadow-[0_1px_2px_rgba(0,0,0,0.15)]' 
+          : 'bg-white border-[#8D9096] group-hover:border-[#007185] group-hover:shadow-[0_1px_2px_rgba(0,0,0,0.05)]'
+      }`}>
+        {checked && (
+          <Check size={10} className="text-white" strokeWidth={4.5} />
+        )}
+      </div>
+      <span className={`text-[13px] transition-colors flex-1 truncate ${
+        checked ? 'font-bold text-[#0F1111]' : 'text-[#0F1111] group-hover:text-[#007185]'
+      }`}>
+        {label}
+      </span>
+      {count !== undefined && count > 0 && (
+        <span className="text-[#565959] text-[11px] ml-auto shrink-0 font-normal">({count})</span>
+      )}
+    </div>
+  );
+}
+
+// ─── Main SidebarFilter Component ─────────────────────────────────────────────
+export default function SidebarFilter({ categories = [], products = [], filters, onFiltersChange, priceBounds = { min: 0, max: 1000 } }) {
+  const pathname = usePathname();
+  const [showAllTags, setShowAllTags] = useState(false);
+  const [showAllSellers, setShowAllSellers] = useState(false);
+
+  // Identify active category object
+  const activeCategory = useMemo(() => {
+    if (!filters.category) return null;
+    return categories.find(c => c.id === Number(filters.category) || c.slug === filters.category);
+  }, [filters.category, categories]);
+
+  // Handle department section tree structure
+  const departmentSection = useMemo(() => {
+    const updateCat = (id) => onFiltersChange({ ...filters, category: id });
+
+    if (!activeCategory) {
+      return (
+        <div className="mb-4">
+          <SectionTitle title="القسم" />
+          <div className="max-h-[260px] overflow-y-auto pr-1">
+            <ul className="space-y-1">
+              {categories.filter(c => c.parent === 0).map(cat => (
+                <li key={cat.id}>
+                  <button
+                    onClick={() => updateCat(cat.id)}
+                    className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-right w-full truncate cursor-pointer"
+                    dangerouslySetInnerHTML={{ __html: cat.name }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    const parentCategory = activeCategory.parent ? categories.find(c => c.id === activeCategory.parent) : null;
+    const children = categories.filter(c => c.parent === activeCategory.id);
+
+    return (
+      <div className="mb-4">
+        <SectionTitle title="القسم" />
+        <div className="max-h-[260px] overflow-y-auto pr-1">
+          <ul className="space-y-1">
+            <li>
+              <button
+                onClick={() => updateCat(null)}
+                className="text-[13px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
+              >
+                <ChevronLeft size={12} className="shrink-0 rotate-180" />
+                <span>جميع الأقسام</span>
+              </button>
+            </li>
+            {parentCategory && (
+              <li className="pr-3">
+                <button
+                  onClick={() => updateCat(parentCategory.id)}
+                  className="text-[13px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
+                  dangerouslySetInnerHTML={{ __html: `&gt; ${parentCategory.name}` }}
+                />
+              </li>
+            )}
+            <li className={`${parentCategory ? 'pr-5' : 'pr-3'}`}>
+              <span
+                className="text-[13px] font-bold text-[#0F1111]"
+                dangerouslySetInnerHTML={{ __html: activeCategory.name }}
+              />
+            </li>
+            {children.map(child => (
+              <li key={child.id} className={`${parentCategory ? 'pr-8' : 'pr-6'}`}>
+                <button
+                  onClick={() => updateCat(child.id)}
+                  className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-right w-full truncate cursor-pointer"
+                  dangerouslySetInnerHTML={{ __html: child.name }}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }, [activeCategory, categories, filters, onFiltersChange]);
+
+  const allTags = useMemo(() => {
+    const tagMap = new Map();
+    products.forEach(p => {
+      (p.tags || []).forEach(tag => {
+        tagMap.set(tag.name, (tagMap.get(tag.name) || 0) + 1);
+      });
+    });
+    return Array.from(tagMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+  }, [products]);
+
+  const allMerchants = useMemo(() => {
+    const merchantMap = new Map();
+    products.forEach(p => {
+      const merchantMeta = p.meta_data?.find(m => m.key === "merchant_name")?.value || 
+                           p.meta_data?.find(m => m.key === "mahally_owner_name")?.value ||
+                           p.store?.shop_name || 
+                           p.store?.name;
+      const name = merchantMeta || "Mahally Jo";
+      merchantMap.set(name, (merchantMap.get(name) || 0) + 1);
+    });
+    return Array.from(merchantMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+  }, [products]);
+
+  const displayedTags = showAllTags ? allTags : allTags.slice(0, 8);
+
+  const update = (key, value) => onFiltersChange({ ...filters, [key]: value });
+
+  const clearAll = () => onFiltersChange({
+    category: null,
+    minRating: null,
+    priceRange: null,
+    onSale: false,
+    freeShipping: false,
+    inStockOnly: false,
+    minDiscount: null,
+    tags: [],
+    merchant: null,
+    colors: [],
+    searchQuery: filters.searchQuery || "",
+  });
+
+  return (
+    <aside className="w-[240px] shrink-0 pl-4 pb-10 border-l border-[#E5E5E5] min-h-[500px]">
+      
+      {/* ── Shortcut (Clean View All Button) ── */}
+      {pathname !== "/browse" && (
+        <div className="mb-4">
+          <Link
+            href="/browse"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-[#F0F2F2] hover:bg-[#E3E6E6] border border-[#D5D9D9] rounded-lg text-[12px] font-normal text-[#0F1111] hover:border-[#B5B9B9] transition-all shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] active:bg-[#EAEDED] select-none"
+          >
+            <ShoppingCart size={14} className="text-[#FF9900]" />
+            <span className="font-medium">عرض جميع المنتجات</span>
+          </Link>
+        </div>
+      )}
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between pb-2 border-b border-[#E5E5E5] mb-2 select-none">
+        <span className="text-[13px] font-bold text-[#0F1111] tracking-tight">الفلاتر النشطة</span>
+        {Object.entries(filters).some(([k, v]) => k !== "searchQuery" && v !== null && v !== false && (Array.isArray(v) ? v.length > 0 : true) && v !== "") && (
+          <button onClick={clearAll} className="text-[11px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors">
+            مسح الكل
+          </button>
+        )}
+      </div>
+
+      {/* ── Department tree ── */}
+      {departmentSection}
+
+      {/* ── Customer Reviews ── */}
+      <div className="mb-4">
+        <SectionTitle title="تقييمات العملاء" />
+        <div className="space-y-1">
+          {[4, 3, 2, 1].map(stars => (
+            <StarRow
+              key={stars}
+              stars={stars}
+              selected={filters.minRating === stars}
+              onClick={() => update("minRating", filters.minRating === stars ? null : stars)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Brands (Tags) ── */}
+      {allTags.length > 0 && (
+        <div className="mb-4">
+          <SectionTitle title="العلامات التجارية" />
+          <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+            {displayedTags.map(({ name, count }) => {
+              const selected = (filters.tags || []).includes(name);
+              return (
+                <AmazonCheckbox
+                  key={name}
+                  label={name}
+                  count={count}
+                  checked={selected}
+                  onChange={() => {
+                    const next = selected
+                      ? (filters.tags || []).filter(t => t !== name)
+                      : [...(filters.tags || []), name];
+                    update("tags", next);
+                  }}
+                />
+              );
+            })}
+          </div>
+          {allTags.length > 8 && (
+            <button
+              onClick={() => setShowAllTags(!showAllTags)}
+              className="mt-1.5 text-[12px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+            >
+              <span>{showAllTags ? "عرض أقل" : `عرض المزيد (${allTags.length})`}</span>
+              <ChevronDown size={12} className={`transform transition-transform ${showAllTags ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Seller ── */}
+      {allMerchants.length > 0 && (() => {
+        const displayedSellers = showAllSellers ? allMerchants : allMerchants.slice(0, 6);
+        return (
+          <div className="mb-4">
+            <SectionTitle title="البائع" />
+            <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
+              {displayedSellers.map(({ name, count }) => {
+                const selected = filters.merchant === name;
+                return (
+                  <AmazonCheckbox
+                    key={name}
+                    label={name === "Mahally Jo" ? "محلي الرسمي" : name}
+                    count={count}
+                    checked={selected}
+                    onChange={() => update("merchant", selected ? null : name)}
+                  />
+                );
+              })}
+            </div>
+            {allMerchants.length > 6 && (
+              <button
+                onClick={() => setShowAllSellers(!showAllSellers)}
+                className="mt-1.5 text-[12px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+              >
+                <span>{showAllSellers ? "عرض أقل" : `عرض المزيد (${allMerchants.length})`}</span>
+                <ChevronDown size={12} className={`transform transition-transform ${showAllSellers ? 'rotate-180' : ''}`} />
+              </button>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ── Price ── */}
+      <div className="mb-4">
+        <SectionTitle title="السعر" />
+        
+        {/* Amazon Price Buckets */}
+        <div className="space-y-1 mb-3">
+          {[
+            { label: "أقل من 10 د.أ", min: 0, max: 10 },
+            { label: "من 10 د.أ إلى 25 د.أ", min: 10, max: 25 },
+            { label: "من 25 د.أ إلى 50 د.أ", min: 25, max: 50 },
+            { label: "50 د.أ وأعلى", min: 50, max: 10000 },
+          ].map((bucket, i) => {
+            const isSelected = filters.priceRange?.[0] === bucket.min && filters.priceRange?.[1] === bucket.max;
+            return (
+              <button
+                 key={i}
+                 onClick={() => update("priceRange", isSelected ? null : [bucket.min, bucket.max])}
+                 className={`block text-[13px] transition-colors w-full text-right font-normal select-none cursor-pointer ${
+                   isSelected 
+                     ? "text-[#9b2c41] font-bold" 
+                     : "text-[#0F1111] hover:text-[#9b2c41]"
+                 }`}
+              >
+                {bucket.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Dual Slider (Sleek Orange-accented) */}
+        <div className="px-1 py-1.5 mb-3">
+           <div className="relative w-full h-[3px] bg-zinc-200 rounded-full">
+              <div 
+                className="absolute h-full bg-[#E47911] rounded-full" 
+                style={{ 
+                  left: `${((filters.priceRange?.[0] || priceBounds.min) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}%`,
+                  right: `${100 - ((filters.priceRange?.[1] || priceBounds.max) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}%`
+                }}
+              />
+              <input
+                type="range"
+                min={priceBounds.min}
+                max={priceBounds.max}
+                value={filters.priceRange?.[0] || priceBounds.min}
+                onChange={(e) => {
+                  const val = Math.min(Number(e.target.value), (filters.priceRange?.[1] || priceBounds.max) - 1);
+                  update("priceRange", [val, filters.priceRange?.[1] || priceBounds.max]);
+                }}
+                className="absolute w-full h-1 opacity-0 cursor-pointer pointer-events-auto appearance-none z-30"
+              />
+              <input
+                type="range"
+                min={priceBounds.min}
+                max={priceBounds.max}
+                value={filters.priceRange?.[1] || priceBounds.max}
+                onChange={(e) => {
+                  const val = Math.max(Number(e.target.value), (filters.priceRange?.[0] || priceBounds.min) + 1);
+                  update("priceRange", [filters.priceRange?.[0] || priceBounds.min, val]);
+                }}
+                className="absolute w-full h-1 opacity-0 cursor-pointer pointer-events-auto appearance-none z-30"
+              />
+              <div 
+                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-[#E47911] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.2)] pointer-events-none z-20"
+                style={{ left: `calc(${((filters.priceRange?.[0] || priceBounds.min) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}% - 7px)` }}
+              />
+           </div>
+           <div className="flex justify-between text-[11px] font-bold text-zinc-400 select-none">
+              <span>{filters.priceRange?.[0] || priceBounds.min} د.أ</span>
+              <span>{filters.priceRange?.[1] || priceBounds.max} د.أ</span>
+           </div>
+        </div>
+        
+        {/* Custom Min/Max Input Box Row */}
+        <div className="flex items-center gap-1.5 mt-2">
+           <div className="relative flex-1">
+              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">د.أ</span>
+              <input 
+                type="number" 
+                placeholder="الحد الأدنى" 
+                value={filters.priceRange?.[0] || ""}
+                onChange={(e) => update("priceRange", [Number(e.target.value), filters.priceRange?.[1] || priceBounds.max])}
+                className="w-full h-7 pr-7 pl-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-right" 
+              />
+           </div>
+           <div className="relative flex-1">
+              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">د.أ</span>
+              <input 
+                type="number" 
+                placeholder="الحد الأقصى" 
+                value={filters.priceRange?.[1] || ""}
+                onChange={(e) => update("priceRange", [filters.priceRange?.[0] || priceBounds.min, Number(e.target.value)])}
+                className="w-full h-7 pr-7 pl-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-right"
+              />
+           </div>
+           <button 
+             onClick={() => update("priceRange", [filters.priceRange?.[0] || 0, filters.priceRange?.[1] || 10000])}
+             className="h-7 px-3 bg-white hover:bg-zinc-50 border border-[#D5D9D9] shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] text-[#0F1111] rounded-[4px] text-[12px] font-normal hover:border-[#B5B9B9] cursor-pointer active:bg-zinc-100 flex items-center justify-center shrink-0 select-none"
+           >
+             تطبيق
+           </button>
+        </div>
+      </div>
+
+      {/* ── Deals & Discounts ── */}
+      <div className="mb-4">
+        <SectionTitle title="العروض والخصومات" />
+        <div className="space-y-2">
+          <AmazonCheckbox
+            label="المنتجات المخفضة"
+            checked={filters.onSale}
+            onChange={() => update("onSale", !filters.onSale)}
+          />
+          <div className="space-y-1.5 pr-5">
+            {[10, 25, 50].map((discount) => {
+              const isSelected = filters.minDiscount === discount;
+              return (
+                <button
+                  key={discount}
+                  onClick={() => update("minDiscount", isSelected ? null : discount)}
+                  className={`block text-[13px] text-right font-normal cursor-pointer transition-colors select-none ${
+                    isSelected 
+                      ? "text-[#9b2c41] font-bold" 
+                      : "text-[#0F1111] hover:text-[#9b2c41]"
+                  }`}
+                >
+                  {discount}% خصم أو أكثر
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Shipping & Availability ── */}
+      <div className="mb-4">
+        <SectionTitle title="الشحن والتوافر" />
+        <div className="space-y-2">
+          <AmazonCheckbox
+            label="مؤهل للشحن المجاني"
+            checked={filters.freeShipping}
+            onChange={() => update("freeShipping", !filters.freeShipping)}
+          />
+          <AmazonCheckbox
+            label="المتوفر في المخزن فقط"
+            checked={filters.inStockOnly}
+            onChange={() => update("inStockOnly", !filters.inStockOnly)}
+          />
+        </div>
+      </div>
+    </aside>
+  );
+}

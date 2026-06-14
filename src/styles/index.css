@@ -1,0 +1,391 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/omnes-arabic');
+@import "tailwindcss";
+
+
+@theme {
+  --color-brand: #be374f;
+  /* New brand palette: deep magenta and white */
+  --color-brand-light: #fde7ee;
+  --color-brand-dark: #8f2d4a;
+
+  --color-zinc-50: #f6f6f6;
+  --color-zinc-100: #eeeeee;
+  --color-zinc-200: #e5e5e5;
+  --color-zinc-300: #d4d4d4;
+  --color-zinc-800: #222222;
+  --color-zinc-900: #111111;
+
+  --font-sans: 'Omnes Arabic', 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+  --radius-premium: 12px;
+  /* Professional semi-rounded edges */
+  --shadow-premium: 0 1px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #222222;
+  --card: #ffffff;
+  --border: #eeeeee;
+  --brand: #be374f;
+
+  /* Luxury Artisanal Palette */
+  --cream: #F9F7F2;
+  --ink: #1A1814;
+  --warm: #E8E3D8;
+  --gold: #C9A84C;
+  --gold-light: #F0E4BE;
+  --muted: #8C8880;
+  --accent: #2D5016;
+}
+
+html[dir="rtl"] {
+  direction: rtl;
+}
+
+html[dir="rtl"] body {
+  text-align: right;
+}
+
+/* Force Mahally-Style Density */
+body {
+  background-color: #ffffff !important;
+  color: #222222 !important;
+  font-family: 'Omnes Arabic', 'Cairo', 'Inter', sans-serif;
+  font-size: 13px;
+  /* Compact base size */
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base Components */
+.rich-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.rich-card:hover {
+  border-color: var(--color-brand);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-rich {
+  height: 2.25rem;
+  padding: 0 1rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-rich:active {
+  transform: scale(0.95);
+}
+
+.btn-rich:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-brand {
+  background-color: var(--color-brand);
+  color: #ffffff;
+}
+
+.btn-brand:hover {
+  background-color: var(--color-brand-dark);
+}
+
+.category-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.category-bubble .icon-box {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #52525b; /* zinc-600 fallback */
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-zinc-100);
+}
+
+.category-bubble:hover .icon-box {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+/* Mobile Touch Targets - Apple HIG / Android Material Minimum */
+.touch-target {
+  position: relative;
+}
+
+.touch-target::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  .category-bubble {
+    gap: 0.25rem;
+  }
+  .category-bubble .icon-box {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  .category-bubble span {
+    font-size: 11px !important;
+  }
+}
+
+.price-tag {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-brand);
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: baseline;
+  gap: 0.125rem;
+}
+
+.price-currency {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-brand);
+  margin-right: 0.125rem;
+}
+
+.flash-tag {
+  background-color: var(--color-brand);
+  color: #ffffff;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+}
+
+.sold-count {
+  font-size: 11px;
+  color: #a1a1aa; /* zinc-400 fallback */
+  font-weight: 500;
+}
+
+.glass {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-zinc-100);
+}
+
+.mahally-frame {
+  border: 1px solid #09090b;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mahally-card {
+  border: 1px solid #09090b;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.mahally-card:hover {
+  box-shadow: 4px 4px 0px 0px rgba(9, 9, 11, 1);
+}
+
+.mahally-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f6f6f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999999;
+}
+
+/* Grid density overrides */
+.mahally-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .mahally-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .mahally-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mahally-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .mahally-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .mahally-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Price Range Slider Thumbs */
+.range-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #131921;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  pointer-events: all;
+}
+
+/* Custom utility to hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.range-thumb::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #131921;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  pointer-events: all;
+}
+
+/* ─── Print Invoice Styles ─── */
+@media print {
+  /* Hide everything except the modal */
+  body > *:not([class*="fixed"]):not(.print-invoice-container) {
+    display: none !important;
+  }
+
+  /* Reset modal positioning for print */
+  .fixed {
+    position: static !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* Hide backdrop */
+  .backdrop-blur-sm {
+    display: none !important;
+  }
+
+  .print-invoice-container {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    z-index: auto !important;
+    background: #fff !important;
+  }
+
+  /* Make modal content flow naturally */
+  [class*="max-h-"] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Hide interactive buttons (close, edit, actions) */
+  button:not(.print-keep),
+  a[class*="bg-[#FFD814]"],
+  a[class*="bg-zinc-100"],
+  a[class*="bg-emerald-50"],
+  button[class*="bg-rose-50"],
+  button[class*="bg-[#FFD814]"],
+  [class*="hover:bg-zinc-50"][class*="border-zinc-300"][class*="shadow-sm"] {
+    display: none !important;
+  }
+
+  /* Keep the Print Invoice button hidden */
+  [class*="text-[#007185]"][class*="hover:text-[#c45500]"] {
+    display: none !important;
+  }
+
+  /* Clean print layout */
+  .shadow-2xl, .shadow-sm {
+    box-shadow: none !important;
+  }
+
+  /* Ensure borders print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Page break handling */
+  [class*="border border-zinc-200 rounded-lg overflow-hidden bg-white shadow-sm"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

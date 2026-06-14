@@ -1,0 +1,821 @@
+"use client";
+
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import {
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
+import { useAuth } from "@/context/AuthContext";
+import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Mail, User, Lock, Store, ChevronRight, Clock, Info, ChevronDown, Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+import Loader from "@/components/Loader";
+
+const STORE_CATEGORIES = [
+  "الأزياء والملابس", "الإلكترونيات", "المنزل والمعيشة", "الأطعمة والمشروبات",
+  "الصحة والجمال", "الرياضة في الهواء الطلق", "السيارات", "الكتب والقرطاسية",
+  "ألعاب وأطفال", "أخرى",
+];
+
+function RegisterContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
+  const { user } = useAuth();
+
+  const [step, setStep] = useState("role");     // "role" | "form" | "vendor_store" | "verify_method" | "phone_otp" | "email_sent" | "success"
+  const [selectedRole, setSelectedRole] = useState(null); // "customer" | "vendor"
+
+  // Common fields
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("+962");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Password validation logic
+  const isLengthValid = password.length >= 8;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const isPasswordValid = isLengthValid && hasUpper && hasLower && hasNumber && hasSpecial;
+  const passwordsMatch = password && confirmPassword && password === confirmPassword;
+
+  // Vendor-specific fields
+  const [storeName, setStoreName] = useState("");
+  const [storeDescription, setStoreDescription] = useState("");
+  const [storeCategory, setStoreCategory] = useState("");
+
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [countdown, setCountdown] = useState(0);
+  const [confirmationResult, setConfirmationResult] = useState(null);
+
+  const recaptchaRef = useRef(null);
+  const otpRefs = useRef([]);
+
+  useEffect(() => {
+    if (user && step === "role") router.replace(redirectTo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, redirectTo]);
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [countdown]);
+
+  useEffect(() => {
+    if (step === "phone_otp" || step === "email_otp") {
+      const timer = setTimeout(() => {
+        otpRefs.current[0]?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+
+  useEffect(() => {
+    return () => {
+      // Delay cleanup slightly so reCAPTCHA async callbacks don't hit null
+      setTimeout(() => {
+        if (recaptchaRef.current) {
+          try {
+            recaptchaRef.current.clear();
+          } catch (e) {
+            // ignore — widget may already be destroyed
+          }
+          recaptchaRef.current = null;
+        }
+      }, 100);
+    };
+  }, []);
+
+  const setupRecaptcha = () => {
+    if (!recaptchaRef.current) {
+      try {
+        recaptchaRef.current = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "invisible",
+          callback: (response) => {
+            // reCAPTCHA solved
+          },
+          'expired-callback': () => {
+            // Response expired. Ask user to solve reCAPTCHA again.
+            if (recaptchaRef.current) {
+              recaptchaRef.current.clear();
+              recaptchaRef.current = null;
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Recaptcha init error", err);
+        setError("Security check failed to initialize. Please refresh the page.");
+        return null;
+      }
+    }
+    return recaptchaRef.current;
+  };
+
+  // Step 1 → 2: pick role
+  const handleRolePick = (role) => {
+    setSelectedRole(role);
+    setStep("form");
+  };
+
+  // Step 2 → 3: submit base details
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    const finalName = selectedRole === "vendor" ? storeName : name;
+
+    if (!finalName || !email || !password || !confirmPassword || phone.replace(/\D/g, "").length < 10) {
+      setError("Please fill in all required fields correctly.");
+      return;
+    }
+    if (!isPasswordValid) {
+      setError("Password does not meet the requirements.");
+      return;
+    }
+    if (!passwordsMatch) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (selectedRole === "vendor" && !storeCategory) {
+      setError("Please fill in your store details.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const checkRes = await fetch("/api/auth/check-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phone }),
+      });
+
+      if (!checkRes.ok) {
+        if (checkRes.status === 503) {
+          throw new Error("Registration service is currently offline. Please try again later.");
+        }
+        throw new Error(`Service error (${checkRes.status})`);
+      }
+
+      const checkData = await checkRes.json();
+      if (checkData.exists) {
+        setError("An account with this email or phone already exists. Please sign in.");
+        setLoading(false);
+        return;
+      }
+
+      setStep("verify_method");
+    } catch {
+      setError("Failed to verify availability. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const syncToDB = async () => {
+    await fetch("/api/auth/register-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: selectedRole === "vendor" ? storeName : name,
+        email,
+        phone,
+        password,
+        role: selectedRole,
+        storeData: selectedRole === "vendor" ? { storeName, storeDescription, storeCategory } : {},
+      }),
+    });
+  };
+
+  const handleChoosePhone = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const verifier = setupRecaptcha();
+      const result = await signInWithPhoneNumber(auth, phone, verifier);
+      setConfirmationResult(result);
+      setStep("phone_otp");
+      setCountdown(60);
+    } catch (err) {
+      setError(err.message || "Failed to send OTP.");
+      recaptchaRef.current = null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [emailOtp, setEmailOtp] = useState(["", "", "", "", "", ""]);
+
+  const handleChooseEmail = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      // 1. Generate and send 6-digit code via API
+      const res = await fetch("/api/auth/email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, action: "send" })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setStep("email_otp");
+        setCountdown(60);
+      } else {
+        throw new Error(data.error || "Failed to send code.");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to initiate email verification.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyEmailOTP = async (e) => {
+    e.preventDefault();
+    const code = emailOtp.join("");
+    if (code.length < 6) { setError("Please enter the full 6-digit code."); return; }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, action: "verify" })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        // SUCCESS: Email is verified, now add to WooCommerce & Firebase
+        // 1. Sync to DB FIRST so AuthContext doesn't sign out the user upon creation
+        await syncToDB();
+
+        const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
+        try {
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(cred.user, { displayName: selectedRole === "vendor" ? storeName : name });
+        } catch (fbErr) {
+          if (fbErr.code === "auth/email-already-in-use") {
+            const { signInWithEmailAndPassword } = await import("firebase/auth");
+            await signInWithEmailAndPassword(auth, email, password);
+          } else {
+            throw fbErr;
+          }
+        }
+
+        if (selectedRole === "vendor") {
+          setStep("vendor_pending");
+          await auth.signOut();
+        } else {
+          setStep("success");
+          setTimeout(() => router.replace(redirectTo), 1500);
+        }
+      } else {
+        setError(data.error || "Invalid verification code.");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to verify code. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (val, idx) => {
+    if (!/^\d?$/.test(val)) return;
+    const next = [...otp];
+    next[idx] = val;
+    setOtp(next);
+    if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (e, idx) => {
+    if (e.key === "Backspace" && !otp[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    const code = otp.join("");
+    if (code.length < 6) { setError("Please enter the full 6-digit code."); return; }
+    setError("");
+    setLoading(true);
+    try {
+      // 1. Sync to DB FIRST so AuthContext doesn't sign out the user upon creation
+      await syncToDB();
+
+      const res = await confirmationResult.confirm(code);
+      if (res.user) await updateProfile(res.user, { displayName: selectedRole === "vendor" ? storeName : name });
+
+      if (selectedRole === "vendor") {
+        setStep("vendor_pending");
+        // Sign out to prevent 'logged in' state until approved
+        await auth.signOut();
+      } else {
+        setStep("success");
+        setTimeout(() => router.replace(redirectTo), 1500);
+      }
+    } catch {
+      setError("Invalid code. Please check and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ─────────────────────────────── RENDER ─────────────────────────────── */
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center pt-8 pb-12">
+      {/* Invisible reCAPTCHA anchor — must stay in DOM at all times */}
+      <div id="recaptcha-container" style={{ position: 'fixed', bottom: 0, left: 0, zIndex: -1, opacity: 0, pointerEvents: 'none' }} />
+
+      <div className="w-full max-w-[350px]">
+        {/* Logo */}
+        <div className="text-center mb-4">
+          <Link href="/" className="inline-block">
+            <span className="text-[28px] font-bold tracking-tight text-zinc-900">
+              mahally<span className="text-[#febd69]">.jo</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white border border-zinc-200 rounded-lg p-7 shadow-sm">
+
+          {/* ── STEP 0: Role Picker ── */}
+          {step === "role" && (
+            <div className="space-y-4">
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">إنشاء حساب</h1>
+
+              <div className="space-y-3">
+                <p className="text-[13px] font-bold text-zinc-900">كيف ترغب بالانضمام إلينا؟</p>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => handleRolePick("customer")}
+                    className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-lg">🛍️</div>
+                      <div>
+                        <p className="text-[13px] font-bold text-zinc-900">عميل</p>
+                        <p className="text-[11px] text-zinc-500">أنا عميل / مشتري</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleRolePick("vendor")}
+                    className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-lg">🏪</div>
+                      <div>
+                        <p className="text-[13px] font-bold text-zinc-900">بائع</p>
+                        <p className="text-[11px] text-zinc-500">أنا بائع / تاجر</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-zinc-100">
+                <p className="text-[12px] text-zinc-900 leading-snug">
+                  هل لديك حساب بالفعل؟ <Link href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"} className="text-[#0066c0] hover:text-[#c45500] hover:underline font-bold">تسجيل الدخول</Link>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 1: Basic Details Form ── */}
+          {step === "form" && (
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">إنشاء حساب</h1>
+
+              <div className="space-y-3">
+                {selectedRole === "customer" && (
+                  <div className="space-y-1">
+                    <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">الاسم الكامل</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="الاسم الأول والأخير"
+                      required
+                      className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none transition-all"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">رقم الهاتف المحمول</label>
+                  <div dir="ltr" className="flex h-[31px] rounded-[3px] border border-zinc-400 shadow-inner focus-within:border-[#e77600] focus-within:ring-1 focus-within:ring-[#e77600] overflow-hidden transition-all bg-white">
+                    <div className="flex items-center gap-1 bg-zinc-50 border-r border-zinc-400 px-2 text-[13px] text-zinc-700 select-none">
+                      <span>+962</span>
+                      <ChevronDown size={14} className="text-zinc-500" />
+                    </div>
+                    <input
+                      type="tel"
+                      dir="ltr"
+                      value={phone.replace(/^\+962/, "")}
+                      onChange={e => {
+                        let val = e.target.value.replace(/[^\d\s-]/g, "");
+                        if (val.startsWith("0")) val = val.substring(1);
+                        setPhone("+962" + val);
+                      }}
+                      placeholder="7X XXX XXXX"
+                      required
+                      className="flex-1 h-full bg-transparent px-2 text-[13px] outline-none min-w-0"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    dir="ltr"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none transition-all text-left"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">كلمة المرور</label>
+                  <div className="relative" dir="ltr">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      dir="ltr"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="8 أحرف على الأقل"
+                      required
+                      className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 pr-8 text-[13px] shadow-inner focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none transition-all text-left"
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+
+                  {password.length > 0 && (
+                    <div className="mt-2 text-[11px] space-y-1 bg-zinc-50 p-2 border border-zinc-200 rounded">
+                      <p className={`flex items-center gap-1 ${isLengthValid ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                        <CheckCircle2 size={12} className={isLengthValid ? 'text-emerald-600' : 'text-zinc-300'} /> 8 أحرف على الأقل
+                      </p>
+                      <p className={`flex items-center gap-1 ${hasUpper && hasLower ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                        <CheckCircle2 size={12} className={hasUpper && hasLower ? 'text-emerald-600' : 'text-zinc-300'} /> أحرف كبيرة وصغيرة
+                      </p>
+                      <p className={`flex items-center gap-1 ${hasNumber ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                        <CheckCircle2 size={12} className={hasNumber ? 'text-emerald-600' : 'text-zinc-300'} /> رقم واحد على الأقل
+                      </p>
+                      <p className={`flex items-center gap-1 ${hasSpecial ? 'text-emerald-600' : 'text-zinc-500'}`}>
+                        <CheckCircle2 size={12} className={hasSpecial ? 'text-emerald-600' : 'text-zinc-300'} /> رمز خاص واحد على الأقل
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1 pt-2">
+                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">تأكيد كلمة المرور</label>
+                  <div className="relative" dir="ltr">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      dir="ltr"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      required
+                      className={`w-full h-[31px] bg-white border ${confirmPassword && !passwordsMatch ? 'border-red-500' : 'border-zinc-400'} rounded-[3px] px-2 pr-8 text-[13px] shadow-inner focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none transition-all text-left`}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {confirmPassword && !passwordsMatch && (
+                    <p className="text-[11px] text-red-600 mt-1">كلمتا المرور غير متطابقتين.</p>
+                  )}
+                </div>
+
+                {selectedRole === "vendor" && (
+                  <div className="pt-2">
+                    <div className="w-full h-px bg-zinc-200 my-4" />
+                    <h3 className="text-[16px] font-bold text-zinc-900 mb-4">تفاصيل المتجر</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">اسم النشاط التجاري/المتجر</label>
+                        <input
+                          type="text"
+                          value={storeName}
+                          onChange={e => setStoreName(e.target.value)}
+                          placeholder="مثال: إلكترونيات زيد"
+                          required
+                          className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none transition-all"
+                        />
+                        <p className="text-[11px] text-zinc-500 mt-1 pl-0.5">يمكنك تغيير اسم نشاطك التجاري ونوعه لاحقاً.</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">فئة النشاط التجاري</label>
+                        <select
+                          value={storeCategory}
+                          onChange={e => setStoreCategory(e.target.value)}
+                          required
+                          className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-sm focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none transition-all"
+                        >
+                          <option value="">اختر الفئة...</option>
+                          {STORE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">وصف المتجر (اختياري)</label>
+                        <textarea
+                          value={storeDescription}
+                          onChange={e => setStoreDescription(e.target.value)}
+                          placeholder="صف باختصار ما تبيعه..."
+                          rows={3}
+                          className="w-full bg-white border border-zinc-400 rounded-[3px] px-2 py-1 text-[13px] shadow-inner focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none transition-all resize-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded flex gap-2">
+                  <Info size={16} className="text-red-600 shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-red-700 leading-tight">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || (password.length > 0 && !isPasswordValid)}
+                className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] hover:border-[#9c7d2e] rounded-[3px] text-[13px] shadow-sm active:from-[#edc04b] active:to-[#edc04b] flex items-center justify-center disabled:opacity-60"
+              >
+                {loading ? <Loader size="sm" text="" /> : "المتابعة للتحقق"}
+              </button>
+
+              <div className="pt-4 space-y-3">
+                <p className="text-[12px] text-zinc-900 leading-snug">
+                  بإنشائك لحساب، فإنك توافق على <Link href="/condition" className="text-[#0066c0] hover:text-[#c45500] hover:underline">شروط الاستخدام</Link> الخاصة بمحلي.
+                </p>
+
+                <div className="border-t border-zinc-100 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep("role")}
+                    className="text-[13px] text-[#0066c0] hover:text-[#c45500] hover:underline"
+                  >
+                    تغيير نوع الحساب
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+
+
+          {/* ── STEP 3: Choose Verification Method ── */}
+          {step === "verify_method" && (
+            <div className="space-y-4">
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق من الحساب</h1>
+
+              <p className="text-[13px] text-zinc-900 leading-snug">كيف تود استلام رمز التحقق الخاص بك؟</p>
+
+              <div className="space-y-2">
+                <button
+                  onClick={handleChoosePhone}
+                  disabled={loading}
+                  className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-zinc-100 group-hover:bg-brand/10 rounded-full flex items-center justify-center">
+                      <Phone size={16} className="text-zinc-600" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-bold text-zinc-900">التحقق عبر رسالة قصيرة SMS</p>
+                      <p className="text-[11px] text-zinc-500">إرسال الرمز إلى <span dir="ltr" className="inline-block">{phone}</span></p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleChooseEmail}
+                  disabled={loading || !email}
+                  className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all group disabled:opacity-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-zinc-100 group-hover:bg-brand/10 rounded-full flex items-center justify-center">
+                      <Mail size={16} className="text-zinc-600" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-bold text-zinc-900">التحقق عبر البريد الإلكتروني</p>
+                      <p className="text-[11px] text-zinc-500">{email ? `إرسال الرمز إلى ${email}` : "يرجى توفير بريد إلكتروني أولاً"}</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded flex gap-2">
+                  <Info size={16} className="text-red-600 shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-red-700 leading-tight">{error}</p>
+                </div>
+              )}
+
+              <div className="pt-4">
+                <button
+                  type="button"
+                  onClick={() => setStep("form")}
+                  className="text-[13px] text-[#0066c0] hover:text-[#c45500] hover:underline"
+                >
+                  رجوع
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 4A: Phone OTP ── */}
+          {step === "phone_otp" && (
+            <form onSubmit={handleVerifyOTP} className="space-y-4">
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق</h1>
+              <p className="text-[13px] text-zinc-900 leading-snug">
+                لقد أرسلنا رمزاً من 6 أرقام إلى <span className="font-bold inline-block" dir="ltr">{phone}</span>.
+              </p>
+
+              <div className="flex gap-2 justify-center py-4" dir="ltr">
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => otpRefs.current[i] = el}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={e => handleOtpChange(e.target.value, i)}
+                    onKeyDown={e => handleOtpKeyDown(e, i)}
+                    className="w-10 h-[31px] text-center text-lg font-bold border border-zinc-400 rounded-[3px] bg-white focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none"
+                  />
+                ))}
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded flex gap-2">
+                  <Info size={16} className="text-red-600 shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-red-700 leading-tight">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || otp.join("").length < 6}
+                className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] rounded-[3px] text-[13px] shadow-sm flex items-center justify-center disabled:opacity-60"
+              >
+                {loading ? <Loader size="sm" text="" /> : "التحقق من الرمز"}
+              </button>
+
+              <div className="text-center pt-4">
+                {countdown > 0 ? (
+                  <p className="text-[12px] text-zinc-600">إعادة إرسال الرمز خلال {countdown}ث</p>
+                ) : (
+                  <button type="button" onClick={handleChoosePhone} className="text-[13px] text-[#0066c0] hover:text-[#c45500] hover:underline">
+                    إعادة إرسال الرمز
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+
+          {/* ── STEP 4B: Email OTP ── */}
+          {step === "email_otp" && (
+            <form onSubmit={handleVerifyEmailOTP} className="space-y-4">
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق</h1>
+              <p className="text-[13px] text-zinc-900 leading-snug">
+                لقد أرسلنا رمزاً من 6 أرقام إلى <span className="font-bold">{email}</span>.
+              </p>
+
+              <div className="flex gap-2 justify-center py-4" dir="ltr">
+                {emailOtp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => otpRefs.current[i] = el}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={e => {
+                      const val = e.target.value;
+                      if (!/^\d?$/.test(val)) return;
+                      const next = [...emailOtp];
+                      next[i] = val;
+                      setEmailOtp(next);
+                      if (val && i < 5) otpRefs.current[i + 1]?.focus();
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Backspace" && !emailOtp[i] && i > 0) otpRefs.current[i - 1]?.focus();
+                    }}
+                    className="w-10 h-[31px] text-center text-lg font-bold border border-zinc-400 rounded-[3px] bg-white focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none"
+                  />
+                ))}
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded flex gap-2">
+                  <Info size={16} className="text-red-600 shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-red-700 leading-tight">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || emailOtp.join("").length < 6}
+                className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] rounded-[3px] text-[13px] shadow-sm flex items-center justify-center disabled:opacity-60"
+              >
+                {loading ? <Loader size="sm" text="" /> : "التحقق من الرمز"}
+              </button>
+
+              <div className="text-center pt-4">
+                {countdown > 0 ? (
+                  <p className="text-[12px] text-zinc-600">إعادة إرسال الرمز خلال {countdown}ث</p>
+                ) : (
+                  <button type="button" onClick={handleChooseEmail} className="text-[13px] text-[#0066c0] hover:text-[#c45500] hover:underline">
+                    إعادة إرسال الرمز
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+
+          {/* ── STEP 5: Vendor Pending ── */}
+          {step === "vendor_pending" && (
+            <div className="text-center py-8 space-y-4">
+              <Clock size={48} className="text-amber-500 mx-auto" />
+              <h2 className="text-[20px] font-bold text-zinc-900">تم تقديم الطلب</h2>
+              <p className="text-[13px] text-zinc-600 leading-relaxed">
+                شكراً لتقديمك، <span className="font-bold">{selectedRole === "vendor" ? storeName : name}</span>. متجرك الآن قيد الموافقة من قبل الإدارة.
+              </p>
+              <div className="pt-4 space-y-3">
+                <button
+                  disabled
+                  className="w-full h-[31px] bg-zinc-200 border border-zinc-300 rounded-[3px] text-zinc-500 text-[13px] flex items-center justify-center shadow-inner cursor-not-allowed font-medium"
+                >
+                  قيد المراجعة
+                </button>
+                <Link href="/" className="block text-[12px] text-[#0066c0] hover:text-[#c45500] hover:underline">
+                  العودة للصفحة الرئيسية
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 6: Success ── */}
+          {step === "success" && (
+            <div className="text-center py-8 space-y-4">
+              <CheckCircle2 size={48} className="text-emerald-600 mx-auto" />
+              <h2 className="text-[20px] font-bold text-zinc-900">مرحباً، {selectedRole === "vendor" ? storeName : name}!</h2>
+              <p className="text-[13px] text-zinc-500">حسابك جاهز الآن. جاري التوجيه...</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-8 pt-4 border-t border-zinc-100 text-center space-y-2">
+          <div className="flex justify-center gap-6 text-[11px] text-[#0066c0]">
+            <Link href="/conditions" className="hover:text-[#c45500] hover:underline">شروط الاستخدام</Link>
+            <Link href="/help" className="hover:text-[#c45500] hover:underline">المساعدة</Link>
+          </div>
+          <p className="text-[11px] text-zinc-500" suppressHydrationWarning>&copy; {new Date().getFullYear()} Mahally.jo</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#be374f]" size={32} /></div>}>
+      <RegisterContent />
+    </Suspense>
+  );
+}

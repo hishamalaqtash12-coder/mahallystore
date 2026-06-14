@@ -1,0 +1,440 @@
+import { NextResponse } from "next/server";
+import { dokanApi } from "@/lib/dokan";
+import { wcApi } from "@/lib/woocommerce";
+import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+
+const api = new WooCommerceRestApi({
+  url: process.env.NEXT_PUBLIC_WORDPRESS_URL,
+  consumerKey: process.env.WC_CONSUMER_KEY,
+  consumerSecret: process.env.WC_CONSUMER_SECRET,
+  version: "wc/v3"
+});
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const wooId = searchParams.get("wooId");
+
+    if (!wooId) {
+      return NextResponse.json({ error: "Missing vendor ID" }, { status: 400 });
+    }
+
+    let products = [];
+    let trustedSource = false; // If Dokan returned products, they're already vendor-scoped
+    
+    try {
+      // 1. Primary Attempt: Dokan REST API (Provides vendor-specific formatting)
+      products = await dokanApi.getProducts(wooId);
+      
+      // Dokan can return an error object instead of array if permissions fail
+      if (products && !Array.isArray(products) && products.code) {
+        throw new Error(products.message || "Dokan API Error");
+      }
+
+      if (Array.isArray(products) && products.length > 0) {
+        trustedSource = true; // Dokan already filters by vendor_id
+        console.log(`[Merchant Products] Dokan returned ${products.length} products for vendor ${wooId}`);
+      }
+    } catch (dokanError) {
+      console.warn("[Merchant Products] Dokan API listing failed:", dokanError.message);
+    }
+
+    // 2. Secondary Attempt: WooCommerce REST API with author-based lookup
+    if (!Array.isArray(products) || products.length === 0) {
+      try {
+        const authorId = Number(wooId);
+        const res = await api.get("products", {
+          author: authorId,
+          per_page: 100,
+          status: "any"
+        });
+        const authorProducts = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+
+        if (authorProducts.length > 0) {
+          products = authorProducts;
+          trustedSource = true;
+          console.log(`[Merchant Products] WC REST (author) returned ${products.length} products for vendor ${wooId}`);
+        } else {
+          console.log(`[Merchant Products] Trying last resort: fetch all and filter locally for vendor ${wooId}`);
+          const allRes = await api.get("products", { per_page: 100, status: "any" });
+          const allProducts = Array.isArray(allRes?.data) ? allRes.data : Array.isArray(allRes) ? allRes : [];
+          if (allProducts.length > 0) {
+            products = allProducts.filter((p) => {
+              const authorMatch = String(p.author || p.post_author || "") === String(wooId);
+              const metaMatch = (p.meta_data || []).some((m) =>
+                (m.key === "_dokan_vendor_id" || m.key === "mahally_owner_id" || m.key === "_vendor_id" || m.key === "merchant_id") &&
+                String(m.value) === String(wooId)
+              );
+              const vendorMatch = String(p.store?.id || p.vendor?.id || "") === String(wooId);
+              return authorMatch || metaMatch || vendorMatch;
+            });
+            console.log(`[Merchant Products] Local filter found ${products.length} products for vendor ${wooId}`);
+          }
+        }
+      } catch (wcError) {
+        console.error("[Merchant Products] WooCommerce REST fallback failed:", wcError.message);
+      }
+    }
+
+    // 4. Enrichment: Ensure brands and store names are present
+    const enrichedProducts = await Promise.all((Array.isArray(products) ? products : []).map(async (p) => {
+      return {
+        ...p,
+        brands: p.brands || p.product_brand || []
+      };
+    }));
+
+    // 5. DATA ISOLATION: If the source was trusted (Dokan or WC author filter), skip re-filtering.
+    //    Only apply strict local filter when products came from the "fetch all" last resort.
+    let finalProducts;
+    if (trustedSource) {
+      finalProducts = enrichedProducts;
+    } else {
+      finalProducts = enrichedProducts.filter(p => {
+        const authorId = String(p.author || p.post_author || "");
+        const vendorId = String(p.store?.id || p.vendor?.id || "");
+        const metaVendorId = p.meta_data?.find(m => m.key === '_dokan_vendor_id' || m.key === 'mahally_owner_id' || m.key === '_vendor_id' || m.key === 'merchant_id')?.value;
+        
+        return authorId === String(wooId) || 
+               vendorId === String(wooId) || 
+               String(metaVendorId) === String(wooId);
+      });
+    }
+
+    console.log(`[Merchant Products] Returning ${finalProducts.length} products for vendor ${wooId}`);
+    return NextResponse.json(finalProducts);
+  } catch (error) {
+    console.error("Merchant products fetch error:", error);
+    // Return empty array instead of 500 to keep the dashboard usable
+    return NextResponse.json([], { status: 200 });
+  }
+}
+
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const { product, variations, wooId } = body;
+    
+    if (!wooId) {
+      return NextResponse.json({ error: "Missing vendor identification (wooId)" }, { status: 400 });
+    }
+
+    // 1. Create the parent product using WC API (More reliable for forcing author with Admin keys)
+    const allImages = product.images || [];
+    const mainImageId = allImages[0] ? parseInt(allImages[0].id) : null;
+
+    const productPayload = {
+      ...product,
+      featured_image: mainImageId, // Some Dokan versions expect raw ID
+      image_id: mainImageId,       // Alternative Dokan field
+      images: allImages.map(img => ({ id: parseInt(img.id) })), // Standard gallery format
+      status: 'pending', 
+      author: parseInt(wooId),
+      post_author: parseInt(wooId),
+      vendor_id: parseInt(wooId),
+      regular_price: product.regular_price?.toString(),
+      sale_price: product.sale_price?.toString(),
+      meta_data: [
+        ...(product.meta_data || []),
+        { key: '_dokan_vendor_id', value: String(wooId) },
+        { key: 'mahally_owner_id', value: String(wooId) },
+        { key: '_vendor_id', value: String(wooId) },
+        { key: '_thumbnail_id', value: String(mainImageId) } // Fallback for featured image
+      ]
+    };
+
+    // 0.5 Enforce single featured product per merchant limit
+    if (product.featured === true) {
+      try {
+        const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+        const prodRes = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products?author=${wooId}&per_page=100&status=any&featured=true`, {
+          headers: { Authorization: `Basic ${auth}` }
+        });
+        const vendorProducts = await prodRes.json();
+        
+        if (Array.isArray(vendorProducts)) {
+          // Use direct WC REST API — wcApi.put routes through GraphQL which doesn't support 'featured'
+          await Promise.all(vendorProducts.map(async (p) => {
+            try {
+              await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products/${p.id}`, {
+                method: 'PUT',
+                headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ featured: false })
+              });
+            } catch (updateErr) {
+              console.warn(`Failed to un-feature product ${p.id}:`, updateErr.message);
+            }
+          }));
+        }
+      } catch (err) {
+        console.warn("Failed to un-feature previous products:", err.message);
+      }
+    }
+
+    // Use Dokan API instead of WC API to ensure authorship is correctly assigned to the vendor
+    const createdProduct = await dokanApi.createProduct(productPayload, wooId);
+
+    // 1.5 Double-check update with standard WooCommerce API for price fields (fallback for Dokan limitations)
+    if (createdProduct.id && (createdProduct.type === 'simple' || createdProduct.type === 'external')) {
+      try {
+        await wcApi.put(`products/${createdProduct.id}`, {
+          regular_price: product.regular_price?.toString(),
+          sale_price: product.sale_price?.toString(),
+          date_on_sale_from: product.date_on_sale_from || null,
+          date_on_sale_to: product.date_on_sale_to || null,
+          brands: product.brands,
+          product_brand: (product.brands || []).map(b => b.id)
+        });
+      } catch (wcPriceError) {
+        console.warn("Direct WC price creation update failed:", wcPriceError.message);
+      }
+    }
+
+    // 2. If it's a variable product and has variations, create them
+    // Note: variations are still created via wcApi as Dokan proxy is primarily for parent product authorship
+    if (createdProduct.type === 'variable' && variations && variations.length > 0) {
+      try {
+        // Prepare variations for WooCommerce format
+        const variationPayload = variations.map(v => ({
+          regular_price: String(v.regular_price || ""),
+          sale_price: String(v.sale_price || ""),
+          sku: v.sku || "",
+          manage_stock: v.manage_stock || false,
+          stock_quantity: parseInt(v.stock_quantity || 0),
+          low_stock_amount: v.low_stock_amount ? parseInt(v.low_stock_amount) : null,
+          backorders: v.backorders || "no",
+          weight: v.weight || "",
+          dimensions: v.dimensions || {},
+          shipping_class: v.shipping_class || "",
+          image: v.image?.id ? { id: v.image.id } : (v.image?.src ? { src: v.image.src } : null),
+          attributes: v.attributes.map(a => ({
+            id: a.id || 0,
+            name: a.name,
+            option: a.option
+          }))
+        }));
+
+        await wcApi.post(`products/${createdProduct.id}/variations/batch`, {
+          create: variationPayload
+        });
+      } catch (varError) {
+        console.error("Variations creation failed:", varError.response?.data || varError.message);
+        // We don't fail the whole request since the parent product is created
+      }
+    }
+
+    return NextResponse.json(createdProduct);
+  } catch (error) {
+    console.error("Product creation error:", error.response?.data || error.message);
+    return NextResponse.json({ error: error.response?.data?.message || error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(req) {
+  try {
+    const { id, product, variations, wooId } = await req.json();
+
+    if (!wooId) {
+      return NextResponse.json({ error: "Missing vendor ID" }, { status: 400 });
+    }
+
+    const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+
+    // 0. OWNERSHIP CHECK: Ensure the merchant owns this product
+    try {
+      const current = await wcApi.get(`products/${id}`);
+      const authorId = String(current.data.author || current.data.post_author || "");
+      const metaVendorId = current.data.meta_data?.find(m => m.key === '_dokan_vendor_id' || m.key === 'mahally_owner_id' || m.key === '_vendor_id' || m.key === 'merchant_id')?.value;
+      
+      if (authorId !== String(wooId) && String(metaVendorId) !== String(wooId)) {
+        return NextResponse.json({ error: "Unauthorized: You do not own this product" }, { status: 403 });
+      }
+    } catch (e) {
+      return NextResponse.json({ error: "Product not found or access denied" }, { status: 404 });
+    }
+
+    // 0.5 Enforce single featured product per merchant limit
+    if (product.featured === true) {
+      try {
+        const prodRes = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products?author=${wooId}&per_page=100&status=any&featured=true`, {
+          headers: { Authorization: `Basic ${auth}` }
+        });
+        const vendorProducts = await prodRes.json();
+        
+        if (Array.isArray(vendorProducts)) {
+          // Use direct WC REST API — wcApi.put routes through GraphQL which doesn't support 'featured'
+          await Promise.all(vendorProducts
+            .filter(p => String(p.id) !== String(id)) // Skip the product being featured
+            .map(async (p) => {
+              try {
+                await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products/${p.id}`, {
+                  method: 'PUT',
+                  headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ featured: false })
+                });
+              } catch (updateErr) {
+                console.warn(`Failed to un-feature product ${p.id}:`, updateErr.message);
+              }
+            })
+          );
+        }
+      } catch (err) {
+        console.warn("Failed to un-feature previous products:", err.message);
+      }
+    }
+
+    // Detect a featured-only (quick toggle) update — the star button sends ONLY { featured: bool }.
+    // Calling dokanApi.updateProduct with no images would clear the product gallery.
+    // Use a direct WC REST API PATCH instead so only the 'featured' field is touched.
+    const productKeys = Object.keys(product);
+    const isFeaturedOnlyToggle = productKeys.length === 1 && productKeys[0] === 'featured';
+
+    if (isFeaturedOnlyToggle) {
+      const wcRes = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products/${id}`, {
+        method: 'PUT',
+        headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ featured: product.featured })
+      });
+      if (!wcRes.ok) {
+        throw new Error(`WC REST featured update failed: ${wcRes.status}`);
+      }
+      const updatedProduct = await wcRes.json();
+      return NextResponse.json(updatedProduct);
+    }
+
+    // Full product update (from the edit form) — safe to call Dokan with full payload
+    const allImages = product.images || [];
+    const mainImageId = allImages[0] ? parseInt(allImages[0].id) : null;
+
+
+    // Use Dokan API instead of WC API to ensure authorship is correctly assigned to the vendor
+    const updatedProduct = await dokanApi.updateProduct(id, {
+      ...product,
+      featured_image: mainImageId,
+      image_id: mainImageId,
+      images: allImages.map(img => ({ id: parseInt(img.id) })),
+      author: parseInt(wooId),
+      post_author: parseInt(wooId),
+      vendor_id: parseInt(wooId),
+      regular_price: product.regular_price?.toString(),
+      sale_price: product.sale_price?.toString(),
+      meta_data: [
+        ...(product.meta_data || []),
+        { key: '_dokan_vendor_id', value: String(wooId) },
+        { key: 'mahally_owner_id', value: String(wooId) },
+        { key: '_vendor_id', value: String(wooId) },
+        { key: '_thumbnail_id', value: String(mainImageId) }
+      ]
+    }, wooId);
+    
+    // 1.5 Double-check update with standard WooCommerce API for price fields
+    // Dokan REST API can sometimes be flaky with price updates on specific server configs.
+    // Since we are using Admin keys for wcApi, this ensures the database is updated.
+    if (updatedProduct.type === 'simple' || updatedProduct.type === 'external') {
+      try {
+        await wcApi.put(`products/${id}`, {
+          regular_price: product.regular_price?.toString(),
+          sale_price: product.sale_price?.toString(),
+          date_on_sale_from: product.date_on_sale_from || null,
+          date_on_sale_to: product.date_on_sale_to || null,
+          brands: product.brands,
+          product_brand: (product.brands || []).map(b => b.id)
+        });
+      } catch (wcPriceError) {
+        console.warn("Direct WC price update failed, but Dokan update proceeded:", wcPriceError.message);
+      }
+    }
+
+    // 2. Handle variations if it's a variable product
+    if (updatedProduct.type === 'variable' && variations && variations.length > 0) {
+      try {
+        const variationPayload = variations.map(v => ({
+          id: v.id, // Include ID for updates
+          regular_price: String(v.regular_price || ""),
+          sale_price: String(v.sale_price || ""),
+          sku: v.sku || "",
+          manage_stock: v.manage_stock || false,
+          stock_quantity: parseInt(v.stock_quantity || 0),
+          low_stock_amount: v.low_stock_amount ? parseInt(v.low_stock_amount) : null,
+          backorders: v.backorders || "no",
+          weight: v.weight || "",
+          dimensions: v.dimensions || {},
+          shipping_class: v.shipping_class || "",
+          image: v.image?.id ? { id: v.image.id } : (v.image?.src ? { src: v.image.src } : null),
+          attributes: v.attributes.map(a => ({
+            id: a.id || 0,
+            name: a.name,
+            option: a.option
+          }))
+        }));
+
+        // Use batch to update existing and create new ones (WooCommerce handles this via 'update' and 'create' keys)
+        // For simplicity here, we split them or just use update if they have IDs
+        const toUpdate = variationPayload.filter(v => v.id);
+        const toCreate = variationPayload.filter(v => !v.id);
+
+        await wcApi.post(`products/${id}/variations/batch`, {
+          update: toUpdate,
+          create: toCreate
+        });
+      } catch (varError) {
+        console.error("Variations update failed:", varError.response?.data || varError.message);
+      }
+    }
+
+    return NextResponse.json(updatedProduct);
+  } catch (error) {
+    console.error("Product update error:", error.response?.data || error.message);
+    return NextResponse.json({ error: error.response?.data?.message || error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req) {
+  try {
+    const { id, ids, wooId } = await req.json();
+
+    if (!wooId) {
+      return NextResponse.json({ error: "Missing vendor ID" }, { status: 400 });
+    }
+
+    const shouldForceDelete = async (productId) => {
+      try {
+        const productRes = await wcApi.get(`products/${productId}`);
+        return productRes.data.status === 'trash';
+      } catch (e) {
+        return false;
+      }
+    };
+
+    const verifyOwnership = async (productId) => {
+      try {
+        const current = await wcApi.get(`products/${productId}`);
+        const authorId = String(current.data.author || current.data.post_author || "");
+        const metaVendorId = current.data.meta_data?.find(m => m.key === '_dokan_vendor_id' || m.key === 'mahally_owner_id' || m.key === '_vendor_id' || m.key === 'merchant_id')?.value;
+        return authorId === String(wooId) || String(metaVendorId) === String(wooId);
+      } catch (e) {
+        return false;
+      }
+    };
+
+    if (ids && Array.isArray(ids)) {
+      const deletePromises = ids.map(async (productId) => {
+        if (!(await verifyOwnership(productId))) return null;
+        const force = await shouldForceDelete(productId);
+        return dokanApi.fetch(`products/${productId}?force=${force}`, { method: 'DELETE' });
+      });
+      const results = await Promise.all(deletePromises);
+      return NextResponse.json({ success: true, deleted: results.filter(r => r !== null).length });
+    }
+
+    if (!(await verifyOwnership(id))) {
+      return NextResponse.json({ error: "Unauthorized: You do not own this product" }, { status: 403 });
+    }
+    const force = await shouldForceDelete(id);
+    const res = await dokanApi.fetch(`products/${id}?force=${force}`, { method: 'DELETE' });
+    return NextResponse.json(res);
+  } catch (error) {
+    console.error("Delete error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
