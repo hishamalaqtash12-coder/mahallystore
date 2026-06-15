@@ -210,7 +210,10 @@ function RegisterContent() {
       setCountdown(60);
     } catch (err) {
       setError(err.message || "Failed to send OTP.");
-      recaptchaRef.current = null;
+      if (recaptchaRef.current) {
+        try { recaptchaRef.current.clear(); } catch(e) {}
+        recaptchaRef.current = null;
+      }
     } finally {
       setLoading(false);
     }

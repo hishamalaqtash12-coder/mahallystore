@@ -147,7 +147,10 @@ function LoginContent() {
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to send OTP. Please try again.");
-      recaptchaRef.current = null;
+      if (recaptchaRef.current) {
+        try { recaptchaRef.current.clear(); } catch(e) {}
+        recaptchaRef.current = null;
+      }
     } finally {
       setLoading(false);
     }
