@@ -10,7 +10,7 @@ export async function POST(request) {
     }
 
     const api = new WooCommerceRestApi({
-      url: process.env.NEXT_PUBLIC_WORDPRESS_URL,
+      url: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://fallback.mahally.local',
       consumerKey: process.env.WC_CONSUMER_KEY,
       consumerSecret: process.env.WC_CONSUMER_SECRET,
       version: "wc/v3"

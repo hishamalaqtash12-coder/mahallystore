@@ -7,7 +7,7 @@ const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL?.replace(/\/*$/, "");
 const JWT_ENDPOINT = `${WP_URL}/wp-json/jwt-auth/v1/token`;
 
 const api = new WooCommerceRestApi({
-  url: process.env.NEXT_PUBLIC_WORDPRESS_URL,
+  url: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://fallback.mahally.local',
   consumerKey: process.env.WC_CONSUMER_KEY,
   consumerSecret: process.env.WC_CONSUMER_SECRET,
   version: "wc/v3",
