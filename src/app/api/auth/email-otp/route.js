@@ -25,28 +25,37 @@ export async function POST(request) {
         expires: Date.now() + 10 * 60 * 1000
       });
 
-      // 3. Send REAL email using Resend
-      const { Resend } = await import("resend");
-      const resend = new Resend(process.env.RESEND_API_KEY);
-
-      const { data, error } = await resend.emails.send({
-        from: "Mahally <onboarding@resend.dev>",
-        to: [email],
-        subject: "Your Mahally Verification Code",
-        html: `
-          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 400px; margin: auto;">
-            <h1 style="color: #000; font-style: italic; font-weight: 900; text-transform: uppercase; letter-spacing: -1px;">Mahally</h1>
-            <p style="color: #666; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Verification Code</p>
-            <div style="background: #f4f4f4; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
-              <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #000;">${generatedCode}</span>
-            </div>
-            <p style="color: #999; font-size: 11px;">This code will expire in 10 minutes. If you didn't request this, please ignore this email.</p>
-          </div>
-        `,
+      // 3. Send REAL email using Nodemailer
+      const nodemailer = await import("nodemailer");
+      
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || "smtp.hostinger.com",
+        port: parseInt(process.env.SMTP_PORT || "465"),
+        secure: process.env.SMTP_PORT === "465" || !process.env.SMTP_PORT, // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
       });
 
-      if (error) {
-        console.error("Resend error:", error);
+      try {
+        await transporter.sendMail({
+          from: `"Mahally.jo" <${process.env.SMTP_USER}>`,
+          to: email,
+          subject: "Your Mahally Verification Code",
+          html: `
+            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 400px; margin: auto;">
+              <h1 style="color: #000; font-style: italic; font-weight: 900; text-transform: uppercase; letter-spacing: -1px;">Mahally</h1>
+              <p style="color: #666; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Verification Code</p>
+              <div style="background: #f4f4f4; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
+                <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #000;">${generatedCode}</span>
+              </div>
+              <p style="color: #999; font-size: 11px;">This code will expire in 10 minutes. If you didn't request this, please ignore this email.</p>
+            </div>
+          `,
+        });
+      } catch (error) {
+        console.error("Nodemailer error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
