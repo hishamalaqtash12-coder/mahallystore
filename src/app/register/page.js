@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { auth } from "@/lib/firebase";
+import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   updateProfile,
@@ -54,8 +55,6 @@ function RegisterContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(0);
-  const [confirmationResult, setConfirmationResult] = useState(null);
-
   const [confirmationResult, setConfirmationResult] = useState(null);
 
   const otpRefs = useRef([]);
