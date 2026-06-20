@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Play, X, Settings, ArrowRight, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 
 export default function VideoPromo({
@@ -12,13 +13,14 @@ export default function VideoPromo({
   title,
   description,
 }) {
+  const t = useTranslations("VideoPromo");
   const { isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const finalVideoUrl = videoUrl || "https://www.youtube.com/embed/XHOmBV4js_E";
   const finalThumbnail = thumbnail || "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop";
-  const finalTitle = title || "دعم المنتجات الأردنية في كل مكان";
-  const finalDescription = description || "نمكّن التجار المحليين والحرفيين عبر سوق رقمي حديث مبني على الثقة والنمو والانتشار العالمي.";
+  const finalTitle = title || t("defaultTitle");
+  const finalDescription = description || t("defaultDesc");
 
   const getEmbedUrl = (url) => {
     if (url.includes("embed")) return `${url}?autoplay=1`;
@@ -49,11 +51,11 @@ export default function VideoPromo({
             <div className="flex flex-col gap-1">
               <h2 className="text-3xl font-extrabold text-black tracking-tight flex items-center gap-3">
                 <Play size={28} className="text-brand" />
-                قصتنا
+                {t("title")}
               </h2>
               <div className="h-1.5 w-20 bg-brand rounded-full"></div>
               <p className="text-[13px] text-zinc-500 font-medium mt-1">
-                شاهد كيف يُمكّن محلي الأعمال الأردنية
+                {t("subtitle")}
               </p>
             </div>
 
@@ -63,7 +65,7 @@ export default function VideoPromo({
                 className="group flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-700 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 transition-all"
               >
                 <Settings size={14} className="transition-transform group-hover:rotate-90" />
-                تعديل الفيديو
+                {t("editVideo")}
               </Link>
             )}
           </div>
@@ -112,14 +114,14 @@ export default function VideoPromo({
                   className="flex-1 inline-flex justify-center items-center gap-1.5 sm:gap-2 bg-brand hover:bg-brand/90 text-white px-2 sm:px-6 py-3 rounded-full text-[13px] sm:text-base font-medium transition-all active:scale-95 whitespace-nowrap"
                 >
                   <Play size={16} className="sm:w-[18px] sm:h-[18px]" />
-                  شاهد الفيديو
+                  {t("watchVideo")}
                 </button>
 
                 <Link
                   href="/browse"
                   className="flex-1 inline-flex justify-center items-center gap-1.5 sm:gap-2 border border-zinc-300 hover:border-zinc-400 text-zinc-800 px-2 sm:px-6 py-3 rounded-full text-[13px] sm:text-base font-medium transition-all whitespace-nowrap"
                 >
-                  استكشف المنتجات
+                  {t("exploreProducts")}
                   <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
                 </Link>
               </div>

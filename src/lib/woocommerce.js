@@ -343,7 +343,7 @@ export async function checkCustomerExists(email, phone) {
 export async function getVendors({ page = 1, per_page = 40, includeRestricted = false } = {}) {
   try {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
-    const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
     // We fetch all users (role=all) to find sellers and admins who are acting as merchants
     const response = await fetch(`${WP_URL}/wp-json/wc/v3/customers?role=all&per_page=${per_page}&page=${page}`, {
@@ -394,7 +394,7 @@ export async function getVendors({ page = 1, per_page = 40, includeRestricted = 
 export async function getVendorById(vendorId) {
   try {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
-    const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
     const response = await fetch(`${WP_URL}/wp-json/wc/v3/customers/${vendorId}`, {
       headers: { Authorization: `Basic ${auth}` }
@@ -472,7 +472,7 @@ export async function getVendorBySlug(slug) {
     
     // Build result directly from matched data + REST products (avoids second customer fetch)
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
-    const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
     const productsRes = await fetch(`${WP_URL}/wp-json/wc/v3/products?author=${matchedVendor.id}&per_page=100&status=publish`, {
       headers: { Authorization: `Basic ${auth}` }
@@ -527,7 +527,7 @@ export async function updateCustomerMeta(customerId, metaUpdates) {
   // we fallback to WP REST API for this specific admin action
   try {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
-    const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
     const existingRes = await fetch(`${WP_URL}/wp-json/wc/v3/customers/${customerId}`, {
       headers: { Authorization: `Basic ${auth}` }
@@ -577,7 +577,7 @@ export async function getCustomersByIds(ids) {
   if (!ids || ids.length === 0) return [];
   try {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
-    const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
     const response = await fetch(`${WP_URL}/wp-json/wc/v3/customers?role=all&include=${ids.join(',')}&per_page=100`, {
       headers: { Authorization: `Basic ${auth}` }

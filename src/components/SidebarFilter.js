@@ -47,15 +47,15 @@ function AmazonCheckbox({ label, count, checked, onChange }) {
     >
       <div className={`w-[14px] h-[14px] border rounded-[3px] flex items-center justify-center transition-all shrink-0 ${
         checked 
-          ? 'bg-[#007185] border-[#007185] shadow-[0_1px_2px_rgba(0,0,0,0.15)]' 
-          : 'bg-white border-[#8D9096] group-hover:border-[#007185] group-hover:shadow-[0_1px_2px_rgba(0,0,0,0.05)]'
+          ? 'bg-[#be374f] border-[#be374f] shadow-[0_1px_2px_rgba(0,0,0,0.15)]' 
+          : 'bg-white border-[#8D9096] group-hover:border-[#be374f] group-hover:shadow-[0_1px_2px_rgba(0,0,0,0.05)]'
       }`}>
         {checked && (
           <Check size={10} className="text-white" strokeWidth={4.5} />
         )}
       </div>
       <span className={`text-[13px] transition-colors flex-1 truncate ${
-        checked ? 'font-bold text-[#0F1111]' : 'text-[#0F1111] group-hover:text-[#007185]'
+        checked ? 'font-bold text-[#0F1111]' : 'text-[#0F1111] group-hover:text-[#be374f]'
       }`}>
         {label}
       </span>
@@ -114,7 +114,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
             <li>
               <button
                 onClick={() => updateCat(null)}
-                className="text-[13px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
+                className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
               >
                 <ChevronLeft size={12} className="shrink-0 rotate-180" />
                 <span>جميع الأقسام</span>
@@ -124,7 +124,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
               <li className="pr-3">
                 <button
                   onClick={() => updateCat(parentCategory.id)}
-                  className="text-[13px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
+                  className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
                   dangerouslySetInnerHTML={{ __html: `&gt; ${parentCategory.name}` }}
                 />
               </li>
@@ -215,7 +215,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
       <div className="flex items-center justify-between pb-2 border-b border-[#E5E5E5] mb-2 select-none">
         <span className="text-[13px] font-bold text-[#0F1111] tracking-tight">الفلاتر النشطة</span>
         {Object.entries(filters).some(([k, v]) => k !== "searchQuery" && v !== null && v !== false && (Array.isArray(v) ? v.length > 0 : true) && v !== "") && (
-          <button onClick={clearAll} className="text-[11px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors">
+          <button onClick={clearAll} className="text-[11px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors">
             مسح الكل
           </button>
         )}
@@ -265,7 +265,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
           {allTags.length > 8 && (
             <button
               onClick={() => setShowAllTags(!showAllTags)}
-              className="mt-1.5 text-[12px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+              className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
             >
               <span>{showAllTags ? "عرض أقل" : `عرض المزيد (${allTags.length})`}</span>
               <ChevronDown size={12} className={`transform transition-transform ${showAllTags ? 'rotate-180' : ''}`} />
@@ -297,7 +297,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
             {allMerchants.length > 6 && (
               <button
                 onClick={() => setShowAllSellers(!showAllSellers)}
-                className="mt-1.5 text-[12px] font-normal text-[#007185] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+                className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
               >
                 <span>{showAllSellers ? "عرض أقل" : `عرض المزيد (${allMerchants.length})`}</span>
                 <ChevronDown size={12} className={`transform transition-transform ${showAllSellers ? 'rotate-180' : ''}`} />

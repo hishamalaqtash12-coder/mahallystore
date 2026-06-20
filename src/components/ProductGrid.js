@@ -3,12 +3,14 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import SidebarFilter from "./SidebarFilter";
 import Loader from "./Loader";
 import { ChevronDown, Loader2, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function ProductGrid({ initialProducts, totalPages: initialTotalPages = 1 }) {
+  const t = useTranslations("ProductGrid");
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const isBrowse = pathname === "/browse";
@@ -222,17 +224,17 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
       <div className="w-full max-w-[1200px] mx-auto px-4 lg:px-8 select-none">
         <div className="flex items-center justify-between mb-4 px-2">
           <div className="flex flex-col gap-1">
-            <h2 className="text-3xl font-extrabold text-black tracking-tight">استكشف منتجاتنا</h2>
+            <h2 className="text-3xl font-extrabold text-black tracking-tight">{t("title")}</h2>
             <div className="h-1.5 w-20 bg-brand rounded-full"></div>
           </div>
           <Link href="/browse" className="text-sm font-bold text-zinc-500 hover:text-black transition-colors flex items-center gap-1 cursor-pointer">
-            عرض الكل <ChevronRight size={16} className="rtl:-scale-x-100" />
+            {t("viewAll")} <ChevronRight size={16} className="rtl:-scale-x-100" />
           </Link>
         </div>
         {products.length === 0 ? (
           <div className="py-12 bg-[#F7F7F7] border border-zinc-200 rounded-lg flex flex-col items-center justify-center text-center px-4 mt-4">
-            <h3 className="text-lg font-bold text-zinc-900 mb-1">لم يتم العثور على منتجات</h3>
-            <p className="text-sm text-zinc-500">لا توجد منتجات متاحة للاستكشاف حالياً.</p>
+            <h3 className="text-lg font-bold text-zinc-900 mb-1">{t("noProducts")}</h3>
+            <p className="text-sm text-zinc-500">{t("noProductsDesc")}</p>
           </div>
         ) : (
           <>
@@ -246,7 +248,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 href="/browse"
                 className="h-10 px-8 bg-white hover:bg-zinc-50 border border-zinc-400 text-zinc-900 rounded-full text-[14px] font-medium transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <span>عرض جميع المنتجات</span>
+                <span>{t("viewAllProducts")}</span>
                 <ChevronRight size={16} className="text-zinc-600 rtl:-scale-x-100" />
               </Link>
             </div>
@@ -267,7 +269,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
           ) : (
             <>
               <span>عرض 1-{sortedProducts.length} من أصل أكثر من {totalPages * 20} نتيجة لـ </span>
-              <span className="font-bold text-[#9b2c41] ml-1">
+              <span className="font-bold text-brand ml-1">
                 &quot;{filters.searchQuery ? filters.searchQuery : (cat ? <span dangerouslySetInnerHTML={{ __html: categories.find(c => c.id === filters.category || c.slug === filters.category)?.name || "القسم" }} /> : "جميع المنتجات")}&quot;
               </span>
             </>
@@ -462,7 +464,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 <p className="text-[#565959] text-[13px] mb-5">تعديل الفلاتر أو كلمات البحث لمساعدتك في العثور على ما تبحث عنه.</p>
                 <button
                   onClick={() => setFilters(f => ({ ...f, category: null, minRating: null, priceRange: null, onSale: false, freeShipping: false, inStockOnly: false, minDiscount: null, tags: [], merchant: null }))}
-                  className="h-8 px-6 bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] text-zinc-955 rounded-lg text-[12px] font-medium shadow-sm transition-all active:scale-98"
+                  className="h-8 px-6 bg-brand hover:bg-brand-dark border border-brand text-white rounded-lg text-[12px] font-medium shadow-sm transition-all active:scale-98"
                 >
                   مسح جميع الفلاتر
                 </button>

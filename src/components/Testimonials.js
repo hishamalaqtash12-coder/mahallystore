@@ -2,10 +2,12 @@
 
 import { Star, ChevronRight, ChevronLeft, MessageSquare } from "lucide-react";
 import { memo, useMemo, useRef, useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import FeedbackModal from "./FeedbackModal";
 import UserAvatar from "./UserAvatar";
 
 const Testimonials = memo(({ feedbacks = [] }) => {
+  const t = useTranslations("Testimonials");
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -71,7 +73,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
           <div className="flex flex-col gap-1">
             <h2 className="text-3xl font-extrabold text-black tracking-tight flex items-center gap-3">
               <MessageSquare size={28} className="text-brand" />
-              ماذا يقول عملاؤنا
+              {t("title")}
             </h2>
 
             <div className="flex items-center gap-4">
@@ -85,14 +87,14 @@ const Testimonials = memo(({ feedbacks = [] }) => {
                     <span className="text-amber-500">★</span>
                   </div>
                   <span className="text-zinc-500">
-                    ({totalReviews} تقييم)
+                    {totalReviews === 1 ? t("reviewsCountOne", {count: totalReviews}) : t("reviewsCount", {count: totalReviews})}
                   </span>
                 </div>
               )}
             </div>
 
             <p className="text-[13px] text-zinc-500 font-medium">
-              آراء حقيقية من عملائنا السعداء
+              {t("realOpinions")}
             </p>
           </div>
 
@@ -100,7 +102,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
             onClick={() => setIsModalOpen(true)}
             className="h-10 px-8 bg-white hover:bg-zinc-50 border border-zinc-400 text-zinc-900 rounded-full text-[14px] font-medium transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
           >
-            <span>شارك تجربتك</span>
+            <span>{t("shareExperience")}</span>
             <MessageSquare size={16} className="text-zinc-600" />
           </button>
         </div>
@@ -129,14 +131,14 @@ const Testimonials = memo(({ feedbacks = [] }) => {
             {displayFeedbacks.length === 0 ? (
               <div className="w-full flex flex-col items-center justify-center py-16 px-4 text-center border border-dashed border-zinc-200 rounded-xl bg-zinc-50">
                 <MessageSquare size={40} className="text-zinc-400 mb-4" />
-                <p className="text-zinc-900 font-medium">لا توجد آراء بعد</p>
-                <p className="text-zinc-500 text-sm mt-1">كن أول من يشارك تجربته!</p>
+                <p className="text-zinc-900 font-medium">{t("noReviews")}</p>
+                <p className="text-zinc-500 text-sm mt-1">{t("firstReview")}</p>
               </div>
             ) : (
               displayFeedbacks.map((f, i) => {
                 const dateObj = new Date(f.date);
                 const timeAgo = Math.floor((new Date() - dateObj) / (1000 * 60 * 60 * 24));
-                const dateDisplay = timeAgo === 0 ? 'اليوم' : `منذ ${timeAgo} يوم`;
+                const dateDisplay = timeAgo === 0 ? t("today") : t("daysAgo", {count: timeAgo});
 
                 return (
                   <div key={i} className="flex flex-col shrink-0 w-[300px] md:w-[340px]">
@@ -163,7 +165,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
                         className="w-9 h-9 rounded-full text-[14px] font-semibold border border-zinc-200 shrink-0 text-white"
                       />
                       <div>
-                        <h4 className="font-semibold text-zinc-900">{f.userName || 'عميل موثوق'}</h4>
+                        <h4 className="font-semibold text-zinc-900">{f.userName || t("trustedCustomer")}</h4>
                         <p className="text-xs text-zinc-500">{dateDisplay}</p>
                       </div>
                     </div>

@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function Footer() {
+   const t = useTranslations("Footer");
    const [settings, setSettings] = useState(null);
 
    useEffect(() => {
@@ -33,34 +35,34 @@ export default function Footer() {
             
             {/* Right Side in RTL (First DOM element) */}
             <div className="flex flex-col w-full md:w-1/2">
-               <h3 className="font-extrabold text-[16px] mb-6 text-black">المزيد عن محلي</h3>
+               <h3 className="font-extrabold text-[16px] mb-6 text-black">{t("moreAbout")}</h3>
                <ul className="space-y-3 text-[14px] text-zinc-600 font-medium mb-8">
-                  <li><Link href="/" className="hover:text-brand transition-colors">الرئيسية</Link></li>
-                  <li><Link href="/conditions" className="hover:text-brand transition-colors">سياسة الخصوصية</Link></li>
-                  <li><Link href="/contact" className="hover:text-brand transition-colors">اتصل بنا</Link></li>
-                  <li><Link href="/register" className="hover:text-brand transition-colors">انضم كتاجر</Link></li>
-                  <li><Link href="/about" className="hover:text-brand transition-colors">عن محلي</Link></li>
-                  <li><Link href="/help" className="hover:text-brand transition-colors">الأسئلة الشائعة</Link></li>
+                  <li><Link href="/" className="hover:text-brand transition-colors">{t("home")}</Link></li>
+                  <li><Link href="/conditions" className="hover:text-brand transition-colors">{t("privacyPolicy")}</Link></li>
+                  <li><Link href="/contact" className="hover:text-brand transition-colors">{t("contactUs")}</Link></li>
+                  <li><Link href="/register" className="hover:text-brand transition-colors">{t("joinAsMerchant")}</Link></li>
+                  <li><Link href="/about" className="hover:text-brand transition-colors">{t("aboutMahally")}</Link></li>
+                  <li><Link href="/help" className="hover:text-brand transition-colors">{t("faq")}</Link></li>
                </ul>
                
                <ul className="flex items-center gap-3 text-white">
                   <li>
-                     <a href={settings?.socialFacebook || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#7A192B] hover:bg-[#5A0F1E] flex items-center justify-center transition-colors">
+                     <a href={settings?.socialFacebook || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-brand hover:bg-brand-dark flex items-center justify-center transition-colors">
                         <FacebookIcon />
                      </a>
                   </li>
                   <li>
-                     <a href={settings?.socialInstagram || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#7A192B] hover:bg-[#5A0F1E] flex items-center justify-center transition-colors">
+                     <a href={settings?.socialInstagram || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-brand hover:bg-brand-dark flex items-center justify-center transition-colors">
                         <InstagramIcon />
                      </a>
                   </li>
                   <li>
-                     <a href={settings?.socialTwitter || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#7A192B] hover:bg-[#5A0F1E] flex items-center justify-center transition-colors">
+                     <a href={settings?.socialTwitter || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-brand hover:bg-brand-dark flex items-center justify-center transition-colors">
                         <TwitterIcon />
                      </a>
                   </li>
                   <li>
-                     <a href={settings?.socialTikTok || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-[#7A192B] hover:bg-[#5A0F1E] flex items-center justify-center transition-colors">
+                     <a href={settings?.socialTikTok || "#"} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-brand hover:bg-brand-dark flex items-center justify-center transition-colors">
                         <TikTokIcon />
                      </a>
                   </li>
@@ -69,11 +71,11 @@ export default function Footer() {
 
             {/* Left Side in RTL (Second DOM element) */}
             <div className="flex flex-col w-full md:w-1/2 md:items-start text-right">
-               <h3 className="font-extrabold text-[16px] mb-6 text-black">سوق واحد... منتجات بلا حدود</h3>
+               <h3 className="font-extrabold text-[16px] mb-6 text-black">{t("oneMarket")}</h3>
                <p className="text-[14px] text-zinc-600 leading-relaxed max-w-[400px] mb-8 font-medium">
-                  اختصرنا عليك المشاوير البعيدة لتشتري من محلك المفضل وين ما كنت بالأردن، جمعنالك كثير متاجر من كل المحافظات بمكان واحد، وبنفس سعر المحل! مع توصيل سريع وموثوق لباب بيتك.
+                  {t("footerDesc")}
                </p>
-               <div className="font-black text-[20px] text-[#7A192B] tracking-wide" dir="ltr" style={{ textAlign: 'right' }}>
+               <div className="font-black text-[20px] text-brand tracking-wide" dir="ltr" style={{ textAlign: 'right' }}>
                   +962 7 8276 0463
                </div>
             </div>

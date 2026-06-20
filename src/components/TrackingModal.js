@@ -184,7 +184,7 @@ export default function TrackingModal({ order, isOpen, onClose }) {
                         <span className="text-[11px] text-zinc-500">
                           مباع بواسطة:{" "}
                           {hasRealMerchant ? (
-                            <Link href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="font-bold text-[#007185] hover:underline">
+                            <Link href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="font-bold text-[#be374f] hover:underline">
                               {merchantName}
                             </Link>
                           ) : (
@@ -225,7 +225,7 @@ export default function TrackingModal({ order, isOpen, onClose }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white rounded-xl border border-zinc-100 p-5 shadow-sm">
               <h4 className="text-[12px] font-bold text-zinc-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <MapPin size={13} className="text-[#e77600]" /> عنوان التسليم
+                <MapPin size={13} className="text-[#be374f]" /> عنوان التسليم
               </h4>
               <p className="text-[14px] font-bold text-zinc-900">{order.shipping?.first_name} {order.shipping?.last_name}</p>
               <p className="text-[13px] text-zinc-600 mt-0.5 leading-relaxed">

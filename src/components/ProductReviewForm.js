@@ -70,13 +70,13 @@ export default function ProductReviewForm({ productId, vendorId }) {
 
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full h-[31px] bg-[#FFD814] hover:bg-[#F7CA00] text-zinc-900 border border-[#FCD200] rounded-md text-[13px] font-medium shadow-sm transition-all mb-4"
+                className="w-full h-[31px] bg-brand hover:bg-brand-dark text-white border border-brand rounded-md text-[13px] font-bold shadow-sm transition-all mb-4"
               >
                 OK
               </button>
               
               <div className="text-center">
-                <button className="text-[11px] text-[#007185] hover:text-[#C45500] hover:underline transition-colors">
+                <button className="text-[11px] text-brand hover:text-brand-dark hover:underline transition-colors">
                   To learn more, please refer to the Review Guidelines
                 </button>
               </div>

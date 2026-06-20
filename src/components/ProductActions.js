@@ -168,11 +168,11 @@ export default function ProductActions({ product, variations = [], returnPolicy 
           </div>
         )}
         <div className="flex items-start gap-1">
-          <span className="text-[24px] font-medium text-[#B12704] flex items-start leading-none">
+          <span className="text-[24px] font-medium text-brand flex items-start leading-none">
             <span className="text-[12px] mt-1 mr-0.5">JOD</span>{currentSalePrice.toFixed(2)}
           </span>
           {currentDiscountPercent > 0 && (
-            <span className="text-[14px] text-[#CC0C39] font-medium mt-1">-{currentDiscountPercent}%</span>
+            <span className="text-[14px] text-brand font-medium mt-1">-{currentDiscountPercent}%</span>
           )}
         </div>
       </div>
@@ -184,7 +184,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
       </div>
 
       {/* Stock Status */}
-      <div className={`text-[18px] font-medium mb-3 ${currentStockStatus === 'outofstock' ? 'text-[#B12704]' : 'text-[#007600]'}`}>
+      <div className={`text-[18px] font-medium mb-3 ${currentStockStatus === 'outofstock' ? 'text-brand-dark' : 'text-[#007600]'}`}>
         {currentStockStatus === 'outofstock' ? 'نفدت الكمية' : 'متوفر'}
       </div>
 
@@ -204,7 +204,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
                       key={option}
                       onClick={() => handleOptionSelect(attr.name, option)}
                       className={`min-w-[40px] h-[32px] px-3 flex items-center justify-center rounded border text-[13px] font-medium transition-all shadow-sm ${isSelected
-                          ? 'border-[#e77600] bg-[#FFF8F0] ring-1 ring-[#e77600] text-zinc-900'
+                          ? 'border-brand bg-brand-light ring-1 ring-brand text-zinc-900'
                           : 'border-[#D5D9D9] bg-white hover:bg-[#F7FAFA] text-zinc-700'
                         }`}
                     >
@@ -225,7 +225,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
             <select
               value={qty}
               onChange={(e) => setQty(parseInt(e.target.value))}
-              className="w-full h-[32px] pl-3 pr-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[13px] text-[#0F1111] appearance-none cursor-pointer outline-none hover:bg-[#E3E6E6] shadow-[0_2px_5px_rgba(15,17,17,0.15)] focus:border-[#007185] focus:shadow-[0_0_0_3px_#C8F3FA]"
+              className="w-full h-[32px] pl-3 pr-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[13px] text-[#0F1111] appearance-none cursor-pointer outline-none hover:bg-[#E3E6E6] shadow-[0_2px_5px_rgba(15,17,17,0.15)] focus:border-brand focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
             >
               {Array.from({ length: currentStockQuantity > 0 ? Math.min(10, currentStockQuantity) : 10 }, (_, i) => i + 1).map(n => (
                 <option key={n} value={n}>الكمية: {n}</option>
@@ -276,11 +276,11 @@ export default function ProductActions({ product, variations = [], returnPolicy 
               <button
                 onClick={handleAddToCart}
                 disabled={added || currentStockStatus === 'outofstock'}
-                className={`w-full h-[32px] rounded-full text-[#0F1111] text-[13px] flex items-center justify-center transition-all ${currentStockStatus === 'outofstock'
+                className={`w-full h-[32px] rounded-full text-[13px] flex items-center justify-center transition-all ${currentStockStatus === 'outofstock'
                     ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300'
                     : added
                       ? 'bg-[#007600] text-white border border-[#007600]'
-                      : 'bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200]'
+                      : 'bg-brand hover:bg-brand-dark text-white border border-brand font-bold'
                   }`}
               >
                 {added ? 'تمت الإضافة للسلة' : 'أضف إلى السلة'}
@@ -291,9 +291,9 @@ export default function ProductActions({ product, variations = [], returnPolicy 
                   router.push("/checkout");
                 }}
                 disabled={currentStockStatus === 'outofstock'}
-                className={`w-full h-[32px] rounded-full text-[#0F1111] text-[13px] flex items-center justify-center transition-all ${currentStockStatus === 'outofstock'
+                className={`w-full h-[32px] rounded-full text-[13px] flex items-center justify-center transition-all ${currentStockStatus === 'outofstock'
                     ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300'
-                    : 'bg-[#FFA41C] hover:bg-[#FA8900] border border-[#FF8F00]'
+                    : 'bg-brand-light hover:bg-brand/20 text-brand-dark border border-brand-light font-bold'
                   }`}
               >
                 اشتري الآن
@@ -313,23 +313,24 @@ export default function ProductActions({ product, variations = [], returnPolicy 
           return (
             <Link
               href={storeId ? `/vendors/${storeId}` : "/vendors"}
-              className="text-[#007185] hover:text-[#9b2c41] hover:underline font-medium"
+              className="text-brand hover:text-brand-dark hover:underline font-medium"
             >
-              {storeName || "محلي الرسمي"}
+              {product.store?.shop_name || "متجر غير معروف"}
             </Link>
           );
         })()}
+      </div>
+      <div className="grid grid-cols-2 gap-y-2 text-[12px] mb-4">
         <div className="text-[#565959]">الاسترجاع</div>
-        <div className={`text-[12px] font-medium ${returnPolicy === "لا نقبل الاسترجاع" ? "text-rose-600" : "text-[#007185] hover:underline cursor-pointer"}`}>
+        <div className={`text-[12px] font-medium ${returnPolicy === "لا نقبل الاسترجاع" ? "text-rose-600" : "text-brand hover:text-brand-dark hover:underline cursor-pointer"}`}>
           {returnPolicy}
         </div>
       </div>
 
-      {/* Add to Wishlist Link */}
       <div className="border-t border-[#D5D9D9] pt-3 flex flex-col gap-2">
         <button
           onClick={() => toggleWishlist(product)}
-          className="w-full text-center text-[13px] text-[#0F1111] hover:text-[#9b2c41] hover:underline border border-[#D5D9D9] rounded-md px-3 py-1.5 bg-white hover:bg-zinc-50 transition-colors shadow-sm"
+          className="w-full text-center text-[13px] text-[#0F1111] hover:text-brand-dark hover:underline border border-[#D5D9D9] rounded-md px-3 py-1.5 bg-white hover:bg-zinc-50 transition-colors shadow-sm"
         >
           {isFavorite ? 'إزالة من القائمة' : 'أضف للقائمة'}
         </button>

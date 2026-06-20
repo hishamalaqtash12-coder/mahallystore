@@ -43,14 +43,14 @@ export default function ProductReviews({ reviews = [], productName = "", product
           <div className="space-y-2 mb-8">
             {distribution.map((item) => (
               <div key={item.stars} className="flex items-center gap-3 group cursor-pointer">
-                <span className="text-[13px] text-[#007185] group-hover:underline w-12 shrink-0">{item.stars} نجوم</span>
+                <span className="text-[13px] text-[#be374f] group-hover:underline w-12 shrink-0">{item.stars} نجوم</span>
                 <div className="flex-1 h-5 bg-[#F0F2F2] rounded-sm overflow-hidden border border-[#D5D9D9]">
                   <div 
                     className="h-full bg-[#FFA41C]" 
                     style={{ width: `${item.percentage}%` }}
                   />
                 </div>
-                <span className="text-[13px] text-[#007185] group-hover:underline w-8 shrink-0">{item.percentage}%</span>
+                <span className="text-[13px] text-[#be374f] group-hover:underline w-8 shrink-0">{item.percentage}%</span>
               </div>
             ))}
           </div>

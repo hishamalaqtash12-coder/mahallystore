@@ -90,9 +90,9 @@ export default function DashboardSidebar() {
                   <Link 
                     key={item.name} 
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${isActive ? 'bg-zinc-100 text-[#007185] font-bold' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'}`}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${isActive ? 'bg-zinc-100 text-[#be374f] font-bold' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'}`}
                   >
-                    <item.icon size={18} className={isActive ? 'text-[#007185]' : 'text-zinc-400'} />
+                    <item.icon size={18} className={isActive ? 'text-[#be374f]' : 'text-zinc-400'} />
                     {item.name}
                   </Link>
                 );

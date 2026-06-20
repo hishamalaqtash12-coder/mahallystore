@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   ChevronLeft,
   ChevronRight,
@@ -24,6 +25,7 @@ const decodeEntities = (text) => {
 
 
 const MerchantCarousel = memo(({ activeVendors }) => {
+  const t = useTranslations("Hero");
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -88,9 +90,9 @@ const MerchantCarousel = memo(({ activeVendors }) => {
 
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between mb-8 px-2 gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">المتاجر</h2>
+          <h2 className="text-3xl font-extrabold text-white tracking-tight">{t("stores")}</h2>
           <div className="h-1.5 w-20 bg-brand rounded-full"></div>
-          <p className="text-white/60 text-sm mt-1">تسوق مباشرة من المتاجر المحلية الموثوقة</p>
+          <p className="text-white/60 text-sm mt-1">{t("shopFromLocal")}</p>
         </div>
         {/* <Link href="/vendors" className="text-sm font-bold text-white/80 hover:text-white transition-colors flex items-center gap-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
           عرض جميع المتاجر<ChevronLeft size={14} />
@@ -122,7 +124,7 @@ const MerchantCarousel = memo(({ activeVendors }) => {
         >
           {/* First block: Solid yellow block */}
           <Link href="/vendors" className="flex flex-col p-5 bg-[#FFDB00] shrink-0 w-[160px] h-[200px] group/first hover:bg-[#E5C500] transition-all rounded-xl shadow-lg border border-black/10">
-            <h3 className="text-[16px] font-bold text-black mt-2 underline group-hover:no-underline leading-tight">عرض جميع<br />التجار</h3>
+            <h3 className="text-[16px] font-bold text-black mt-2 underline group-hover:no-underline leading-tight">{t("viewAllMerchants")}</h3>
             <div className="mt-auto w-8 h-8 bg-black rounded-full flex items-center justify-center text-white shadow-sm">
               <ChevronLeft size={16} />
             </div>
@@ -151,14 +153,14 @@ const MerchantCarousel = memo(({ activeVendors }) => {
                 </div>
                 <span className="text-[13px] font-bold text-zinc-900 mb-0.5 text-center w-full truncate px-1">{vendor.name}</span>
                 <span className="text-[11px] font-bold text-brand group-hover/v:text-brand-dark group-hover/v:underline mt-1 flex items-center gap-1">
-                  تسوق الآن <ChevronLeft size={12} />
+                  {t("shopNow")} <ChevronLeft size={12} />
                 </span>
               </div>
             </Link>
           ))}
           {activeVendors.length === 0 && (
             <div className="w-[160px] h-[200px] flex items-center justify-center text-white/50 italic text-[13px] font-medium bg-white/5 rounded-xl border border-dashed border-white/20 backdrop-blur-sm">
-              جارٍ البحث عن التجار...
+              {t("searchingMerchants")}
             </div>
           )}
         </div>
@@ -168,6 +170,7 @@ const MerchantCarousel = memo(({ activeVendors }) => {
 });
 
 const CategoryCarousel = memo(({ categories }) => {
+  const t = useTranslations("Hero");
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -219,11 +222,11 @@ const CategoryCarousel = memo(({ categories }) => {
     <div className="relative z-40 group/carousel">
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-extrabold text-black tracking-tight">استكشف الفئات</h2>
+          <h2 className="text-3xl font-extrabold text-black tracking-tight">{t("exploreCategories")}</h2>
           <div className="h-1.5 w-20 bg-brand rounded-full"></div>
         </div>
         <Link href="/browse" className="text-sm font-bold text-zinc-500 hover:text-black transition-colors flex items-center gap-1">
-          عرض الكل <ChevronLeft size={16} />
+          {t("viewAll")} <ChevronLeft size={16} />
         </Link>
       </div>
 
@@ -283,7 +286,7 @@ const CategoryCarousel = memo(({ categories }) => {
 
                 {typeof cat.count !== 'undefined' && (
                   <span className={`text-[10px] font-bold tracking-widest ${cat.count === 0 ? 'text-red-500' : 'text-zinc-400'}`}>
-                    ({cat.count}) {cat.count === 1 ? 'منتج' : 'منتج'}
+                    ({cat.count}) {t("product")}
                   </span>
                 )}
 
@@ -473,30 +476,34 @@ const CategoryCarousel = memo(({ categories }) => {
 //   </div>
 // ));
 
-const QuadCard = memo(({ title, items, link }) => (
-  <div className="bg-white p-6 flex flex-col h-[440px] border border-zinc-200 hover:border-black transition-colors relative z-10 group box-border">
-    <h2 className="text-[20px] font-bold text-black mb-4 truncate">{title}</h2>
-    <div className="grid grid-cols-2 gap-4 flex-1 mb-5">
-      {items.map((item, i) => (
-        <Link href={`/product/${item.slug}`} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
-          <div className="relative aspect-square overflow-hidden bg-[#F5F5F5]">
-            <Image
-              src={item?.images?.[0]?.src || "https://placehold.co/400x400"}
-              alt={item.name}
-              fill
-              className="object-cover mix-blend-multiply group-hover/item:scale-105 transition-transform duration-500"
-            />
-          </div>
-          <span className="text-[12px] text-black line-clamp-1 group-hover/item:underline">{item.name}</span>
-        </Link>
-      ))}
+const QuadCard = memo(({ title, items, link }) => {
+  const t = useTranslations("Hero");
+  return (
+    <div className="bg-white p-6 flex flex-col h-[440px] border border-zinc-200 hover:border-black transition-colors relative z-10 group box-border">
+      <h2 className="text-[20px] font-bold text-black mb-4 truncate">{title}</h2>
+      <div className="grid grid-cols-2 gap-4 flex-1 mb-5">
+        {items.map((item, i) => (
+          <Link href={`/product/${item.slug}`} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
+            <div className="relative aspect-square overflow-hidden bg-[#F5F5F5]">
+              <Image
+                src={item?.images?.[0]?.src || "https://placehold.co/400x400"}
+                alt={item.name}
+                fill
+                className="object-cover mix-blend-multiply group-hover/item:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <span className="text-[12px] text-black line-clamp-1 group-hover/item:underline">{item.name}</span>
+          </Link>
+        ))}
+      </div>
+      <Link href={link} className="text-[13px] font-bold text-black hover:underline mt-auto inline-block">
+        {t("viewMore")}
+      </Link>
     </div>
-    <Link href={link} className="text-[13px] font-bold text-black hover:underline mt-auto inline-block">
-      عرض المزيد
-    </Link>
-  </div>
-));
+  );
+});
 export default function Hero({ products = [], categories = [], vendors = [] }) {
+  const t = useTranslations("Hero");
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const activeVendors = useMemo(() => {
@@ -507,42 +514,42 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
         name: (meta.dokan_profile_settings && meta.dokan_profile_settings.store_name) || meta.store_name || meta.mahally_store_name || meta.dokan_store_name || v.store_name || (v.store && v.store.name) || `${v.first_name} ${v.last_name}`.trim() || "Store",
         slug: v.store_slug || (v.store && v.store.slug) || meta.mahally_store_slug || v.id,
         description: v.store_description || meta.mahally_store_description || "",
-        category: meta.mahally_store_category || "تاجر عام",
+        category: meta.mahally_store_category || t("generalMerchant"),
         logo: v.gravatar || (v.store && v.store.gravatar) || meta.mahally_avatar_url || meta.mahally_store_logo || null,
         showInCarousel: meta.mahally_show_in_carousel
       };
     }).filter(v => v.showInCarousel !== 'no');
-  }, [vendors]);
+  }, [vendors, t]);
 
   // Mock Amazon-style banners (representing gaming, fashion, home etc)
   const banners = [
     {
-      title: "سوق محلي",
-      subtitle: "نربطك بأفضل التجار المحليين في الأردن",
+      title: t("bannerLocalMarket"),
+      subtitle: t("bannerLocalSubtitle"),
       image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop",
       bg: "bg-zinc-100"
     },
     {
-      title: "التقنية والابتكار",
-      subtitle: "اكتشف أحدث الإلكترونيات عالية الأداء",
+      title: t("bannerTech"),
+      subtitle: t("bannerTechSubtitle"),
       image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=2070&auto=format&fit=crop",
       bg: "bg-zinc-100"
     },
     {
-      title: "الموضة والأناقة",
-      subtitle: "ارتقِ بخزانتك من خلال أزياء فاخرة",
+      title: t("bannerFashion"),
+      subtitle: t("bannerFashionSubtitle"),
       image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop",
       bg: "bg-zinc-200"
     },
     {
-      title: "المنزل والمعيشة",
-      subtitle: "حوّل مساحتك بتصاميم أنيقة",
+      title: t("bannerHome"),
+      subtitle: t("bannerHomeSubtitle"),
       image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2070&auto=format&fit=crop",
       bg: "bg-zinc-100"
     },
     {
-      title: "الجمال والعناية",
-      subtitle: "اكتشف أفضل منتجات العناية والجمال",
+      title: t("bannerBeauty"),
+      subtitle: t("bannerBeautySubtitle"),
       image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=2070&auto=format&fit=crop",
       bg: "bg-zinc-100"
     }

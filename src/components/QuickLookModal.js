@@ -178,7 +178,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
 
         {loading ? (
           <div className="w-full flex items-center justify-center p-20 min-h-[400px]">
-            <div className="w-10 h-10 border-4 border-zinc-200 border-t-[#febd69] rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-zinc-200 border-t-brand rounded-full animate-spin" />
           </div>
         ) : (
           <>
@@ -200,7 +200,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
-                    className={`relative w-12 h-12 rounded border transition-all shrink-0 bg-white ${selectedImage === i ? 'border-[#e77600] ring-1 ring-[#e77600]' : 'border-zinc-200 hover:border-[#e77600]'}`}
+                    className={`relative w-12 h-12 rounded border transition-all shrink-0 bg-white ${selectedImage === i ? 'border-brand ring-1 ring-brand' : 'border-zinc-200 hover:border-brand'}`}
                   >
                     <Image src={img.src} alt={`Product thumbnail ${i + 1}`} fill className="object-cover p-0.5 rounded" />
                   </button>
@@ -225,7 +225,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                       />
                     ))}
                   </div>
-                  <span className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline cursor-pointer">
+                  <span className="text-[13px] text-brand hover:text-brand-dark hover:underline cursor-pointer">
                     {ratingCount} {ratingCount === 1 ? 'تقييم' : 'تقييمات'}
                   </span>
                 </div>
@@ -237,7 +237,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
               <div className="mb-4">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   {discount > 0 && (
-                    <div className="inline-block bg-[#CC0C39] text-white text-[11px] font-bold px-2 py-0.5 rounded-sm">
+                    <div className="inline-block bg-brand text-white text-[11px] font-bold px-2 py-0.5 rounded-sm">
                       عرض لفترة محدودة
                     </div>
                   )}
@@ -264,7 +264,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                 />
                 <div className="flex items-center gap-3 text-[13px] pt-3 px-1">
                   <RotateCcw size={16} className={returnPolicyStr === "لا يقبل الإرجاع" ? "text-rose-500" : "text-zinc-600"} />
-                  <span className={`font-medium ${returnPolicyStr === "لا يقبل الإرجاع" ? "text-rose-600" : "text-[#007185]"}`}>{returnPolicyStr}</span>
+                  <span className={`font-medium ${returnPolicyStr === "لا يقبل الإرجاع" ? "text-rose-600" : "text-brand hover:text-brand-dark hover:underline cursor-pointer"}`}>{returnPolicyStr}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[12px] pt-1 px-1">
                   <Clock size={14} className="text-zinc-400" />
@@ -294,7 +294,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                               key={option}
                               onClick={() => handleOptionSelect(attr.name, option)}
                               className={`min-w-[40px] h-[32px] px-3 flex items-center justify-center rounded border text-[13px] font-medium transition-all shadow-sm ${isSelected
-                                ? 'border-[#e77600] bg-[#FFF8F0] ring-1 ring-[#e77600] text-zinc-900'
+                                ? 'border-brand bg-brand-light ring-1 ring-brand text-zinc-900'
                                 : 'border-[#D5D9D9] bg-white hover:bg-[#F7FAFA] text-zinc-700'
                                 }`}
                             >
@@ -368,7 +368,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                               <Plus size={14} />
                             </button>
                           </div>
-                          <button onClick={() => removeFromCart(product.id)} className="text-[12px] text-[#007185] hover:text-[#c45500] hover:underline flex items-center gap-1 font-medium">
+                          <button onClick={() => removeFromCart(product.id)} className="text-[12px] text-brand hover:text-brand-dark hover:underline flex items-center gap-1 font-medium">
                             <Trash2 size={14} /> إزالة
                           </button>
                         </div>
@@ -387,13 +387,13 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                           };
                           addToCart(itemToAdd, 1);
                         }}
-                        className="w-full h-[33px] bg-[#FFD814] hover:bg-[#F7CA00] text-zinc-900 border border-[#FCD200] rounded-full text-[13px] font-medium shadow-sm transition-all"
+                        className="w-full h-[33px] bg-brand hover:bg-brand-dark text-white border border-brand rounded-full text-[13px] font-medium shadow-sm transition-all"
                       >
                         أضف إلى السلة
                       </button>
                       <button
                         onClick={handleBuyNow}
-                        className="w-full h-[33px] bg-[#FFA41C] hover:bg-[#FA8914] text-zinc-900 border border-[#FF8F00] rounded-full text-[13px] font-medium shadow-sm transition-all"
+                        className="w-full h-[33px] bg-brand-light hover:bg-brand/20 text-brand-dark border border-brand-light rounded-full text-[13px] font-medium shadow-sm transition-all"
                       >
                         اشتري الآن
                       </button>
@@ -403,10 +403,10 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
               </div>
 
               <div className="mt-auto pt-4 border-t border-zinc-100 flex justify-between items-center">
-                <a href={`/product/${product.slug}`} className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline flex items-center gap-1">
+                <a href={`/product/${product.slug}`} className="text-[13px] text-brand hover:text-brand-dark hover:underline flex items-center gap-1">
                   عرض تفاصيل المنتج كاملة <ChevronRight size={14} className="rtl:-scale-x-100" />
                 </a>
-                <a href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="text-[11px] text-zinc-400 hover:text-[#007185] hover:underline transition-colors">
+                <a href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="text-[11px] text-zinc-400 hover:text-brand hover:underline transition-colors">
                   يباع بواسطة {merchantName || "محلي الرسمي"}
                 </a>
               </div>

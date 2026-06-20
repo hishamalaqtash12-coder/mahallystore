@@ -63,21 +63,21 @@ export default function OnboardingWizard({ stats, user }) {
   }
 
   return (
-    <div className="bg-gradient-to-r from-[#007185]/5 to-[#febd69]/10 border border-[#007185]/20 rounded-xl p-6 mb-8 relative overflow-hidden">
+    <div className="bg-gradient-to-r from-[#be374f]/5 to-[#febd69]/10 border border-[#be374f]/20 rounded-xl p-6 mb-8 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#febd69] opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
       
       <div className="flex justify-between items-start mb-6">
         <div>
           <h2 className="text-[20px] font-bold text-zinc-900 tracking-tight flex items-center gap-2">
             Store Setup Wizard
-            <span className="px-2 py-0.5 bg-[#007185] text-white text-[10px] font-bold rounded-full uppercase tracking-wider">
+            <span className="px-2 py-0.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full uppercase tracking-wider">
               Required
             </span>
           </h2>
           <p className="text-[13px] text-zinc-600 mt-1">Complete these steps to publish your store and start selling.</p>
         </div>
         <div className="text-right">
-          <div className="text-[24px] font-bold text-[#007185] leading-none">{progressPercent}%</div>
+          <div className="text-[24px] font-bold text-[#be374f] leading-none">{progressPercent}%</div>
           <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Completed</p>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function OnboardingWizard({ stats, user }) {
       {/* Progress Bar */}
       <div className="w-full h-2 bg-zinc-200 rounded-full mb-8 overflow-hidden">
         <div 
-          className="h-full bg-[#007185] rounded-full transition-all duration-1000 ease-out"
+          className="h-full bg-[#be374f] rounded-full transition-all duration-1000 ease-out"
           style={{ width: `${progressPercent}%` }}
         ></div>
       </div>
@@ -95,7 +95,7 @@ export default function OnboardingWizard({ stats, user }) {
           <Link 
             key={step.id} 
             href={step.href}
-            className={`block p-4 rounded-lg border transition-all ${step.completed ? 'bg-white/60 border-zinc-200 opacity-70' : 'bg-white border-[#007185]/30 hover:border-[#007185] hover:shadow-md'}`}
+            className={`block p-4 rounded-lg border transition-all ${step.completed ? 'bg-white/60 border-zinc-200 opacity-70' : 'bg-white border-[#be374f]/30 hover:border-[#be374f] hover:shadow-md'}`}
           >
             <div className="flex items-start gap-3">
               <div className="mt-0.5">
@@ -111,7 +111,7 @@ export default function OnboardingWizard({ stats, user }) {
                 </h3>
                 <p className="text-[12px] text-zinc-500 mt-1 mb-3">{step.description}</p>
                 {!step.completed && (
-                  <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#007185] hover:underline">
+                  <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#be374f] hover:underline">
                     {step.actionText} <ChevronRight size={14} />
                   </span>
                 )}

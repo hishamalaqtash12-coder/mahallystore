@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronRight, ChevronLeft, Clock } from "lucide-react";
 import ProductCard from "./ProductCard";
 
 export default function LimitedTimeOffers({ products }) {
+  const t = useTranslations("LimitedTimeOffers");
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -43,14 +45,14 @@ export default function LimitedTimeOffers({ products }) {
       <section className="w-full max-w-[1200px] mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between mb-4 px-2">
           <div className="flex flex-col gap-1">
-            <h2 className="text-3xl font-extrabold text-black tracking-tight">عروض لفترة محدودة</h2>
+            <h2 className="text-3xl font-extrabold text-black tracking-tight">{t("title")}</h2>
             <div className="h-1.5 w-20 bg-brand rounded-full"></div>
           </div>
         </div>
         <div className="py-12 bg-[#F7F7F7] border border-zinc-200 rounded-lg flex flex-col items-center justify-center text-center px-4">
           <Clock size={32} className="text-zinc-400 mb-3" />
-          <h3 className="text-lg font-bold text-zinc-900 mb-1">لا تتوفر عروض حالياً</h3>
-          <p className="text-sm text-zinc-500">انتهت صلاحية جميع العروض لفترة محدودة أو نفدت الكمية. يرجى العودة قريباً!</p>
+          <h3 className="text-lg font-bold text-zinc-900 mb-1">{t("noOffers")}</h3>
+          <p className="text-sm text-zinc-500">{t("noOffersDesc")}</p>
         </div>
       </section>
     );
@@ -60,11 +62,11 @@ export default function LimitedTimeOffers({ products }) {
     <section className="w-full max-w-[1200px] mx-auto px-4 lg:px-8">
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-extrabold text-black tracking-tight">عروض لفترة محدودة</h2>
+          <h2 className="text-3xl font-extrabold text-black tracking-tight">{t("title")}</h2>
           <div className="h-1.5 w-20 bg-brand rounded-full"></div>
         </div>
         <Link href="/browse?onDiscount=true" className="text-sm font-bold text-zinc-500 hover:text-black transition-colors flex items-center gap-1">
-          عرض الكل <ChevronRight size={16} className="rtl:-scale-x-100" />
+          {t("viewAll")} <ChevronRight size={16} className="rtl:-scale-x-100" />
         </Link>
       </div>
 

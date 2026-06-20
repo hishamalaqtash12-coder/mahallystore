@@ -82,7 +82,7 @@ export default function CartDrawer() {
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
                         <div>
-                          <h4 className="text-[13px] font-bold text-[#007185] hover:text-[#9b2c41] hover:underline cursor-pointer leading-snug line-clamp-2">{item.name}</h4>
+                          <h4 className="text-[13px] font-bold text-[#be374f] hover:text-[#9b2c41] hover:underline cursor-pointer leading-snug line-clamp-2">{item.name}</h4>
                           <p className="text-sm font-bold text-zinc-900 mt-1">د.أ {parseFloat(item.price || 0).toFixed(2)}</p>
                         </div>
 
@@ -106,7 +106,7 @@ export default function CartDrawer() {
                               <span className="text-[9px] font-bold text-amber-600 uppercase">وصلت لأقصى كمية</span>
                             )}
                           </div>
-                          <button onClick={() => removeFromCart(item.id, item.variation_id)} className="text-[11px] text-[#007185] hover:text-[#9b2c41] hover:underline font-medium touch-target">
+                          <button onClick={() => removeFromCart(item.id, item.variation_id)} className="text-[11px] text-[#be374f] hover:text-[#9b2c41] hover:underline font-medium touch-target">
                             حذف
                           </button>
                         </div>
@@ -124,7 +124,7 @@ export default function CartDrawer() {
           <div className="bg-white p-5 border-t border-zinc-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] shrink-0 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-zinc-600">المجموع ({itemCount} عناصر):</span>
-              <span className="text-lg font-bold text-[#B12704]">د.أ {cartTotal.toFixed(2)}</span>
+              <span className="text-lg font-bold text-[#be374f]">د.أ {cartTotal.toFixed(2)}</span>
             </div>
 
             <div className="space-y-2">

@@ -71,7 +71,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[600px] overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#e77600]/10 rounded-lg text-[#e77600]">
+              <div className="p-2 bg-[#be374f]/10 rounded-lg text-[#be374f]">
                  <Percent size={20} />
               </div>
               <h2 className="text-[18px] font-bold text-zinc-900">Create New Coupon</h2>
@@ -90,7 +90,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                    value={formData.code}
                    onChange={e => setFormData({...formData, code: e.target.value.toUpperCase()})}
                    placeholder="E.G. SUMMER2026"
-                   className="w-full h-[42px] px-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] font-bold uppercase outline-none focus:border-[#e77600] focus:bg-white transition-all shadow-inner"
+                   className="w-full h-[42px] px-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] font-bold uppercase outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner"
                    required
                  />
                  <p className="text-[11px] text-zinc-400">Customers enter this code at checkout.</p>
@@ -101,7 +101,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                  <select 
                    value={formData.discount_type}
                    onChange={e => setFormData({...formData, discount_type: e.target.value})}
-                   className="w-full h-[42px] px-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#e77600] focus:bg-white transition-all shadow-sm"
+                   className="w-full h-[42px] px-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-sm"
                  >
                     <option value="percent">Percentage Discount (%)</option>
                     <option value="fixed_cart">Fixed Amount Discount (JOD)</option>
@@ -120,7 +120,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                       value={formData.amount}
                       onChange={e => setFormData({...formData, amount: e.target.value})}
                       placeholder="0.00"
-                      className="w-full h-[42px] pl-12 pr-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] font-bold outline-none focus:border-[#e77600] focus:bg-white transition-all shadow-inner"
+                      className="w-full h-[42px] pl-12 pr-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] font-bold outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner"
                       required
                     />
                  </div>
@@ -134,7 +134,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                       type="date" 
                       value={formData.date_expires}
                       onChange={e => setFormData({...formData, date_expires: e.target.value})}
-                      className="w-full h-[42px] pl-12 pr-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#e77600] focus:bg-white transition-all shadow-inner"
+                      className="w-full h-[42px] pl-12 pr-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner"
                     />
                  </div>
               </div>
@@ -146,7 +146,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                 value={formData.description}
                 onChange={e => setFormData({...formData, description: e.target.value})}
                 placeholder="What is this coupon for?"
-                className="w-full h-[80px] p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#e77600] focus:bg-white transition-all shadow-inner resize-none"
+                className="w-full h-[80px] p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner resize-none"
               />
            </div>
 
@@ -157,7 +157,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                     id="individual"
                     checked={formData.individual_use}
                     onChange={e => setFormData({...formData, individual_use: e.target.checked})}
-                    className="w-4 h-4 accent-[#e77600]"
+                    className="w-4 h-4 accent-[#be374f]"
                   />
                   <label htmlFor="individual" className="text-[13px] font-medium text-zinc-600">Individual use only</label>
                </div>
@@ -174,7 +174,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                           type="checkbox" 
                           checked={formData.product_ids.includes(p.id)}
                           onChange={() => toggleProduct(p.id)}
-                          className="w-4 h-4 accent-[#e77600] rounded"
+                          className="w-4 h-4 accent-[#be374f] rounded"
                         />
                         <span className="text-[13px] text-zinc-600 group-hover:text-zinc-900 transition-colors">{p.name}</span>
                      </label>
@@ -203,7 +203,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="flex-[2] h-[48px] bg-[#FFD814] hover:bg-[#F7CA00] text-zinc-900 border border-[#FCD200] rounded-xl text-[14px] font-black shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-[2] h-[48px] bg-brand hover:bg-brand-dark text-white border-brand rounded-xl text-[14px] font-black shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                  {loading ? <Loader size="sm" text="" /> : <Save size={18} />}
                  Create Coupon

@@ -87,9 +87,9 @@ export default function AccountSidebar({ user, customerName, logout, isVendor, v
       <nav className="space-y-0.5">
         {isVendor && (
           <div className="mb-2 pb-2 border-b border-gray-100">
-            <Link href="/merchant/dashboard" className="w-full flex items-center justify-between px-3 py-2.5 rounded-md text-[14px] transition-all group hover:bg-[#FFD700]/10 font-bold text-[#c45500]">
+            <Link href="/merchant/dashboard" className="w-full flex items-center justify-between px-3 py-2.5 rounded-md text-[14px] transition-all group hover:bg-[#FFD700]/10 font-bold text-[#8f2d4a]">
               <div className="flex items-center gap-3">
-                <Store size={19} strokeWidth={2} className="text-[#c45500]" />
+                <Store size={19} strokeWidth={2} className="text-[#8f2d4a]" />
                 <span>لوحة تحكم التاجر</span>
               </div>
             </Link>

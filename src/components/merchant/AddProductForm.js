@@ -592,7 +592,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                 name="virtual"
                 checked={formData.virtual}
                 onChange={handleInputChange}
-                className="w-4 h-4 accent-[#e77600]"
+                className="w-4 h-4 accent-[#be374f]"
               />
               <label htmlFor="virtual" className="text-[13px] font-medium text-zinc-700 cursor-pointer">Virtual</label>
             </div>
@@ -603,7 +603,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                 name="downloadable"
                 checked={formData.downloadable}
                 onChange={handleInputChange}
-                className="w-4 h-4 accent-[#e77600]"
+                className="w-4 h-4 accent-[#be374f]"
               />
               <label htmlFor="downloadable" className="text-[13px] font-medium text-zinc-700 cursor-pointer">Downloadable</label>
             </div>
@@ -660,7 +660,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.g. Premium Leather Wallet"
-                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] transition-all shadow-inner"
+                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] transition-all shadow-inner"
                     />
                   </div>
 
@@ -670,7 +670,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       name="type"
                       value={formData.type}
                       onChange={handleInputChange}
-                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all"
+                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all"
                     >
                       <option value="simple">Simple Product</option>
                       <option value="variable">Variable Product</option>
@@ -687,7 +687,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           value={formData.external_url}
                           onChange={handleInputChange}
                           placeholder="https://..."
-                          className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600]"
+                          className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f]"
                         />
                       </div>
                       <div className="space-y-2">
@@ -697,7 +697,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           value={formData.button_text}
                           onChange={handleInputChange}
                           placeholder="Buy product"
-                          className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600]"
+                          className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f]"
                         />
                       </div>
                     </div>
@@ -735,7 +735,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       name="sku"
                       value={formData.sku}
                       onChange={handleInputChange}
-                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner"
+                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                     />
                   </div>
 
@@ -746,7 +746,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       name="manage_stock"
                       checked={formData.manage_stock}
                       onChange={handleInputChange}
-                      className="w-4 h-4 accent-[#e77600]"
+                      className="w-4 h-4 accent-[#be374f]"
                     />
                     <label htmlFor="manage_stock" className="text-[13px] font-bold text-zinc-700 cursor-pointer select-none">
                       Manage stock level (quantity)
@@ -761,7 +761,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         name="stock_quantity"
                         value={formData.stock_quantity}
                         onChange={handleInputChange}
-                        className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner"
+                        className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                       />
                     </div>
                   )}
@@ -782,7 +782,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                             value={status.id}
                             checked={formData.stock_status === status.id}
                             onChange={handleInputChange}
-                            className="w-4 h-4 accent-[#e77600]"
+                            className="w-4 h-4 accent-[#be374f]"
                           />
                           <label htmlFor={status.id} className="text-[13px] text-zinc-700 cursor-pointer">{status.label}</label>
                         </div>
@@ -797,7 +797,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       name="sold_individually"
                       checked={formData.sold_individually}
                       onChange={handleInputChange}
-                      className="w-4 h-4 accent-[#e77600]"
+                      className="w-4 h-4 accent-[#be374f]"
                     />
                     <label htmlFor="sold_individually" className="text-[13px] font-bold text-zinc-700 cursor-pointer select-none">
                       Sold individually (Limit purchases to 1 item per order)
@@ -821,7 +821,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         value={formData.regular_price || ""}
                         onChange={handleInputChange}
                         placeholder="0.00"
-                        className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] font-bold outline-none focus:border-[#e77600] transition-all shadow-inner"
+                        className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] font-bold outline-none focus:border-[#be374f] transition-all shadow-inner"
                       />
                       {formData.type === "variable" && (
                         <p className="text-[11px] text-zinc-500 italic">This price will be used for any variations you generate below.</p>
@@ -890,7 +890,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
-                        <ImageIcon size={18} className="text-[#e77600]" />
+                        <ImageIcon size={18} className="text-[#be374f]" />
                         Main Product Image
                       </h3>
                       {formData.images.length > 0 && (
@@ -927,7 +927,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         )}
                         {uploadingMain && (
                           <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
-                            <Loader2 size={24} className="text-[#e77600] animate-spin" />
+                            <Loader2 size={24} className="text-[#be374f] animate-spin" />
                           </div>
                         )}
                       </div>
@@ -950,7 +950,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                     <div className="grid grid-cols-4 gap-4">
                       {/* Upload Placeholder */}
                       <label className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
-                        uploadingGallery ? "bg-zinc-50 border-zinc-200 cursor-not-allowed" : "hover:bg-zinc-50 border-zinc-200 hover:border-[#e77600] hover:bg-zinc-50"
+                        uploadingGallery ? "bg-zinc-50 border-zinc-200 cursor-not-allowed" : "hover:bg-zinc-50 border-zinc-200 hover:border-[#be374f] hover:bg-zinc-50"
                       }`}>
                         {uploadingGallery ? <Loader2 size={24} className="text-zinc-300 animate-spin" /> : <Plus size={24} className="text-zinc-300" />}
                         <span className="text-[11px] font-bold text-zinc-400">{uploadingGallery ? "Uploading..." : "Add Gallery Images"}</span>
@@ -996,7 +996,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           placeholder="Add new category..."
                           value={newCatName}
                           onChange={(e) => setNewCatName(e.target.value)}
-                          className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#e77600]"
+                          className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f]"
                         />
                         <button 
                           type="button"
@@ -1034,7 +1034,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           placeholder="Add new tag..."
                           value={newTagName}
                           onChange={(e) => setNewTagName(e.target.value)}
-                          className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#e77600]"
+                          className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f]"
                         />
                         <button 
                           type="button"
@@ -1079,7 +1079,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           placeholder="Add new brand (e.g. Zara)..."
                           value={newBrandName}
                           onChange={(e) => setNewBrandName(e.target.value)}
-                          className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#e77600]"
+                          className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f]"
                         />
                         <button 
                           type="button"
@@ -1152,7 +1152,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       name="weight"
                       value={formData.weight || ""}
                       onChange={handleInputChange}
-                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner"
+                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                     />
                   </div>
                   <div className="space-y-4">
@@ -1163,21 +1163,21 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                          name="dimensions.length"
                          value={formData.dimensions.length}
                          onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, length: e.target.value } }))}
-                         className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner"
+                         className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                        />
                        <input 
                          placeholder="Width"
                          name="dimensions.width"
                          value={formData.dimensions.width}
                          onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, width: e.target.value } }))}
-                         className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner"
+                         className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                        />
                        <input 
                          placeholder="Height"
                          name="dimensions.height"
                          value={formData.dimensions.height}
                          onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, height: e.target.value } }))}
-                         className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner"
+                         className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                        />
                     </div>
                   </div>
@@ -1272,7 +1272,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       value={formData.purchase_note}
                       onChange={handleInputChange}
                       rows={4}
-                      className="w-full p-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner resize-none"
+                      className="w-full p-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner resize-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1282,7 +1282,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       name="menu_order"
                       value={formData.menu_order}
                       onChange={handleInputChange}
-                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#e77600] transition-all shadow-inner"
+                      className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                     />
                   </div>
                   <div className="flex items-center gap-3 p-4 bg-zinc-50 border border-zinc-200 rounded-lg">
@@ -1292,7 +1292,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       name="reviews_allowed"
                       checked={formData.reviews_allowed}
                       onChange={handleInputChange}
-                      className="w-4 h-4 accent-[#e77600]"
+                      className="w-4 h-4 accent-[#be374f]"
                     />
                     <label htmlFor="reviews_allowed" className="text-[13px] font-bold text-zinc-700 cursor-pointer select-none">
                       Enable reviews
@@ -1308,7 +1308,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           name="return_policy"
                           value={formData.return_policy}
                           onChange={handleInputChange}
-                          className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#e77600] transition-all cursor-pointer"
+                          className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f] transition-all cursor-pointer"
                         >
                           <option value="global">Use Global Store Policy</option>
                           <option value="custom">Custom Policy for this Item</option>
@@ -1326,7 +1326,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                             value={formData.return_period}
                             onChange={handleInputChange}
                             placeholder="e.g. 14"
-                            className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#e77600] transition-all"
+                            className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f] transition-all"
                           />
                         </div>
                       )}
@@ -1386,7 +1386,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                     newAttrs[idx].name = e.target.value;
                                     setFormData(prev => ({ ...prev, attributes: newAttrs }));
                                   }}
-                                  className="w-full h-9 px-3 bg-white border border-zinc-300 rounded text-[13px] outline-none focus:border-[#e77600]"
+                                  className="w-full h-9 px-3 bg-white border border-zinc-300 rounded text-[13px] outline-none focus:border-[#be374f]"
                                 />
                               ) : (
                                 <div className="h-9 px-3 bg-zinc-100 border border-zinc-200 rounded text-[13px] flex items-center text-zinc-500 font-bold">
@@ -1404,7 +1404,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                       newAttrs[idx].visible = e.target.checked;
                                       setFormData(prev => ({ ...prev, attributes: newAttrs }));
                                     }}
-                                    className="accent-[#e77600] w-4 h-4"
+                                    className="accent-[#be374f] w-4 h-4"
                                   />
                                   <span className="text-[12px] text-zinc-700">Visible on the product page</span>
                                 </label>
@@ -1418,7 +1418,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                         newAttrs[idx].variation = e.target.checked;
                                         setFormData(prev => ({ ...prev, attributes: newAttrs }));
                                       }}
-                                      className="accent-[#e77600] w-4 h-4"
+                                      className="accent-[#be374f] w-4 h-4"
                                     />
                                     <span className="text-[12px] text-zinc-700">Used for variations</span>
                                   </label>
@@ -1439,7 +1439,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                     newAttrs[idx].options = val.split("|").map(o => o.trim()).filter(o => o !== "");
                                     setFormData(prev => ({ ...prev, attributes: newAttrs }));
                                   }}
-                                  className="w-full p-3 bg-white border border-zinc-300 rounded text-[13px] outline-none focus:border-[#e77600] min-h-[120px] resize-none"
+                                  className="w-full p-3 bg-white border border-zinc-300 rounded text-[13px] outline-none focus:border-[#be374f] min-h-[120px] resize-none"
                                 />
                               ) : (
                                 <div className="p-3 bg-white border border-zinc-300 rounded min-h-[120px]">

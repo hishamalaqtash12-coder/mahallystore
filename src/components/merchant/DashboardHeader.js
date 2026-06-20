@@ -40,7 +40,7 @@ export default function DashboardHeader() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search products, orders, coupons, settings..."
-          className="w-full h-[31px] bg-white border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] focus:border-[#e77600] transition-all outline-none shadow-inner"
+          className="w-full h-[31px] bg-white border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] focus:border-[#be374f] transition-all outline-none shadow-inner"
         />
         {searchQuery.trim().length > 0 && (
           <div className="absolute left-0 right-0 mt-2 bg-white border border-zinc-200 rounded-lg shadow-xl z-50 overflow-hidden divide-y divide-zinc-100 max-h-[350px] overflow-y-auto animate-in slide-in-from-top-1 duration-150">

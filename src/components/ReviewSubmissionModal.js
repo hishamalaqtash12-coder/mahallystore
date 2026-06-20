@@ -102,7 +102,7 @@ export default function ReviewSubmissionModal({ isOpen, onClose, order, user, us
                       <button 
                         key={idx}
                         onClick={() => handleSelectProduct(item)}
-                        className="flex items-center gap-4 p-4 border border-zinc-200 rounded-lg hover:border-[#e77600] hover:bg-orange-50/30 transition-all text-left group"
+                        className="flex items-center gap-4 p-4 border border-zinc-200 rounded-lg hover:border-brand hover:bg-brand-light/30 transition-all text-left group"
                       >
                          <div className="w-16 h-16 bg-white border border-zinc-100 rounded-md overflow-hidden shrink-0">
                             {item.image?.src ? (
@@ -115,7 +115,7 @@ export default function ReviewSubmissionModal({ isOpen, onClose, order, user, us
                             <p className="text-[14px] font-bold text-zinc-900 line-clamp-1">{item.name}</p>
                             <p className="text-[12px] text-zinc-400">Sold by {item.meta_data?.find(m => m.key === "merchant_name")?.value || "Mahally Partner"}</p>
                          </div>
-                         <ChevronRight size={18} className="text-zinc-300 group-hover:text-[#e77600]" />
+                         <ChevronRight size={18} className="text-zinc-300 group-hover:text-brand" />
                       </button>
                     ))}
                   </div>
@@ -143,7 +143,7 @@ export default function ReviewSubmissionModal({ isOpen, onClose, order, user, us
                         </button>
                       ))}
                       {rating > 0 && (
-                        <span className="ml-2 text-[14px] font-bold text-[#c45500]">
+                        <span className="ml-2 text-[14px] font-bold text-brand-dark">
                           {rating === 5 ? 'I love it!' : rating === 4 ? 'I like it' : rating === 3 ? 'It\'s okay' : rating === 2 ? 'I don\'t like it' : 'I hate it'}
                         </span>
                       )}
@@ -157,7 +157,7 @@ export default function ReviewSubmissionModal({ isOpen, onClose, order, user, us
                      value={reviewText}
                      onChange={(e) => setReviewText(e.target.value)}
                      placeholder="What did you like or dislike? What was the quality like?"
-                     className="w-full min-h-[150px] p-4 border border-zinc-300 rounded-md text-[15px] outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] transition-all"
+                     className="w-full min-h-[150px] p-4 border border-zinc-300 rounded-md text-[15px] outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                    />
                 </div>
 
@@ -184,7 +184,7 @@ export default function ReviewSubmissionModal({ isOpen, onClose, order, user, us
                <button 
                  onClick={handleSubmit}
                  disabled={submitting || rating === 0 || !reviewText.trim()}
-                 className="h-10 px-8 bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] rounded-md text-[14px] font-bold shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
+                 className="h-10 px-8 bg-brand hover:bg-brand-dark border border-brand text-white rounded-md text-[14px] font-bold shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
                >
                   {submitting && <Loader2 size={16} className="animate-spin" />}
                   Submit Review

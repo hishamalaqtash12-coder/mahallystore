@@ -44,7 +44,7 @@ export default function ProductCountdown({ endDate }) {
   if (!timeLeft) return null;
 
   return (
-    <div className="flex items-center gap-1.5 text-[#CC0C39] font-medium text-[13px] bg-[#CC0C39]/10 px-2.5 py-1 rounded-sm w-fit">
+    <div className="flex items-center gap-1.5 text-[#be374f] font-medium text-[13px] bg-[#be374f]/10 px-2.5 py-1 rounded-sm w-fit">
       <Clock size={14} />
       <span>Ends in: {timeLeft}</span>
     </div>

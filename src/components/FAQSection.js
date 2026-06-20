@@ -40,12 +40,12 @@ export default function FAQSection() {
             onClick={() => setOpenIndex(openIndex === i ? null : i)}
             className="w-full flex items-center justify-between py-4 text-left group transition-all"
           >
-            <span className={`text-[14px] font-medium transition-colors ${openIndex === i ? 'text-[#c45500] font-bold' : 'text-zinc-700 group-hover:text-[#c45500]'}`}>
+            <span className={`text-[14px] font-medium transition-colors ${openIndex === i ? 'text-[#8f2d4a] font-bold' : 'text-zinc-700 group-hover:text-[#8f2d4a]'}`}>
               {faq.q}
             </span>
             <ChevronDown 
               size={18} 
-              className={`text-zinc-400 transition-transform duration-200 ${openIndex === i ? 'rotate-180 text-[#c45500]' : ''}`} 
+              className={`text-zinc-400 transition-transform duration-200 ${openIndex === i ? 'rotate-180 text-[#8f2d4a]' : ''}`} 
             />
           </button>
           

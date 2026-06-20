@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter, usePathname } from "@/i18n/routing";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -59,7 +60,10 @@ import UserAvatar from "@/components/UserAvatar";
 const megaCacheGlobal = {};
 
 export default function Header() {
+  const t = useTranslations('Header');
+  const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
   const { cart, setIsCartOpen, addToCart } = useCart();
   const { user, customerName, isVendor, isApprovedVendor, isAdmin, logout, messagingEnabled, wooId, loading: authLoading, avatarUrl, avatarBgColor } = useAuth();
   const { wishlistIds } = useWishlist();
@@ -303,7 +307,7 @@ export default function Header() {
             onClick={() => setShowLocationModal(true)}
             className="hidden lg:flex order-2 flex-col p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer ml-2 shrink-0"
           >
-            <span className="text-zinc-500 text-[12px] leading-none ml-5">التوصيل إلى</span>
+            <span className="text-zinc-500 text-[12px] leading-none ml-5">{t("deliveryTo")}</span>
             <div className="flex items-center gap-1 leading-none mt-1 text-zinc-900">
               <MapPin size={15} className="text-zinc-900" />
               <span className="text-[14px] font-bold">{GOVERNORATES_MAP_AR[governorate] || governorate}</span>
@@ -311,7 +315,7 @@ export default function Header() {
           </div>
 
           <div ref={searchRef} className="order-last lg:order-3 w-full lg:w-auto lg:flex-1 flex flex-col relative lg:ml-2 group z-[100]">
-            <form onSubmit={handleSearch} className={`flex h-10 w-full rounded-md transition-shadow relative bg-white border border-zinc-300 ${showSuggestions ? 'ring-[3px] ring-[#febd69] border-[#febd69]' : ''}`}>
+            <form onSubmit={handleSearch} className={`flex h-10 w-full rounded-md transition-shadow relative bg-white border border-zinc-300 ${showSuggestions ? 'ring-[3px] ring-brand/30 border-brand' : ''}`}>
               <div className="relative shrink-0 h-full flex items-center bg-[#f3f3f3] hover:bg-[#dadada] transition-colors border-l border-zinc-300 rounded-r-md w-[75px] sm:w-[110px]">
                 <select
                   value={selectedCategory}
@@ -319,7 +323,7 @@ export default function Header() {
                   className="h-full w-full bg-transparent text-[#555] text-[11px] sm:text-[12px] pl-5 pr-2 sm:pl-6 sm:pr-3 outline-none cursor-pointer font-bold text-zinc-700 appearance-none text-right"
                   aria-label="اختر القسم"
                 >
-                  <option value="All">الأقسام</option>
+                  <option value="All">{t("categories")}</option>
                   {categories.map(c => (
                     <option key={c.id} value={c.slug}>{decodeHtml(c.name)}</option>
                   ))}
@@ -328,8 +332,8 @@ export default function Header() {
                   <ChevronDown size={14} />
                 </div>
               </div>
-              <input type="text" placeholder="ابحث في محلي" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }} onFocus={() => { setShowSuggestions(true); setIsCategoryOpen(false); }} className="flex-1 px-3 sm:px-4 text-zinc-900 outline-none h-full text-[14px] sm:text-[15px] bg-white w-0 min-w-0" />
-              <button type="submit" className="bg-[#febd69] hover:bg-[#f3a847] w-[45px] flex items-center justify-center text-zinc-900 transition-colors shrink-0 rounded-l-md">
+              <input type="text" placeholder={t("searchPlaceholder")} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }} onFocus={() => { setShowSuggestions(true); setIsCategoryOpen(false); }} className="flex-1 px-3 sm:px-4 text-zinc-900 outline-none h-full text-[14px] sm:text-[15px] bg-white w-0 min-w-0" />
+              <button type="submit" className="bg-brand hover:bg-brand-dark w-[45px] flex items-center justify-center text-white transition-colors shrink-0 rounded-l-md">
                 {isSearching ? <div className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" /> : <Search size={24} />}
               </button>
             </form>
@@ -344,14 +348,14 @@ export default function Header() {
                       </Link>
                     ))}
                   </div>
-                ) : (!isSearching && <div className="p-4 text-zinc-400 text-sm italic">لا توجد نتائج</div>)}
+                ) : (!isSearching && <div className="p-4 text-zinc-400 text-sm italic">{t("noResults")}</div>)}
               </div>
             )}
           </div>
 
           <div className="order-2 lg:order-4 ml-auto lg:ml-0 relative flex items-center gap-1 sm:gap-2 lg:gap-4">
             <div
-              className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-900/40 border-blue-500/50 ring-1 ring-blue-500/30' : (isVendor ? 'bg-[#FFD700]/10 border-[#FFD700]/30 ring-1 ring-[#FFD700]/20' : '')}`}
+              className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-900/40 border-blue-500/50 ring-1 ring-blue-500/30' : (isVendor ? 'bg-brand-light/40 border-brand-light/30 ring-1 ring-brand-light/20' : '')}`}
               onMouseEnter={() => { if (user && window.innerWidth >= 640) setIsAccountMenuOpen(true); }}
               onMouseLeave={() => setIsAccountMenuOpen(false)}
               onClick={() => {
@@ -368,18 +372,18 @@ export default function Header() {
                 </div>
               ) : (
                 <>
-                  <span className={`text-[10px] sm:text-[12px] leading-none hidden sm:flex items-center gap-1 ${isAdmin ? 'text-blue-400 font-bold' : (isApprovedVendor ? 'text-[#c45500] font-bold' : 'text-zinc-500')}`}>
+                  <span className={`text-[10px] sm:text-[12px] leading-none hidden sm:flex items-center gap-1 ${isAdmin ? 'text-blue-400 font-bold' : (isApprovedVendor ? 'text-brand font-bold' : 'text-zinc-500')}`}>
                     {isAdmin && <ShieldCheck size={12} />}
                     <span>
                       {isAdmin ? `لوحة المشرف (${customerName || 'المشرف'})` : (isApprovedVendor ? `بوابة البائع (${customerName || 'التاجر'})` : (user ? `مرحبًا، ${customerName || user.displayName || 'العميل'}` : 'تسجيل الدخول'))}
                     </span>
                   </span>
                   <div className="hidden sm:flex items-center gap-1 leading-none mt-1 text-zinc-900">
-                    <span className={`text-[14px] font-bold ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-[#c45500]' : '')}`}>{isVendor ? 'لوحة التحكم' : 'الطلبات والحساب'}</span>
-                    {user && <ChevronDown size={12} className={`mt-1 ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-[#c45500]' : 'text-zinc-500')}`} />}
+                    <span className={`text-[14px] font-bold ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : '')}`}>{isVendor ? 'لوحة التحكم' : 'الطلبات والحساب'}</span>
+                    {user && <ChevronDown size={12} className={`mt-1 ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : 'text-zinc-500')}`} />}
                   </div>
                   <div className="sm:hidden flex items-center justify-center text-zinc-900 p-0.5">
-                    <UserCircle size={24} className={isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-[#c45500]' : 'text-zinc-900')} />
+                    <UserCircle size={24} className={isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : 'text-zinc-900')} />
                   </div>
                 </>
               )}
@@ -413,7 +417,7 @@ export default function Header() {
                         )}
                         {(isApprovedVendor && !isAdmin) && (
                           <>
-                            <li><Link href="/merchant/dashboard" className="flex items-center gap-3.5 hover:bg-[#FFD700]/10 text-[#c45500] font-bold py-2.5 px-3 rounded-md transition-colors"><Store size={20} strokeWidth={1.5} className="text-[#c45500]" /> لوحة البائع</Link></li>
+                            <li><Link href="/merchant/dashboard" className="flex items-center gap-3.5 hover:bg-brand-light text-brand font-bold py-2.5 px-3 rounded-md transition-colors"><Store size={20} strokeWidth={1.5} className="text-brand" /> لوحة البائع</Link></li>
                             <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><PlusCircle size={18} strokeWidth={1.5} className="text-emerald-500" /> إضافة منتج جديد</Link></li>
                             <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Package size={18} strokeWidth={1.5} className="text-zinc-500" /> المنتجات</Link></li>
                             <li><Link href="/merchant/dashboard/inventory" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Boxes size={18} strokeWidth={1.5} className="text-zinc-500" /> المخزون</Link></li>
@@ -442,21 +446,21 @@ export default function Header() {
                     {/* Left Side: Browsing History */}
                     <div className="hidden sm:flex w-[280px] h-full bg-white border-r border-zinc-100 p-5 flex-col relative z-10">
                       <div className="flex justify-between items-center mb-4 shrink-0">
-                        <Link href="/account/recently-viewed" className="font-medium text-[16px] flex items-center gap-1 hover:text-[#f77f00] transition-colors">سجل التصفح <ChevronLeft size={16} /></Link>
+                        <Link href="/account/recently-viewed" className="font-medium text-[16px] flex items-center gap-1 hover:text-brand transition-colors">سجل التصفح <ChevronLeft size={16} /></Link>
                       </div>
                       {recentViews.length > 0 ? (
                         <div className="space-y-4 flex-1 overflow-y-auto pr-1.5 custom-scrollbar pb-2">
-                          {recentViews.slice(0, 10).map((p) => (
+                           {recentViews.slice(0, 10).map((p) => (
                             <Link href={`/product/${p.slug}`} key={p.id} className="flex items-center gap-3 group relative block">
                               <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded relative shrink-0 overflow-hidden"><Image src={p.image || p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Recently viewed product"} fill className="object-cover" /></div>
                               <div className="flex flex-col flex-1 overflow-hidden">
                                 <p className="text-[13px] text-zinc-800 line-clamp-1 group-hover:underline transition-colors leading-tight mb-1">{p.name}</p>
                                 {p.stock_status === 'outofstock' ? (
-                                  <p className="text-[11px] text-red-600 font-medium mb-0.5">غير متوفر</p>
+                                  <p className="text-[11px] text-red-600 font-medium mb-0.5">{t("outOfStock")}</p>
                                 ) : (p.stock_quantity > 0 && p.stock_quantity <= 5) ? (
-                                  <p className="text-[11px] text-[#f77f00] font-medium mb-0.5">يكاد ينفد (يتبقى فقط {p.stock_quantity})</p>
+                                  <p className="text-[11px] text-brand-dark font-medium mb-0.5">يكاد ينفد (يتبقى فقط {p.stock_quantity})</p>
                                 ) : (
-                                  <p className="text-[11px] text-green-600 font-medium mb-0.5">متوفر</p>
+                                  <p className="text-[11px] text-green-600 font-medium mb-0.5">{t("inStock")}</p>
                                 )}
                                 <div className="flex items-center justify-between">
                                   <p className="text-[16px] font-bold">{p.price || "0.00"} د.أ</p>
@@ -469,7 +473,7 @@ export default function Header() {
                                         setIsCartOpen(true);
                                       }}
                                       className="w-7 h-7 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors cursor-pointer animate-fade-in"
-                                      title="أضف إلى السلة"
+                                      title={t("addToCart")}
                                     >
                                       <ShoppingCart size={14} className="text-zinc-700" />
                                     </button>
@@ -480,7 +484,7 @@ export default function Header() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-[13px] text-zinc-500 py-4 text-center">لا توجد عناصر تمت مشاهدتها مؤخرًا.</p>
+                        <p className="text-[13px] text-zinc-500 py-4 text-center">{t("noRecentItems")}</p>
                       )}
                     </div>
                   </div>
@@ -492,9 +496,9 @@ export default function Header() {
               <Link href="/messages" className="flex items-end p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer relative shrink-0">
                 <div className="flex items-center gap-1 leading-none mt-1 sm:mt-1 relative">
                   <MessageSquare size={22} className="text-zinc-900 sm:w-5 sm:h-5" />
-                  <span className="text-[11px] sm:text-[14px] font-bold text-zinc-900 mt-1">الرسائل</span>
+                  <span className="text-[11px] sm:text-[14px] font-bold text-zinc-900 mt-1">{t("messages")}</span>
                   {unreadMessages > 0 && (
-                    <span className="absolute -top-2 left-3 bg-[#e77600] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-[#131921]">
+                    <span className="absolute -top-2 left-3 bg-brand text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white">
                       {unreadMessages}
                     </span>
                   )}
@@ -505,19 +509,26 @@ export default function Header() {
             <Link href="/wishlist" className="flex items-end p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer relative shrink-0">
               <div className="flex items-center gap-1 leading-none mt-1 sm:mt-1 relative">
                 <Heart size={22} className="text-zinc-900 sm:w-5 sm:h-5" />
-                <span className="text-[11px] sm:text-[14px] font-bold text-zinc-900 mt-1">المفضلة</span>
+                <span className="text-[11px] sm:text-[14px] font-bold text-zinc-900 mt-1">{t("wishlist")}</span>
                 {(wishlistIds?.size > 0) && (
-                  <span className="absolute -top-2 left-3 bg-[#e77600] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-[#131921]">
+                  <span className="absolute -top-2 left-3 bg-brand text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white">
                     {wishlistIds.size}
                   </span>
                 )}
               </div>
             </Link>
 
+            <button 
+              onClick={() => router.replace(pathname, { locale: locale === 'ar' ? 'en' : 'ar' })}
+              className="flex items-center justify-center p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm font-bold text-[14px] text-zinc-900 shrink-0"
+            >
+              <Globe size={18} className="ml-1 sm:mr-1" />
+              {locale === 'ar' ? 'EN' : 'AR'}
+            </button>
             {!isVendor && (
               <button onClick={() => setIsCartOpen(true)} className="flex items-end p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer relative shrink-0 group touch-target text-zinc-900">
                 <div className="relative group-hover:scale-105 transition-transform flex items-center justify-center w-[36px] sm:w-[40px] h-[30px] sm:h-[34px]">
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 text-[#f3a847] text-[15px] sm:text-[16px] font-bold z-10 leading-none">{cartItemsCount}</span>
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 text-brand text-[15px] sm:text-[16px] font-bold z-10 leading-none">{cartItemsCount}</span>
                   <svg width="34" height="24" viewBox="0 0 38 26" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-2 sm:mt-3 w-8 sm:w-[34px]">
                     <path d="M14.5 25C15.8807 25 17 23.8807 17 22.5C17 21.1193 15.8807 20 14.5 20C13.1193 20 12 21.1193 12 22.5C12 23.8807 13.1193 25 14.5 25Z" fill="currentColor" />
                     <path d="M28.5 25C29.8807 25 31 23.8807 31 22.5C31 21.1193 29.8807 20 28.5 20C27.1193 20 26 21.1193 26 22.5C26 23.8807 27.1193 25 28.5 25Z" fill="currentColor" />
@@ -525,24 +536,24 @@ export default function Header() {
                     <path d="M10 13H33L36 3H8.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-                <span className="text-[13px] sm:text-[14px] font-bold mb-1 hidden lg:block ml-1">السلة</span>
+                <span className="text-[13px] sm:text-[14px] font-bold mb-1 hidden lg:block ml-1">{t("cart")}</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Sub Nav Bar */}
-        <div className="bg-[#232f3e] relative flex items-center h-[40px]">
+        <div className="bg-brand-dark relative flex items-center h-[40px]">
           {/* Scroll Right Button (Go Back) */}
           <button
             onClick={() => document.getElementById('sub-nav')?.scrollBy({ left: 150, behavior: 'smooth' })}
-            className="absolute right-0 top-0 bottom-0 w-8 bg-[#232f3e] flex items-center justify-center sm:hidden z-10 text-white shadow-[-4px_0_12px_rgba(35,47,62,1)]"
+            className="absolute right-0 top-0 bottom-0 w-8 bg-brand-dark flex items-center justify-center sm:hidden z-10 text-white shadow-[-4px_0_12px_rgba(143,45,74,0.5)]"
             aria-label="التمرير لليمين"
           >
             <ChevronRight size={18} />
           </button>
 
-          <div id="sub-nav" className="flex-1 text-white px-8 sm:px-4 h-full flex items-center gap-x-2 sm:gap-x-4 text-[13px] sm:text-[14px] overflow-x-auto no-scrollbar whitespace-nowrap border-b border-[#131921] sm:border-0">
+          <div id="sub-nav" className="flex-1 text-white px-8 sm:px-4 h-full flex items-center gap-x-2 sm:gap-x-4 text-[13px] sm:text-[14px] overflow-x-auto no-scrollbar whitespace-nowrap border-b border-brand-dark sm:border-0">
             {/* Mobile-only Categories drawer toggle (hides on desktop lg) */}
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -563,10 +574,10 @@ export default function Header() {
 
             <div className="flex items-center gap-1 lg:gap-2 flex-nowrap shrink-0">
               {[
-                { label: "المتاجر", href: "/vendors" },
-                { label: "منتجات مميزة", href: "/featured-products" },
-                { label: "المساعدة والدعم", href: "/help" },
-                { label: "تصفح جميع المنتجات", href: "/browse" }
+                { label: t("vendors"), href: "/vendors" },
+                { label: t("featuredProducts"), href: "/featured-products" },
+                { label: t("helpAndSupport"), href: "/help" },
+                { label: t("browseAllProducts"), href: "/browse" }
               ].map(link => (
                 <Link key={link.label} href={link.href} className="p-1.5 sm:p-2 border border-transparent hover:border-white rounded-sm shrink-0">{link.label}</Link>
               ))}
@@ -576,8 +587,8 @@ export default function Header() {
           {/* Scroll Left Button (See More) */}
           <button
             onClick={() => document.getElementById('sub-nav')?.scrollBy({ left: -150, behavior: 'smooth' })}
-            className="absolute left-0 top-0 bottom-0 w-8 bg-[#232f3e] flex items-center justify-center sm:hidden z-10 text-white shadow-[4px_0_12px_rgba(35,47,62,1)]"
-            aria-label="التمرير لليسار"
+            className="absolute left-0 top-0 bottom-0 w-8 bg-brand-dark flex items-center justify-center sm:hidden z-10 text-white shadow-[4px_0_12px_rgba(143,45,74,0.5)]"
+            aria-label="التمرير ليسار"
           >
             <ChevronLeft size={18} />
           </button>
@@ -591,7 +602,7 @@ export default function Header() {
             <Link
               href={user ? "/account" : "/login"}
               onClick={() => setIsSidebarOpen(false)}
-              className="bg-[#232f3e] text-white p-4 py-5 flex items-center gap-3 shrink-0 hover:bg-[#1a242f] transition-colors"
+              className="bg-brand-dark text-white p-4 py-5 flex items-center gap-3 shrink-0 hover:bg-brand-dark/90 transition-colors"
             >
               <UserCircle size={28} className="text-white" />
               <span className="text-xl font-bold tracking-tight">
@@ -650,7 +661,7 @@ export default function Header() {
                   <MapPin size={18} className="text-zinc-500" />
                   <div className="flex flex-col">
                     <span className="text-[14px] text-zinc-900 font-medium">التوصيل إلى {GOVERNORATES_MAP_AR[governorate] || governorate}</span>
-                    <span className="text-[12px] text-[#007185]">تحديث الموقع</span>
+                    <span className="text-[12px] text-brand hover:underline">تحديث الموقع</span>
                   </div>
                 </button>
               </div>
@@ -663,7 +674,7 @@ export default function Header() {
                   {user ? (
                     <li><button onClick={() => { logout(); setIsSidebarOpen(false); }} className="cursor-pointer px-6 py-3 w-full text-left hover:bg-zinc-100 flex items-center gap-3 text-red-600 font-bold"><LogOut size={18} className="cursor-pointer" /> تسجيل الخروج</button></li>
                   ) : (
-                    <li><Link href="/login" onClick={() => setIsSidebarOpen(false)} className="px-6 py-3 hover:bg-zinc-100 block font-bold text-blue-600">تسجيل الدخول</Link></li>
+                    <li><Link href="/login" onClick={() => setIsSidebarOpen(false)} className="px-6 py-3 hover:bg-zinc-100 block font-bold text-blue-600">{t("login")}</Link></li>
                   )}
                 </ul>
               </div>
@@ -672,7 +683,7 @@ export default function Header() {
           {/* Close button with square border as requested */}
           <button
             onClick={() => { setIsSidebarOpen(false); setIsExpanded(false); }}
-            className="absolute right-[85vw] max-sm:right-[calc(85vw+10px)] sm:right-[380px] top-5 text-white hover:text-[#febd69] transition-all z-[1100] group flex items-center justify-center w-10 h-10 border-2 border-white rounded-md bg-zinc-900/50 hover:bg-zinc-900/80 shadow-2xl"
+            className="absolute right-[85vw] max-sm:right-[calc(85vw+10px)] sm:right-[380px] top-5 text-white hover:text-brand-light transition-all z-[1100] group flex items-center justify-center w-10 h-10 border-2 border-white rounded-md bg-zinc-900/50 hover:bg-zinc-900/80 shadow-2xl"
             aria-label="Close menu"
           >
             <X size={28} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
@@ -685,7 +696,7 @@ export default function Header() {
         <div className="fixed inset-0 z-[1000] flex sm:hidden">
           <div className="absolute inset-0 bg-black/80 animate-in fade-in duration-300" onClick={() => setIsMobileAccountMenuOpen(false)} />
           <div className="relative w-[85vw] max-w-[365px] h-full bg-white animate-in slide-in-from-left duration-300 flex flex-col shadow-2xl overflow-hidden">
-            <div className="bg-[#232f3e] text-white p-4 py-5 flex items-center gap-3 shrink-0">
+            <div className="bg-brand-dark text-white p-4 py-5 flex items-center gap-3 shrink-0">
               <UserAvatar
                 user={user}
                 customerName={customerName}
@@ -711,7 +722,7 @@ export default function Header() {
                 )}
                 {(isApprovedVendor && !isAdmin) && (
                   <>
-                    <li><Link href="/merchant/dashboard" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors text-[#c45500] font-bold"><Store size={20} className="text-[#c45500]" /> لوحة البائع</Link></li>
+                    <li><Link href="/merchant/dashboard" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors text-brand font-bold"><Store size={20} className="text-brand" /> لوحة البائع</Link></li>
                     <li><Link href="/merchant/dashboard/products" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Package size={20} className="text-zinc-500" /> المنتجات</Link></li>
                     <li><Link href="/merchant/dashboard/orders" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><ShoppingCart size={20} className="text-zinc-500" /> الطلبات</Link></li>
                     <li><Link href="/merchant/dashboard/settings" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Settings size={20} className="text-zinc-500" /> إعدادات المتجر</Link></li>
@@ -739,7 +750,7 @@ export default function Header() {
           </div>
           <button
             onClick={() => setIsMobileAccountMenuOpen(false)}
-            className="absolute right-[85vw] max-sm:right-[calc(85vw+10px)] sm:right-[380px] top-5 text-white hover:text-[#febd69] transition-all z-[1100] group flex items-center justify-center w-10 h-10 border-2 border-white rounded-md bg-zinc-900/50 hover:bg-zinc-900/80 shadow-2xl"
+            className="absolute right-[85vw] max-sm:right-[calc(85vw+10px)] sm:right-[380px] top-5 text-white hover:text-brand-light transition-all z-[1100] group flex items-center justify-center w-10 h-10 border-2 border-white rounded-md bg-zinc-900/50 hover:bg-zinc-900/80 shadow-2xl"
             aria-label="Close menu"
           >
             <X size={28} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
@@ -763,7 +774,7 @@ export default function Header() {
                   <button
                     key={gov}
                     onClick={() => { updateGovernorate(gov); setShowLocationModal(false); }}
-                    className={`px-4 py-2 text-[14px] rounded-md border transition-all text-right ${governorate === gov ? 'bg-orange-50 border-orange-400 text-orange-700 font-bold' : 'border-zinc-200 hover:border-orange-400 hover:bg-zinc-50'}`}
+                    className={`px-4 py-2 text-[14px] rounded-md border transition-all text-right ${governorate === gov ? 'bg-brand-light border-brand text-brand-dark font-bold' : 'border-zinc-200 hover:border-brand hover:bg-brand-light/20'}`}
                   >
                     {GOVERNORATES_MAP_AR[gov] || gov}
                   </button>
@@ -771,7 +782,7 @@ export default function Header() {
               </div>
             </div>
             <div className="px-6 py-4 bg-zinc-50 border-t border-zinc-200 text-right">
-              <button onClick={() => setShowLocationModal(false)} className="px-6 py-2 bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] rounded-md text-[13px] font-bold shadow-sm">تم</button>
+              <button onClick={() => setShowLocationModal(false)} className="px-6 py-2 bg-brand hover:bg-brand-dark border-brand text-white rounded-md text-[13px] font-bold shadow-sm">تم</button>
             </div>
           </div>
         </div>

@@ -322,7 +322,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                 <p className="text-zinc-800 font-medium">{totalItems}</p>
               </div>
             </div>
-            <button onClick={handlePrintInvoice} className="print-keep flex items-center gap-1.5 text-[#007185] hover:text-[#c45500] hover:underline text-[13px]">
+            <button onClick={handlePrintInvoice} className="print-keep flex items-center gap-1.5 text-brand hover:text-brand-dark hover:underline text-[13px]">
               <Printer size={14} /> طباعة الفاتورة
             </button>
           </div>
@@ -340,7 +340,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
           {/* Receipt Confirmation */}
           {order.status === "completed" && !isConfirmed && (
-            <div className="bg-[#FFF9E6] border border-[#FFE8A3] rounded-lg p-5 flex items-start gap-4">
+            <div className="bg-brand-light/30 border border-brand-light rounded-lg p-5 flex items-start gap-4">
               <div className="p-2.5 bg-amber-100 rounded-full shrink-0">
                 <Package size={20} className="text-amber-700" />
               </div>
@@ -350,7 +350,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                 <button
                   onClick={handleConfirmReceipt}
                   disabled={confirming}
-                  className="h-[34px] px-5 bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] rounded-md text-[13px] font-bold shadow-sm transition-all flex items-center gap-2 w-fit"
+                  className="h-[34px] px-5 bg-brand hover:bg-brand-dark border border-brand rounded-md text-white text-[13px] font-bold shadow-sm transition-all flex items-center gap-2 w-fit"
                 >
                   {confirming ? <RefreshCw size={14} className="animate-spin" /> : "نعم، أؤكد الاستلام"}
                 </button>
@@ -426,7 +426,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                         {/* Connecting Line */}
                         {!isLast && (
                           <div 
-                            className={`absolute left-[11px] top-[30px] bottom-[-30px] w-[2px] ${isPast ? 'bg-[#c45500]' : 'bg-zinc-200'}`}
+                            className={`absolute left-[11px] top-[30px] bottom-[-30px] w-[2px] ${isPast ? 'bg-brand' : 'bg-zinc-200'}`}
                             style={{ height: 'calc(100% + 10px)' }}
                           />
                         )}
@@ -438,8 +438,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                               <CheckCircle2 size={16} className="text-white" />
                             </div>
                           ) : isCurrent ? (
-                            <div className="w-6 h-6 rounded-full bg-white border-2 border-[#c45500] flex items-center justify-center outline outline-2 outline-offset-2 outline-dashed outline-[#c45500]/60">
-                              <div className="w-2.5 h-2.5 bg-[#c45500] rounded-full" />
+                            <div className="w-6 h-6 rounded-full bg-white border-2 border-brand flex items-center justify-center outline outline-2 outline-offset-2 outline-dashed outline-brand/60">
+                              <div className="w-2.5 h-2.5 bg-brand rounded-full" />
                             </div>
                           ) : (
                             <div className="w-6 h-6 rounded-full bg-white border-2 border-zinc-300 flex items-center justify-center outline outline-2 outline-offset-2 outline-dashed outline-zinc-300">
@@ -470,10 +470,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-[12px] font-bold text-zinc-900 uppercase tracking-wide flex items-center gap-1.5">
-                  <MapPin size={12} className="text-[#e77600]" /> عنوان الشحن
+                  <MapPin size={12} className="text-brand" /> عنوان الشحن
                 </h4>
                 {['pending', 'processing', 'on-hold'].includes(order.status) && !isEditingAddress && (
-                  <button onClick={() => setIsEditingAddress(true)} className="text-[11px] font-bold text-[#007185] hover:underline flex items-center gap-1">
+                  <button onClick={() => setIsEditingAddress(true)} className="text-[11px] font-bold text-brand hover:underline flex items-center gap-1">
                     <Edit2 size={10} /> تعديل
                   </button>
                 )}
@@ -482,14 +482,14 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
               {isEditingAddress ? (
                 <div className="space-y-2 text-[12px] mt-3">
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={addressForm.first_name} onChange={e => setAddressForm(prev => ({...prev, first_name: e.target.value}))} placeholder="الاسم الأول" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-[#e77600]" />
-                    <input value={addressForm.last_name} onChange={e => setAddressForm(prev => ({...prev, last_name: e.target.value}))} placeholder="الاسم الأخير" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-[#e77600]" />
+                    <input value={addressForm.first_name} onChange={e => setAddressForm(prev => ({...prev, first_name: e.target.value}))} placeholder="الاسم الأول" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+                    <input value={addressForm.last_name} onChange={e => setAddressForm(prev => ({...prev, last_name: e.target.value}))} placeholder="الاسم الأخير" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
                   </div>
-                  <input value={addressForm.address_1} onChange={e => setAddressForm(prev => ({...prev, address_1: e.target.value}))} placeholder="العنوان" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-[#e77600]" />
-                  <input value={addressForm.city} onChange={e => setAddressForm(prev => ({...prev, city: e.target.value}))} placeholder="المدينة" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-[#e77600]" />
-                  <input value={addressForm.phone} onChange={e => setAddressForm(prev => ({...prev, phone: e.target.value}))} placeholder="الهاتف" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-[#e77600]" dir="ltr" />
+                  <input value={addressForm.address_1} onChange={e => setAddressForm(prev => ({...prev, address_1: e.target.value}))} placeholder="العنوان" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+                  <input value={addressForm.city} onChange={e => setAddressForm(prev => ({...prev, city: e.target.value}))} placeholder="المدينة" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+                  <input value={addressForm.phone} onChange={e => setAddressForm(prev => ({...prev, phone: e.target.value}))} placeholder="الهاتف" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" dir="ltr" />
                   <div className="flex items-center gap-2 pt-1">
-                    <button onClick={handleSaveAddress} disabled={savingAddress} className="h-7 px-3 bg-[#FFD814] hover:bg-[#F7CA00] rounded text-zinc-900 font-bold border border-[#FCD200]">
+                    <button onClick={handleSaveAddress} disabled={savingAddress} className="h-7 px-3 bg-brand hover:bg-brand-dark rounded text-white font-bold border border-brand shadow-sm transition-all">
                       {savingAddress ? "جاري الحفظ..." : "حفظ"}
                     </button>
                     <button onClick={() => {
@@ -574,7 +574,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                   return (
                     <div key={note.id} className={`flex gap-3 text-[13px] ${isStatus ? "text-zinc-500 italic" : "text-zinc-800"}`}>
                       <div className="pt-0.5 shrink-0">
-                        {isStatus ? <RefreshCw size={13} className="text-zinc-400" /> : <MessageCircle size={13} className="text-[#c45500]" />}
+                        {isStatus ? <RefreshCw size={13} className="text-zinc-400" /> : <MessageCircle size={13} className="text-[#8f2d4a]" />}
                       </div>
                       <div className="flex-1">
                         <p className={isStatus ? "" : "font-medium leading-relaxed"}>{decodeHTMLEntities(note.note)}</p>
@@ -597,10 +597,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                   {/* Vendor Header */}
                   <div className="px-4 py-3 bg-[#f0f2f2] border-b border-zinc-200 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <Store size={18} className="text-[#007185]" />
+                      <Store size={18} className="text-brand" />
                       <h3 className="text-[14px] font-bold text-zinc-900">
                         فاتورة من: {hasRealMerchant ? (
-                          <Link href={`/vendors/${vendor.id}`} className="text-[#007185] hover:text-[#c45500] hover:underline">
+                          <Link href={`/vendors/${vendor.id}`} className="text-brand hover:text-brand-dark hover:underline">
                             {vendor.name}
                           </Link>
                         ) : (
@@ -626,7 +626,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <Link href={`/product/${item.product_id}`} className="text-[13px] font-semibold text-[#007185] hover:text-[#c45500] hover:underline leading-snug block">
+                          <Link href={`/product/${item.product_id}`} className="text-[13px] font-semibold text-brand hover:text-brand-dark hover:underline leading-snug block">
                             {item.name}
                           </Link>
 
@@ -653,7 +653,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
                           {/* Actions */}
                           <div className="flex flex-wrap gap-2 mt-3">
-                            <Link href={`/product/${item.product_id}`} className="h-[28px] px-4 bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center">
+                            <Link href={`/product/${item.product_id}`} className="h-[28px] px-4 bg-brand hover:bg-brand-dark border border-brand text-white rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center">
                               شراء مرة أخرى
                             </Link>
                             {order.status === "completed" && (
@@ -698,7 +698,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
                         {/* Right price */}
                         <div className="text-right shrink-0">
-                          <p className="text-[14px] font-bold text-[#b12704]">JOD {parseFloat(item.total || 0).toFixed(2)}</p>
+                          <p className="text-[14px] font-bold text-brand">JOD {parseFloat(item.total || 0).toFixed(2)}</p>
                           {item.quantity > 1 && (
                             <p className="text-[11px] text-zinc-400">×{item.quantity}</p>
                           )}

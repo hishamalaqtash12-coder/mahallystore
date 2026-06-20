@@ -85,7 +85,7 @@ export default function ReturnRequestModal({ isOpen, onClose, order, user, onSub
         {/* Header */}
         <div className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+            <div className="w-10 h-10 rounded-xl bg-brand-light flex items-center justify-center text-orange-600">
               <ArrowLeft size={20} />
             </div>
             <div>
@@ -121,7 +121,7 @@ export default function ReturnRequestModal({ isOpen, onClose, order, user, onSub
           {/* Reason Selection */}
           <div className="space-y-2">
             <label className="text-[13px] font-bold text-zinc-700 flex items-center gap-2">
-              <AlertCircle size={14} className="text-orange-500" />
+              <AlertCircle size={14} className="text-brand" />
               Reason for Return
             </label>
             <select 
