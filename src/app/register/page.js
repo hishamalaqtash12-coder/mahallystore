@@ -3,9 +3,6 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
   createUserWithEmailAndPassword,
   sendEmailVerification,
   updateProfile,
@@ -59,7 +56,8 @@ function RegisterContent() {
   const [countdown, setCountdown] = useState(0);
   const [confirmationResult, setConfirmationResult] = useState(null);
 
-  const recaptchaRef = useRef(null);
+  const [confirmationResult, setConfirmationResult] = useState(null);
+
   const otpRefs = useRef([]);
 
   useEffect(() => {
@@ -84,45 +82,13 @@ function RegisterContent() {
   }, [step]);
 
   useEffect(() => {
-    return () => {
-      // Delay cleanup slightly so reCAPTCHA async callbacks don't hit null
-      setTimeout(() => {
-        if (recaptchaRef.current) {
-          try {
-            recaptchaRef.current.clear();
-          } catch (e) {
-            // ignore — widget may already be destroyed
-          }
-          recaptchaRef.current = null;
-        }
-      }, 100);
-    };
-  }, []);
-
-  const setupRecaptcha = () => {
-    if (!recaptchaRef.current) {
-      try {
-        recaptchaRef.current = new RecaptchaVerifier(auth, "recaptcha-container", {
-          size: "invisible",
-          callback: (response) => {
-            // reCAPTCHA solved
-          },
-          'expired-callback': () => {
-            // Response expired. Ask user to solve reCAPTCHA again.
-            if (recaptchaRef.current) {
-              recaptchaRef.current.clear();
-              recaptchaRef.current = null;
-            }
-          }
-        });
-      } catch (err) {
-        console.error("Recaptcha init error", err);
-        setError("Security check failed to initialize. Please refresh the page.");
-        return null;
-      }
+    if (step === "phone_otp" || step === "email_otp") {
+      const timer = setTimeout(() => {
+        otpRefs.current[0]?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
     }
-    return recaptchaRef.current;
-  };
+  }, [step]);
 
   // Step 1 → 2: pick role
   const handleRolePick = (role) => {
@@ -203,17 +169,21 @@ function RegisterContent() {
     setError("");
     setLoading(true);
     try {
-      const verifier = setupRecaptcha();
-      const result = await signInWithPhoneNumber(auth, phone, verifier);
-      setConfirmationResult(result);
-      setStep("phone_otp");
-      setCountdown(60);
+      const res = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, action: "send" })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setStep("phone_otp");
+        setCountdown(60);
+      } else {
+        throw new Error(data.error || "Failed to send code.");
+      }
     } catch (err) {
       setError(err.message || "Failed to send OTP.");
-      if (recaptchaRef.current) {
-        try { recaptchaRef.current.clear(); } catch(e) {}
-        recaptchaRef.current = null;
-      }
     } finally {
       setLoading(false);
     }
@@ -314,22 +284,46 @@ function RegisterContent() {
     setError("");
     setLoading(true);
     try {
-      // 1. Sync to DB FIRST so AuthContext doesn't sign out the user upon creation
-      await syncToDB();
+      const res = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code, action: "verify" })
+      });
+      const data = await res.json();
 
-      const res = await confirmationResult.confirm(code);
-      if (res.user) await updateProfile(res.user, { displayName: selectedRole === "vendor" ? storeName : name });
+      if (res.ok) {
+        // 1. Sync to DB FIRST so AuthContext doesn't sign out the user upon creation
+        await syncToDB();
 
-      if (selectedRole === "vendor") {
-        setStep("vendor_pending");
-        // Sign out to prevent 'logged in' state until approved
-        await auth.signOut();
+        const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
+        try {
+          // Since we bypass Firebase Phone Auth, we create an email user using their phone as the email
+          const phoneEmail = `phone_${phone.replace("+", "")}@mahally.jo`;
+          const cred = await createUserWithEmailAndPassword(auth, phoneEmail, password);
+          await updateProfile(cred.user, { displayName: selectedRole === "vendor" ? storeName : name });
+        } catch (fbErr) {
+          if (fbErr.code === "auth/email-already-in-use") {
+            // ignore if they already exist, we just sign them in
+            const { signInWithEmailAndPassword } = await import("firebase/auth");
+            const phoneEmail = `phone_${phone.replace("+", "")}@mahally.jo`;
+            await signInWithEmailAndPassword(auth, phoneEmail, password);
+          } else {
+            throw fbErr;
+          }
+        }
+
+        if (selectedRole === "vendor") {
+          setStep("vendor_pending");
+          await auth.signOut();
+        } else {
+          setStep("success");
+          setTimeout(() => router.replace(redirectTo), 1500);
+        }
       } else {
-        setStep("success");
-        setTimeout(() => router.replace(redirectTo), 1500);
+        setError(data.error || "Invalid verification code.");
       }
-    } catch {
-      setError("Invalid code. Please check and try again.");
+    } catch (err) {
+      setError(err.message || "Failed to verify code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -339,8 +333,6 @@ function RegisterContent() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center pt-8 pb-12">
-      {/* Invisible reCAPTCHA anchor — must stay in DOM at all times */}
-      <div id="recaptcha-container" style={{ position: 'fixed', bottom: 0, left: 0, zIndex: -1, opacity: 0, pointerEvents: 'none' }} />
 
       <div className="w-full max-w-[350px]">
         {/* Logo */}
