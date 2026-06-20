@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Info, Clock, Mail, Store, ChevronDown, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -146,27 +145,15 @@ function LoginContent() {
       const data = await res.json();
 
       if (res.ok) {
-        // Sign in using the WP/Firebase Email mapping
-        const { signInWithEmailAndPassword } = await import("firebase/auth");
+        // Sync WooCommerce session
         try {
-          const phoneEmail = `phone_${phone.replace("+", "")}@mahally.jo`;
-          // Note: Since we don't have the password, if they register via Phone, we use their set password.
-          // BUT wait, login doesn't have the password. We can bypass Firebase auth on login if they verify OTP successfully,
-          // or we can use custom token. For now, since they just verified OTP, we redirect them to home,
-          // but we MUST sign them into Firebase somehow for the client SDK to work.
-          // Because we don't have the password here, we actually need to hit the WP login endpoint to get the auth cookie!
-          
-          // Use our WP API to get the session:
-          const wpRes = await fetch("/api/auth/login", {
+          await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: phone, password: "otp_login" }) // Let WP handle OTP override if implemented
+            body: JSON.stringify({ email: phone, password: "otp_login" })
           });
-          
-          // For Firebase, if we don't have a custom token or password, we might just set the user in AuthContext manually
-          // Actually, if we hit the WP endpoint, AuthContext will read from the WP cookie on refresh.
-        } catch (fbErr) {
-           console.log("Firebase direct sign-in bypassed for OTP");
+        } catch (err) {
+          console.warn("Failed to set session cookie for OTP login");
         }
 
         setStep("success");
@@ -219,24 +206,8 @@ function LoginContent() {
         }
       }
 
-      // 2. WordPress authorized successfully! Now ensure Firebase is synced
-      const { signInWithEmailAndPassword, createUserWithEmailAndPassword } = await import("firebase/auth");
-
-      try {
-        // Try to sign in to Firebase with the same credentials
-        await signInWithEmailAndPassword(auth, loginIdentity, password);
-      } catch (fbErr) {
-        console.warn("Firebase sync info:", fbErr.code);
-        if (fbErr.code === "auth/user-not-found" || fbErr.code === "auth/invalid-credential") {
-          // If user exists in WP but not in Firebase, auto-onboard them
-          try {
-            await createUserWithEmailAndPassword(auth, loginIdentity, password);
-          } catch (createErr) {
-            // If they already exist but with different creds, we've done our best
-            console.error("Firebase auto-onboard failed:", createErr);
-          }
-        }
-      }
+      // 2. WordPress authorized successfully!
+      // (Firebase sync removed completely)
 
       setStep("success");
       setTimeout(() => router.replace(redirectTo), 1500);

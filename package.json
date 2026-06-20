@@ -14,8 +14,6 @@
     "apexcharts": "^5.10.6",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
-    "firebase": "^12.12.1",
-    "firebase-admin": "^13.10.0",
     "graphql-request": "^7.4.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.4",

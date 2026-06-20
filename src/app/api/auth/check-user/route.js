@@ -167,12 +167,11 @@ export async function POST(request) {
     console.error("Check user API error:", error);
     
     // Detect 401 unauthorized WooCommerce REST API keys
-    const errorString = (error.message || "") + (error.code || "") + (error.stack || "");
     const isUnauthorized = 
       error.status === 401 || 
       error.data?.status === 401 || 
-      errorString.includes("401") || 
-      errorString.includes("woocommerce_rest_cannot_view");
+      (error.message || "").includes("401") || 
+      (error.message || "").includes("woocommerce_rest_cannot_view");
 
     if (isUnauthorized) {
       return NextResponse.json(
@@ -189,8 +188,8 @@ export async function POST(request) {
     const isConnectionError = 
       error.code === 'ECONNREFUSED' || 
       error.code === 'ECONNRESET' || 
-      errorString.includes('ECONNREFUSED') ||
-      errorString.includes('network') ||
+      (error.message || "").includes('ECONNREFUSED') ||
+      (error.message || "").includes('network') ||
       (error.errors && error.errors.some(e => e.code === 'ECONNREFUSED'));
 
     if (isConnectionError) {

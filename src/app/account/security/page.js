@@ -3,17 +3,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
-import { 
-  RecaptchaVerifier, 
-  signInWithPhoneNumber, 
-  updatePhoneNumber, 
-  PhoneAuthProvider, 
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  updateEmail
-} from "firebase/auth";
 import { ChevronRight, ShieldCheck, Smartphone, Lock, User, Check, AlertCircle, Mail, Eye, EyeOff } from "lucide-react";
 import Loader from "@/components/Loader";
 
@@ -33,8 +22,6 @@ export default function AccountSecurityPage() {
   const [phoneStep, setPhoneStep] = useState("verify_current"); // "verify_password_phone" | "verify_current" | "otp_current" | "enter_new" | "otp_new"
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [newPhone, setNewPhone] = useState("+962");
-  const [confirmationResult, setConfirmationResult] = useState(null);
-  const recaptchaRef = useRef(null);
 
   // Password States
   const [currentPassword, setCurrentPassword] = useState("");
@@ -49,41 +36,8 @@ export default function AccountSecurityPage() {
   const [confirmNewEmail, setConfirmNewEmail] = useState("");
   const emailOtpRefs = useRef([]);
 
-  // Check if provider is email/password
-  const hasPassword = user?.providerData?.some(p => p.providerId === "password") || false;
-
-
-
-  // Cleanup recaptcha on unmount
-  useEffect(() => {
-    return () => {
-      // Delay cleanup slightly so reCAPTCHA async callbacks don't hit null
-      setTimeout(() => {
-        if (recaptchaRef.current) {
-          try {
-            recaptchaRef.current.clear();
-          } catch (e) {
-            console.error("Recaptcha cleanup error", e);
-          }
-          recaptchaRef.current = null;
-        }
-      }, 500);
-    };
-  }, []);
-
-  // Firebase Setup
-  const setupRecaptcha = () => {
-    if (!recaptchaRef.current) {
-      try {
-        recaptchaRef.current = new RecaptchaVerifier(auth, "recaptcha-container", {
-          size: "invisible",
-        });
-      } catch (err) {
-        console.error("Recaptcha init error", err);
-      }
-    }
-    return recaptchaRef.current;
-  };
+  // Everyone has a password in WooCommerce
+  const hasPassword = true;
 
   const handleSaveName = async () => {
     setIsSaving(true);
@@ -118,6 +72,16 @@ export default function AccountSecurityPage() {
     setShowNewPassword(false);
   };
 
+  const verifyPasswordWithBackend = async (pass) => {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: wooEmail || user?.email, password: pass })
+    });
+    if (!res.ok) throw new Error("Incorrect current password.");
+    return true;
+  };
+
   // --- EMAIL OTP LOGIC ---
   const handleSendEmailOTP = async () => {
     if (!email.trim() || email === (wooEmail || user?.email)) {
@@ -126,12 +90,12 @@ export default function AccountSecurityPage() {
     }
     
     // Quick regex validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^s@]+@[^s@]+.[^s@]+$/.test(email)) {
       setMessage({ type: 'error', text: "Please enter a valid email address." });
       return;
     }
 
-    if (hasPassword && !currentPassword) {
+    if (!currentPassword) {
       setMessage({ type: 'error', text: "Current password is required to verify identity." });
       return;
     }
@@ -140,11 +104,8 @@ export default function AccountSecurityPage() {
     setMessage(null);
 
     try {
-      // First, try re-authenticating the user if they have a password to verify password is correct before sending OTP
-      if (hasPassword) {
-        const credential = EmailAuthProvider.credential(user.email, currentPassword);
-        await reauthenticateWithCredential(auth.currentUser, credential);
-      }
+      // First, verify password
+      await verifyPasswordWithBackend(currentPassword);
 
       // Check if email already registered in WooCommerce
       const checkRes = await fetch("/api/auth/check-user", {
@@ -198,16 +159,10 @@ export default function AccountSecurityPage() {
       const verifyData = await verifyRes.json();
       if (!verifyRes.ok) throw new Error(verifyData.error || "Invalid verification code.");
 
-      // 2. Re-authenticate
-      if (hasPassword) {
-        const credential = EmailAuthProvider.credential(user.email, currentPassword);
-        await reauthenticateWithCredential(auth.currentUser, credential);
-      }
+      // 2. Re-verify password
+      await verifyPasswordWithBackend(currentPassword);
 
-      // 3. Update Firebase email
-      await updateEmail(auth.currentUser, confirmNewEmail);
-
-      // 4. Update WooCommerce email
+      // 3. Update WooCommerce email
       const res = await fetch("/api/auth/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -248,12 +203,8 @@ export default function AccountSecurityPage() {
   // --- PHONE WIZARD LOGIC ---
   const handleEditPhone = () => {
     setEditingField('phone');
-    if (!user?.phoneNumber) {
-      if (hasPassword) {
-        setPhoneStep('verify_password_phone');
-      } else {
-        setPhoneStep('enter_new');
-      }
+    if (!wooPhone) {
+      setPhoneStep('enter_new');
     } else {
       setPhoneStep('verify_current');
     }
@@ -271,12 +222,11 @@ export default function AccountSecurityPage() {
     setIsSaving(true);
     setMessage(null);
     try {
-      const credential = EmailAuthProvider.credential(user.email, currentPassword);
-      await reauthenticateWithCredential(auth.currentUser, credential);
+      await verifyPasswordWithBackend(currentPassword);
       setPhoneStep("enter_new");
       setCurrentPassword("");
     } catch (err) {
-      setMessage({ type: 'error', text: "Incorrect password. Please try again." });
+      setMessage({ type: 'error', text: err.message });
     } finally {
       setIsSaving(false);
     }
@@ -286,9 +236,12 @@ export default function AccountSecurityPage() {
     setIsSaving(true);
     setMessage(null);
     try {
-      const verifier = setupRecaptcha();
-      const result = await signInWithPhoneNumber(auth, user.phoneNumber, verifier);
-      setConfirmationResult(result);
+      const res = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: wooPhone, action: "send" })
+      });
+      if (!res.ok) throw new Error("Failed");
       setPhoneStep("otp_current");
     } catch (err) { setMessage({ type: 'error', text: "Failed to send OTP to current number." }); }
     finally { setIsSaving(false); }
@@ -298,7 +251,12 @@ export default function AccountSecurityPage() {
     setIsSaving(true);
     setMessage(null);
     try {
-      await confirmationResult.confirm(otp.join(""));
+      const res = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: wooPhone, code: otp.join(""), action: "verify" })
+      });
+      if (!res.ok) throw new Error("Invalid code");
       setPhoneStep("enter_new");
       setOtp(["", "", "", "", "", ""]);
     } catch (err) { setMessage({ type: 'error', text: "Invalid verification code." }); }
@@ -309,9 +267,12 @@ export default function AccountSecurityPage() {
     setIsSaving(true);
     setMessage(null);
     try {
-      const verifier = setupRecaptcha();
-      const result = await signInWithPhoneNumber(auth, newPhone, verifier);
-      setConfirmationResult(result);
+      const res = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: newPhone, action: "send" })
+      });
+      if (!res.ok) throw new Error("Failed");
       setPhoneStep("otp_new");
     } catch (err) { setMessage({ type: 'error', text: "Failed to send OTP to new number." }); }
     finally { setIsSaving(false); }
@@ -321,8 +282,12 @@ export default function AccountSecurityPage() {
     setIsSaving(true);
     setMessage(null);
     try {
-      const credential = PhoneAuthProvider.credential(confirmationResult.verificationId, otp.join(""));
-      await updatePhoneNumber(auth.currentUser, credential);
+      const verifyRes = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: newPhone, code: otp.join(""), action: "verify" })
+      });
+      if (!verifyRes.ok) throw new Error("Invalid verification code");
       
       const res = await fetch("/api/auth/update-profile", {
         method: "POST",
@@ -356,14 +321,10 @@ export default function AccountSecurityPage() {
     setIsSaving(true);
     setMessage(null);
     try {
-      // 1. Re-authenticate in Firebase
-      const credential = EmailAuthProvider.credential(user.email, currentPassword);
-      await reauthenticateWithCredential(auth.currentUser, credential);
+      // 1. Re-authenticate via Backend
+      await verifyPasswordWithBackend(currentPassword);
 
-      // 2. Update Firebase Auth password
-      await updatePassword(auth.currentUser, newPassword);
-
-      // 3. Update WooCommerce/WordPress password
+      // 2. Update WooCommerce/WordPress password
       const res = await fetch("/api/auth/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -391,8 +352,6 @@ export default function AccountSecurityPage() {
 
   return (
     <div className="w-full">
-      <div id="recaptcha-container" />
-      
       <h2 className="text-2xl font-bold mb-8 text-gray-900">Login & Security</h2>
 
       {message && (
@@ -509,7 +468,7 @@ export default function AccountSecurityPage() {
                   {!editingField || editingField !== 'phone' ? (
                     <div>
                        <h3 className="text-[16px] font-bold text-gray-900">Mobile Number</h3>
-                       <p className="text-[14px] text-gray-500 mt-1">{user?.phoneNumber || "Add a mobile number"}</p>
+                       <p className="text-[14px] text-gray-500 mt-1">{wooPhone || user?.phone || "Add a mobile number"}</p>
                     </div>
                   ) : (
                     <div className="flex-1 min-w-[300px]">
@@ -538,7 +497,7 @@ export default function AccountSecurityPage() {
 
                        {phoneStep === 'verify_current' && (
                           <div className="space-y-4">
-                             <p className="text-[14px] text-gray-500">Verify current number: <span className="font-bold text-black">{user.phoneNumber}</span></p>
+                             <p className="text-[14px] text-gray-500">Verify current number: <span className="font-bold text-black">{wooPhone || user?.phone}</span></p>
                              <button onClick={sendOTPToCurrent} disabled={isSaving} className="h-10 px-8 bg-black text-white rounded-md text-[14px] font-bold flex items-center gap-2">
                                 {isSaving ? <Loader size="sm" text="" /> : "Send Code"}
                              </button>
@@ -589,12 +548,7 @@ export default function AccountSecurityPage() {
                   <div className="w-10 h-10 bg-gray-50 rounded-md flex items-center justify-center text-gray-400 border border-gray-100 border-none shrink-0">
                      <Lock size={20} />
                   </div>
-                  {!hasPassword ? (
-                    <div>
-                       <h3 className="text-[16px] font-bold text-gray-900">Password</h3>
-                       <p className="text-[14px] text-gray-500 mt-1">Password login is not set up for this account. (Signed in via Mobile Phone)</p>
-                    </div>
-                  ) : !editingField || editingField !== 'password' ? (
+                  {!editingField || editingField !== 'password' ? (
                     <div>
                        <h3 className="text-[16px] font-bold text-gray-900">Password</h3>
                        <p className="text-[14px] text-gray-500 mt-1">********</p>

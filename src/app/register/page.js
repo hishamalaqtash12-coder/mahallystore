@@ -2,12 +2,6 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile,
-} from "firebase/auth";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Mail, User, Lock, Store, ChevronRight, Clock, Info, ChevronDown, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -234,17 +228,15 @@ function RegisterContent() {
         // 1. Sync to DB FIRST so AuthContext doesn't sign out the user upon creation
         await syncToDB();
 
-        const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
+        // 2. Set the WooCommerce Session
         try {
-          const cred = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(cred.user, { displayName: selectedRole === "vendor" ? storeName : name });
-        } catch (fbErr) {
-          if (fbErr.code === "auth/email-already-in-use") {
-            const { signInWithEmailAndPassword } = await import("firebase/auth");
-            await signInWithEmailAndPassword(auth, email, password);
-          } else {
-            throw fbErr;
-          }
+          await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+          });
+        } catch (err) {
+          console.warn("Auto-login after registration failed", err);
         }
 
         if (selectedRole === "vendor") {
@@ -294,26 +286,22 @@ function RegisterContent() {
         // 1. Sync to DB FIRST so AuthContext doesn't sign out the user upon creation
         await syncToDB();
 
-        const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
+        // 2. Set the WooCommerce Session using the email we just registered
+        const phoneEmail = `phone_${phone.replace("+", "")}@mahally.jo`;
         try {
-          // Since we bypass Firebase Phone Auth, we create an email user using their phone as the email
-          const phoneEmail = `phone_${phone.replace("+", "")}@mahally.jo`;
-          const cred = await createUserWithEmailAndPassword(auth, phoneEmail, password);
-          await updateProfile(cred.user, { displayName: selectedRole === "vendor" ? storeName : name });
-        } catch (fbErr) {
-          if (fbErr.code === "auth/email-already-in-use") {
-            // ignore if they already exist, we just sign them in
-            const { signInWithEmailAndPassword } = await import("firebase/auth");
-            const phoneEmail = `phone_${phone.replace("+", "")}@mahally.jo`;
-            await signInWithEmailAndPassword(auth, phoneEmail, password);
-          } else {
-            throw fbErr;
-          }
+          await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email || phoneEmail, password })
+          });
+        } catch (err) {
+          console.warn("Auto-login after registration failed", err);
         }
 
         if (selectedRole === "vendor") {
           setStep("vendor_pending");
-          await auth.signOut();
+          // Logout to clear the session for pending vendors
+          await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
         } else {
           setStep("success");
           setTimeout(() => router.replace(redirectTo), 1500);

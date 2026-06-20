@@ -20,7 +20,7 @@ import {
 import { createProduct, getCategories } from "@/lib/woocommerce";
 
 export default function NewProduct() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, email, phone, customerName } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -87,9 +87,6 @@ export default function NewProduct() {
     setError("");
 
     try {
-      const { user } = await import("@/lib/firebase").then(m => m.auth);
-      const currentUser = user || {};
-
       const productData = {
         name,
         description,
@@ -98,9 +95,9 @@ export default function NewProduct() {
         status,
         categories: categoryId ? [{ id: parseInt(categoryId) }] : [],
         meta_data: [
-          { key: "merchant_email", value: currentUser.email || "" },
-          { key: "merchant_phone", value: currentUser.phoneNumber || "" },
-          { key: "merchant_name", value: currentUser.displayName || "Merchant User" }
+          { key: "merchant_email", value: email || "" },
+          { key: "merchant_phone", value: phone || "" },
+          { key: "merchant_name", value: customerName || "Merchant User" }
         ]
       };
 
