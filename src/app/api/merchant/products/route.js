@@ -84,22 +84,18 @@ export async function GET(request) {
       };
     }));
 
-    // 5. DATA ISOLATION: If the source was trusted (Dokan or WC author filter), skip re-filtering.
-    //    Only apply strict local filter when products came from the "fetch all" last resort.
-    let finalProducts;
-    if (trustedSource) {
-      finalProducts = enrichedProducts;
-    } else {
-      finalProducts = enrichedProducts.filter(p => {
-        const authorId = String(p.author || p.post_author || "");
-        const vendorId = String(p.store?.id || p.vendor?.id || "");
-        const metaVendorId = p.meta_data?.find(m => m.key === '_dokan_vendor_id' || m.key === 'mahally_owner_id' || m.key === '_vendor_id' || m.key === 'merchant_id')?.value;
-        
-        return authorId === String(wooId) || 
-               vendorId === String(wooId) || 
-               String(metaVendorId) === String(wooId);
-      });
-    }
+    // 5. STRICT DATA ISOLATION: Always apply local filter.
+    // WooCommerce REST API 'products' endpoint ignores 'author' and returns ALL products!
+    // We MUST filter locally to guarantee vendors only see their own products.
+    const finalProducts = enrichedProducts.filter(p => {
+      const authorId = String(p.author || p.post_author || "");
+      const vendorId = String(p.store?.id || p.vendor?.id || "");
+      const metaVendorId = p.meta_data?.find(m => m.key === '_dokan_vendor_id' || m.key === 'mahally_owner_id' || m.key === '_vendor_id' || m.key === 'merchant_id')?.value;
+      
+      return authorId === String(wooId) || 
+             vendorId === String(wooId) || 
+             String(metaVendorId) === String(wooId);
+    });
 
     console.log(`[Merchant Products] Returning ${finalProducts.length} products for vendor ${wooId}`);
     return NextResponse.json(finalProducts);
