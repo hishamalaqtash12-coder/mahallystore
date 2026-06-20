@@ -20,6 +20,9 @@ const inter = Inter({
 export const metadata = {
   title: "Mahally | Local Marketplace",
   description: "Shop the best local stores and brands on Mahally.",
+  icons: {
+    icon: "/icon.webp",
+  },
 };
 
 export default async function RootLayout({ children, params }) {
