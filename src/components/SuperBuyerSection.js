@@ -85,7 +85,7 @@ export default function SuperBuyerSection({ products = [], vendors = [], adverti
                         );
                      }
                      return (
-                        <Link key={i} href={`/product/${p.id}`} className="group p-5 flex flex-col hover:bg-zinc-50 transition-colors">
+                        <Link key={i} href={`/product/${p.slug}`} className="group p-5 flex flex-col hover:bg-zinc-50 transition-colors">
                            <div className="aspect-square bg-white mb-4 relative flex items-center justify-center">
                               <Image src={p.images?.[0]?.src || "https://placehold.co/200x200"} alt={p.name} fill className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
                            </div>

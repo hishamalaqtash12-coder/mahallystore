@@ -347,7 +347,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
             <button
               onClick={() => {
                 const vendorId = product.meta_data.find(m => m.key === "_vendor_id").value;
-                const msg = `I have a question about this product:\n\n${product.name}\nItem ID: MH${product.id}\nLink: ${window.location.origin}/product/${product.id}`;
+                const msg = `I have a question about this product:\n\n${product.name}\nItem ID: MH${product.id}\nLink: ${window.location.origin}/product/${product.slug}`;
                 router.push(`/messages?to=${vendorId}&msg=${encodeURIComponent(msg)}`);
               }}
               className="w-full text-center text-[13px] font-bold text-zinc-900 border border-[#D5D9D9] rounded-md px-3 py-1.5 bg-zinc-50 hover:bg-zinc-100 transition-all shadow-sm"
@@ -366,7 +366,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
                 (Object.keys(selectedOptions).length > 0
                   ? `*Options:* ${Object.entries(selectedOptions).map(([k, v]) => `${k}: ${v}`).join(', ')}\n`
                   : '') +
-                `\nView Product: ${window.location.origin}/product/${product.id}`
+                `\nView Product: ${window.location.origin}/product/${product.slug}`
               )}` : "#"}
               target="_blank"
               rel="noopener noreferrer"

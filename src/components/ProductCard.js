@@ -142,7 +142,7 @@ export default function ProductCard({ product }) {
     <div className="relative flex flex-col h-full bg-white group border border-zinc-200 hover:border-zinc-300 transition-all rounded-md p-2 shadow-sm hover:shadow-md min-w-0">
       {/* IMAGE */}
       <div className="relative aspect-square bg-[#F7F7F7] rounded-md overflow-hidden flex items-center justify-center p-2 mb-2">
-        <Link href={`/product/${product.id}`} className="block h-full w-full relative">
+        <Link href={`/product/${product.slug}`} className="block h-full w-full relative">
           <Image
             src={imageUrl}
             alt={product.name}
@@ -205,7 +205,7 @@ export default function ProductCard({ product }) {
         )}
 
         <div className="relative group/title">
-          <Link href={`/product/${product.id}`}>
+          <Link href={`/product/${product.slug}`}>
             <h3 className="text-[14px] leading-tight font-medium text-zinc-900 group-hover:text-[#9b2c41] line-clamp-2">
               {product.name}
             </h3>

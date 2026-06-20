@@ -455,7 +455,7 @@ export default function MerchantProductsPage() {
                             <span className="text-zinc-200">•</span>
                             <button onClick={() => handleDelete(product.id)} className="text-rose-600 hover:underline">Trash</button>
                             <span className="text-zinc-200">•</span>
-                            <Link href={`/product/${product.id}`} target="_blank" className="text-zinc-400 hover:text-zinc-600">Preview</Link>
+                            <Link href={`/product/${product.slug}`} target="_blank" className="text-zinc-400 hover:text-zinc-600">Preview</Link>
                           </>
                         )}
                       </div>

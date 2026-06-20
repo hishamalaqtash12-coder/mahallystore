@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Info, Clock, Mail, Store, ChevronDown, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import Loader from "@/components/Loader";
 import { Suspense } from "react";
 
@@ -156,8 +157,44 @@ function LoginContent() {
           console.warn("Failed to set session cookie for OTP login");
         }
 
+        // Fetch user data from check-user to populate localStorage
+        try {
+          const checkRes = await fetch("/api/auth/check-user", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone })
+          });
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            if (checkData.exists && checkData.customer) {
+              const cust = checkData.customer;
+              localStorage.setItem("mahally_user", JSON.stringify({
+                uid: String(cust.id),
+                role: cust.role,
+                vendorStatus: cust.vendorStatus,
+                publicId: cust.publicId,
+                wooId: cust.id,
+                name: cust.displayName,
+                email: cust.email,
+                phone: cust.phone
+              }));
+            } else {
+              // Fallback if check-user fails or customer doesn't exist yet
+              localStorage.setItem("mahally_user", JSON.stringify({ phone }));
+            }
+          } else {
+            localStorage.setItem("mahally_user", JSON.stringify({ phone }));
+          }
+        } catch(e) {
+          localStorage.setItem("mahally_user", JSON.stringify({ phone }));
+        }
+
+        // Force a small delay then redirect, then reload to let AuthContext pick it up
         setStep("success");
-        setTimeout(() => router.replace(redirectTo), 1500);
+        setTimeout(() => {
+          router.replace(redirectTo);
+          setTimeout(() => window.location.reload(), 100);
+        }, 1500);
       } else {
         setError(data.error || "Invalid verification code.");
       }
@@ -208,9 +245,34 @@ function LoginContent() {
 
       // 2. WordPress authorized successfully!
       // (Firebase sync removed completely)
+      
+      // Save user to localStorage for AuthContext to pick up
+      if (checkRes && checkRes.ok) {
+        const checkData = await checkRes.clone().json();
+        if (checkData.exists && checkData.customer) {
+          const cust = checkData.customer;
+          localStorage.setItem("mahally_user", JSON.stringify({
+            uid: String(cust.id),
+            role: cust.role,
+            vendorStatus: cust.vendorStatus,
+            publicId: cust.publicId,
+            wooId: cust.id,
+            name: cust.displayName,
+            email: cust.email,
+            phone: cust.phone
+          }));
+        } else {
+          localStorage.setItem("mahally_user", JSON.stringify({ email: loginIdentity }));
+        }
+      } else {
+        localStorage.setItem("mahally_user", JSON.stringify({ email: loginIdentity }));
+      }
 
       setStep("success");
-      setTimeout(() => router.replace(redirectTo), 1500);
+      setTimeout(() => {
+        router.replace(redirectTo);
+        setTimeout(() => window.location.reload(), 100);
+      }, 1500);
     } catch (err) {
       console.warn("Login validation failed:", err.message);
       setError(err.message || "Invalid email or password.");
@@ -230,11 +292,16 @@ function LoginContent() {
 
       <div className="w-full max-w-[350px]">
         {/* Logo */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-4 flex justify-center">
           <Link href="/" className="inline-block">
-            <span className="text-[28px] font-bold tracking-tight text-zinc-900">
-              mahally<span className="text-[#febd69]">.jo</span>
-            </span>
+            <Image 
+              src="/mahally-logo.webp" 
+              alt="Mahally.jo Logo" 
+              width={160} 
+              height={50} 
+              className="object-contain"
+              priority
+            />
           </Link>
         </div>
 

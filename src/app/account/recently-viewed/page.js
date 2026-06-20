@@ -48,10 +48,10 @@ export default function AccountRecentlyViewedPage() {
               <div className="aspect-square relative mb-4 flex items-center justify-center overflow-hidden rounded-md border border-gray-50 bg-gray-50/20">
                 {item.image && <Image src={item.image} alt={item.name || "Product"} fill className="object-contain p-2 group-hover:scale-105 transition-transform duration-300" />}
               </div>
-              <Link href={`/product/${item.id}`} className="text-[13px] font-medium text-gray-800 line-clamp-2 mb-3 h-10 hover:text-[#be374f] transition-colors leading-relaxed">{item.name}</Link>
+              <Link href={`/product/${item.slug}`} className="text-[13px] font-medium text-gray-800 line-clamp-2 mb-3 h-10 hover:text-[#be374f] transition-colors leading-relaxed">{item.name}</Link>
               <div className="mt-auto flex items-center justify-between">
                 <span className="font-black text-[18px] text-gray-900">JOD {item.price}</span>
-                <Link href={`/product/${item.id}`} className="w-9 h-9 rounded-md border border-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-pointer shadow-sm">
+                <Link href={`/product/${item.slug}`} className="w-9 h-9 rounded-md border border-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-pointer shadow-sm">
                   <ShoppingBag size={16} />
                 </Link>
               </div>

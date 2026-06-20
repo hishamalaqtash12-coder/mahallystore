@@ -221,11 +221,8 @@ export async function getProduct(id, retries = 3) {
   try {
     // If id is string and not numeric, fetch by slug
     if (isNaN(id)) {
-      const data = await fetchGraphQL(`
-        query GetProductBySlug($slug: ID!) {
-          product(id: $slug, idType: SLUG) { databaseId name slug type price }
-        }
-      `, { slug: id });
+      const GET_PRODUCT_BY_SLUG = GET_PRODUCT.replace('idType: DATABASE_ID', 'idType: SLUG');
+      const data = await fetchGraphQL(GET_PRODUCT_BY_SLUG, { id: id });
       return mapProduct(data?.product);
     }
     

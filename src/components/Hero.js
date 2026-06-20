@@ -405,7 +405,7 @@ const CategoryCarousel = memo(({ categories }) => {
 //               return (
 //                 <Link
 //                   key={i}
-//                   href={`/product/${deal.id}`}
+//                   href={`/product/${deal.slug}`}
 //                   className="flex flex-col shrink-0 w-[130px] p-3 gap-1.5 hover:bg-zinc-50 transition-colors"
 //                 >
 //                   {/* Image */}
@@ -478,7 +478,7 @@ const QuadCard = memo(({ title, items, link }) => (
     <h2 className="text-[20px] font-bold text-black mb-4 truncate">{title}</h2>
     <div className="grid grid-cols-2 gap-4 flex-1 mb-5">
       {items.map((item, i) => (
-        <Link href={`/product/${item.id}`} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
+        <Link href={`/product/${item.slug}`} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
           <div className="relative aspect-square overflow-hidden bg-[#F5F5F5]">
             <Image
               src={item?.images?.[0]?.src || "https://placehold.co/400x400"}
@@ -637,7 +637,7 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
   //           title: cat.name,
   //           type: "single",
   //           item,
-  //           link: `/product/${item.id}`
+  //           link: `/product/${item.slug}`
   //         });
   //         usedProductIds.add(item.id);
   //         usedTitles.add(cat.name);

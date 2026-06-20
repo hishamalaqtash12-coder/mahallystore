@@ -17,9 +17,9 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function generateMetadata({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
   try {
-    const product = await getProduct(id);
+    const product = await getProduct(slug);
     if (!product) return { title: "Product Not Found - Mahally" };
 
     const description = product.short_description?.replace(/<[^>]*>/g, '') ||
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductPage({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
 
   let product = null;
   let relatedProducts = [];
@@ -58,15 +58,15 @@ export default async function ProductPage({ params }) {
   let vendorData = null;
 
   try {
-    product = await getProduct(id);
+    product = await getProduct(slug);
     if (product) {
       const vendorId = product.meta_data?.find(m => m.key === "_vendor_id" || m.key === "mahally_owner_id")?.value;
       const fetchPromises = [
         getProducts({ per_page: 12, category: product.categories?.[0]?.id }),
-        getProductReviews(id)
+        getProductReviews(product.id)
       ];
       if (product.type === "variable" || (product.variations && product.variations.length > 0)) {
-        fetchPromises.push(getProductVariations(id));
+        fetchPromises.push(getProductVariations(product.id));
       } else {
         fetchPromises.push(Promise.resolve(null));
       }

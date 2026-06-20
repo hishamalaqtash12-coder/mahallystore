@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
@@ -61,11 +62,16 @@ export default function DashboardSidebar() {
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-white text-zinc-900 flex flex-col border-r border-zinc-200">
       {/* Logo Area */}
       <div className="p-6 border-b border-zinc-200 h-[60px] flex items-center">
-        <Link href="/" className="flex items-center">
-             <span className="text-[22px] font-bold tracking-tight text-zinc-900">
-                mahally<span className="text-[#febd69]">.jo</span>
-             </span>
-        </Link>
+              <Link href="/merchant/dashboard">
+                <Image 
+                  src="/mahally-logo.webp" 
+                  alt="Mahally.jo Logo" 
+                  width={140} 
+                  height={45} 
+                  className="object-contain"
+                  priority
+                />
+              </Link>
       </div>
 
       {/* Navigation */}

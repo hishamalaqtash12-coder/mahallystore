@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Mail, User, Lock, Store, ChevronRight, Clock, Info, ChevronDown, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import Loader from "@/components/Loader";
 
 const STORE_CATEGORIES = [
@@ -241,10 +242,15 @@ function RegisterContent() {
 
         if (selectedRole === "vendor") {
           setStep("vendor_pending");
-          await auth.signOut();
+          await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+          localStorage.removeItem("mahally_user");
         } else {
+          localStorage.setItem("mahally_user", JSON.stringify({ email, phone }));
           setStep("success");
-          setTimeout(() => router.replace(redirectTo), 1500);
+          setTimeout(() => {
+            router.replace(redirectTo);
+            setTimeout(() => window.location.reload(), 100);
+          }, 1500);
         }
       } else {
         setError(data.error || "Invalid verification code.");
@@ -302,9 +308,14 @@ function RegisterContent() {
           setStep("vendor_pending");
           // Logout to clear the session for pending vendors
           await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+          localStorage.removeItem("mahally_user");
         } else {
+          localStorage.setItem("mahally_user", JSON.stringify({ email: email || phoneEmail, phone }));
           setStep("success");
-          setTimeout(() => router.replace(redirectTo), 1500);
+          setTimeout(() => {
+            router.replace(redirectTo);
+            setTimeout(() => window.location.reload(), 100);
+          }, 1500);
         }
       } else {
         setError(data.error || "Invalid verification code.");
@@ -323,11 +334,16 @@ function RegisterContent() {
 
       <div className="w-full max-w-[350px]">
         {/* Logo */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-4 flex justify-center">
           <Link href="/" className="inline-block">
-            <span className="text-[28px] font-bold tracking-tight text-zinc-900">
-              mahally<span className="text-[#febd69]">.jo</span>
-            </span>
+            <Image 
+              src="/mahally-logo.webp" 
+              alt="Mahally.jo Logo" 
+              width={160} 
+              height={50} 
+              className="object-contain"
+              priority
+            />
           </Link>
         </div>
 

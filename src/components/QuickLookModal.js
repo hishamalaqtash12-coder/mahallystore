@@ -403,7 +403,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
               </div>
 
               <div className="mt-auto pt-4 border-t border-zinc-100 flex justify-between items-center">
-                <a href={`/product/${product.id}`} className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline flex items-center gap-1">
+                <a href={`/product/${product.slug}`} className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline flex items-center gap-1">
                   عرض تفاصيل المنتج كاملة <ChevronRight size={14} className="rtl:-scale-x-100" />
                 </a>
                 <a href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="text-[11px] text-zinc-400 hover:text-[#007185] hover:underline transition-colors">

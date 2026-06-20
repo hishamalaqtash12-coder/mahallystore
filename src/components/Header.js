@@ -287,26 +287,31 @@ export default function Header() {
       <header className="z-[90] sticky top-0 font-sans shadow-md">
 
         {/* 1. TOP MAIN HEADER */}
-        <div className="bg-[#131921] px-2 py-2 flex flex-wrap lg:flex-nowrap items-center gap-2 min-h-[50px]">
-          <Link href="/" className="order-1 p-1 sm:p-2 border border-transparent hover:border-white rounded-sm transition-all flex items-center shrink-0">
-            <div className="flex flex-col items-right gap-1">
-              <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-white">محلي</span>
-            </div>
+        <div className="bg-white px-2 py-2 flex flex-wrap lg:flex-nowrap items-center gap-2 min-h-[50px] border-b border-zinc-200">
+          <Link href="/" className="order-1 p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm transition-all flex items-center shrink-0">
+            <Image 
+              src="/mahally-logo.webp" 
+              alt="Mahally.jo Logo" 
+              width={120} 
+              height={40} 
+              className="object-contain"
+              priority
+            />
           </Link>
 
           <div
             onClick={() => setShowLocationModal(true)}
-            className="hidden lg:flex order-2 flex-col p-2 border border-transparent hover:border-white rounded-sm cursor-pointer ml-2 shrink-0"
+            className="hidden lg:flex order-2 flex-col p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer ml-2 shrink-0"
           >
-            <span className="text-[#ccc] text-[12px] leading-none ml-5">التوصيل إلى</span>
-            <div className="flex items-center gap-1 leading-none mt-1 text-white">
-              <MapPin size={15} className="text-white" />
+            <span className="text-zinc-500 text-[12px] leading-none ml-5">التوصيل إلى</span>
+            <div className="flex items-center gap-1 leading-none mt-1 text-zinc-900">
+              <MapPin size={15} className="text-zinc-900" />
               <span className="text-[14px] font-bold">{GOVERNORATES_MAP_AR[governorate] || governorate}</span>
             </div>
           </div>
 
           <div ref={searchRef} className="order-last lg:order-3 w-full lg:w-auto lg:flex-1 flex flex-col relative lg:ml-2 group z-[100]">
-            <form onSubmit={handleSearch} className={`flex h-10 w-full rounded-md transition-shadow relative bg-white ${showSuggestions ? 'ring-[3px] ring-[#febd69]' : ''}`}>
+            <form onSubmit={handleSearch} className={`flex h-10 w-full rounded-md transition-shadow relative bg-white border border-zinc-300 ${showSuggestions ? 'ring-[3px] ring-[#febd69] border-[#febd69]' : ''}`}>
               <div className="relative shrink-0 h-full flex items-center bg-[#f3f3f3] hover:bg-[#dadada] transition-colors border-l border-zinc-300 rounded-r-md w-[75px] sm:w-[110px]">
                 <select
                   value={selectedCategory}
@@ -333,7 +338,7 @@ export default function Header() {
                 {suggestions.length > 0 ? (
                   <div className="py-2">
                     {suggestions.map((p) => (
-                      <Link key={p.id} href={`/product/${p.id}`} onClick={() => setShowSuggestions(false)} className="flex items-center gap-3 px-4 py-2 hover:bg-zinc-100 transition-colors">
+                      <Link key={p.id} href={`/product/${p.slug || p.id}`} onClick={() => setShowSuggestions(false)} className="flex items-center gap-3 px-4 py-2 hover:bg-zinc-100 transition-colors">
                         <div className="w-8 h-8 relative shrink-0 bg-white"><Image src={p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Product"} fill className="object-contain" /></div>
                         <p className="text-[14px] truncate flex-1 font-bold">{p.name}</p>
                       </Link>
@@ -346,7 +351,7 @@ export default function Header() {
 
           <div className="order-2 lg:order-4 ml-auto lg:ml-0 relative flex items-center gap-1 sm:gap-2 lg:gap-4">
             <div
-              className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-white rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-900/40 border-blue-500/50 ring-1 ring-blue-500/30' : (isVendor ? 'bg-[#FFD700]/10 border-[#FFD700]/30 ring-1 ring-[#FFD700]/20' : '')}`}
+              className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-900/40 border-blue-500/50 ring-1 ring-blue-500/30' : (isVendor ? 'bg-[#FFD700]/10 border-[#FFD700]/30 ring-1 ring-[#FFD700]/20' : '')}`}
               onMouseEnter={() => { if (user && window.innerWidth >= 640) setIsAccountMenuOpen(true); }}
               onMouseLeave={() => setIsAccountMenuOpen(false)}
               onClick={() => {
@@ -363,18 +368,18 @@ export default function Header() {
                 </div>
               ) : (
                 <>
-                  <span className={`text-[10px] sm:text-[12px] leading-none hidden sm:flex items-center gap-1 ${isAdmin ? 'text-blue-400 font-bold' : (isApprovedVendor ? 'text-[#FFD700] font-bold' : 'text-[#ccc]')}`}>
+                  <span className={`text-[10px] sm:text-[12px] leading-none hidden sm:flex items-center gap-1 ${isAdmin ? 'text-blue-400 font-bold' : (isApprovedVendor ? 'text-[#c45500] font-bold' : 'text-zinc-500')}`}>
                     {isAdmin && <ShieldCheck size={12} />}
                     <span>
                       {isAdmin ? `لوحة المشرف (${customerName || 'المشرف'})` : (isApprovedVendor ? `بوابة البائع (${customerName || 'التاجر'})` : (user ? `مرحبًا، ${customerName || user.displayName || 'العميل'}` : 'تسجيل الدخول'))}
                     </span>
                   </span>
-                  <div className="hidden sm:flex items-center gap-1 leading-none mt-1 text-white">
-                    <span className={`text-[14px] font-bold ${isAdmin ? 'text-blue-400' : (isApprovedVendor ? 'text-[#FFD700]' : '')}`}>{isVendor ? 'لوحة التحكم' : 'الطلبات والحساب'}</span>
-                    {user && <ChevronDown size={12} className={`mt-1 ${isAdmin ? 'text-blue-400' : (isApprovedVendor ? 'text-[#FFD700]' : 'text-[#ccc]')}`} />}
+                  <div className="hidden sm:flex items-center gap-1 leading-none mt-1 text-zinc-900">
+                    <span className={`text-[14px] font-bold ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-[#c45500]' : '')}`}>{isVendor ? 'لوحة التحكم' : 'الطلبات والحساب'}</span>
+                    {user && <ChevronDown size={12} className={`mt-1 ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-[#c45500]' : 'text-zinc-500')}`} />}
                   </div>
-                  <div className="sm:hidden flex items-center justify-center text-white p-0.5">
-                    <UserCircle size={24} className={isAdmin ? 'text-blue-400' : (isApprovedVendor ? 'text-[#FFD700]' : 'text-white')} />
+                  <div className="sm:hidden flex items-center justify-center text-zinc-900 p-0.5">
+                    <UserCircle size={24} className={isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-[#c45500]' : 'text-zinc-900')} />
                   </div>
                 </>
               )}
@@ -442,7 +447,7 @@ export default function Header() {
                       {recentViews.length > 0 ? (
                         <div className="space-y-4 flex-1 overflow-y-auto pr-1.5 custom-scrollbar pb-2">
                           {recentViews.slice(0, 10).map((p) => (
-                            <Link href={`/product/${p.id}`} key={p.id} className="flex items-center gap-3 group relative block">
+                            <Link href={`/product/${p.slug}`} key={p.id} className="flex items-center gap-3 group relative block">
                               <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded relative shrink-0 overflow-hidden"><Image src={p.image || p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Recently viewed product"} fill className="object-cover" /></div>
                               <div className="flex flex-col flex-1 overflow-hidden">
                                 <p className="text-[13px] text-zinc-800 line-clamp-1 group-hover:underline transition-colors leading-tight mb-1">{p.name}</p>
@@ -484,10 +489,10 @@ export default function Header() {
             </div>
 
             {messagingEnabled && user && (
-              <Link href="/messages" className="flex items-end p-1 sm:p-2 border border-transparent hover:border-white rounded-sm cursor-pointer relative shrink-0">
+              <Link href="/messages" className="flex items-end p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer relative shrink-0">
                 <div className="flex items-center gap-1 leading-none mt-1 sm:mt-1 relative">
-                  <MessageSquare size={22} className="text-white sm:w-5 sm:h-5" />
-                  <span className="text-[11px] sm:text-[14px] font-bold text-white mt-1">الرسائل</span>
+                  <MessageSquare size={22} className="text-zinc-900 sm:w-5 sm:h-5" />
+                  <span className="text-[11px] sm:text-[14px] font-bold text-zinc-900 mt-1">الرسائل</span>
                   {unreadMessages > 0 && (
                     <span className="absolute -top-2 left-3 bg-[#e77600] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-[#131921]">
                       {unreadMessages}
@@ -497,10 +502,10 @@ export default function Header() {
               </Link>
             )}
 
-            <Link href="/wishlist" className="flex items-end p-1 sm:p-2 border border-transparent hover:border-white rounded-sm cursor-pointer relative shrink-0">
+            <Link href="/wishlist" className="flex items-end p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer relative shrink-0">
               <div className="flex items-center gap-1 leading-none mt-1 sm:mt-1 relative">
-                <Heart size={22} className="text-white sm:w-5 sm:h-5" />
-                <span className="text-[11px] sm:text-[14px] font-bold text-white mt-1">المفضلة</span>
+                <Heart size={22} className="text-zinc-900 sm:w-5 sm:h-5" />
+                <span className="text-[11px] sm:text-[14px] font-bold text-zinc-900 mt-1">المفضلة</span>
                 {(wishlistIds?.size > 0) && (
                   <span className="absolute -top-2 left-3 bg-[#e77600] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-[#131921]">
                     {wishlistIds.size}
@@ -510,7 +515,7 @@ export default function Header() {
             </Link>
 
             {!isVendor && (
-              <button onClick={() => setIsCartOpen(true)} className="flex items-end p-1 sm:p-2 border border-transparent hover:border-white rounded-sm cursor-pointer relative shrink-0 group touch-target text-white">
+              <button onClick={() => setIsCartOpen(true)} className="flex items-end p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer relative shrink-0 group touch-target text-zinc-900">
                 <div className="relative group-hover:scale-105 transition-transform flex items-center justify-center w-[36px] sm:w-[40px] h-[30px] sm:h-[34px]">
                   <span className="absolute top-0 left-1/2 -translate-x-1/2 text-[#f3a847] text-[15px] sm:text-[16px] font-bold z-10 leading-none">{cartItemsCount}</span>
                   <svg width="34" height="24" viewBox="0 0 38 26" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-2 sm:mt-3 w-8 sm:w-[34px]">
