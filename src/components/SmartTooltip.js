@@ -27,7 +27,7 @@ export default function SmartTooltip({ title, content, children }) {
           />
           
           {/* Tooltip Content */}
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-zinc-900 text-white p-4 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 origin-bottom">
+          <div className="absolute bottom-full end-1/2 -translate-x-1/2 mb-3 w-64 bg-zinc-900 text-white p-4 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 origin-bottom">
             <div className="flex justify-between items-start mb-2">
               <h4 className="text-[11px] font-black uppercase tracking-wider text-brand">{title}</h4>
               <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white">
@@ -38,7 +38,7 @@ export default function SmartTooltip({ title, content, children }) {
               {content}
             </p>
             {/* Arrow */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-zinc-900" />
+            <div className="absolute top-full end-1/2 -translate-x-1/2 -mt-1 border-8 border-transparent border-t-zinc-900" />
           </div>
         </>
       )}

@@ -188,7 +188,7 @@ export default function AdminReportsPage() {
           <div className="flex items-end justify-between h-48 pt-4 px-2">
             {dailySales.map((h, i) => (
               <div key={i} className="group relative flex flex-col items-center gap-2">
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-zinc-900 px-2 py-1 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                <div className="absolute -top-8 end-1/2 -translate-x-1/2 rounded bg-zinc-900 px-2 py-1 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                   JOD {((h / 120) * (parseFloat(stats?.monthlyRevenue || 0) / 4)).toFixed(0)}
                 </div>
                 <div

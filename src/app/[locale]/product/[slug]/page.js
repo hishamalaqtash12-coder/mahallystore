@@ -3,7 +3,7 @@ import ProductCard from "@/components/ProductCard";
 import { getProductMerchant } from "@/lib/product-utils";
 import ProductActions from "@/components/ProductActions";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Star, ShieldCheck, Truck, RotateCcw, ChevronRight, CheckCircle2, MessageSquare, ThumbsUp, Package, Zap, Tag, Check, ChevronDown, Lock, Clock, Share2, Info } from "lucide-react";
 import ProductReviewForm from "@/components/ProductReviewForm";
 import ProductGallery from "@/components/ProductGallery";
@@ -245,7 +245,7 @@ export default async function ProductPage({ params }) {
                     ))}
                   </div>
                   <ChevronDown size={14} className="text-zinc-500" />
-                  <a href="#" className="text-[#be374f] hover:text-[#9b2c41] hover:underline ml-2">{ratingCount.toLocaleString()} تقييمات</a>
+                  <a href="#" className="text-[#be374f] hover:text-[#9b2c41] hover:underline me-2">{ratingCount.toLocaleString()} تقييمات</a>
                 </div>
                 {soldCount > 0 && (
                   <div className="text-[14px] text-[#0F1111] font-medium">
@@ -270,7 +270,7 @@ export default async function ProductPage({ params }) {
                   <span className="text-[28px] text-[#be374f] font-light leading-none">-{discount}%</span>
                 )}
                 <span className="text-[28px] font-medium text-[#0F1111] flex items-start leading-none">
-                  <span className="text-[14px] mt-1 mr-0.5 ml-1">د.أ</span>{salePrice.toFixed(2)}
+                  <span className="text-[14px] mt-1 ms-0.5 me-1">د.أ</span>{salePrice.toFixed(2)}
                 </span>
               </div>
               {discount > 0 && (
@@ -318,10 +318,10 @@ export default async function ProductPage({ params }) {
               <h2 className="text-[16px] font-bold text-[#0F1111] mb-2">عن هذا المنتج</h2>
               {product.description ? (
                 <div className="prose prose-sm prose-zinc max-w-none text-[#0F1111] text-[14px] leading-relaxed 
-                  [&>ul]:list-disc [&>ul]:pr-5 [&>ul>li]:mb-1 [&>p]:mb-2"
+                  [&>ul]:list-disc [&>ul]:ps-5 [&>ul>li]:mb-1 [&>p]:mb-2"
                   dangerouslySetInnerHTML={{ __html: product.description }} />
               ) : (
-                <ul className="list-disc pr-5 text-[14px] text-[#0F1111] space-y-1">
+                <ul className="list-disc ps-5 text-[14px] text-[#0F1111] space-y-1">
                   <li>مواد عالية الجودة وصناعة متقنة.</li>
                   <li>مثالي للاستخدام اليومي.</li>
                   <li>أداء متين وموثوق.</li>

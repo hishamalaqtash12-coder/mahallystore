@@ -1,5 +1,5 @@
 import { Target, TrendingUp, BarChart3, Users, Zap, Globe } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function AdsPage() {
   return (

@@ -221,7 +221,7 @@ export default function WhatsAppBroadcaster() {
                   onChange={(e) => setMessage(e.target.value)}
                   className="w-full p-4 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-emerald-500 transition-all font-sans leading-relaxed resize-none"
                 />
-                <span className="absolute bottom-3 right-3 text-[10px] text-zinc-400 font-bold bg-zinc-50 px-1.5 py-0.5 rounded border border-zinc-200">
+                <span className="absolute bottom-3 start-3 text-[10px] text-zinc-400 font-bold bg-zinc-50 px-1.5 py-0.5 rounded border border-zinc-200">
                   {message.length} chars
                 </span>
               </div>

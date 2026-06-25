@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { Globe } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -70,7 +70,7 @@ export default function Footer() {
             </div>
 
             {/* Left Side in RTL (Second DOM element) */}
-            <div className="flex flex-col w-full md:w-1/2 md:items-start text-right">
+            <div className="flex flex-col w-full md:w-1/2 md:items-start text-start">
                <h3 className="font-extrabold text-[16px] mb-6 text-black">{t("oneMarket")}</h3>
                <p className="text-[14px] text-zinc-600 leading-relaxed max-w-[400px] mb-8 font-medium">
                   {t("footerDesc")}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import ProductCard from "@/components/ProductCard";
 import {
   ChevronRight,
@@ -173,7 +173,7 @@ export default function CategoryPageClient({
         <div className="bg-white border-b border-zinc-100">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest shrink-0 mr-1">
+              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest shrink-0 ms-1">
                 Related:
               </span>
               {siblingCategories.slice(0, 10).map((cat) => (
@@ -224,7 +224,7 @@ export default function CategoryPageClient({
                     : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300"
                 }`}
               >
-                <Tag size={9} className="inline mr-1 -mt-px" />
+                <Tag size={9} className="inline ms-1 -mt-px" />
                 On Sale
               </button>
 
@@ -257,7 +257,7 @@ export default function CategoryPageClient({
                     className="fixed inset-0 z-40"
                     onClick={() => setShowSortMenu(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg border border-zinc-200 shadow-xl z-50 py-1 overflow-hidden">
+                  <div className="absolute start-0 top-full mt-1 w-44 bg-white rounded-lg border border-zinc-200 shadow-xl z-50 py-1 overflow-hidden">
                     {sortOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -265,7 +265,7 @@ export default function CategoryPageClient({
                           setSortBy(opt.value);
                           setShowSortMenu(false);
                         }}
-                        className={`w-full text-left px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                        className={`w-full text-end px-3 py-1.5 text-[11px] font-medium transition-colors ${
                           sortBy === opt.value
                             ? "bg-zinc-900 text-white"
                             : "text-zinc-700 hover:bg-zinc-50"

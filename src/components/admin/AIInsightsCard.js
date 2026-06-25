@@ -223,7 +223,7 @@ export default function AIInsightsCard() {
                     <span className="font-bold text-zinc-900">{store.storeName}</span>
                     <span className="block text-[10px] text-zinc-500 mt-0.5">{store.ordersCount} orders completed</span>
                   </div>
-                  <div className="text-right">
+                  <div className="text-start">
                     <span className="font-bold text-[#800000] block">JOD {store.sales}</span>
                     {store.avgRating > 0 && (
                       <span className="text-[10px] text-amber-600 font-medium">★ {store.avgRating} rating</span>

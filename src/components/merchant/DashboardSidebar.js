@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/routing";
 import { 
   LayoutDashboard, 
   Package, 
@@ -59,7 +59,7 @@ export default function DashboardSidebar() {
   const { user, customerName, isVendor, isApprovedVendor, isAdmin, logout, messagingEnabled } = useAuth();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-white text-zinc-900 flex flex-col border-r border-zinc-200">
+    <aside className="fixed end-0 top-0 z-40 h-screen w-64 bg-white text-zinc-900 flex flex-col border-r border-zinc-200">
       {/* Logo Area */}
       <div className="p-6 border-b border-zinc-200 h-[60px] flex items-center">
               <Link href="/merchant/dashboard">

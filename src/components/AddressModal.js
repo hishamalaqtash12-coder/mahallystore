@@ -76,7 +76,7 @@ export default function AddressModal({ isOpen, onClose, initialData, type = 'bil
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[13px] font-bold text-gray-500 ml-1">First Name</label>
+              <label className="text-[13px] font-bold text-gray-500 me-1">First Name</label>
               <input 
                 required
                 value={formData.first_name}
@@ -85,7 +85,7 @@ export default function AddressModal({ isOpen, onClose, initialData, type = 'bil
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[13px] font-bold text-gray-500 ml-1">Last Name</label>
+              <label className="text-[13px] font-bold text-gray-500 me-1">Last Name</label>
               <input 
                 required
                 value={formData.last_name}
@@ -96,7 +96,7 @@ export default function AddressModal({ isOpen, onClose, initialData, type = 'bil
           </div>
 
           <div className="space-y-1">
-            <label className="text-[13px] font-bold text-gray-500 ml-1">Street Address</label>
+            <label className="text-[13px] font-bold text-gray-500 me-1">Street Address</label>
             <input 
               required
               value={formData.address_1}
@@ -108,7 +108,7 @@ export default function AddressModal({ isOpen, onClose, initialData, type = 'bil
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[13px] font-bold text-gray-500 ml-1">City / Governorate</label>
+              <label className="text-[13px] font-bold text-gray-500 me-1">City / Governorate</label>
               <select 
                 value={formData.city}
                 onChange={e => setFormData({ ...formData, city: e.target.value })}
@@ -118,7 +118,7 @@ export default function AddressModal({ isOpen, onClose, initialData, type = 'bil
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-[13px] font-bold text-gray-500 ml-1">Phone</label>
+              <label className="text-[13px] font-bold text-gray-500 me-1">Phone</label>
               <input 
                 required
                 value={formData.phone}

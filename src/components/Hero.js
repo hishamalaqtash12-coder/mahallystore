@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import {
   ChevronLeft,
@@ -103,18 +103,18 @@ const MerchantCarousel = memo(({ activeVendors }) => {
         {/* Scroll Buttons */}
         <button
           onClick={() => scroll('left')}
-          disabled={!canScrollLeft}
-          className={`hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          disabled={!canScrollRight}
+          className={`hidden md:flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={24} className="rtl:rotate-180" />
         </button>
 
         <button
           onClick={() => scroll('right')}
-          disabled={!canScrollRight}
-          className={`hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          disabled={!canScrollLeft}
+          className={`hidden md:flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={24} className="rtl:rotate-180" />
         </button>
 
         <div
@@ -234,18 +234,18 @@ const CategoryCarousel = memo(({ categories }) => {
         {/* Persistent Navigation Buttons */}
         <button
           onClick={() => scroll('left')}
-          className={`flex absolute left-0 md:-left-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          className={`flex absolute start-0 md:-start-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           aria-label="Scroll Left"
         >
-          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
         </button>
 
         <button
           onClick={() => scroll('right')}
-          className={`flex absolute right-0 md:-right-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          className={`flex absolute end-0 md:-end-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           aria-label="Scroll Right"
         >
-          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
         </button>
 
         <div
@@ -371,7 +371,7 @@ const CategoryCarousel = memo(({ categories }) => {
 //           {/* Scroll left */}
 //           <button
 //             onClick={() => scroll("left")}
-//             className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm transition-opacity ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100"
+//             className={`absolute end-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm transition-opacity ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100"
 //               }`}
 //           >
 //             <ChevronLeft size={14} />
@@ -380,7 +380,7 @@ const CategoryCarousel = memo(({ categories }) => {
 //           {/* Scroll right */}
 //           <button
 //             onClick={() => scroll("right")}
-//             className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm transition-opacity ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100"
+//             className={`absolute start-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white border border-zinc-200 rounded-full flex items-center justify-center shadow-sm transition-opacity ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100"
 //               }`}
 //           >
 //             <ChevronRight size={14} />
@@ -419,7 +419,7 @@ const CategoryCarousel = memo(({ categories }) => {
 //                       fill
 //                       className="object-cover"
 //                     />
-//                     <span className="absolute top-1 left-1 text-[10px] font-medium bg-red-50 text-red-600 border border-red-200 px-1.5 py-0.5 rounded">
+//                     <span className="absolute top-1 end-1 text-[10px] font-medium bg-red-50 text-red-600 border border-red-200 px-1.5 py-0.5 rounded">
 //                       −{discount}%
 //                     </span>
 //                   </div>
@@ -688,15 +688,15 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
         {/* Slider Controls - Kept circular as seen in screenshots */}
         <button
           onClick={() => setCurrentSlide(prev => (prev - 1 + banners.length) % banners.length)}
-          className="hidden sm:flex absolute left-6 top-1/3 -translate-y-1/2 w-12 h-12 items-center justify-center group z-20 bg-black rounded-full transition-transform hover:scale-110"
+          className="hidden sm:flex absolute start-6 top-1/3 -translate-y-1/2 w-12 h-12 items-center justify-center group z-20 bg-black rounded-full transition-transform hover:scale-110"
         >
-          <ChevronLeft size={24} className="text-white" />
+          <ChevronLeft size={24} className="text-white rtl:rotate-180" />
         </button>
         <button
           onClick={() => setCurrentSlide(prev => (prev + 1) % banners.length)}
-          className="hidden sm:flex absolute right-6 top-1/3 -translate-y-1/2 w-12 h-12 items-center justify-center group z-20 bg-black rounded-full transition-transform hover:scale-110"
+          className="hidden sm:flex absolute end-6 top-1/3 -translate-y-1/2 w-12 h-12 items-center justify-center group z-20 bg-black rounded-full transition-transform hover:scale-110"
         >
-          <ChevronRight size={24} className="text-white" />
+          <ChevronRight size={24} className="text-white rtl:rotate-180" />
         </button>
       </div>
 

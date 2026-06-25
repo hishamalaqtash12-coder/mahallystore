@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import {
   Send, Search, Loader2, ShieldCheck, BadgeCheck, Paperclip,
@@ -11,7 +12,7 @@ import {
   ChevronRight, Package
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 const ALL_EMOJIS = ["😊", "😂", "❤️", "👍", "🙏", "🔥", "✨", "🙌", "😍", "🤔", "😎", "🚀", "😢", "😅", "🥳", "😤", "🫡", "💯", "👀", "🎉", "😬", "🤝", "💪", "🫶", "😮", "🥰", "😑", "🙃", "😏", "🤩", "😴", "🫠", "👏", "🌟", "💀", "🤯"];
@@ -471,13 +472,13 @@ function MessagesContent() {
             </div>
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+            <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <input
               type="text"
               placeholder="ابحث في المحادثات…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full h-[31px] pl-9 pr-3 bg-zinc-50 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-[#be374f] transition-all"
+              className="w-full h-[31px] pe-9 ps-3 bg-zinc-50 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-[#be374f] transition-all"
             />
           </div>
           <div className="flex items-center mt-3 px-0.5 select-none">
@@ -519,7 +520,7 @@ function MessagesContent() {
                   <p className="text-[12px] text-zinc-500 truncate mt-0.5">مدير النظام</p>
                 </div>
                 {adminUnreadCount > 0 && (
-                  <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 ml-2">
+                  <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 me-2">
                     {adminUnreadCount}
                   </span>
                 )}
@@ -585,14 +586,14 @@ function MessagesContent() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
                         <p className={`text-[13px] font-medium truncate ${isActive ? "text-[#be374f]" : "text-zinc-900"}`}>{conv.name}</p>
-                        <span className="text-[11px] text-zinc-400 shrink-0 ml-2">{conv.time}</span>
+                        <span className="text-[11px] text-zinc-400 shrink-0 me-2">{conv.time}</span>
                       </div>
                       <div className="flex items-center justify-between mt-0.5">
                         <p className={`text-[12px] truncate ${conv.unreadCount > 0 && !isActive ? "text-zinc-900 font-bold" : "text-zinc-500"}`}>
                           {conv.lastMessage}
                         </p>
                         {conv.unreadCount > 0 && (
-                          <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 ml-2">
+                          <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 me-2">
                             {conv.unreadCount}
                           </span>
                         )}
@@ -673,7 +674,7 @@ function MessagesContent() {
                             } ${isMe ? "bg-[#be374f] text-white border-[#be374f]" : "bg-white text-zinc-800 border-zinc-200 shadow-sm"}`}
                         >
                           {msg.replyTo && (
-                            <div className={`mb-2 p-2 border-l-2 text-[11px] rounded-sm ${isMe ? "border-white/40 bg-white/10 text-white/60" : "border-[#be374f] bg-zinc-50 text-zinc-500"}`}>
+                            <div className={`mb-2 p-2 border-e-2 text-[11px] rounded-sm ${isMe ? "border-white/40 bg-white/10 text-white/60" : "border-[#be374f] bg-zinc-50 text-zinc-500"}`}>
                               ↩ {msg.replyTo.text}
                             </div>
                           )}
@@ -709,12 +710,12 @@ function MessagesContent() {
                           </div>
 
                           {msg.reaction && !msg.isDeleted && (
-                            <div className="absolute -bottom-2 -right-2 bg-white shadow border border-zinc-100 px-1.5 py-0.5 rounded-full text-[12px]">{msg.reaction}</div>
+                            <div className="absolute -bottom-2 -start-2 bg-white shadow border border-zinc-100 px-1.5 py-0.5 rounded-full text-[12px]">{msg.reaction}</div>
                           )}
 
                           {/* Action Dock */}
                           {!msg.isDeleted && (
-                            <div className={`absolute -top-9 ${isMe ? "right-0" : "left-0"} flex gap-1 bg-white border border-zinc-200 p-1 shadow-md rounded-md z-50 transition-all ${isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"}`}>
+                            <div className={`absolute -top-9 ${isMe ? "start-0" : "end-0"} flex gap-1 bg-white border border-zinc-200 p-1 shadow-md rounded-md z-50 transition-all ${isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"}`}>
                               <button onClick={(e) => { e.stopPropagation(); setReplyTo(msg); setSelectedMessageId(null); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-[#be374f] rounded transition-all" title="الرد">
                                 <Reply size={13} />
                               </button>
@@ -727,7 +728,7 @@ function MessagesContent() {
                                 </button>
                               )}
                               {showReactionPicker === msg.id && (
-                                <div className="absolute bottom-full mb-1 left-0 bg-white border border-zinc-200 shadow-xl p-1.5 flex gap-1 rounded-md z-[70]" onClick={e => e.stopPropagation()}>
+                                <div className="absolute bottom-full mb-1 end-0 bg-white border border-zinc-200 shadow-xl p-1.5 flex gap-1 rounded-md z-[70]" onClick={e => e.stopPropagation()}>
                                   {REACTION_EMOJIS.map(e => (
                                     <button key={e} onClick={() => handleReact(msg, e)} className="text-[16px] hover:scale-125 transition-all p-0.5">{e}</button>
                                   ))}
@@ -776,7 +777,7 @@ function MessagesContent() {
                     <Smile size={16} />
                   </button>
                   {showEmoji && (
-                    <div className="absolute bottom-full left-0 bg-white border border-zinc-200 shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[240px] rounded-md z-50">
+                    <div className="absolute bottom-full end-0 bg-white border border-zinc-200 shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[240px] rounded-md z-50">
                       {ALL_EMOJIS.map(e => (
                         <button key={e} onClick={() => { setNewMessage(p => p + e); setShowEmoji(false); }} className="text-[20px] hover:scale-125 transition-all p-0.5">{e}</button>
                       ))}
@@ -1016,13 +1017,13 @@ function MessagesContent() {
                 </button>
               </div>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+                <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
                 <input
                   type="text"
                   placeholder="ابحث عن البائعين…"
                   value={vendorSearch}
                   onChange={e => setVendorSearch(e.target.value)}
-                  className="w-full h-[34px] pl-9 pr-4 bg-zinc-50 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-[#be374f] transition-all"
+                  className="w-full h-[34px] pe-9 ps-4 bg-zinc-50 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-[#be374f] transition-all"
                 />
               </div>
             </div>

@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, Edit3, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import ConfirmationModal from "@/components/ConfirmationModal";

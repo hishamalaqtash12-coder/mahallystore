@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { ShoppingCart, Loader2, Package } from "lucide-react";
 
 function OrderRow({ order }) {

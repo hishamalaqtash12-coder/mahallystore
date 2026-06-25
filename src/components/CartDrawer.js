@@ -3,7 +3,7 @@
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { X, Minus, Plus, ShoppingCart, Trash2, ChevronRight } from "lucide-react";
 
 export default function CartDrawer() {
@@ -24,7 +24,7 @@ export default function CartDrawer() {
       />
 
       {/* 2. AMAZON-STYLE DRAWER PANEL */}
-      <div className="fixed inset-y-0 right-0 w-full max-w-[380px] bg-[#EAEDED] shadow-2xl z-[1001] flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="fixed inset-y-0 start-0 w-full max-w-[380px] bg-[#EAEDED] shadow-2xl z-[1001] flex flex-col animate-in slide-in-from-right duration-300">
 
         {/* Header - Amazon Navy */}
         <div className="bg-[#232f3e] text-white px-5 h-[60px] flex items-center justify-between shrink-0 shadow-md">
@@ -37,7 +37,7 @@ export default function CartDrawer() {
           <Link
             href="/cart"
             onClick={() => setIsCartOpen(false)}
-            className="ml-auto mr-4 text-[11px] font-bold uppercase tracking-widest text-orange-400 hover:text-white border border-orange-400/30 px-2 py-1 rounded transition-all"
+            className="me-auto ms-4 text-[11px] font-bold uppercase tracking-widest text-orange-400 hover:text-white border border-orange-400/30 px-2 py-1 rounded transition-all"
           >
             عرض السلة كاملة
           </Link>
@@ -90,14 +90,14 @@ export default function CartDrawer() {
                           {/* Amazon-style Qty Selector */}
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center bg-[#F0F2F2] border border-[#D5D9D9] rounded-lg shadow-sm">
-                              <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.variation_id)} className="p-1.5 hover:bg-[#E3E6E6] rounded-l-lg transition-colors touch-target">
+                              <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.variation_id)} className="p-1.5 hover:bg-[#E3E6E6] rounded-e-lg transition-colors touch-target">
                                 <Minus size={14} className="text-zinc-600" />
                               </button>
                               <span className="px-3 text-xs font-bold text-zinc-900 border-x border-[#D5D9D9]">{item.quantity}</span>
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity + 1, item.variation_id)}
                                 disabled={item.manage_stock && item.stock_quantity !== null && item.quantity >= item.stock_quantity}
-                                className="p-1.5 hover:bg-[#E3E6E6] rounded-r-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed touch-target"
+                                className="p-1.5 hover:bg-[#E3E6E6] rounded-s-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed touch-target"
                               >
                                 <Plus size={14} className="text-zinc-600" />
                               </button>

@@ -111,7 +111,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
               <div className="space-y-2">
                  <label className="text-[13px] font-bold text-zinc-700">Coupon Amount</label>
                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold">
+                    <span className="absolute end-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold">
                        {formData.discount_type === 'percent' ? '%' : 'JOD'}
                     </span>
                     <input 
@@ -120,7 +120,7 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
                       value={formData.amount}
                       onChange={e => setFormData({...formData, amount: e.target.value})}
                       placeholder="0.00"
-                      className="w-full h-[42px] pl-12 pr-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] font-bold outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner"
+                      className="w-full h-[42px] pe-12 ps-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] font-bold outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner"
                       required
                     />
                  </div>
@@ -129,12 +129,12 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
               <div className="space-y-2">
                  <label className="text-[13px] font-bold text-zinc-700">Expiry Date</label>
                  <div className="relative group">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Calendar className="absolute end-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                     <input 
                       type="date" 
                       value={formData.date_expires}
                       onChange={e => setFormData({...formData, date_expires: e.target.value})}
-                      className="w-full h-[42px] pl-12 pr-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner"
+                      className="w-full h-[42px] pe-12 ps-4 bg-zinc-50 border border-zinc-200 rounded-xl text-[14px] outline-none focus:border-[#be374f] focus:bg-white transition-all shadow-inner"
                     />
                  </div>
               </div>

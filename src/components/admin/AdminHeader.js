@@ -3,7 +3,7 @@
 import { Search, ChevronDown, Settings, LogOut, RefreshCw, User, Sparkles, Navigation, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 
 const ADMIN_PAGES = [
   { title: "Admin Dashboard", description: "View store stats, charts, and seller list", path: "/admin", category: "Navigation" },
@@ -37,17 +37,17 @@ export default function AdminHeader() {
       <div className="relative w-full max-w-sm hidden sm:block">
         <Search
           size={15}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+          className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400"
         />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search dashboard, settings, reports..."
-          className="w-full h-9 bg-zinc-50 border border-zinc-200 rounded-lg pl-9 pr-4 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors"
+          className="w-full h-9 bg-zinc-50 border border-zinc-200 rounded-lg pe-9 ps-4 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors"
         />
         {searchQuery.trim().length > 0 && (
-          <div className="absolute left-0 right-0 mt-2 bg-white border border-zinc-200 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-zinc-100 max-h-[380px] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
+          <div className="absolute end-0 start-0 mt-2 bg-white border border-zinc-200 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-zinc-100 max-h-[380px] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
             <div className="px-3 py-2 bg-zinc-50 flex items-center justify-between text-[11px] font-bold text-zinc-400">
               <span>SEARCH RESULTS</span>
               <span>ESC TO CLOSE</span>
@@ -75,7 +75,7 @@ export default function AdminHeader() {
                       router.push(item.path);
                       setSearchQuery("");
                     }}
-                    className="w-full text-left px-4 py-2.5 hover:bg-zinc-50 flex items-start gap-3 transition-colors group cursor-pointer"
+                    className="w-full text-end px-4 py-2.5 hover:bg-zinc-50 flex items-start gap-3 transition-colors group cursor-pointer"
                   >
                     <div className="h-7 w-7 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-200 group-hover:text-zinc-900 transition-colors shrink-0">
                       <Navigation size={13} />
@@ -96,7 +96,7 @@ export default function AdminHeader() {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-2 me-auto">
 
         {/* Refresh */}
         <button
@@ -116,7 +116,7 @@ export default function AdminHeader() {
             <div className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-semibold">
               {initials}
             </div>
-            <div className="hidden lg:block text-left">
+            <div className="hidden lg:block text-end">
               <p className="text-sm font-medium text-zinc-900 leading-tight">{displayName}</p>
               <p className="text-xs text-zinc-400">Administrator</p>
             </div>
@@ -127,7 +127,7 @@ export default function AdminHeader() {
           </button>
 
           {isUserMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg py-1.5 z-50">
+            <div className="absolute start-0 mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg py-1.5 z-50">
               <div className="px-4 py-2.5 border-b border-zinc-100 mb-1">
                 <p className="text-xs font-medium text-zinc-400">Signed in as</p>
                 <p className="text-sm font-medium text-zinc-900 truncate mt-0.5">{user?.email}</p>

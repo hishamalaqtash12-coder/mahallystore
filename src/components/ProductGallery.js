@@ -68,13 +68,13 @@ export default function ProductGallery({ images, productName }) {
           <>
             <button 
               onClick={(e) => { e.stopPropagation(); prevImage(); }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur shadow-lg flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-20"
+              className="absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur shadow-lg flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-20"
             >
               <ChevronLeft size={24} />
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); nextImage(); }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur shadow-lg flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-20"
+              className="absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur shadow-lg flex items-center justify-center text-zinc-900 opacity-0 group-hover:opacity-100 transition-all hover:bg-white z-20"
             >
               <ChevronRight size={24} />
             </button>
@@ -82,12 +82,12 @@ export default function ProductGallery({ images, productName }) {
         )}
 
         {/* Counter Indicator */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur text-white text-[10px] font-black px-3 py-1 rounded-full z-20">
+        <div className="absolute bottom-4 end-1/2 -translate-x-1/2 bg-black/50 backdrop-blur text-white text-[10px] font-black px-3 py-1 rounded-full z-20">
           {activeImage + 1} / {galleryImages.length}
         </div>
 
         {/* Ad Tag */}
-        <div className="absolute top-0 right-0 bg-zinc-900 text-white text-[9px] font-black px-2 py-1 uppercase z-10 tracking-widest">
+        <div className="absolute top-0 start-0 bg-zinc-900 text-white text-[9px] font-black px-2 py-1 uppercase z-10 tracking-widest">
           MAHALLY EXCLUSIVE
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { Star, Package, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function AccountReviewsPage() {
   const { user, wooId, email, loading } = useAuth();
@@ -73,13 +73,13 @@ export default function AccountReviewsPage() {
                   
                   {/* Detailed Transaction Info Panel */}
                   <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-zinc-50 border border-zinc-100 rounded-md text-[13px]">
-                    <div className="space-y-1 border-r border-dashed border-zinc-200 last:border-0 pr-2">
+                    <div className="space-y-1 border-r border-dashed border-zinc-200 last:border-0 ps-2">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Reference Details</span>
                       <div className="text-zinc-700 font-medium">Order ID: <span className="font-bold text-zinc-900">{review.order_id ? `#${review.order_id}` : "N/A"}</span></div>
                       <div className="text-zinc-500 text-[11px]">Product ID: #{review.product_id}</div>
                     </div>
                     
-                    <div className="space-y-1 sm:border-r sm:border-dashed sm:border-zinc-200 last:border-0 pr-2">
+                    <div className="space-y-1 sm:border-r sm:border-dashed sm:border-zinc-200 last:border-0 ps-2">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Merchant Details</span>
                       <div className="text-zinc-700 font-medium truncate max-w-[180px]" title={review.merchant_name}>
                         {review.merchant_name || "Mahally Partner"}
@@ -89,7 +89,7 @@ export default function AccountReviewsPage() {
                       )}
                     </div>
                     
-                    <div className="space-y-1 md:border-r md:border-dashed md:border-zinc-200 last:border-0 pr-2">
+                    <div className="space-y-1 md:border-r md:border-dashed md:border-zinc-200 last:border-0 ps-2">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Pricing Info</span>
                       <div className="text-zinc-700 font-medium">
                         Product Price: <span className="font-bold text-zinc-900">JOD {parseFloat(review.product_price || 0).toFixed(2)}</span>

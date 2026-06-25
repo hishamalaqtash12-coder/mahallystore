@@ -1,9 +1,10 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import {
   Package,
   Search,
@@ -154,20 +155,20 @@ function AccountOrdersContent() {
             className={`pb-3 text-[15px] whitespace-nowrap font-medium relative ${activeStatus === tab.id ? 'text-black' : 'text-gray-500 hover:text-black transition-colors'}`}
           >
             {tab.label}
-            {activeStatus === tab.id && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-black"></div>}
+            {activeStatus === tab.id && <div className="absolute bottom-0 end-0 w-full h-[2px] bg-black"></div>}
           </Link>
         ))}
 
-        <div className="ml-auto relative mb-2">
+        <div className="me-auto relative mb-2">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="اسم المنتج / رقم الطلب"
-            className="w-72 h-9 bg-gray-50 border border-gray-200 rounded-md pl-4 pr-10 text-[13px] outline-none focus:border-[#be374f] focus:bg-white transition-all text-right"
+            className="w-72 h-9 bg-gray-50 border border-gray-200 rounded-md pe-4 ps-10 text-[13px] outline-none focus:border-[#be374f] focus:bg-white transition-all text-start"
             dir="rtl"
           />
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
       </div>
 
@@ -233,7 +234,7 @@ function AccountOrdersContent() {
                               شحنة من {vendor.name}
                             </h4>
                           )}
-                          <div className="space-y-4 pl-1">
+                          <div className="space-y-4 pe-1">
                             {vendor.items.map((item, idx) => (
                               <div key={idx} className="flex gap-4">
                                 <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden border border-gray-50 flex items-center justify-center p-1">
@@ -258,7 +259,7 @@ function AccountOrdersContent() {
                   </div>
                   {/* Right action column: only render if there are active actions available */}
                   {(order.status === 'completed' || ["processing", "on-hold", "pending", "pending payment"].includes(order.status)) && (
-                    <div className="w-48 border-r border-gray-50 pr-6 space-y-2">
+                    <div className="w-48 border-r border-gray-50 ps-6 space-y-2">
                       {(() => {
                         const hasReviewedItems = (order.line_items || []).some(item => reviewedProducts.has(item.product_id));
                         const canWriteReview = order.status === 'completed' && order.meta_data?.some(m => m.key === "mahally_customer_confirmed_receipt" && m.value === "yes") && !hasReviewedItems;

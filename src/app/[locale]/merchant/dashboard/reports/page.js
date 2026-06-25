@@ -217,7 +217,7 @@ export default function ReportsPage() {
                   </div>
                   <p className="text-[10px] text-zinc-500 mt-2">75% of monthly target reached</p>
                </div>
-               <TrendingUp className="absolute -right-4 -bottom-4 w-24 h-24 text-white/5 -rotate-12" />
+               <TrendingUp className="absolute -start-4 -bottom-4 w-24 h-24 text-white/5 -rotate-12" />
             </div>
          </div>
       </div>
@@ -227,7 +227,7 @@ export default function ReportsPage() {
             <h4 className="text-[16px] font-bold text-zinc-900">Recent Transactions Report</h4>
          </div>
          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-end">
                <thead>
                   <tr className="bg-zinc-100/50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                      <th className="px-6 py-4">Order ID</th>

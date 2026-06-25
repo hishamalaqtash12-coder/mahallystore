@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Mail, User, Lock, Store, ChevronRight, Clock, Info, ChevronDown, Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import Loader from "@/components/Loader";
 
@@ -361,7 +362,7 @@ function RegisterContent() {
                 <div className="space-y-2">
                   <button
                     onClick={() => handleRolePick("customer")}
-                    className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all"
+                    className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-end transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-lg">🛍️</div>
@@ -374,7 +375,7 @@ function RegisterContent() {
 
                   <button
                     onClick={() => handleRolePick("vendor")}
-                    className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all"
+                    className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-end transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-lg">🏪</div>
@@ -403,7 +404,7 @@ function RegisterContent() {
               <div className="space-y-3">
                 {selectedRole === "customer" && (
                   <div className="space-y-1">
-                    <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">الاسم الكامل</label>
+                    <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">الاسم الكامل</label>
                     <input
                       type="text"
                       value={name}
@@ -416,7 +417,7 @@ function RegisterContent() {
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">رقم الهاتف المحمول</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">رقم الهاتف المحمول</label>
                   <div dir="ltr" className="flex h-[31px] rounded-[3px] border border-zinc-400 shadow-inner focus-within:border-[#be374f] focus-within:ring-1 focus-within:ring-[#be374f] overflow-hidden transition-all bg-white">
                     <div className="flex items-center gap-1 bg-zinc-50 border-r border-zinc-400 px-2 text-[13px] text-zinc-700 select-none">
                       <span>+962</span>
@@ -439,7 +440,7 @@ function RegisterContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">البريد الإلكتروني</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">البريد الإلكتروني</label>
                   <input
                     type="email"
                     dir="ltr"
@@ -447,12 +448,12 @@ function RegisterContent() {
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-left"
+                    className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-end"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">كلمة المرور</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">كلمة المرور</label>
                   <div className="relative" dir="ltr">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -461,12 +462,12 @@ function RegisterContent() {
                       onChange={e => setPassword(e.target.value)}
                       placeholder="8 أحرف على الأقل"
                       required
-                      className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 pr-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-left"
+                      className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 ps-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-end"
                     />
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                      className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -491,7 +492,7 @@ function RegisterContent() {
                 </div>
 
                 <div className="space-y-1 pt-2">
-                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">تأكيد كلمة المرور</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">تأكيد كلمة المرور</label>
                   <div className="relative" dir="ltr">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
@@ -499,12 +500,12 @@ function RegisterContent() {
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       required
-                      className={`w-full h-[31px] bg-white border ${confirmPassword && !passwordsMatch ? 'border-red-500' : 'border-zinc-400'} rounded-[3px] px-2 pr-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-left`}
+                      className={`w-full h-[31px] bg-white border ${confirmPassword && !passwordsMatch ? 'border-red-500' : 'border-zinc-400'} rounded-[3px] px-2 ps-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-end`}
                     />
                     <button 
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                      className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
                     >
                       {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -520,7 +521,7 @@ function RegisterContent() {
                     <h3 className="text-[16px] font-bold text-zinc-900 mb-4">تفاصيل المتجر</h3>
                     <div className="space-y-3">
                       <div className="space-y-1">
-                        <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">اسم النشاط التجاري/المتجر</label>
+                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">اسم النشاط التجاري/المتجر</label>
                         <input
                           type="text"
                           value={storeName}
@@ -529,11 +530,11 @@ function RegisterContent() {
                           required
                           className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all"
                         />
-                        <p className="text-[11px] text-zinc-500 mt-1 pl-0.5">يمكنك تغيير اسم نشاطك التجاري ونوعه لاحقاً.</p>
+                        <p className="text-[11px] text-zinc-500 mt-1 pe-0.5">يمكنك تغيير اسم نشاطك التجاري ونوعه لاحقاً.</p>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">فئة النشاط التجاري</label>
+                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">فئة النشاط التجاري</label>
                         <select
                           value={storeCategory}
                           onChange={e => setStoreCategory(e.target.value)}
@@ -546,7 +547,7 @@ function RegisterContent() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">وصف المتجر (اختياري)</label>
+                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">وصف المتجر (اختياري)</label>
                         <textarea
                           value={storeDescription}
                           onChange={e => setStoreDescription(e.target.value)}
@@ -606,7 +607,7 @@ function RegisterContent() {
                 <button
                   onClick={handleChoosePhone}
                   disabled={loading}
-                  className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all group"
+                  className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-end transition-all group"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-zinc-100 group-hover:bg-brand/10 rounded-full flex items-center justify-center">
@@ -622,7 +623,7 @@ function RegisterContent() {
                 <button
                   onClick={handleChooseEmail}
                   disabled={loading || !email}
-                  className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-left transition-all group disabled:opacity-50"
+                  className="w-full h-auto p-4 bg-white border border-zinc-300 rounded-[3px] hover:bg-zinc-50 text-end transition-all group disabled:opacity-50"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-zinc-100 group-hover:bg-brand/10 rounded-full flex items-center justify-center">

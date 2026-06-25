@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { Search, Store, MapPin, ChevronRight, Star, Loader2, Filter, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -103,12 +103,12 @@ export default function VendorsPage() {
             </div>
 
             <div className="relative w-full max-w-md">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Search size={18} className="absolute end-4 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="ابحث عن المتاجر بالاسم أو الوصف..."
-                className="w-full h-11 bg-white border border-zinc-300 rounded-md pl-11 pr-4 text-[14px] outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-sm"
+                className="w-full h-11 bg-white border border-zinc-300 rounded-md pe-11 ps-4 text-[14px] outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-sm"
               />
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function VendorsPage() {
               <li key={c}>
                 <button
                   onClick={() => setCatFilter(c)}
-                  className={`text-[13px] w-full text-right py-1 hover:text-brand transition-colors ${catFilter === c ? "font-bold text-zinc-950" : "text-brand-dark"}`}
+                  className={`text-[13px] w-full text-start py-1 hover:text-brand transition-colors ${catFilter === c ? "font-bold text-zinc-950" : "text-brand-dark"}`}
                 >
                   {c === "All" ? "الكل" : c}
                 </button>
@@ -239,7 +239,7 @@ export default function VendorsPage() {
                     <div className="absolute inset-0 bg-black/5" />
 
                     {/* Logo Overlay */}
-                    <div className="absolute -bottom-6 left-4 w-16 h-16 rounded-md bg-white border border-zinc-200 shadow-md overflow-hidden p-1 flex items-center justify-center">
+                    <div className="absolute -bottom-6 end-4 w-16 h-16 rounded-md bg-white border border-zinc-200 shadow-md overflow-hidden p-1 flex items-center justify-center">
                       {v.storeLogo ? (
                         <Image src={v.storeLogo} alt={v.storeName || "Vendor Logo"} fill className="object-contain p-1" />
                       ) : (

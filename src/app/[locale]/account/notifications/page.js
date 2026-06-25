@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, Bell, ShieldCheck, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useState, useEffect } from "react";
 
 export default function AccountNotificationsPage() {
@@ -76,7 +76,7 @@ export default function AccountNotificationsPage() {
       <div className="bg-white border border-gray-100 rounded-md overflow-hidden divide-y divide-gray-50 shadow-sm">
         {notificationSettings.map((item) => (
           <div key={item.id} className="p-6 flex items-start justify-between group hover:bg-gray-50/5 transition-all">
-            <div className="flex flex-col gap-0.5 max-w-2xl pr-8">
+            <div className="flex flex-col gap-0.5 max-w-2xl ps-8">
               <h3 className="text-[16px] font-bold text-gray-900 group-hover:text-[#be374f] transition-colors">{item.title}</h3>
               <p className="text-[13px] text-gray-500 leading-relaxed mb-2">{item.desc}</p>
               {item.meta && <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{item.meta}</span>}
@@ -87,14 +87,14 @@ export default function AccountNotificationsPage() {
               disabled={isSaving}
               className={`relative w-12 h-6 rounded-full transition-all flex items-center shrink-0 mt-1 ${item.enabled ? 'bg-[#be374f]' : 'bg-gray-200'}`}
             >
-               <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${item.enabled ? 'left-7' : 'left-1'}`} />
+               <div className={`absolute w-4 h-4 bg-white rounded-full shadow-sm transition-all ${item.enabled ? 'end-7' : 'end-1'}`} />
             </button>
           </div>
         ))}
       </div>
 
       {isSaving && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 rounded-md shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 z-[100]">
+        <div className="fixed bottom-10 end-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 rounded-md shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 z-[100]">
            <Loader2 size={18} className="animate-spin text-[#be374f]" />
            <span className="text-[14px] font-bold">Preferences saved</span>
         </div>

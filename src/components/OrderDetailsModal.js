@@ -2,7 +2,7 @@
 
 import { X, Package, Printer, MapPin, CreditCard, MessageCircle, Clock, RefreshCw, History, CheckCircle2, Star, ShoppingBag, Edit2, AlertTriangle, MessageSquare, Store } from "lucide-react";
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import ReportModal from "@/components/ReportModal";
 
 
@@ -166,7 +166,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
             table { width: 100%; border-collapse: collapse; }
             th, td { padding: 10px 8px; text-align: left; vertical-align: top; font-size: 13px; border-bottom: 1px solid #e4e4e7; }
             th { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #52525b; }
-            .text-right { text-align: right; }
+            .text-start { text-align: right; }
             .text-center { text-align: center; }
             .summary { width: 340px; margin-left: auto; border-top: 2px solid #18181b; padding-top: 10px; }
             .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
@@ -221,8 +221,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                     <tr>
                       <th>Item</th>
                       <th class="text-center">Qty</th>
-                      <th class="text-right">Price</th>
-                      <th class="text-right">Total</th>
+                      <th class="text-start">Price</th>
+                      <th class="text-start">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -233,8 +233,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                           ${item.sku ? `<div class="muted" style="font-size: 11px;">SKU: ${item.sku}</div>` : ''}
                         </td>
                         <td class="text-center">${item.quantity || 1}</td>
-                        <td class="text-right">${formatCurrency(item.price || 0)}</td>
-                        <td class="text-right">${formatCurrency(item.total || 0)}</td>
+                        <td class="text-start">${formatCurrency(item.price || 0)}</td>
+                        <td class="text-start">${formatCurrency(item.total || 0)}</td>
                       </tr>
                     `).join('')}
                   </tbody>
@@ -291,7 +291,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
             <h2 className="text-[15px] font-bold text-zinc-900">تفاصيل الطلب</h2>
             <p className="text-[12px] text-zinc-500 mt-0.5">
               طلب #{order.id}
-              {mahallyId && <span className="mr-2 text-[10px] text-zinc-400 uppercase tracking-widest">{mahallyId}</span>}
+              {mahallyId && <span className="ms-2 text-[10px] text-zinc-400 uppercase tracking-widest">{mahallyId}</span>}
             </p>
           </div>
           <button onClick={onClose} className="text-zinc-500 hover:text-zinc-900 transition-colors p-1">
@@ -414,7 +414,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
             return (
               <div className="bg-white border border-zinc-200 rounded-lg p-6 shadow-sm">
-                <div className="space-y-6 pl-4 relative">
+                <div className="space-y-6 pe-4 relative">
                   {TRACKING_STEPS.map((s, idx) => {
                     const isPast = s.step < currentStep;
                     const isCurrent = s.step === currentStep;
@@ -426,7 +426,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                         {/* Connecting Line */}
                         {!isLast && (
                           <div 
-                            className={`absolute left-[11px] top-[30px] bottom-[-30px] w-[2px] ${isPast ? 'bg-brand' : 'bg-zinc-200'}`}
+                            className={`absolute end-[11px] top-[30px] bottom-[-30px] w-[2px] ${isPast ? 'bg-brand' : 'bg-zinc-200'}`}
                             style={{ height: 'calc(100% + 10px)' }}
                           />
                         )}
@@ -697,7 +697,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                         </div>
 
                         {/* Right price */}
-                        <div className="text-right shrink-0">
+                        <div className="text-start shrink-0">
                           <p className="text-[14px] font-bold text-brand">JOD {parseFloat(item.total || 0).toFixed(2)}</p>
                           {item.quantity > 1 && (
                             <p className="text-[11px] text-zinc-400">×{item.quantity}</p>
@@ -721,7 +721,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                   <h1 className="text-2xl font-bold text-zinc-900 uppercase">Invoice</h1>
                   <p className="text-sm text-zinc-500 font-medium mt-1">Order #{order.id}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <h2 className="text-xl font-bold text-zinc-900">{vendor.id !== 'mahally' ? vendor.name : 'Mahally Official'}</h2>
                   {vendor.phone && <p className="text-sm text-zinc-600">Tel: {vendor.phone}</p>}
                   {vendor.email && <p className="text-sm text-zinc-600">{vendor.email}</p>}
@@ -736,20 +736,20 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                   <p className="text-sm text-zinc-600">{order.billing?.city}, {order.billing?.country}</p>
                   <p className="text-sm text-zinc-600">{order.billing?.phone}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <p className="text-sm"><span className="font-bold text-zinc-900">Invoice Date:</span> <span className="text-zinc-600">{new Date(order.date_created).toLocaleDateString()}</span></p>
                   <p className="text-sm"><span className="font-bold text-zinc-900">Payment Method:</span> <span className="text-zinc-600">{order.payment_method_title}</span></p>
                   <p className="text-sm"><span className="font-bold text-zinc-900">Status:</span> <span className="text-zinc-600 uppercase">{order.status}</span></p>
                 </div>
               </div>
 
-              <table className="w-full text-left border-collapse mb-8">
+              <table className="w-full text-end border-collapse mb-8">
                 <thead>
                   <tr className="border-b-2 border-zinc-200">
                     <th className="py-2 text-sm font-bold text-zinc-900">Item</th>
                     <th className="py-2 text-sm font-bold text-zinc-900 text-center">Qty</th>
-                    <th className="py-2 text-sm font-bold text-zinc-900 text-right">Price</th>
-                    <th className="py-2 text-sm font-bold text-zinc-900 text-right">Total</th>
+                    <th className="py-2 text-sm font-bold text-zinc-900 text-start">Price</th>
+                    <th className="py-2 text-sm font-bold text-zinc-900 text-start">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
@@ -760,8 +760,8 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                         {item.sku && <p className="text-xs text-zinc-500">SKU: {item.sku}</p>}
                       </td>
                       <td className="py-3 text-sm text-zinc-700 text-center">{item.quantity}</td>
-                      <td className="py-3 text-sm text-zinc-700 text-right">JOD {parseFloat(item.price || 0).toFixed(2)}</td>
-                      <td className="py-3 text-sm text-zinc-900 font-bold text-right">JOD {parseFloat(item.total || 0).toFixed(2)}</td>
+                      <td className="py-3 text-sm text-zinc-700 text-start">JOD {parseFloat(item.price || 0).toFixed(2)}</td>
+                      <td className="py-3 text-sm text-zinc-900 font-bold text-start">JOD {parseFloat(item.total || 0).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>

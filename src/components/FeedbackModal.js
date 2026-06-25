@@ -136,7 +136,7 @@ export default function FeedbackModal({ isOpen, onClose, isRTL = true }) {
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-5 left-5 p-2 rounded hover:bg-gray-100 transition-colors z-10"
+          className="absolute top-5 end-5 p-2 rounded hover:bg-gray-100 transition-colors z-10"
         >
           <X size={20} className="text-gray-400" />
         </button>
@@ -236,7 +236,7 @@ export default function FeedbackModal({ isOpen, onClose, isRTL = true }) {
                   maxLength={1000}
                   dir="rtl"
                 />
-                <span className="absolute bottom-3 left-4 text-[11px] text-gray-400 font-medium">
+                <span className="absolute bottom-3 end-4 text-[11px] text-gray-400 font-medium">
                   {comment.length}/1000
                 </span>
               </div>

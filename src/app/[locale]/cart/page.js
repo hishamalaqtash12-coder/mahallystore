@@ -3,8 +3,8 @@
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import { 
   Trash2, 
   Minus, 
@@ -153,7 +153,7 @@ export default function CartPage() {
              <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center">
                 <ShoppingCart size={64} className="text-gray-200" />
              </div>
-             <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border border-gray-100">
+             <div className="absolute -bottom-2 -start-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border border-gray-100">
                 <Heart size={24} className="text-[#be374f]" />
              </div>
           </div>
@@ -365,7 +365,7 @@ export default function CartPage() {
                   <h4 className="font-black text-[16px] mb-1">حمّل التطبيق</h4>
                   <p className="text-[13px] text-emerald-100 font-medium">احصل على باقة كوبونات بقيمة 40 د.أ!</p>
                </div>
-               <div className="absolute top-1/2 -right-4 -translate-y-1/2 opacity-20 group-hover:opacity-40 transition-opacity">
+               <div className="absolute top-1/2 -start-4 -translate-y-1/2 opacity-20 group-hover:opacity-40 transition-opacity">
                   <ShoppingCart size={80} strokeWidth={3} />
                </div>
             </div>

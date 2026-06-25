@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { Megaphone, Store, Package, Plus, Calendar, CheckCircle2, XCircle, Clock, AlertCircle, ExternalLink, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 
 const AD_PRICING = {
@@ -240,7 +240,7 @@ export default function MerchantAdvertisingPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-end border-collapse">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200">
                     <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Campaign</th>

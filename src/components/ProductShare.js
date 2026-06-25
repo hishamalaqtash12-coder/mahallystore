@@ -39,7 +39,7 @@ export default function ProductShare({ productTitle }) {
     >
       {copied ? <Check size={18} className="text-green-600" /> : <Share2 size={18} />}
       {copied && (
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap animate-in fade-in slide-in-from-bottom-1">
+        <span className="absolute -top-8 end-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap animate-in fade-in slide-in-from-bottom-1">
           Copied!
         </span>
       )}

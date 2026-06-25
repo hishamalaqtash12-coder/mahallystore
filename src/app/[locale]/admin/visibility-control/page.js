@@ -254,9 +254,9 @@ export default function VisibilityControlPage() {
             placeholder={`Search ${activeTab}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 rounded-lg border border-zinc-200 text-sm focus:border-brand outline-none shadow-sm transition-all"
+            className="w-full h-10 pe-10 ps-4 rounded-lg border border-zinc-200 text-sm focus:border-brand outline-none shadow-sm transition-all"
           />
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Search size={16} className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" />
         </div>
       </div>
 

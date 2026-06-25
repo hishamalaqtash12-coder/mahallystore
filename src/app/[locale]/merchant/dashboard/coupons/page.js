@@ -142,13 +142,13 @@ export default function CouponsPage() {
         <div className="p-6 border-b border-zinc-100 flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-zinc-50/50">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+              <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
               <input
                 type="text"
                 placeholder="Search codes..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-[36px] bg-white border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
+                className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
               />
             </div>
             <select className="h-[36px] px-4 bg-white border border-zinc-300 rounded-md text-[13px] outline-none shadow-sm cursor-pointer">
@@ -160,7 +160,7 @@ export default function CouponsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-end">
             <thead>
               <tr className="bg-zinc-100/50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                 <th className="px-6 py-4">Coupon Code</th>
@@ -212,7 +212,7 @@ export default function CouponsPage() {
                       {c.status}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-right">
+                  <td className="px-6 py-5 text-start">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
                         <Edit size={16} />

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Info, Clock, Mail, Store, ChevronDown, Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import Loader from "@/components/Loader";
 import { Suspense } from "react";
@@ -327,7 +328,7 @@ function LoginContent() {
               <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{step === "phone" ? "تسجيل الدخول برقم الهاتف" : "تسجيل الدخول"}</h1>
 
               <div className="space-y-1">
-                <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">
+                <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">
                   {step === "phone" ? "رقم الهاتف" : "البريد الإلكتروني أو اسم المستخدم"}
                 </label>
                 {step === "phone" ? (
@@ -357,26 +358,26 @@ function LoginContent() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-left"
+                    className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-end"
                   />
                 )}
               </div>
 
               {step === "email" && (
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pl-0.5">كلمة المرور</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">كلمة المرور</label>
                   <div className="relative" dir="ltr">
                     <input
                       type={showPassword ? "text" : "password"}
                       dir="ltr"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 pr-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-left"
+                      className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 ps-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-end"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                      className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -500,7 +501,7 @@ function LoginContent() {
                 )}
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left space-y-3">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-end space-y-3">
                 <div className="flex items-start gap-3">
                   <Store size={16} className="text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-[12px] text-amber-800 leading-relaxed">

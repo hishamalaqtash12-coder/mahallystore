@@ -17,7 +17,7 @@ import {
   Phone,
   ArrowRight,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import AIInsightsCard from "@/components/admin/AIInsightsCard";
 
 export default function AdminDashboard() {
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg animate-in slide-in-from-right-4 duration-300 ${
+          className={`fixed top-6 start-6 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg animate-in slide-in-from-start-4 duration-300 ${
             toast.type === "success"
               ? "bg-emerald-600 text-white animate-[bounce_0.5s_ease-in-out_1]"
               : "bg-red-600 text-white"

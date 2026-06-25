@@ -68,12 +68,12 @@ export default function ProductReviews({ reviews = [], productName = "", product
                 <select 
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="h-8 pl-3 pr-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[12px] text-[#0F1111] appearance-none cursor-pointer hover:bg-[#E3E6E6] shadow-sm outline-none"
+                  className="h-8 pe-3 ps-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[12px] text-[#0F1111] appearance-none cursor-pointer hover:bg-[#E3E6E6] shadow-sm outline-none"
                 >
                    <option>الأهم</option>
                    <option>الأحدث</option>
                 </select>
-                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none" />
+                <ChevronDown size={12} className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none" />
              </div>
           </div>
 
@@ -122,7 +122,7 @@ export default function ProductReviews({ reviews = [], productName = "", product
                     <button className="h-8 px-6 border border-[#D5D9D9] rounded-lg text-[13px] text-[#0F1111] hover:bg-[#F7FAFA] shadow-sm">
                       مفيد
                     </button>
-                    <span className="text-[12px] text-[#565959] border-r border-zinc-200 pr-4">إبلاغ</span>
+                    <span className="text-[12px] text-[#565959] border-r border-zinc-200 ps-4">إبلاغ</span>
                   </div>
                 </div>
               ))}

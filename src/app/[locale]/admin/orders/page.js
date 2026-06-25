@@ -106,7 +106,7 @@ export default function AdminOrdersPage() {
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-        <table className="w-full text-left">
+        <table className="w-full text-end">
           <thead>
             <tr className="border-b border-zinc-200 bg-zinc-50">
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
@@ -124,7 +124,7 @@ export default function AdminOrdersPage() {
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-center">
                 Status
               </th>
-              <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-right">
+              <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-start">
                 Actions
               </th>
             </tr>
@@ -168,8 +168,8 @@ export default function AdminOrdersPage() {
                       {o.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-400 hover:text-indigo-600 hover:border-indigo-200 transition-colors opacity-0 group-hover:opacity-100 ml-auto">
+                  <td className="px-6 py-4 text-start">
+                    <button className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-400 hover:text-indigo-600 hover:border-indigo-200 transition-colors opacity-0 group-hover:opacity-100 me-auto">
                       <Eye size={14} />
                     </button>
                   </td>

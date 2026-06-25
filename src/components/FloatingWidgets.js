@@ -13,7 +13,7 @@ export default function FloatingWidgets() {
 
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-[9999]">
+      <div className="fixed bottom-4 start-4 z-[9999]">
         {/* Shield Icon Button */}
         <button
           onClick={() => setIsFeedbackOpen(true)}
@@ -23,7 +23,7 @@ export default function FloatingWidgets() {
           <ShieldAlert size={28} className="text-[#be374f] group-hover:rotate-12 transition-transform" />
 
           {/* Subtle Label on Hover */}
-          <span className="absolute right-full mr-4 bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl">
+          <span className="absolute start-full ms-4 bg-black text-white text-[11px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl">
             Feedback
           </span>
         </button>

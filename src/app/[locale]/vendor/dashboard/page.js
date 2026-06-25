@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import {
   Store, Eye, EyeOff, Save, CheckCircle, AlertCircle, Loader2, Clock,
@@ -96,7 +96,7 @@ export default function VendorDashboardPage() {
             Your vendor application is being reviewed by the Mahally team.
             You'll be able to access your dashboard and list products once approved.
           </p>
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left space-y-2">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-end space-y-2">
             <p className="text-[11px] font-black text-amber-700 uppercase tracking-widest">Your Application</p>
             <p className="text-sm font-bold text-zinc-800">{profile?.storeName || user.displayName}</p>
             <p className="text-[12px] text-zinc-400">{profile?.storeCategory}</p>

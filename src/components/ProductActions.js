@@ -4,8 +4,8 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { ShoppingCart, Heart, Share2, Minus, Plus, Check, Clock, Truck, ChevronRight, ChevronDown, ShieldAlert } from "lucide-react";
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import { getProductMerchant } from "@/lib/product-utils";
 import ReportModal from "@/components/ReportModal";
@@ -169,7 +169,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
         )}
         <div className="flex items-start gap-1">
           <span className="text-[24px] font-medium text-brand flex items-start leading-none">
-            <span className="text-[12px] mt-1 mr-0.5">JOD</span>{currentSalePrice.toFixed(2)}
+            <span className="text-[12px] mt-1 ms-0.5">JOD</span>{currentSalePrice.toFixed(2)}
           </span>
           {currentDiscountPercent > 0 && (
             <span className="text-[14px] text-brand font-medium mt-1">-{currentDiscountPercent}%</span>
@@ -225,13 +225,13 @@ export default function ProductActions({ product, variations = [], returnPolicy 
             <select
               value={qty}
               onChange={(e) => setQty(parseInt(e.target.value))}
-              className="w-full h-[32px] pl-3 pr-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[13px] text-[#0F1111] appearance-none cursor-pointer outline-none hover:bg-[#E3E6E6] shadow-[0_2px_5px_rgba(15,17,17,0.15)] focus:border-brand focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
+              className="w-full h-[32px] pe-3 ps-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[13px] text-[#0F1111] appearance-none cursor-pointer outline-none hover:bg-[#E3E6E6] shadow-[0_2px_5px_rgba(15,17,17,0.15)] focus:border-brand focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
             >
               {Array.from({ length: currentStockQuantity > 0 ? Math.min(10, currentStockQuantity) : 10 }, (_, i) => i + 1).map(n => (
                 <option key={n} value={n}>الكمية: {n}</option>
               ))}
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-[#0F1111] pointer-events-none" size={14} />
+            <ChevronDown className="absolute start-2 top-1/2 -translate-y-1/2 text-[#0F1111] pointer-events-none" size={14} />
           </div>
         </div>
       )}

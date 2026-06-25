@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { usePathname } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import SidebarFilter from "./SidebarFilter";
@@ -262,34 +263,34 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
     <div className="flex flex-col mx-auto w-full">
 
       {/* ── Page Heading & Summary (Amazon Style Unified Top Bar) ── */}
-      <div className="py-2.5 px-4 bg-[#F8F9FA] border-y border-[#E5E5E5] flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 w-full select-none text-right">
+      <div className="py-2.5 px-4 bg-[#F8F9FA] border-y border-[#E5E5E5] flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 w-full select-none text-start">
         <div className="text-[13px] text-[#0F1111] font-normal">
           {isFeaturedPage ? (
-            <span>تم العثور على {featuredProductCount} منتج{featuredProductCount === 1 ? " مميز" : "ات مميزة"}</span>
+            <span>{t("foundFeatured", { count: featuredProductCount, suffix: featuredProductCount === 1 ? t("featuredSuffixSingle") : t("featuredSuffixPlural") })}</span>
           ) : (
             <>
-              <span>عرض 1-{sortedProducts.length} من أصل أكثر من {totalPages * 20} نتيجة لـ </span>
-              <span className="font-bold text-brand ml-1">
-                &quot;{filters.searchQuery ? filters.searchQuery : (cat ? <span dangerouslySetInnerHTML={{ __html: categories.find(c => c.id === filters.category || c.slug === filters.category)?.name || "القسم" }} /> : "جميع المنتجات")}&quot;
+              <span>{t("showingResults", { end: sortedProducts.length, total: totalPages * 20 })}</span>
+              <span className="font-bold text-brand me-1">
+                &quot;{filters.searchQuery ? filters.searchQuery : (cat ? <span dangerouslySetInnerHTML={{ __html: categories.find(c => c.id === filters.category || c.slug === filters.category)?.name || t("category") }} /> : t("allProducts"))}&quot;
               </span>
             </>
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-[13px] text-[#565959] font-normal">ترتيب حسب:</span>
+          <span className="text-[13px] text-[#565959] font-normal">{t("sortBy")}</span>
           <div className="relative">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="h-7 pl-2.5 pr-8 bg-[#F0F2F2] hover:bg-[#E3E6E6] border border-[#D5D9D9] rounded-md shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] text-[13px] text-[#0f1111] appearance-none cursor-pointer outline-none font-normal hover:border-[#B5B9B9] transition-all"
+              className="h-7 pe-2.5 ps-8 bg-[#F0F2F2] hover:bg-[#E3E6E6] border border-[#D5D9D9] rounded-md shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] text-[13px] text-[#0f1111] appearance-none cursor-pointer outline-none font-normal hover:border-[#B5B9B9] transition-all"
             >
-              <option value="Recommended">الموصى به</option>
-              <option value="Price: Low to High">السعر: من الأقل إلى الأعلى</option>
-              <option value="Price: High to Low">السعر: من الأعلى إلى الأقل</option>
-              <option value="Top Rated">الأعلى تقييمًا</option>
-              <option value="Newest Arrivals">أحدث المنتجات</option>
+              <option value="Recommended">{t("sortRecommended")}</option>
+              <option value="Price: Low to High">{t("sortPriceLowHigh")}</option>
+              <option value="Price: High to Low">{t("sortPriceHighLow")}</option>
+              <option value="Top Rated">{t("sortTopRated")}</option>
+              <option value="Newest Arrivals">{t("sortNewest")}</option>
             </select>
-            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#565959] pointer-events-none" />
+            <ChevronDown size={12} className="absolute start-2 top-1/2 -translate-y-1/2 text-[#565959] pointer-events-none" />
           </div>
         </div>
       </div>
@@ -300,13 +301,13 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
 
           <button
             onClick={(e) => { e.preventDefault(); scrollFilters('left'); }}
-            className="absolute -left-4 top-[18px] -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover/filter-carousel:opacity-100 transition-opacity hover:scale-110 shadow-lg hidden md:flex"
+            className="absolute -end-4 top-[18px] -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover/filter-carousel:opacity-100 transition-opacity hover:scale-110 shadow-lg hidden md:flex"
           >
             <ChevronLeft size={16} />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); scrollFilters('right'); }}
-            className="absolute -right-4 top-[18px] -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover/filter-carousel:opacity-100 transition-opacity hover:scale-110 shadow-lg hidden md:flex"
+            className="absolute -start-4 top-[18px] -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover/filter-carousel:opacity-100 transition-opacity hover:scale-110 shadow-lg hidden md:flex"
           >
             <ChevronRight size={16} />
           </button>
@@ -336,7 +337,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
 
         {/* ── Desktop Sidebar (Scrollbar Visible) ── */}
         {!isFeaturedPage && (
-          <div className="hidden lg:block sticky top-[76px] max-h-[calc(100vh-80px)] overflow-y-auto pr-2 shrink-0">
+          <div className="hidden lg:block sticky top-[76px] max-h-[calc(100vh-80px)] overflow-y-auto ps-2 shrink-0">
             <SidebarFilter
               categories={categories}
               products={products}
@@ -351,9 +352,9 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
         {mobileSidebarOpen && (
           <>
             <div className="fixed inset-0 bg-black/40 z-50 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
-            <div className="fixed left-0 top-0 bottom-0 w-72 bg-white z-50 overflow-y-auto p-5 shadow-2xl lg:hidden animate-in slide-in-from-left duration-300">
+            <div className="fixed end-0 top-0 bottom-0 w-72 bg-white z-50 overflow-y-auto p-5 shadow-2xl lg:hidden animate-in slide-in-from-left duration-300">
               {/* Close button */}
-              <button onClick={() => setMobileSidebarOpen(false)} className="absolute top-3 right-3 p-1.5 hover:bg-zinc-100 rounded-lg z-10 text-zinc-500 hover:text-black">
+              <button onClick={() => setMobileSidebarOpen(false)} className="absolute top-3 start-3 p-1.5 hover:bg-zinc-100 rounded-lg z-10 text-zinc-500 hover:text-black">
                 <X size={16} />
               </button>
               <SidebarFilter
@@ -372,8 +373,8 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
 
           {/* Results Heading block */}
           <div className="mb-4 select-none">
-            <h2 className="text-[20px] font-bold text-[#0F1111] leading-none">{isFeaturedPage ? "مختارات مميزة" : "النتائج"}</h2>
-            <p className="text-[13px] text-[#565959] mt-1 leading-snug">{isFeaturedPage ? "مجموعة منسقة بعناية من المنتجات المختارة من كبار تجارنا." : "تحقق من صفحة كل منتج لمشاهدة خيارات الشراء الأخرى. قد تختلف الأسعار والتفاصيل الأخرى بناءً على حجم المنتج ولونه."}</p>
+            <h2 className="text-[20px] font-bold text-[#0F1111] leading-none">{isFeaturedPage ? t("featuredPicks") : t("results")}</h2>
+            <p className="text-[13px] text-[#565959] mt-1 leading-snug">{isFeaturedPage ? t("featuredDesc") : t("resultsDesc")}</p>
           </div>
 
           {/* Mobile Filter Toggle */}
@@ -384,7 +385,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 className="flex items-center gap-1.5 h-8 px-4 border border-[#D5D9D9] rounded-lg text-[12px] font-medium text-[#0F1111] bg-white hover:bg-zinc-50 transition-colors shadow-sm"
               >
                 <SlidersHorizontal size={12} />
-                الفلاتر {activeFilterCount > 0 && `(${activeFilterCount})`}
+                {t("filters")} {activeFilterCount > 0 && `(${activeFilterCount})`}
               </button>
             </div>
           )}
@@ -395,58 +396,58 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
               {filters.category !== null && (() => {
                 const catObj = categories.find(c => c.id === filters.category || c.slug === filters.category);
                 return catObj ? (
-                  <span key="cat" className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  <span key="cat" className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
                     <span dangerouslySetInnerHTML={{ __html: catObj.name }} />
-                    <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, category: null }))} />
+                    <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, category: null }))} />
                   </span>
                 ) : null;
               })()}
               {filters.minRating !== null && (
-                <span className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  {filters.minRating}★ وأعلى
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, minRating: null }))} />
+                <span className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {filters.minRating}★ {t("andUp")}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, minRating: null }))} />
                 </span>
               )}
               {filters.onSale && (
-                <span className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  مخفض
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, onSale: false }))} />
+                <span className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {t("discounted")}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, onSale: false }))} />
                 </span>
               )}
               {filters.minDiscount !== null && filters.minDiscount !== undefined && (
-                <span className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  {filters.minDiscount}% خصم أو أكثر
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, minDiscount: null }))} />
+                <span className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {filters.minDiscount}{t("discountOrMore")}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, minDiscount: null }))} />
                 </span>
               )}
               {filters.freeShipping && (
-                <span className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  شحن مجاني
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, freeShipping: false }))} />
+                <span className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {t("freeShipping")}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, freeShipping: false }))} />
                 </span>
               )}
               {filters.inStockOnly && (
-                <span className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  المتوفر في المخزن فقط
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, inStockOnly: false }))} />
+                <span className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {t("inStockOnly")}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, inStockOnly: false }))} />
                 </span>
               )}
               {filters.priceRange && (
-                <span className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  {filters.priceRange[0]} - {filters.priceRange[1]} د.أ
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, priceRange: null }))} />
+                <span className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {filters.priceRange[0]} - {filters.priceRange[1]} {t("currency")}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, priceRange: null }))} />
                 </span>
               )}
               {(filters.tags || []).map(tag => (
-                <span key={tag} className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  العلامة التجارية: {tag}
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, tags: f.tags.filter(t => t !== tag) }))} />
+                <span key={tag} className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {t("brand")} {tag}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, tags: f.tags.filter(t => t !== tag) }))} />
                 </span>
               ))}
               {filters.merchant && (
-                <span className="inline-flex items-center gap-1 h-6 pl-2.5 pr-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
-                  البائع: {filters.merchant === "Mahally Jo" ? "محلي الرسمي" : filters.merchant}
-                  <X size={12} className="cursor-pointer ml-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, merchant: null }))} />
+                <span className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
+                  {t("seller")} {filters.merchant === "Mahally Jo" ? t("officialMahally") : filters.merchant}
+                  <X size={12} className="cursor-pointer me-1 text-zinc-500 hover:text-zinc-800 p-0.5 rounded-full hover:bg-zinc-250" onClick={() => setFilters(f => ({ ...f, merchant: null }))} />
                 </span>
               )}
             </div>
@@ -455,18 +456,18 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
           {/* Grid + Loading overlay */}
           <section className="relative min-h-[400px]">
             {loading && (
-              <Loader overlay text="جارٍ تحميل المنتجات..." />
+              <Loader overlay text={t("loadingProducts")} />
             )}
 
             {!loading && sortedProducts.length === 0 && (
               <div className="py-24 text-center select-none">
-                <p className="text-zinc-950 text-[16px] font-bold mb-1">لا توجد منتجات تطابق الفلاتر المحددة</p>
-                <p className="text-[#565959] text-[13px] mb-5">تعديل الفلاتر أو كلمات البحث لمساعدتك في العثور على ما تبحث عنه.</p>
+                <p className="text-zinc-950 text-[16px] font-bold mb-1">{t("noProducts")}</p>
+                <p className="text-[#565959] text-[13px] mb-5">{t("noProductsDesc")}</p>
                 <button
                   onClick={() => setFilters(f => ({ ...f, category: null, minRating: null, priceRange: null, onSale: false, freeShipping: false, inStockOnly: false, minDiscount: null, tags: [], merchant: null }))}
                   className="h-8 px-6 bg-brand hover:bg-brand-dark border border-brand text-white rounded-lg text-[12px] font-medium shadow-sm transition-all active:scale-98"
                 >
-                  مسح جميع الفلاتر
+                  {t("clearAllFilters")}
                 </button>
               </div>
             )}
@@ -484,7 +485,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                     onClick={loadNextPage}
                     className="h-10 px-8 bg-white hover:bg-zinc-50 border border-zinc-400 text-zinc-900 rounded-full text-[14px] font-medium transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <span>عرض المزيد</span>
+                    <span>{t("showMore")}</span>
                     <ChevronDown size={16} className="text-zinc-600" />
                   </button>
                 </div>
@@ -495,7 +496,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                   href="/browse"
                   className="h-10 px-8 bg-white hover:bg-zinc-50 border border-zinc-400 text-zinc-900 rounded-full text-[14px] font-medium transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>عرض جميع المنتجات</span>
+                  <span>{t("viewAllProducts")}</span>
                   <ChevronRight size={16} className="text-zinc-600 rtl:-scale-x-100" />
                 </Link>
               </div>

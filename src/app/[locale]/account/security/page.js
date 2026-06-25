@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { ChevronRight, ShieldCheck, Smartphone, Lock, User, Check, AlertCircle, Mail, Eye, EyeOff } from "lucide-react";
 import Loader from "@/components/Loader";
 
@@ -418,8 +418,8 @@ export default function AccountSecurityPage() {
                              <div>
                                <label className="text-[13px] font-bold text-zinc-900 block mb-1">Current Password</label>
                                <div className="relative">
-                                 <input type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Confirm your password" className="w-full h-10 px-4 pr-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
-                                 <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                                 <input type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Confirm your password" className="w-full h-10 px-4 ps-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
+                                 <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
                                    {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                  </button>
                                </div>
@@ -480,8 +480,8 @@ export default function AccountSecurityPage() {
                            <div>
                              <label className="text-[13px] font-bold text-zinc-900 block mb-1">Current Password</label>
                              <div className="relative">
-                               <input type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Confirm your password" className="w-full h-10 px-4 pr-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
-                               <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                               <input type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Confirm your password" className="w-full h-10 px-4 ps-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
+                               <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
                                  {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                </button>
                              </div>
@@ -560,8 +560,8 @@ export default function AccountSecurityPage() {
                           <div>
                             <label className="text-[13px] font-bold text-zinc-900 block mb-1">Current Password</label>
                             <div className="relative">
-                              <input type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Enter current password" className="w-full h-10 px-4 pr-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
-                              <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                              <input type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Enter current password" className="w-full h-10 px-4 ps-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
+                              <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
                                 {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                               </button>
                             </div>
@@ -569,8 +569,8 @@ export default function AccountSecurityPage() {
                           <div>
                             <label className="text-[13px] font-bold text-zinc-900 block mb-1">New Password</label>
                             <div className="relative">
-                              <input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 6 characters)" className="w-full h-10 px-4 pr-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
-                              <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                              <input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 6 characters)" className="w-full h-10 px-4 ps-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black" />
+                              <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
                                 {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                               </button>
                             </div>

@@ -269,7 +269,7 @@ export default function RichTextEditor({
           <select 
             onChange={handleFormatBlock}
             defaultValue="div"
-            className="h-8 px-2 bg-white border border-zinc-200 rounded text-[11px] font-bold outline-none text-zinc-700 mr-2 shadow-sm focus:border-zinc-300"
+            className="h-8 px-2 bg-white border border-zinc-200 rounded text-[11px] font-bold outline-none text-zinc-700 ms-2 shadow-sm focus:border-zinc-300"
           >
             <option value="div">Paragraph</option>
             <option value="h1">Heading 1</option>
@@ -382,7 +382,7 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={clearFormatting}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all ml-auto"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all me-auto"
             title="Clear Formatting"
           >
             <RemoveFormatting size={14} />
@@ -421,7 +421,7 @@ export default function RichTextEditor({
 
         {/* Floating placeholder for Visual mode if empty */}
         {isVisualMode && (!value || value === "<br>" || value === "") && (
-          <div className="absolute top-4 left-4 text-zinc-400 text-[14px] pointer-events-none select-none">
+          <div className="absolute top-4 end-4 text-zinc-400 text-[14px] pointer-events-none select-none">
             {placeholder}
           </div>
         )}

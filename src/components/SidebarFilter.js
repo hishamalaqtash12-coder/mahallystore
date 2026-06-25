@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { usePathname } from "@/i18n/routing";
 import { Star, ChevronDown, ChevronUp, X, ChevronLeft, ShoppingCart, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // ─── Filter Section Header ──────────────────────────────────────
 function SectionTitle({ title }) {
@@ -16,10 +17,11 @@ function SectionTitle({ title }) {
 
 // ─── Amazon Star Rating Row ──────────────────────────────────────────
 function StarRow({ stars, selected, onClick }) {
+  const t = useTranslations("SidebarFilter");
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-1 py-0.5 w-full group transition-all text-left select-none cursor-pointer"
+      className="flex items-center gap-1 py-0.5 w-full group transition-all text-end select-none cursor-pointer"
     >
       <div className="flex items-center gap-0.5">
         {[1, 2, 3, 4, 5].map(i => (
@@ -31,8 +33,8 @@ function StarRow({ stars, selected, onClick }) {
           />
         ))}
       </div>
-      <span className={`text-[13px] mr-1 transition-colors ${selected ? "text-[#9b2c41] font-bold" : "text-[#0F1111] group-hover:text-[#9b2c41]"}`}>
-        وأعلى
+      <span className={`text-[13px] ms-1 transition-colors ${selected ? "text-[#9b2c41] font-bold" : "text-[#0F1111] group-hover:text-[#9b2c41]"}`}>
+        {t("andUp")}
       </span>
     </button>
   );
@@ -60,7 +62,7 @@ function AmazonCheckbox({ label, count, checked, onChange }) {
         {label}
       </span>
       {count !== undefined && count > 0 && (
-        <span className="text-[#565959] text-[11px] ml-auto shrink-0 font-normal">({count})</span>
+        <span className="text-[#565959] text-[11px] me-auto shrink-0 font-normal">({count})</span>
       )}
     </div>
   );
@@ -68,6 +70,7 @@ function AmazonCheckbox({ label, count, checked, onChange }) {
 
 // ─── Main SidebarFilter Component ─────────────────────────────────────────────
 export default function SidebarFilter({ categories = [], products = [], filters, onFiltersChange, priceBounds = { min: 0, max: 1000 } }) {
+  const t = useTranslations("SidebarFilter");
   const pathname = usePathname();
   const [showAllTags, setShowAllTags] = useState(false);
   const [showAllSellers, setShowAllSellers] = useState(false);
@@ -85,14 +88,14 @@ export default function SidebarFilter({ categories = [], products = [], filters,
     if (!activeCategory) {
       return (
         <div className="mb-4">
-          <SectionTitle title="القسم" />
-          <div className="max-h-[260px] overflow-y-auto pr-1">
+          <SectionTitle title={t("category")} />
+          <div className="max-h-[260px] overflow-y-auto ps-1">
             <ul className="space-y-1">
               {categories.filter(c => c.parent === 0).map(cat => (
                 <li key={cat.id}>
                   <button
                     onClick={() => updateCat(cat.id)}
-                    className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-right w-full truncate cursor-pointer"
+                    className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-start w-full truncate cursor-pointer"
                     dangerouslySetInnerHTML={{ __html: cat.name }}
                   />
                 </li>
@@ -108,38 +111,38 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
     return (
       <div className="mb-4">
-        <SectionTitle title="القسم" />
-        <div className="max-h-[260px] overflow-y-auto pr-1">
+        <SectionTitle title={t("category")} />
+        <div className="max-h-[260px] overflow-y-auto ps-1">
           <ul className="space-y-1">
             <li>
               <button
                 onClick={() => updateCat(null)}
-                className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
+                className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-start cursor-pointer"
               >
                 <ChevronLeft size={12} className="shrink-0 rotate-180" />
-                <span>جميع الأقسام</span>
+                <span>{t("allCategories")}</span>
               </button>
             </li>
             {parentCategory && (
-              <li className="pr-3">
+              <li className="ps-3">
                 <button
                   onClick={() => updateCat(parentCategory.id)}
-                  className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-right cursor-pointer"
+                  className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-start cursor-pointer"
                   dangerouslySetInnerHTML={{ __html: `&gt; ${parentCategory.name}` }}
                 />
               </li>
             )}
-            <li className={`${parentCategory ? 'pr-5' : 'pr-3'}`}>
+            <li className={`${parentCategory ? 'ps-5' : 'ps-3'}`}>
               <span
                 className="text-[13px] font-bold text-[#0F1111]"
                 dangerouslySetInnerHTML={{ __html: activeCategory.name }}
               />
             </li>
             {children.map(child => (
-              <li key={child.id} className={`${parentCategory ? 'pr-8' : 'pr-6'}`}>
+              <li key={child.id} className={`${parentCategory ? 'ps-8' : 'ps-6'}`}>
                 <button
                   onClick={() => updateCat(child.id)}
-                  className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-right w-full truncate cursor-pointer"
+                  className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-start w-full truncate cursor-pointer"
                   dangerouslySetInnerHTML={{ __html: child.name }}
                 />
               </li>
@@ -196,7 +199,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
   });
 
   return (
-    <aside className="w-[240px] shrink-0 pl-4 pb-10 border-l border-[#E5E5E5] min-h-[500px]">
+    <aside className="w-[240px] shrink-0 pe-4 pb-10 border-l border-[#E5E5E5] min-h-[500px]">
       
       {/* ── Shortcut (Clean View All Button) ── */}
       {pathname !== "/browse" && (
@@ -206,17 +209,17 @@ export default function SidebarFilter({ categories = [], products = [], filters,
             className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-[#F0F2F2] hover:bg-[#E3E6E6] border border-[#D5D9D9] rounded-lg text-[12px] font-normal text-[#0F1111] hover:border-[#B5B9B9] transition-all shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] active:bg-[#EAEDED] select-none"
           >
             <ShoppingCart size={14} className="text-[#FF9900]" />
-            <span className="font-medium">عرض جميع المنتجات</span>
+            <span className="font-medium">{t("viewAllProducts")}</span>
           </Link>
         </div>
       )}
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between pb-2 border-b border-[#E5E5E5] mb-2 select-none">
-        <span className="text-[13px] font-bold text-[#0F1111] tracking-tight">الفلاتر النشطة</span>
+        <span className="text-[13px] font-bold text-[#0F1111] tracking-tight">{t("activeFilters")}</span>
         {Object.entries(filters).some(([k, v]) => k !== "searchQuery" && v !== null && v !== false && (Array.isArray(v) ? v.length > 0 : true) && v !== "") && (
           <button onClick={clearAll} className="text-[11px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors">
-            مسح الكل
+            {t("clearAll")}
           </button>
         )}
       </div>
@@ -226,7 +229,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
       {/* ── Customer Reviews ── */}
       <div className="mb-4">
-        <SectionTitle title="تقييمات العملاء" />
+        <SectionTitle title={t("customerReviews")} />
         <div className="space-y-1">
           {[4, 3, 2, 1].map(stars => (
             <StarRow
@@ -242,8 +245,8 @@ export default function SidebarFilter({ categories = [], products = [], filters,
       {/* ── Brands (Tags) ── */}
       {allTags.length > 0 && (
         <div className="mb-4">
-          <SectionTitle title="العلامات التجارية" />
-          <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+          <SectionTitle title={t("brands")} />
+          <div className="space-y-1.5 max-h-[220px] overflow-y-auto ps-1">
             {displayedTags.map(({ name, count }) => {
               const selected = (filters.tags || []).includes(name);
               return (
@@ -263,13 +266,13 @@ export default function SidebarFilter({ categories = [], products = [], filters,
             })}
           </div>
           {allTags.length > 8 && (
-            <button
-              onClick={() => setShowAllTags(!showAllTags)}
-              className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
-            >
-              <span>{showAllTags ? "عرض أقل" : `عرض المزيد (${allTags.length})`}</span>
-              <ChevronDown size={12} className={`transform transition-transform ${showAllTags ? 'rotate-180' : ''}`} />
-            </button>
+              <button
+                onClick={() => setShowAllTags(!showAllTags)}
+                className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+              >
+                <span>{showAllTags ? t("showLess") : t("showMoreCount", { count: allTags.length })}</span>
+                <ChevronDown size={12} className={`transform transition-transform ${showAllTags ? 'rotate-180' : ''}`} />
+              </button>
           )}
         </div>
       )}
@@ -279,14 +282,14 @@ export default function SidebarFilter({ categories = [], products = [], filters,
         const displayedSellers = showAllSellers ? allMerchants : allMerchants.slice(0, 6);
         return (
           <div className="mb-4">
-            <SectionTitle title="البائع" />
-            <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
+            <SectionTitle title={t("seller")} />
+            <div className="space-y-1.5 max-h-[160px] overflow-y-auto ps-1">
               {displayedSellers.map(({ name, count }) => {
                 const selected = filters.merchant === name;
                 return (
                   <AmazonCheckbox
                     key={name}
-                    label={name === "Mahally Jo" ? "محلي الرسمي" : name}
+                    label={name === "Mahally Jo" ? t("officialMahally") : name}
                     count={count}
                     checked={selected}
                     onChange={() => update("merchant", selected ? null : name)}
@@ -299,7 +302,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                 onClick={() => setShowAllSellers(!showAllSellers)}
                 className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
               >
-                <span>{showAllSellers ? "عرض أقل" : `عرض المزيد (${allMerchants.length})`}</span>
+                <span>{showAllSellers ? t("showLess") : t("showMoreCount", { count: allMerchants.length })}</span>
                 <ChevronDown size={12} className={`transform transition-transform ${showAllSellers ? 'rotate-180' : ''}`} />
               </button>
             )}
@@ -309,22 +312,22 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
       {/* ── Price ── */}
       <div className="mb-4">
-        <SectionTitle title="السعر" />
+        <SectionTitle title={t("price")} />
         
         {/* Amazon Price Buckets */}
         <div className="space-y-1 mb-3">
           {[
-            { label: "أقل من 10 د.أ", min: 0, max: 10 },
-            { label: "من 10 د.أ إلى 25 د.أ", min: 10, max: 25 },
-            { label: "من 25 د.أ إلى 50 د.أ", min: 25, max: 50 },
-            { label: "50 د.أ وأعلى", min: 50, max: 10000 },
+            { label: t("under10"), min: 0, max: 10 },
+            { label: t("10to25"), min: 10, max: 25 },
+            { label: t("25to50"), min: 25, max: 50 },
+            { label: t("50andUp"), min: 50, max: 10000 },
           ].map((bucket, i) => {
             const isSelected = filters.priceRange?.[0] === bucket.min && filters.priceRange?.[1] === bucket.max;
             return (
               <button
                  key={i}
                  onClick={() => update("priceRange", isSelected ? null : [bucket.min, bucket.max])}
-                 className={`block text-[13px] transition-colors w-full text-right font-normal select-none cursor-pointer ${
+                 className={`block text-[13px] transition-colors w-full text-start font-normal select-none cursor-pointer ${
                    isSelected 
                      ? "text-[#9b2c41] font-bold" 
                      : "text-[#0F1111] hover:text-[#9b2c41]"
@@ -374,65 +377,65 @@ export default function SidebarFilter({ categories = [], products = [], filters,
               />
            </div>
            <div className="flex justify-between text-[11px] font-bold text-zinc-400 select-none">
-              <span>{filters.priceRange?.[0] || priceBounds.min} د.أ</span>
-              <span>{filters.priceRange?.[1] || priceBounds.max} د.أ</span>
+              <span>{filters.priceRange?.[0] || priceBounds.min} {t("currency")}</span>
+              <span>{filters.priceRange?.[1] || priceBounds.max} {t("currency")}</span>
            </div>
         </div>
         
         {/* Custom Min/Max Input Box Row */}
         <div className="flex items-center gap-1.5 mt-2">
            <div className="relative flex-1">
-              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">د.أ</span>
+              <span className="absolute start-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">{t("currency")}</span>
               <input 
                 type="number" 
-                placeholder="الحد الأدنى" 
+                placeholder={t("minPrice")}
                 value={filters.priceRange?.[0] || ""}
                 onChange={(e) => update("priceRange", [Number(e.target.value), filters.priceRange?.[1] || priceBounds.max])}
-                className="w-full h-7 pr-7 pl-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-right" 
+                className="w-full h-7 ps-7 pe-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-start" 
               />
            </div>
            <div className="relative flex-1">
-              <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">د.أ</span>
+              <span className="absolute start-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">{t("currency")}</span>
               <input 
                 type="number" 
-                placeholder="الحد الأقصى" 
+                placeholder={t("maxPrice")} 
                 value={filters.priceRange?.[1] || ""}
                 onChange={(e) => update("priceRange", [filters.priceRange?.[0] || priceBounds.min, Number(e.target.value)])}
-                className="w-full h-7 pr-7 pl-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-right"
+                className="w-full h-7 ps-7 pe-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-start"
               />
            </div>
            <button 
              onClick={() => update("priceRange", [filters.priceRange?.[0] || 0, filters.priceRange?.[1] || 10000])}
              className="h-7 px-3 bg-white hover:bg-zinc-50 border border-[#D5D9D9] shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] text-[#0F1111] rounded-[4px] text-[12px] font-normal hover:border-[#B5B9B9] cursor-pointer active:bg-zinc-100 flex items-center justify-center shrink-0 select-none"
            >
-             تطبيق
+             {t("apply")}
            </button>
         </div>
       </div>
 
       {/* ── Deals & Discounts ── */}
       <div className="mb-4">
-        <SectionTitle title="العروض والخصومات" />
+        <SectionTitle title={t("dealsAndDiscounts")} />
         <div className="space-y-2">
           <AmazonCheckbox
-            label="المنتجات المخفضة"
+            label={t("discountedProducts")}
             checked={filters.onSale}
             onChange={() => update("onSale", !filters.onSale)}
           />
-          <div className="space-y-1.5 pr-5">
+          <div className="space-y-1.5 ps-5">
             {[10, 25, 50].map((discount) => {
               const isSelected = filters.minDiscount === discount;
               return (
                 <button
                   key={discount}
                   onClick={() => update("minDiscount", isSelected ? null : discount)}
-                  className={`block text-[13px] text-right font-normal cursor-pointer transition-colors select-none ${
+                  className={`block text-[13px] text-start font-normal cursor-pointer transition-colors select-none ${
                     isSelected 
                       ? "text-[#9b2c41] font-bold" 
                       : "text-[#0F1111] hover:text-[#9b2c41]"
                   }`}
                 >
-                  {discount}% خصم أو أكثر
+                  {discount}{t("discountOrMore")}
                 </button>
               );
             })}
@@ -442,15 +445,15 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
       {/* ── Shipping & Availability ── */}
       <div className="mb-4">
-        <SectionTitle title="الشحن والتوافر" />
+        <SectionTitle title={t("shippingAndAvailability")} />
         <div className="space-y-2">
           <AmazonCheckbox
-            label="مؤهل للشحن المجاني"
+            label={t("eligibleForFreeShipping")}
             checked={filters.freeShipping}
             onChange={() => update("freeShipping", !filters.freeShipping)}
           />
           <AmazonCheckbox
-            label="المتوفر في المخزن فقط"
+            label={t("inStockOnly")}
             checked={filters.inStockOnly}
             onChange={() => update("inStockOnly", !filters.inStockOnly)}
           />

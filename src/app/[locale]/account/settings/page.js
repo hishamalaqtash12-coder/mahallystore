@@ -143,7 +143,7 @@ export default function AccountSettingsPage() {
       </div>
 
       {isSaving && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 rounded-md shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 z-[100]">
+        <div className="fixed bottom-10 end-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 rounded-md shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 z-[100]">
            <Loader2 size={18} className="animate-spin text-[#be374f]" />
            <span className="text-[14px] font-bold">Saving settings...</span>
         </div>

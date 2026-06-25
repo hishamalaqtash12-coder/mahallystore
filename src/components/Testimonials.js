@@ -111,14 +111,14 @@ const Testimonials = memo(({ feedbacks = [] }) => {
         <div className="relative group">
           <button
             onClick={() => scroll('left')}
-            className={`absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-zinc-200 shadow-md hover:bg-zinc-50 rounded-full flex items-center justify-center text-zinc-700 transition-all ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            className={`absolute -end-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-zinc-200 shadow-md hover:bg-zinc-50 rounded-full flex items-center justify-center text-zinc-700 transition-all ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
             <ChevronLeft size={20} />
           </button>
 
           <button
             onClick={() => scroll('right')}
-            className={`absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-zinc-200 shadow-md hover:bg-zinc-50 rounded-full flex items-center justify-center text-zinc-700 transition-all ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            className={`absolute -start-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-zinc-200 shadow-md hover:bg-zinc-50 rounded-full flex items-center justify-center text-zinc-700 transition-all ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
             <ChevronRight size={20} />
           </button>

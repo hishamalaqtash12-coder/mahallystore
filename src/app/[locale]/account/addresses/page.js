@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Info
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useState } from "react";
 import AddressModal from "@/components/AddressModal";
 
@@ -62,7 +62,7 @@ export default function AccountAddressesPage() {
         <div className={`relative group p-10 rounded-xl border-2 transition-all duration-300 ${hasBilling ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/30 border-dashed border-gray-200 flex flex-col items-center justify-center text-center'}`}>
            {hasBilling ? (
               <>
-                 <div className="absolute top-6 right-6 flex gap-1 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
+                 <div className="absolute top-6 start-6 flex gap-1 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
                     <button onClick={() => openEdit('billing')} className="w-10 h-10 bg-gray-900 text-white rounded-md flex items-center justify-center hover:bg-black transition-all">
                       <Edit2 size={16} />
                     </button>
@@ -122,7 +122,7 @@ export default function AccountAddressesPage() {
         <div className={`relative group p-10 rounded-xl border-2 transition-all duration-300 ${hasShipping ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/30 border-dashed border-gray-200 flex flex-col items-center justify-center text-center'}`}>
            {hasShipping ? (
               <>
-                 <div className="absolute top-6 right-6 flex gap-1 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
+                 <div className="absolute top-6 start-6 flex gap-1 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
                     <button onClick={() => openEdit('shipping')} className="w-10 h-10 bg-gray-900 text-white rounded-md flex items-center justify-center hover:bg-black transition-all">
                       <Edit2 size={16} />
                     </button>
@@ -182,7 +182,7 @@ export default function AccountAddressesPage() {
          <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center text-[#be374f] shrink-0 border border-zinc-700">
             <ShieldCheck size={32} />
          </div>
-         <div className="flex-1 text-center md:text-left">
+         <div className="flex-1 text-center md:text-end">
             <h4 className="font-bold text-white mb-1.5 text-[18px]">Privacy & Encryption</h4>
             <p className="text-[14px] text-zinc-400 leading-relaxed max-w-2xl">
               Your addresses are used strictly for fulfillment and tax purposes. We utilize enterprise-grade encryption 

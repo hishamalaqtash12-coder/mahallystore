@@ -14,7 +14,7 @@ import {
   Loader2,
   Layers,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import AdminSearch from "@/components/admin/AdminSearch";
 
 export default function AdminInventoryPage() {
@@ -138,7 +138,7 @@ export default function AdminInventoryPage() {
 
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
-        <table className="min-w-[1000px] w-full text-left">
+        <table className="min-w-[1000px] w-full text-end">
           <thead>
             <tr className="border-b border-zinc-200 bg-zinc-50">
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
@@ -156,7 +156,7 @@ export default function AdminInventoryPage() {
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-center">
                 Stock
               </th>
-              <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-right">
+              <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-start">
                 Actions
               </th>
             </tr>
@@ -238,7 +238,7 @@ export default function AdminInventoryPage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-start">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-400 hover:text-indigo-600 hover:border-indigo-200 transition-colors">
                         <Edit size={14} />

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { 
   ArrowLeft, 
   Upload, 
@@ -126,7 +126,7 @@ export default function NewProduct() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-24 text-left">
+    <div className="max-w-4xl mx-auto pb-24 text-end">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <Link 
@@ -206,9 +206,9 @@ export default function NewProduct() {
                     value={salePrice}
                     onChange={(e) => setSalePrice(e.target.value)}
                     placeholder="0.00" 
-                    className="w-full h-12 pl-10 pr-4 bg-zinc-50 rounded-xl border border-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all text-sm font-black" 
+                    className="w-full h-12 pe-10 ps-4 bg-zinc-50 rounded-xl border border-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all text-sm font-black" 
                   />
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">JOD</span>
+                  <span className="absolute end-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">JOD</span>
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -219,9 +219,9 @@ export default function NewProduct() {
                     value={regularPrice}
                     onChange={(e) => setRegularPrice(e.target.value)}
                     placeholder="0.00" 
-                    className="w-full h-12 pl-10 pr-4 bg-zinc-50 rounded-xl border border-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all text-sm font-black opacity-60" 
+                    className="w-full h-12 pe-10 ps-4 bg-zinc-50 rounded-xl border border-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all text-sm font-black opacity-60" 
                   />
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">JOD</span>
+                  <span className="absolute end-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">JOD</span>
                 </div>
               </div>
             </div>

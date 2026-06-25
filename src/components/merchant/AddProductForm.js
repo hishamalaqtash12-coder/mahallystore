@@ -576,7 +576,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed top-0 end-0 w-full h-full z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-5xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
@@ -584,7 +584,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
             <h2 className="text-[18px] font-bold text-zinc-900">{productToEdit ? "Edit Product" : "Add New Product"}</h2>
             <p className="text-[12px] text-zinc-500 font-medium">Complete all sections to publish your product.</p>
           </div>
-          <div className="flex items-center gap-6 mr-12">
+          <div className="flex items-center gap-6 ms-12">
             <div className="flex items-center gap-2">
               <input 
                 type="checkbox"
@@ -628,7 +628,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               >
                 <tab.icon size={18} />
                 {tab.label}
-                {activeTab === tab.id && <ChevronRight size={14} className="ml-auto" />}
+                {activeTab === tab.id && <ChevronRight size={14} className="me-auto" />}
               </button>
             ))}
           </div>
@@ -642,7 +642,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   <span>{error}</span>
                 </div>
                 {error.includes("not allowed to create posts") && (
-                  <p className="ml-7 text-[11px] text-rose-500 font-normal italic">
+                  <p className="me-7 text-[11px] text-rose-500 font-normal italic">
                     Tip: This usually means you need to add a <strong>WordPress Application Password</strong> to your .env file and restart the server.
                   </p>
                 )}
@@ -1006,7 +1006,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           Add
                         </button>
                       </div>
-                      <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                      <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto ps-2 custom-scrollbar">
                         {categories.map(cat => (
                           <button
                             key={cat.id}
@@ -1810,7 +1810,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
           </div>
           <div className="flex items-center gap-3">
             {success && (
-              <span className="text-[13px] text-emerald-600 font-medium flex items-center gap-1 animate-in fade-in slide-in-from-right-2">
+              <span className="text-[13px] text-emerald-600 font-medium flex items-center gap-1 animate-in fade-in slide-in-from-start-2">
                 <Check size={16} /> Product updated successfully!
               </span>
             )}

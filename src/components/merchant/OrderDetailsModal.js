@@ -336,13 +336,13 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus }) {
 
             {/* Items */}
             <div className="bg-white rounded border border-zinc-200 shadow-sm overflow-hidden">
-               <table className="w-full text-left">
+               <table className="w-full text-end">
                  <thead className="bg-[#f6f7f7] border-b">
                    <tr className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                      <th className="p-4">Item</th>
-                     <th className="p-4 text-right">Cost</th>
+                     <th className="p-4 text-start">Cost</th>
                      <th className="p-4 text-center">Qty</th>
-                     <th className="p-4 text-right">Total</th>
+                     <th className="p-4 text-start">Total</th>
                    </tr>
                  </thead>
                  <tbody className="divide-y divide-zinc-100">
@@ -371,16 +371,16 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus }) {
                             </div>
                          </div>
                        </td>
-                       <td className="p-4 text-right">JOD {item.price}</td>
+                       <td className="p-4 text-start">JOD {item.price}</td>
                        <td className="p-4 text-center">× {item.quantity}</td>
-                       <td className="p-4 text-right font-bold text-zinc-900">JOD {item.total}</td>
+                       <td className="p-4 text-start font-bold text-zinc-900">JOD {item.total}</td>
                      </tr>
                    ))}
                  </tbody>
                  <tfoot className="bg-zinc-50/50 border-t">
                     <tr className="text-[13px]">
-                        <td colSpan={3} className="p-4 text-right text-zinc-500 font-medium">Order Total:</td>
-                        <td className="p-4 text-right font-bold text-zinc-900 text-[16px]">JOD {order.total}</td>
+                        <td colSpan={3} className="p-4 text-start text-zinc-500 font-medium">Order Total:</td>
+                        <td className="p-4 text-start font-bold text-zinc-900 text-[16px]">JOD {order.total}</td>
                     </tr>
                  </tfoot>
                </table>
@@ -539,7 +539,7 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus }) {
                     </div>
                   )}
 
-                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1 text-zinc-900">
+                  <div className="space-y-4 max-h-[300px] overflow-y-auto ps-1 text-zinc-900">
                     {notes.map(note => (
                       <div key={note.id} className={`p-3 rounded-lg text-[12px] relative ${
                         note.customer_note ? 'bg-amber-50 border border-amber-100' : 'bg-zinc-100 border border-zinc-200'

@@ -31,7 +31,7 @@ export default async function ProductPage({ params }) {
     : "https://via.placeholder.com/600?text=No+Image";
 
   return (
-    <div className="min-h-screen pb-24 text-left">
+    <div className="min-h-screen pb-24 text-end">
       <div className="container mx-auto px-4 pt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
           {/* High-Precision Gallery */}
@@ -45,7 +45,7 @@ export default async function ProductPage({ params }) {
                   unoptimized
                   className="object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
+                <div className="absolute top-6 end-6 flex flex-col gap-2">
                   <div className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">Verified Product</div>
                 </div>
               </div>

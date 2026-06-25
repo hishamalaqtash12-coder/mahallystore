@@ -154,7 +154,7 @@ export default function MerchantSettings() {
 
       {/* Floating Toast Notification */}
       {success && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+        <div className="fixed bottom-6 start-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className="bg-emerald-50 border border-emerald-200 px-6 py-4 rounded-md shadow-lg flex items-center gap-3 text-[14px] font-bold text-emerald-700">
             <CheckCircle2 size={20} className="text-emerald-500" />
             Changes updated successfully!
@@ -238,20 +238,20 @@ export default function MerchantSettings() {
                       onClick={() => setData({...data, showWhatsapp: !data.showWhatsapp})}
                       className={`w-8 h-4 rounded-full relative transition-colors ${data.showWhatsapp ? 'bg-emerald-500' : 'bg-zinc-300'}`}
                     >
-                      <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${data.showWhatsapp ? 'right-0.5' : 'left-0.5'}`} />
+                      <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${data.showWhatsapp ? 'start-0.5' : 'end-0.5'}`} />
                     </button>
                   </div>
                 </div>
                 <div className="flex">
-                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-r-0 rounded-l-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
-                  <input type="tel" value={data.whatsappNumber} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setWhatsappCustomized(true); setData({...data, whatsappNumber: val}); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-r-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
+                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-s-0 rounded-e-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
+                  <input type="tel" value={data.whatsappNumber} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setWhatsappCustomized(true); setData({...data, whatsappNumber: val}); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-s-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-zinc-900">Business Phone</label>
                 <div className="flex">
-                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-r-0 rounded-l-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
-                  <input type="tel" value={data.phone} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setData(prev => ({ ...prev, phone: val, whatsappNumber: whatsappCustomized ? prev.whatsappNumber : val })); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-r-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
+                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-s-0 rounded-e-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
+                  <input type="tel" value={data.phone} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setData(prev => ({ ...prev, phone: val, whatsappNumber: whatsappCustomized ? prev.whatsappNumber : val })); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-s-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
                 </div>
               </div>
             </div>

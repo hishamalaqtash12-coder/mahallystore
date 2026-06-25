@@ -415,35 +415,87 @@ export async function getVendorById(vendorId) {
       roles: [c.role]
     };
 
-    // Fetch this vendor's products directly using REST API (much faster than fetching all and filtering)
-    const productsRes = await fetch(`${WP_URL}/wp-json/wc/v3/products?author=${vendorId}&per_page=100&status=publish`, {
-      headers: { Authorization: `Basic ${auth}` }
-    });
+    // Fetch vendor products using Dokan REST API (filters by actual vendor/seller)
+    // Dokan exposes /wp-json/dokan/v1/products?seller_id=X which is the correct filter.
+    // Fallback: fetch all products and filter by _dokan_vendor_id meta if Dokan endpoint fails.
     let vendorProducts = [];
-    if (productsRes.ok) {
-      const restProducts = await productsRes.json();
-      vendorProducts = (Array.isArray(restProducts) ? restProducts : []).map(p => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        type: p.type,
-        status: p.status,
-        description: p.description,
-        short_description: p.short_description,
-        price: p.price,
-        regular_price: p.regular_price,
-        sale_price: p.sale_price,
-        average_rating: p.average_rating,
-        rating_count: p.rating_count,
-        on_sale: p.on_sale,
-        stock_status: p.stock_status,
-        stock_quantity: p.stock_quantity,
-        manage_stock: p.manage_stock,
-        images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
-        categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
-        attributes: p.attributes || [],
-        meta_data: p.meta_data || []
-      }));
+    let dokanFailed = false;
+
+    try {
+      const dokanRes = await fetch(
+        `${WP_URL}/wp-json/dokan/v1/products?seller_id=${vendorId}&per_page=100&status=publish`,
+        { headers: { Authorization: `Basic ${auth}` } }
+      );
+      if (dokanRes.ok) {
+        const dokanData = await dokanRes.json();
+        const rawProducts = Array.isArray(dokanData) ? dokanData : (dokanData.products || []);
+        vendorProducts = rawProducts.map(p => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          type: p.type,
+          status: p.status,
+          description: p.description,
+          short_description: p.short_description,
+          price: p.price,
+          regular_price: p.regular_price,
+          sale_price: p.sale_price,
+          average_rating: p.average_rating,
+          rating_count: p.rating_count,
+          on_sale: p.on_sale,
+          stock_status: p.stock_status,
+          stock_quantity: p.stock_quantity,
+          manage_stock: p.manage_stock,
+          images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
+          categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
+          attributes: p.attributes || [],
+          meta_data: p.meta_data || []
+        }));
+      } else {
+        dokanFailed = true;
+      }
+    } catch {
+      dokanFailed = true;
+    }
+
+    // Fallback: use WC REST API and filter by _dokan_vendor_id meta
+    if (dokanFailed || vendorProducts.length === 0) {
+      const productsRes = await fetch(
+        `${WP_URL}/wp-json/wc/v3/products?per_page=100&status=publish`,
+        { headers: { Authorization: `Basic ${auth}` } }
+      );
+      if (productsRes.ok) {
+        const allProducts = await productsRes.json();
+        vendorProducts = (Array.isArray(allProducts) ? allProducts : [])
+          .filter(p => {
+            const dokanVendorId = (p.meta_data || []).find(
+              m => m.key === '_dokan_vendor_id' || m.key === '_vendor_id'
+            )?.value;
+            return String(dokanVendorId) === String(vendorId);
+          })
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            type: p.type,
+            status: p.status,
+            description: p.description,
+            short_description: p.short_description,
+            price: p.price,
+            regular_price: p.regular_price,
+            sale_price: p.sale_price,
+            average_rating: p.average_rating,
+            rating_count: p.rating_count,
+            on_sale: p.on_sale,
+            stock_status: p.stock_status,
+            stock_quantity: p.stock_quantity,
+            manage_stock: p.manage_stock,
+            images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
+            categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
+            attributes: p.attributes || [],
+            meta_data: p.meta_data || []
+          }));
+      }
     }
       
     vendor.products = vendorProducts;
@@ -474,36 +526,64 @@ export async function getVendorBySlug(slug) {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
     const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
-    const productsRes = await fetch(`${WP_URL}/wp-json/wc/v3/products?author=${matchedVendor.id}&per_page=100&status=publish`, {
-      headers: { Authorization: `Basic ${auth}` }
-    });
-    
+    // Try Dokan API first (correct vendor filter), fallback to meta filtering
     let vendorProducts = [];
-    if (productsRes.ok) {
-      const restProducts = await productsRes.json();
-      vendorProducts = (Array.isArray(restProducts) ? restProducts : []).map(p => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        type: p.type,
-        status: p.status,
-        description: p.description,
-        short_description: p.short_description,
-        price: p.price,
-        regular_price: p.regular_price,
-        sale_price: p.sale_price,
-        average_rating: p.average_rating,
-        rating_count: p.rating_count,
-        on_sale: p.on_sale,
-        stock_status: p.stock_status,
-        stock_quantity: p.stock_quantity,
-        manage_stock: p.manage_stock,
-        images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
-        categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
-        attributes: p.attributes || [],
-        meta_data: p.meta_data || []
-      }));
+    let dokanFailed = false;
+
+    try {
+      const dokanRes = await fetch(
+        `${WP_URL}/wp-json/dokan/v1/products?seller_id=${matchedVendor.id}&per_page=100&status=publish`,
+        { headers: { Authorization: `Basic ${auth}` } }
+      );
+      if (dokanRes.ok) {
+        const dokanData = await dokanRes.json();
+        const rawProducts = Array.isArray(dokanData) ? dokanData : (dokanData.products || []);
+        vendorProducts = rawProducts.map(p => ({
+          id: p.id, name: p.name, slug: p.slug, type: p.type, status: p.status,
+          description: p.description, short_description: p.short_description,
+          price: p.price, regular_price: p.regular_price, sale_price: p.sale_price,
+          average_rating: p.average_rating, rating_count: p.rating_count,
+          on_sale: p.on_sale, stock_status: p.stock_status, stock_quantity: p.stock_quantity,
+          manage_stock: p.manage_stock,
+          images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
+          categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
+          attributes: p.attributes || [], meta_data: p.meta_data || []
+        }));
+      } else {
+        dokanFailed = true;
+      }
+    } catch {
+      dokanFailed = true;
     }
+
+    if (dokanFailed || vendorProducts.length === 0) {
+      const productsRes = await fetch(
+        `${WP_URL}/wp-json/wc/v3/products?per_page=100&status=publish`,
+        { headers: { Authorization: `Basic ${auth}` } }
+      );
+      if (productsRes.ok) {
+        const allProducts = await productsRes.json();
+        vendorProducts = (Array.isArray(allProducts) ? allProducts : [])
+          .filter(p => {
+            const dokanVendorId = (p.meta_data || []).find(
+              m => m.key === '_dokan_vendor_id' || m.key === '_vendor_id'
+            )?.value;
+            return String(dokanVendorId) === String(matchedVendor.id);
+          })
+          .map(p => ({
+            id: p.id, name: p.name, slug: p.slug, type: p.type, status: p.status,
+            description: p.description, short_description: p.short_description,
+            price: p.price, regular_price: p.regular_price, sale_price: p.sale_price,
+            average_rating: p.average_rating, rating_count: p.rating_count,
+            on_sale: p.on_sale, stock_status: p.stock_status, stock_quantity: p.stock_quantity,
+            manage_stock: p.manage_stock,
+            images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
+            categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
+            attributes: p.attributes || [], meta_data: p.meta_data || []
+          }));
+      }
+    }
+
     
     matchedVendor.products = vendorProducts;
     return { vendor: matchedVendor, products: vendorProducts };

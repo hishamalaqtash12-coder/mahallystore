@@ -6,7 +6,7 @@ export default function ContactPage() {
         <p className="text-zinc-500 font-medium leading-relaxed mb-8">
           Have questions about a store or an order? We're here to help.
         </p>
-        <div className="bg-zinc-50 p-8 rounded-3xl border border-zinc-100 inline-block text-left">
+        <div className="bg-zinc-50 p-8 rounded-3xl border border-zinc-100 inline-block text-end">
           <p className="font-black text-zinc-900 mb-2 uppercase tracking-widest text-xs">Email Support</p>
           <p className="text-brand font-bold">support@mahally.jo</p>
         </div>

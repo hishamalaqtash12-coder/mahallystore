@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
+import { Link } from "@/i18n/routing";
 import Image from 'next/image';
 import { 
   RotateCcw, 
@@ -200,19 +200,19 @@ const TemuCustomerDashboard = ({ user, logout }) => {
                   className={`pb-3 text-[15px] whitespace-nowrap font-medium relative ${activeOrderTab === tab.id ? 'text-black' : 'text-gray-500'}`}
                 >
                   {tab.label}
-                  {activeOrderTab === tab.id && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-black"></div>}
+                  {activeOrderTab === tab.id && <div className="absolute bottom-0 end-0 w-full h-[2px] bg-black"></div>}
                 </button>
               ))}
               
-              <div className="ml-auto relative mb-2">
+              <div className="me-auto relative mb-2">
                 <input 
                   type="text" 
                   value={orderSearchQuery}
                   onChange={(e) => setOrderSearchQuery(e.target.value)}
                   placeholder="Item name / Order ID / Tracking No." 
-                  className="w-72 h-9 bg-gray-50 border border-gray-200 rounded-full pl-4 pr-10 text-[13px] outline-none focus:border-[#be374f] focus:bg-white transition-all" 
+                  className="w-72 h-9 bg-gray-50 border border-gray-200 rounded-full pe-4 ps-10 text-[13px] outline-none focus:border-[#be374f] focus:bg-white transition-all" 
                 />
-                <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
             </div>
 
@@ -271,7 +271,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
                              </div>
                            ))}
                          </div>
-                         <div className="w-48 border-l border-gray-50 pl-6 space-y-2">
+                         <div className="w-48 border-l border-gray-50 pe-6 space-y-2">
                             <button onClick={() => { setSelectedOrder(order); setIsDetailsOpen(true); }} className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-[13px] font-bold transition-colors">Order details</button>
                             {order.status === 'completed' && (
                               <button onClick={() => { setSelectedOrder(order); setIsReviewOpen(true); }} className="cursor-pointer w-full py-2 border border-gray-200 hover:bg-gray-50 rounded-lg text-[13px] font-bold transition-colors">Write a review</button>
@@ -373,7 +373,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
               {['Unused', 'Used', 'Expired'].map((tab) => (
                 <button key={tab} className={`pb-3 text-[16px] font-medium relative whitespace-nowrap ${tab === 'Unused' ? 'text-black' : 'text-gray-500'}`}>
                   {tab} ({tab === 'Unused' ? coupons.length : 0})
-                  {tab === 'Unused' && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-black"></div>}
+                  {tab === 'Unused' && <div className="absolute bottom-0 end-0 w-full h-[3px] bg-black"></div>}
                 </button>
               ))}
             </div>
@@ -381,7 +381,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {coupons.map((coupon) => (
                   <div key={coupon.id} className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-[#be374f]/5 rounded-bl-full flex items-center justify-end pr-4 pt-4 text-[#be374f]">
+                    <div className="absolute top-0 start-0 w-16 h-16 bg-[#be374f]/5 rounded-bl-full flex items-center justify-end ps-4 pt-4 text-[#be374f]">
                        <Ticket size={24} />
                     </div>
                     <div className="flex flex-col gap-1 mb-4">
@@ -456,7 +456,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
               <svg viewBox="0 0 100 100" className="w-full h-full text-gray-100" fill="currentColor">
                 <path d="M50 0C30.67 0 15 15.67 15 35c0 23.33 35 65 35 65s35-41.67 35-65c0-19.33-15.67-35-35-35zm0 50c-8.28 0-15-6.72-15-15s6.72-15 15-15 15 6.72 15 15-6.72 15-15 15z" />
               </svg>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full"></div>
+              <div className="absolute top-1/2 end-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full"></div>
             </div>
             <h2 className="text-[18px] font-bold mb-2">You don't have any shipping addresses saved</h2>
             <div className="flex items-center gap-2 text-[14px] text-emerald-600 mb-8">
@@ -518,7 +518,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
                         <ShoppingBag size={18} />
                       </div>
                     </div>
-                    <button onClick={() => { const updated = recentViews.filter(p => p.id !== item.id); setRecentViews(updated); localStorage.setItem("mahally_recently_viewed", JSON.stringify(updated)); }} className="absolute top-2 right-2 p-2 text-gray-300 hover:text-rose-600 transition-colors">
+                    <button onClick={() => { const updated = recentViews.filter(p => p.id !== item.id); setRecentViews(updated); localStorage.setItem("mahally_recently_viewed", JSON.stringify(updated)); }} className="absolute top-2 start-2 p-2 text-gray-300 hover:text-rose-600 transition-colors">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -626,7 +626,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
               </button>
               
               {item.expandable && isOrdersExpanded && (
-                <div className="ml-9 mt-1 space-y-1 mb-2">
+                <div className="me-9 mt-1 space-y-1 mb-2">
                   {item.subItems.map((sub) => (
                     <button
                       key={sub.id}
@@ -634,7 +634,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
                         setActiveSection('orders');
                         setActiveOrderTab(sub.id);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-[13.5px] transition-colors ${activeSection === 'orders' && activeOrderTab === sub.id ? 'text-[#be374f] font-bold bg-[#be374f]/5' : 'text-gray-500 hover:text-black hover:bg-gray-50'}`}
+                      className={`w-full text-end px-3 py-2 rounded-lg text-[13.5px] transition-colors ${activeSection === 'orders' && activeOrderTab === sub.id ? 'text-[#be374f] font-bold bg-[#be374f]/5' : 'text-gray-500 hover:text-black hover:bg-gray-50'}`}
                     >
                       {sub.label}
                     </button>

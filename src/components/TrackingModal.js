@@ -1,7 +1,7 @@
 "use client";
 
 import { X, MapPin, Package, CheckCircle2, Clock, Truck, ShoppingBag, Phone, Mail, Store, CreditCard } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 // ─── Status Config ─────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -109,7 +109,7 @@ export default function TrackingModal({ order, isOpen, onClose }) {
               </span>
             </div>
             {/* Decorative bg icon */}
-            <div className="absolute -right-4 -bottom-6 opacity-[0.04] pointer-events-none">
+            <div className="absolute -start-4 -bottom-6 opacity-[0.04] pointer-events-none">
               {step === 3 ? <CheckCircle2 size={120} /> : <Truck size={120} />}
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function TrackingModal({ order, isOpen, onClose }) {
             <div className="bg-white rounded-xl border border-zinc-100 p-6 shadow-sm">
               <div className="relative px-4">
                 {/* Track line */}
-                <div className="absolute top-6 left-12 right-12 h-[3px] bg-zinc-100 rounded-full overflow-hidden">
+                <div className="absolute top-6 end-12 start-12 h-[3px] bg-zinc-100 rounded-full overflow-hidden">
                   <div className={`h-full ${col.bar} transition-all duration-1000`} style={{ width: `${progressPercent}%` }} />
                 </div>
                 {/* Steps */}
@@ -193,7 +193,7 @@ export default function TrackingModal({ order, isOpen, onClose }) {
                         </span>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-start shrink-0">
                       <p className="text-[13px] font-bold text-zinc-800" dir="ltr">JOD {parseFloat(item.total || 0).toFixed(2)}</p>
                     </div>
                   </div>
@@ -216,7 +216,7 @@ export default function TrackingModal({ order, isOpen, onClose }) {
                 <span>المجموع</span><span dir="ltr">JOD {parseFloat(order.total || 0).toFixed(2)}</span>
               </div>
               {order.payment_method_title && (
-                <p className="text-[11px] text-zinc-400 text-right">{order.payment_method_title}</p>
+                <p className="text-[11px] text-zinc-400 text-start">{order.payment_method_title}</p>
               )}
             </div>
           </div>

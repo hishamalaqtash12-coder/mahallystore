@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { ShieldCheck, ArrowLeft, CheckCircle2, RefreshCcw, Store, Scale } from "lucide-react";
 
 export const metadata = {
@@ -24,13 +24,13 @@ export default function ConditionsPage() {
       <div className="max-w-[800px] mx-auto px-4 mt-[-20px] relative z-10">
         
         {/* Consent Message Box (Top) */}
-        <div className="bg-white rounded-xl p-8 shadow-sm border border-zinc-200 mb-8 border-l-4 border-l-brand">
+        <div className="bg-white rounded-xl p-8 shadow-sm border border-zinc-200 mb-8 border-e-4 border-e-brand">
            <div className="flex items-start gap-4 mb-4">
               <ShieldCheck size={28} className="text-brand shrink-0 mt-1" />
               <div>
                  <h2 className="text-xl font-bold text-zinc-900 mb-2">Consent Message</h2>
                  <p className="text-zinc-600 mb-4">Please read the following terms carefully before proceeding. By using the Mahally platform, you acknowledge and agree to:</p>
-                 <ul className="list-disc pl-5 space-y-1 text-zinc-700 font-medium mb-6">
+                 <ul className="list-disc pe-5 space-y-1 text-zinc-700 font-medium mb-6">
                     <li>Return Policy</li>
                     <li>Seller Agreement (for merchants only)</li>
                     <li>Terms of Use</li>
@@ -93,7 +93,7 @@ export default function ConditionsPage() {
            <div className="space-y-8">
               <div>
                  <h3 className="text-lg font-bold text-zinc-800 mb-3">1. Seller Obligations</h3>
-                 <ul className="space-y-3 text-zinc-600 pl-2">
+                 <ul className="space-y-3 text-zinc-600 pe-2">
                     <li className="flex items-start gap-3">
                        <span className="text-brand mt-1">•</span>
                        <span>The seller is committed to providing accurate and correct information about their products, including prices, descriptions, and images.</span>
@@ -115,7 +115,7 @@ export default function ConditionsPage() {
 
               <div>
                  <h3 className="text-lg font-bold text-zinc-800 mb-3">2. Legal Responsibilities</h3>
-                 <ul className="space-y-3 text-zinc-600 pl-2">
+                 <ul className="space-y-3 text-zinc-600 pe-2">
                     <li className="flex items-start gap-3">
                        <span className="text-brand mt-1">•</span>
                        <span>The seller bears full responsibility for any disputes, complaints, or legal claims related to their products.</span>
@@ -129,7 +129,7 @@ export default function ConditionsPage() {
 
               <div>
                  <h3 className="text-lg font-bold text-zinc-800 mb-3">3. Platform Rights</h3>
-                 <ul className="space-y-3 text-zinc-600 pl-2">
+                 <ul className="space-y-3 text-zinc-600 pe-2">
                     <li className="flex items-start gap-3">
                        <span className="text-brand mt-1">•</span>
                        <span>The platform has the right to review or remove any product that violates the terms of use or applicable laws.</span>
@@ -153,12 +153,12 @@ export default function ConditionsPage() {
            <div className="space-y-8">
               <div>
                  <h3 className="text-lg font-bold text-zinc-800 mb-3">1. Acceptance of Terms</h3>
-                 <p className="text-zinc-600 pl-5">By using the Mahally platform, you acknowledge and agree to abide by these terms and conditions, and any updates that may occur to them.</p>
+                 <p className="text-zinc-600 pe-5">By using the Mahally platform, you acknowledge and agree to abide by these terms and conditions, and any updates that may occur to them.</p>
               </div>
 
               <div>
                  <h3 className="text-lg font-bold text-zinc-800 mb-3">2. User Obligations</h3>
-                 <ul className="space-y-3 text-zinc-600 pl-2">
+                 <ul className="space-y-3 text-zinc-600 pe-2">
                     <li className="flex items-start gap-3">
                        <span className="text-brand mt-1">•</span>
                        <span>The user (seller or buyer) is committed to using the platform in compliance with local laws.</span>
@@ -176,7 +176,7 @@ export default function ConditionsPage() {
 
               <div>
                  <h3 className="text-lg font-bold text-zinc-800 mb-3">3. Limitation of Liability</h3>
-                 <ul className="space-y-3 text-zinc-600 pl-2">
+                 <ul className="space-y-3 text-zinc-600 pe-2">
                     <li className="flex items-start gap-3">
                        <span className="text-brand mt-1">•</span>
                        <span>The platform is not responsible for any transactions conducted outside the platform's official electronic system.</span>
@@ -190,7 +190,7 @@ export default function ConditionsPage() {
 
               <div>
                  <h3 className="text-lg font-bold text-zinc-800 mb-3">4. Modifications</h3>
-                 <p className="text-zinc-600 pl-5">The platform reserves the right to modify or update these terms at any time, and continued use is considered implicit approval of those modifications.</p>
+                 <p className="text-zinc-600 pe-5">The platform reserves the right to modify or update these terms at any time, and continued use is considered implicit approval of those modifications.</p>
               </div>
            </div>
         </div>

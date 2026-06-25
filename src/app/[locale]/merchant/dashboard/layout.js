@@ -4,7 +4,7 @@ import "@/styles/dashboard.css";
 import DashboardSidebar from "@/components/merchant/DashboardSidebar";
 import DashboardHeader from "@/components/merchant/DashboardHeader";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useEffect } from "react";
 import Loader from "@/components/Loader";
 
@@ -38,7 +38,7 @@ export default function MerchantLayout({ children }) {
   return (
     <div dir="ltr" className="min-h-screen bg-white flex font-sans">
       <DashboardSidebar />
-      <div className="flex-1 ml-64 flex flex-col h-screen relative border-l border-zinc-200 overflow-hidden">
+      <div className="flex-1 me-64 flex flex-col h-screen relative border-l border-zinc-200 overflow-hidden">
         <DashboardHeader />
         <main className="flex-1 p-8 bg-white overflow-y-auto">
           {children}

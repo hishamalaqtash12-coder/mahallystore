@@ -1,6 +1,6 @@
 import { getPage } from "@/lib/woocommerce";
 import { ShieldCheck, Truck, RotateCcw, Clock, Lock, CheckCircle2, AlertCircle, CreditCard } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default async function DynamicPage({ params }) {
   const { slug } = await params;

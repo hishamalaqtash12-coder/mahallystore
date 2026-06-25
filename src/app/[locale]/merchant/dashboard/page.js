@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useEffect, useState } from "react";
 import RevenueChart from "@/components/merchant/RevenueChart";
 import OnboardingWizard from "@/components/merchant/OnboardingWizard";
@@ -220,7 +220,7 @@ export default function MerchantDashboard() {
                   </span>
                 </div>
                 {stat.tooltip && (
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 start-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="bg-zinc-800 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap shadow-xl">
                       {stat.tooltip}
                     </div>
@@ -295,13 +295,13 @@ export default function MerchantDashboard() {
               <h4 className="text-[16px] font-bold text-zinc-900">Recent Transactions</h4>
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+                  <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
                   <input
                     type="text"
                     placeholder="Filter orders..."
                     value={orderSearch}
                     onChange={(e) => setOrderSearch(e.target.value)}
-                    className="h-[34px] bg-white border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
+                    className="h-[34px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
                   />
                 </div>
                 <button
@@ -315,7 +315,7 @@ export default function MerchantDashboard() {
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-end">
                 <thead className="bg-zinc-100/50 border-b border-zinc-200">
                   <tr className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                     <th className="px-6 py-4">Order ID</th>

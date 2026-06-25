@@ -6,7 +6,7 @@ import {
   Pencil, Dog, Heart, Gift, Gamepad2, Download, Tent,
   ChevronLeft, ChevronRight
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useRef } from "react";
 
 const categories = [
@@ -48,13 +48,13 @@ export default function CategoryNav() {
         {/* Navigation Buttons */}
         <button 
           onClick={() => scroll("right")}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white shadow-md border border-zinc-100 text-zinc-400 hover:text-brand transition-colors lg:opacity-0 lg:group-hover:opacity-100"
+          className="absolute start-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white shadow-md border border-zinc-100 text-zinc-400 hover:text-brand transition-colors lg:opacity-0 lg:group-hover:opacity-100"
         >
           <ChevronRight size={18} />
         </button>
         <button 
           onClick={() => scroll("left")}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white shadow-md border border-zinc-100 text-zinc-400 hover:text-brand transition-colors lg:opacity-0 lg:group-hover:opacity-100"
+          className="absolute end-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white shadow-md border border-zinc-100 text-zinc-400 hover:text-brand transition-colors lg:opacity-0 lg:group-hover:opacity-100"
         >
           <ChevronLeft size={18} />
         </button>

@@ -124,13 +124,13 @@ export default function MerchantReviewsPage() {
         </div>
         <div className="flex items-center gap-3">
            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+              <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
               <input 
                 type="text" 
                 placeholder="Search reviews..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-[36px] bg-white border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
+                className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
               />
            </div>
            <select 
@@ -235,7 +235,7 @@ export default function MerchantReviewsPage() {
                                  required
                                  autoFocus
                                />
-                               <MessageSquare className="absolute right-4 bottom-4 text-zinc-100 w-12 h-12 -z-0" />
+                               <MessageSquare className="absolute start-4 bottom-4 text-zinc-100 w-12 h-12 -z-0" />
                             </div>
                             <div className="flex items-center justify-between">
                                <div className="flex items-center gap-2 text-[11px] text-zinc-400">

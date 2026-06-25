@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Play, X, Settings, ArrowRight, ArrowLeft } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 
@@ -90,12 +90,12 @@ export default function VideoPromo({
               {/* Big Play Button */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-black shadow-2xl transition-all duration-300 group-hover:scale-110">
-                  <Play fill="currentColor" size={36} className="ml-1" />
+                  <Play fill="currentColor" size={36} className="me-1" />
                 </div>
               </div>
 
               {/* Title Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-8 md:p-12">
+              <div className="absolute bottom-0 end-0 start-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-8 md:p-12">
                 <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight tracking-tight max-w-2xl">
                   {finalTitle}
                 </h3>
@@ -135,7 +135,7 @@ export default function VideoPromo({
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md">
           <button
             onClick={() => setIsOpen(false)}
-            className="absolute right-5 top-5 z-20 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white hover:bg-white hover:text-black transition-all"
+            className="absolute start-5 top-5 z-20 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white hover:bg-white hover:text-black transition-all"
           >
             <X size={24} />
           </button>

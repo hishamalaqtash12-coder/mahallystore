@@ -3,7 +3,7 @@
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useState, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Heart, Search, Store, Trash2, ChevronRight, ArrowRight, Package, X } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { getProductMerchant } from "@/lib/product-utils";
@@ -70,18 +70,18 @@ export default function WishlistPage() {
           <div className="flex flex-wrap items-center gap-3">
             {/* Search bar */}
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-brand transition-colors" size={14} />
+              <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-brand transition-colors" size={14} />
               <input 
                 type="text"
                 placeholder="ابحث عن المنتجات..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-10 pl-10 pr-10 bg-white border border-zinc-200 rounded-xl text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none w-full md:w-64 transition-all"
+                className="h-10 pe-10 ps-10 bg-white border border-zinc-200 rounded-xl text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none w-full md:w-64 transition-all"
               />
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  className="absolute start-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
                 >
                   <X size={14} />
                 </button>
@@ -95,7 +95,7 @@ export default function WishlistPage() {
                 <select 
                   value={selectedVendor}
                   onChange={(e) => setSelectedVendor(e.target.value)}
-                  className="text-sm bg-transparent outline-none cursor-pointer font-semibold text-zinc-700 pr-2"
+                  className="text-sm bg-transparent outline-none cursor-pointer font-semibold text-zinc-700 ps-2"
                 >
                   <option value="all">جميع المتاجر</option>
                   {uniqueVendors.map(v => (

@@ -3,7 +3,7 @@
 import { Search, Menu, ChevronDown, User, Settings, LogOut, RefreshCw, Navigation } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 
 const MERCHANT_PAGES = [
   { title: "Merchant Dashboard Home", description: "Overview of store analytics and sales status", path: "/merchant/dashboard", category: "Overview" },
@@ -32,7 +32,7 @@ export default function DashboardHeader() {
     <header className="sticky top-0 z-30 h-[60px] bg-white border-b border-zinc-200 px-8 flex items-center justify-between">
       {/* Search Area */}
       <div className="relative w-96 group">
-        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-zinc-400">
+        <div className="absolute inset-y-0 end-3 flex items-center pointer-events-none text-zinc-400">
           <Search size={14} />
         </div>
         <input
@@ -40,10 +40,10 @@ export default function DashboardHeader() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search products, orders, coupons, settings..."
-          className="w-full h-[31px] bg-white border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] focus:border-[#be374f] transition-all outline-none shadow-inner"
+          className="w-full h-[31px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] focus:border-[#be374f] transition-all outline-none shadow-inner"
         />
         {searchQuery.trim().length > 0 && (
-          <div className="absolute left-0 right-0 mt-2 bg-white border border-zinc-200 rounded-lg shadow-xl z-50 overflow-hidden divide-y divide-zinc-100 max-h-[350px] overflow-y-auto animate-in slide-in-from-top-1 duration-150">
+          <div className="absolute end-0 start-0 mt-2 bg-white border border-zinc-200 rounded-lg shadow-xl z-50 overflow-hidden divide-y divide-zinc-100 max-h-[350px] overflow-y-auto animate-in slide-in-from-top-1 duration-150">
             <div className="px-3 py-1.5 bg-zinc-50 flex items-center justify-between text-[10px] font-bold text-zinc-400">
               <span>SEARCH RESULTS</span>
               <span>ESC TO CLOSE</span>
@@ -71,7 +71,7 @@ export default function DashboardHeader() {
                       router.push(item.path);
                       setSearchQuery("");
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-zinc-50 flex items-start gap-2.5 transition-colors group cursor-pointer"
+                    className="w-full text-end px-4 py-2 hover:bg-zinc-50 flex items-start gap-2.5 transition-colors group cursor-pointer"
                   >
                     <div className="h-6 w-6 rounded bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-200 group-hover:text-zinc-800 transition-colors shrink-0">
                       <Navigation size={11} />
@@ -126,7 +126,7 @@ export default function DashboardHeader() {
           </button>
 
           {isUserMenuOpen && (
-            <div className="absolute right-0 mt-1 w-56 bg-white border border-zinc-200 rounded-md shadow-lg py-2 z-50">
+            <div className="absolute start-0 mt-1 w-56 bg-white border border-zinc-200 rounded-md shadow-lg py-2 z-50">
               <button onClick={() => router.push('/merchant/dashboard/settings')} className="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
                 <User size={16} /> Store Profile
               </button>

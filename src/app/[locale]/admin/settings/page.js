@@ -151,7 +151,7 @@ export default function AdminSettingsPage() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-left ${
+              className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-end ${
                 activeTab === t.id
                   ? "bg-zinc-100 text-zinc-900"
                   : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
@@ -240,9 +240,9 @@ export default function AdminSettingsPage() {
                         value={promoSettings.promoVideoUrl}
                         onChange={(e) => setPromoSettings(prev => ({ ...prev, promoVideoUrl: e.target.value }))}
                         placeholder="Paste YouTube URL or upload a file above"
-                        className="w-full h-11 bg-zinc-50 border border-zinc-200 rounded-xl px-4 pr-10 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all"
+                        className="w-full h-11 bg-zinc-50 border border-zinc-200 rounded-xl px-4 ps-10 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all"
                       />
-                      <Link2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                      <Link2 size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                     </div>
                     <p className="text-[11px] text-zinc-400">Supported: YouTube links or direct MP4/MOV files</p>
                   </div>
@@ -279,7 +279,7 @@ export default function AdminSettingsPage() {
                         placeholder="Paste image URL or upload a file above"
                         className="w-full h-11 bg-zinc-50 border border-zinc-200 rounded-xl px-4 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all"
                       />
-                      <ImageIcon size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                      <ImageIcon size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                     </div>
                     
                     {/* Preview */}
@@ -294,7 +294,7 @@ export default function AdminSettingsPage() {
                         <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
                            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full border border-white/40 flex items-center justify-center shadow-2xl transition-all group-hover:scale-110">
                               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-brand shadow-[0_0_15px_rgba(255,96,0,0.4)]">
-                                <Play size={12} fill="currentColor" className="ml-0.5" />
+                                <Play size={12} fill="currentColor" className="me-0.5" />
                               </div>
                            </div>
                         </div>

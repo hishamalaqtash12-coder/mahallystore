@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState, useMemo } from "react";
 import { Ticket, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function AccountCouponsPage() {
   const { wooId, loading } = useAuth();
@@ -61,7 +61,7 @@ export default function AccountCouponsPage() {
               className={`pb-3 text-[15px] font-medium relative whitespace-nowrap transition-colors ${activeTab === tab ? 'text-black' : 'text-gray-500 hover:text-black'}`}
             >
               {tab} ({count})
-              {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-black animate-in fade-in slide-in-from-left-2 duration-300"></div>}
+              {activeTab === tab && <div className="absolute bottom-0 end-0 w-full h-[2px] bg-black animate-in fade-in slide-in-from-end-2 duration-300"></div>}
             </button>
           );
         })}
@@ -71,7 +71,7 @@ export default function AccountCouponsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredCoupons.map((coupon) => (
             <div key={coupon.id} className="bg-white border border-gray-100 rounded-md p-6 flex flex-col relative overflow-hidden group hover:border-[#be374f] transition-colors">
-              <div className="absolute top-0 right-0 w-12 h-12 bg-gray-50 rounded-bl-md flex items-center justify-center text-gray-300 group-hover:text-[#be374f] group-hover:bg-[#be374f]/5 transition-all">
+              <div className="absolute top-0 start-0 w-12 h-12 bg-gray-50 rounded-bl-md flex items-center justify-center text-gray-300 group-hover:text-[#be374f] group-hover:bg-[#be374f]/5 transition-all">
                  <Ticket size={20} />
               </div>
               <div className="flex flex-col gap-0.5 mb-4">

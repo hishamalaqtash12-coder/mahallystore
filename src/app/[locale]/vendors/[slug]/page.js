@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -335,16 +335,16 @@ export default function VendorProfilePage() {
             </div>
 
             {/* Info Area */}
-            <div className="flex-1 text-center md:text-left">
+            <div className="flex-1 text-center md:text-end">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-1">
                 <h1 className="text-[24px] md:text-[28px] font-bold text-zinc-900 leading-tight">
-                  {v.storeName} {isOwner && <span className="text-[14px] font-medium text-zinc-400 ml-1">(أنا)</span>}
+                  {v.storeName} {isOwner && <span className="text-[14px] font-medium text-zinc-400 me-1">(أنا)</span>}
                 </h1>
-                <div className="flex items-center gap-0.5 ml-2">
+                <div className="flex items-center gap-0.5 me-2">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={14} className={i < Math.round(v.averageRating || 0) ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'} />
                   ))}
-                  <span className="text-[13px] text-brand ml-1">{v.averageRating || "0.0"}</span>
+                  <span className="text-[13px] text-brand me-1">{v.averageRating || "0.0"}</span>
                 </div>
               </div>
 
@@ -464,12 +464,12 @@ export default function VendorProfilePage() {
               <div className="mb-6">
                 <h3 className="text-[14px] font-bold text-zinc-900 mb-3">ابحث داخل المتجر</h3>
                 <div className="relative">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <Search size={14} className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                   <input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="ابحث عن منتجات..."
-                    className="w-full h-9 border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                    className="w-full h-9 border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   />
                 </div>
               </div>
@@ -559,14 +559,14 @@ export default function VendorProfilePage() {
                   {view === 'list' ? (
                     <div className="bg-white border border-zinc-200 shadow-sm rounded-sm overflow-hidden">
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-end border-collapse">
                           <thead>
                             <tr className="border-b border-zinc-200 bg-white text-[13px] text-zinc-600">
                               <th className="px-4 py-3 w-16 text-center"><Camera size={16} className="text-zinc-400 inline" /></th>
                               <th className="px-4 py-3 font-bold">اسم المنتج</th>
                               <th className="px-4 py-3 font-bold">السعر</th>
                               <th className="px-4 py-3 font-bold">الفئة</th>
-                              <th className="px-4 py-3 font-bold text-right">الإجراء</th>
+                              <th className="px-4 py-3 font-bold text-start">الإجراء</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-zinc-100">
@@ -591,14 +591,14 @@ export default function VendorProfilePage() {
                                     {[...Array(5)].map((_, i) => (
                                       <Star key={i} size={12} className={i < Math.round(p.average_rating || 0) ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'} />
                                     ))}
-                                    <span className="text-[11px] text-brand hover:text-brand-dark cursor-pointer ml-1">{p.rating_count || 0}</span>
+                                    <span className="text-[11px] text-brand hover:text-brand-dark cursor-pointer me-1">{p.rating_count || 0}</span>
                                   </div>
                                 </td>
                                 <td className="px-4 py-3 align-top pt-4">
                                   <div className="space-y-0.5 font-normal text-zinc-900">
                                     {p.type === "variable" ? (
                                       <div>
-                                        <span className="text-[11px] text-zinc-600 mr-1">من</span>
+                                        <span className="text-[11px] text-zinc-600 ms-1">من</span>
                                         <span className="font-medium text-[16px]">د.أ {parseFloat(p.price || 0).toFixed(2)}</span>
                                       </div>
                                     ) : (
@@ -614,7 +614,7 @@ export default function VendorProfilePage() {
                                 <td className="px-4 py-3 align-top pt-4 text-[13px] text-zinc-600">
                                   {decodeHtml(p.categories?.[0]?.name) || "—"}
                                 </td>
-                                <td className="px-4 py-3 align-top pt-4 text-right">
+                                <td className="px-4 py-3 align-top pt-4 text-start">
                                   <div className="flex items-center justify-end gap-2">
                                     <button
                                       onClick={(e) => { e.preventDefault(); setQuickLookProduct(p); }}
@@ -700,7 +700,7 @@ export default function VendorProfilePage() {
         {activeTab === "reviews" && (
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row gap-12 bg-[#fcfcfc] border border-zinc-200 rounded-lg p-8 relative overflow-hidden">
-              <div className="w-full md:w-64 text-center md:text-left">
+              <div className="w-full md:w-64 text-center md:text-end">
                 <h2 className="text-[24px] font-bold text-zinc-900 mb-1">{v.averageRating || "0.0"} من 5</h2>
                 <div className="flex justify-center md:justify-start gap-0.5 mb-2">
                   {[...Array(5)].map((_, i) => (
@@ -721,7 +721,7 @@ export default function VendorProfilePage() {
                       <div className="flex-1 h-5 bg-zinc-100 rounded-sm overflow-hidden border border-zinc-200 shadow-inner">
                         <div className="h-full bg-brand" style={{ width: percentage }}></div>
                       </div>
-                      <span className="w-10 text-right text-zinc-500">{percentage}</span>
+                      <span className="w-10 text-start text-zinc-500">{percentage}</span>
                     </div>
                   );
                 })}

@@ -15,7 +15,7 @@ import {
   Filter,
   Plus
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function MerchantInventoryPage() {
   const { wooId } = useAuth();
@@ -95,13 +95,13 @@ export default function MerchantInventoryPage() {
              <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
            </button>
            <div className="relative">
-             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+             <Search size={16} className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" />
              <input 
                type="text"
                placeholder="Search products..."
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               className="pl-9 pr-4 py-2 border border-zinc-200 rounded-md text-sm outline-none focus:border-brand w-64"
+               className="pe-9 ps-4 py-2 border border-zinc-200 rounded-md text-sm outline-none focus:border-brand w-64"
              />
            </div>
         </div>
@@ -123,7 +123,7 @@ export default function MerchantInventoryPage() {
            </div>
            <p className="text-2xl font-bold text-zinc-900">{stats.reduce((acc, s) => acc + s.confirmedOrders, 0)}</p>
          </div>
-         <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm border-l-4 border-l-amber-400">
+         <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm border-e-4 border-e-amber-400">
            <div className="flex items-center justify-between mb-2">
              <RefreshCw size={20} className="text-amber-500" />
              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Pending/On-Hold</span>
@@ -141,7 +141,7 @@ export default function MerchantInventoryPage() {
 
       <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full text-end border-collapse min-w-[800px]">
             <thead className="bg-zinc-50 border-b border-zinc-200">
               <tr>
                 <th className="px-6 py-4 text-[12px] font-bold text-zinc-500 uppercase tracking-wider">Product Info</th>

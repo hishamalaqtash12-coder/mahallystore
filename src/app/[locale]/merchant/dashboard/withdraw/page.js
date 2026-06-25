@@ -145,7 +145,7 @@ export default function WithdrawPage() {
                     <span className="text-[12px] font-bold uppercase tracking-widest">Available Balance</span>
                  </div>
                  <h2 className="text-[48px] font-bold tracking-tight mb-4">
-                    <span className="text-[20px] font-medium mr-1 text-zinc-400">JOD</span>
+                    <span className="text-[20px] font-medium ms-1 text-zinc-400">JOD</span>
                     {balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                  </h2>
                  
@@ -162,7 +162,7 @@ export default function WithdrawPage() {
                     )}
                  </div>
               </div>
-              <DollarSign className="absolute -right-6 -bottom-6 w-40 h-40 text-white/5 rotate-12" />
+              <DollarSign className="absolute -start-6 -bottom-6 w-40 h-40 text-white/5 rotate-12" />
            </div>
         </div>
 
@@ -178,14 +178,14 @@ export default function WithdrawPage() {
                        <div className="space-y-2">
                           <label className="text-[13px] font-bold text-zinc-700">Amount to Withdraw</label>
                           <div className="relative group">
-                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-[14px] group-focus-within:text-[#be374f] transition-colors">JOD</span>
+                             <span className="absolute end-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-[14px] group-focus-within:text-[#be374f] transition-colors">JOD</span>
                              <input 
                                type="number" 
                                step="0.01"
                                value={amount}
                                onChange={(e) => setAmount(e.target.value)}
                                placeholder="0.00"
-                               className="w-full h-[52px] pl-14 pr-4 bg-zinc-50 border border-zinc-200 rounded-md text-[18px] font-bold outline-none focus:border-[#be374f] focus:ring-4 focus:ring-[#be374f]/5 focus:bg-white transition-all shadow-inner"
+                               className="w-full h-[52px] pe-14 ps-4 bg-zinc-50 border border-zinc-200 rounded-md text-[18px] font-bold outline-none focus:border-[#be374f] focus:ring-4 focus:ring-[#be374f]/5 focus:bg-white transition-all shadow-inner"
                                required
                              />
                           </div>
@@ -262,7 +262,7 @@ export default function WithdrawPage() {
             </h3>
          </div>
          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-end">
                <thead>
                   <tr className="bg-zinc-100/50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                      <th className="px-6 py-4">Transaction ID</th>

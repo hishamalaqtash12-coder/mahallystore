@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { History, ShoppingBag, Trash2, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 
 export default function AccountRecentlyViewedPage() {
@@ -57,7 +57,7 @@ export default function AccountRecentlyViewedPage() {
               </div>
               <button 
                 onClick={() => removeItem(item.id)} 
-                className="absolute top-2 right-2 p-2 text-gray-300 hover:text-rose-600 transition-colors bg-white/90 rounded-md backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 border border-gray-100"
+                className="absolute top-2 start-2 p-2 text-gray-300 hover:text-rose-600 transition-colors bg-white/90 rounded-md backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 border border-gray-100"
               >
                 <Trash2 size={14} />
               </button>

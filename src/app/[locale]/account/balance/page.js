@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, Wallet, History, Plus } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function AccountBalancePage() {
   const { loading } = useAuth();
@@ -33,7 +33,7 @@ export default function AccountBalancePage() {
               <p className="font-bold text-xl text-gray-900">JOD 0.00</p>
            </div>
         </div>
-        <div className="absolute -bottom-10 -right-10 opacity-5">
+        <div className="absolute -bottom-10 -start-10 opacity-5">
            <Wallet size={200} className="text-gray-900" />
         </div>
       </div>

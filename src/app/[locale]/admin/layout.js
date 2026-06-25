@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/routing";
 import "@/styles/dashboard.css";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -40,7 +40,7 @@ export default function AdminLayout({ children }) {
   return (
     <div dir="ltr" className="flex min-h-screen bg-zinc-50 font-sans">
       <AdminSidebar />
-      <div className="flex-1 lg:ml-64 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 lg:me-64 flex flex-col h-screen overflow-hidden">
         <AdminHeader />
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
           {children}

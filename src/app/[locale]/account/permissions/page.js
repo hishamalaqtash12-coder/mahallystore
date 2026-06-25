@@ -54,7 +54,7 @@ export default function AccountPermissionsPage() {
       <div className="space-y-3">
         {permissions.map((item) => (
           <div key={item.id} className="bg-white border border-gray-100 rounded-md p-6 flex items-center justify-between group hover:border-[#be374f] transition-all">
-            <div className="flex-1 pr-8">
+            <div className="flex-1 ps-8">
               <h3 className="text-[16px] font-bold mb-1 text-gray-900">{item.title}</h3>
               <p className="text-[13px] text-gray-500 leading-relaxed max-w-xl">{item.desc}</p>
             </div>
@@ -88,7 +88,7 @@ export default function AccountPermissionsPage() {
       </div>
 
       {isSaving && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 rounded-md shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 z-[100]">
+        <div className="fixed bottom-10 end-1/2 -translate-x-1/2 bg-black text-white px-8 py-3 rounded-md shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 z-[100]">
            <Loader2 size={18} className="animate-spin text-[#be374f]" />
            <span className="text-[14px] font-bold">Updating permissions...</span>
         </div>

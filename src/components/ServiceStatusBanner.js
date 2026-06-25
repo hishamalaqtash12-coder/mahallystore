@@ -17,7 +17,7 @@ export default function ServiceStatusBanner() {
   if (!backendError || !isVisible) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] w-[calc(100%-2rem)] max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-6 end-1/2 -translate-x-1/2 z-[9999] w-[calc(100%-2rem)] max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="bg-white border-2 border-red-100 shadow-2xl rounded-2xl p-4 md:p-5 flex items-start gap-4 ring-1 ring-black/5">
         <div className="bg-red-50 p-2 rounded-xl shrink-0">
           <AlertCircle className="w-6 h-6 text-red-600" />

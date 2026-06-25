@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { usePathname } from "@/i18n/routing";
 import {
   LayoutDashboard,
   Package,
@@ -54,7 +54,7 @@ export default function AdminSidebar() {
   const { logout } = useAuth();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-zinc-200 bg-white flex flex-col">
+    <aside className="fixed end-0 top-0 z-40 h-screen w-64 border-r border-zinc-200 bg-white flex flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-zinc-200 px-6">
         <Link href="/" className="flex items-center gap-2.5">

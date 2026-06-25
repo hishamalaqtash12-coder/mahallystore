@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Store, ShoppingBag, Truck, Heart, Users, Globe, ShieldCheck, Zap } from "lucide-react";
 
 export const metadata = {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Package, Search, PlusCircle, Edit, Trash2, Zap, Star, Eye, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import AddProductForm from "@/components/merchant/AddProductForm";
 import Loader from "@/components/Loader";
 
@@ -371,13 +371,13 @@ export default function MerchantProductsPage() {
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+          <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
           <input
             type="text"
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-[36px] border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] bg-white outline-none focus:border-[#be374f] w-64 shadow-sm"
+            className="h-[36px] border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] bg-white outline-none focus:border-[#be374f] w-64 shadow-sm"
           />
         </div>
       </div>
@@ -385,7 +385,7 @@ export default function MerchantProductsPage() {
       {/* Product Table */}
       <div className="bg-white border border-zinc-200 shadow-sm rounded-md overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-[1200px] w-full text-left border-collapse">
+          <table className="min-w-[1200px] w-full text-end border-collapse">
             <thead>
               <tr className="bg-zinc-100/50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                 <th className="px-6 py-4 w-10">
@@ -406,7 +406,7 @@ export default function MerchantProductsPage() {
                 <th className="px-6 py-4">Commission</th>
                 <th className="px-6 py-4">Author</th>
                 <th className="px-6 py-4 text-center">Featured</th>
-                <th className="px-6 py-4 text-right">Date</th>
+                <th className="px-6 py-4 text-start">Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
@@ -434,7 +434,7 @@ export default function MerchantProductsPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="font-bold text-[#be374f] hover:text-[#8f2d4a] text-[14px] text-left leading-tight transition-colors"
+                          className="font-bold text-[#be374f] hover:text-[#8f2d4a] text-[14px] text-end leading-tight transition-colors"
                         >
                           {product.name}
                         </button>
@@ -531,7 +531,7 @@ export default function MerchantProductsPage() {
                       <Star size={18} className={product.featured ? "text-amber-400 fill-amber-400" : "text-zinc-200 group-hover/star:text-amber-400"} />
                     </button>
                   </td>
-                  <td className="px-6 py-5 text-right">
+                  <td className="px-6 py-5 text-start">
                     <div className="text-[12px] leading-tight">
                       <p className={`font-black uppercase text-[10px] ${product.status === 'publish' ? 'text-emerald-600' : 'text-amber-600'}`}>
                         {product.status === 'publish' ? 'Published' : (product.status === 'pending' ? 'Pending Approval' : 'Draft')}

@@ -102,7 +102,7 @@ export default function ReviewSubmissionModal({ isOpen, onClose, order, user, us
                       <button 
                         key={idx}
                         onClick={() => handleSelectProduct(item)}
-                        className="flex items-center gap-4 p-4 border border-zinc-200 rounded-lg hover:border-brand hover:bg-brand-light/30 transition-all text-left group"
+                        className="flex items-center gap-4 p-4 border border-zinc-200 rounded-lg hover:border-brand hover:bg-brand-light/30 transition-all text-end group"
                       >
                          <div className="w-16 h-16 bg-white border border-zinc-100 rounded-md overflow-hidden shrink-0">
                             {item.image?.src ? (
@@ -143,7 +143,7 @@ export default function ReviewSubmissionModal({ isOpen, onClose, order, user, us
                         </button>
                       ))}
                       {rating > 0 && (
-                        <span className="ml-2 text-[14px] font-bold text-brand-dark">
+                        <span className="me-2 text-[14px] font-bold text-brand-dark">
                           {rating === 5 ? 'I love it!' : rating === 4 ? 'I like it' : rating === 3 ? 'It\'s okay' : rating === 2 ? 'I don\'t like it' : 'I hate it'}
                         </span>
                       )}

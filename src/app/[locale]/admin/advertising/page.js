@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { Megaphone, CheckCircle2, XCircle, Clock, Search, Filter } from "lucide-react";
 
 export default function AdminAdvertisingPage() {
@@ -245,13 +245,13 @@ export default function AdminAdvertisingPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-end border-collapse">
                 <thead>
                   <tr className="bg-white border-b border-zinc-200">
                      <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Type</th>
                      <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Name / ID</th>
                      <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Expires In</th>
-                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-right">Action</th>
+                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-start">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
@@ -277,7 +277,7 @@ export default function AdminAdvertisingPage() {
                              <span className="text-[13px] font-bold text-zinc-700">{daysLeft} Days</span>
                            )}
                          </td>
-                         <td className="px-6 py-4 text-right">
+                         <td className="px-6 py-4 text-start">
                            <button
                              onClick={() => handleRevoke(ad.type, ad.id)}
                              disabled={actioningId === `revoke-${ad.id}`}
@@ -309,7 +309,7 @@ export default function AdminAdvertisingPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-end border-collapse">
                 <thead>
                   <tr className="bg-white border-b border-zinc-200">
                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Invoice / Date</th>
@@ -317,7 +317,7 @@ export default function AdminAdvertisingPage() {
                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Type / Duration</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Cost</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-right">Action</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-start">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
@@ -340,7 +340,7 @@ export default function AdminAdvertisingPage() {
                       <td className="px-6 py-4">
                         {getStatusBadge(req.status)}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-start">
                         {req.status === "processing" ? (
                           <div className="flex justify-end gap-2">
                             <button

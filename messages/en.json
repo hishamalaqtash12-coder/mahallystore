@@ -6,7 +6,7 @@
     "noResults": "No results found",
     "dashboard": "Dashboard",
     "ordersAndAccount": "Orders & Account",
-    "vendorPortal": "Vendor Portal",
+    "vendorPortal": "Seller Portal",
     "adminPanel": "Admin Panel",
     "hello": "Hello, {name}",
     "login": "Login",
@@ -41,7 +41,40 @@
     "vendors": "Stores",
     "featuredProducts": "Featured Products",
     "helpAndSupport": "Help & Support",
-    "browseAllProducts": "Browse All Products"
+    "browseAllProducts": "Browse All Products",
+    "welcomePrefix": "Welcome, ",
+    "customer": "Customer",
+    "adminBoard": "Admin Board",
+    "merchant": "Merchant",
+    "admin": "Admin",
+    "yourProfile": "Your Profile",
+    "accountSecurity": "Account Security",
+    "couponsAndOffers": "Coupons & Offers",
+    "trending": "Trending",
+    "featuredProductsMenu": "Featured Products",
+    "newProducts": "New Products",
+    "shopByCategory": "Shop by Category",
+    "viewAllMenu": "View All",
+    "viewLess": "View Less",
+    "ourMerchants": "Our Merchants",
+    "allVendors": "All Vendors",
+    "location": "Location",
+    "deliveryToGov": "Delivery to",
+    "updateLocation": "Update Location",
+    "helpAndSettings": "Help & Settings",
+    "yourAccount": "Your Account",
+    "aboutMahally": "About Mahally",
+    "customerService": "Customer Service",
+    "scrollRight": "Scroll Right",
+    "scrollLeft": "Scroll Left",
+    "categoriesMenu": "Categories",
+    "almostOutOfStock": "Almost out of stock",
+    "onlyLeft": "only left",
+    "jod": "JOD",
+    "chooseLocation": "Choose Your Location",
+    "shippingOptionsMayVary": "Shipping options and delivery speed may vary depending on the location.",
+    "done": "Done",
+    "adminDashboardMenu": "Admin Dashboard"
   },
   "Hero": {
     "stores": "Stores",
@@ -80,9 +113,38 @@
   "ProductGrid": {
     "title": "Explore Our Products",
     "viewAll": "View All",
-    "noProducts": "No products found",
-    "noProductsDesc": "There are no products available to explore at the moment.",
-    "viewAllProducts": "View All Products"
+    "noProducts": "No products match the selected filters",
+    "noProductsDesc": "Adjust filters or search keywords to help you find what you are looking for.",
+    "viewAllProducts": "View All Products",
+    "foundFeatured": "Found {count} featured product{suffix}",
+    "featuredSuffixSingle": "",
+    "featuredSuffixPlural": "s",
+    "showingResults": "Showing 1-{end} out of more than {total} results for ",
+    "category": "Category",
+    "allProducts": "All Products",
+    "sortBy": "Sort by:",
+    "sortRecommended": "Recommended",
+    "sortPriceLowHigh": "Price: Low to High",
+    "sortPriceHighLow": "Price: High to Low",
+    "sortTopRated": "Top Rated",
+    "sortNewest": "Newest Arrivals",
+    "featuredPicks": "Featured Picks",
+    "results": "Results",
+    "featuredDesc": "A carefully curated collection of selected products from our top merchants.",
+    "resultsDesc": "Check each product page for other buying options. Price and other details may vary based on product size and color.",
+    "filters": "Filters",
+    "andUp": "& Up",
+    "discounted": "Discounted",
+    "discountOrMore": "% Off or more",
+    "freeShipping": "Free Shipping",
+    "inStockOnly": "In Stock Only",
+    "currency": "JOD",
+    "brand": "Brand:",
+    "seller": "Seller:",
+    "officialMahally": "Official Mahally",
+    "loadingProducts": "Loading products...",
+    "clearAllFilters": "Clear all filters",
+    "showMore": "Show More"
   },
   "SuperBuyerSection": {
     "sponsoredProducts": "Sponsored Products",
@@ -150,5 +212,138 @@
     "faq": "FAQ",
     "oneMarket": "One market... limitless products",
     "footerDesc": "We saved you the long trips to buy from your favorite store wherever you are in Jordan. We gathered many stores from all governorates in one place, at the same store price! With fast and reliable delivery to your doorstep."
+  },
+  "SidebarFilter": {
+    "category": "Category",
+    "allCategories": "All Categories",
+    "viewAllProducts": "View All Products",
+    "activeFilters": "Active Filters",
+    "clearAll": "Clear All",
+    "customerReviews": "Customer Reviews",
+    "andUp": "& Up",
+    "brands": "Brands",
+    "showLess": "Show Less",
+    "showMoreCount": "Show More ({count})",
+    "seller": "Seller",
+    "officialMahally": "Official Mahally",
+    "price": "Price",
+    "under10": "Under 10 JOD",
+    "10to25": "10 to 25 JOD",
+    "25to50": "25 to 50 JOD",
+    "50andUp": "50 JOD & Up",
+    "currency": "JOD",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "apply": "Apply",
+    "dealsAndDiscounts": "Deals & Discounts",
+    "discountedProducts": "Discounted Products",
+    "discountOrMore": "% off or more",
+    "shippingAndAvailability": "Shipping & Availability",
+    "eligibleForFreeShipping": "Eligible for Free Shipping",
+    "inStockOnly": "In Stock Only"
+  },
+  "Help": {
+    "topics": {
+      "recommended": "Recommended Topics",
+      "order-issues": "Order Issues",
+      "buying": "Shopping on Mahally",
+      "shipping": "Shipping & Delivery",
+      "account": "Account & Security",
+      "promotions": "Promotions & Credit",
+      "technical": "Technical Issues"
+    },
+    "faqData": {
+      "recommended": [
+        {
+          "q": "How do I track my order?",
+          "a": "You can track your order in the 'My Orders' section. Click the 'Track' button next to the order for real-time shipping status. We also send email notifications for every update."
+        },
+        {
+          "q": "Where is the order number?",
+          "a": "The order number is a 12-digit number usually starting with 'MAH'. You can find it in the order confirmation email and in the 'My Orders' section inside your account."
+        },
+        {
+          "q": "How do I cancel my order?",
+          "a": "An order can be cancelled within 30 minutes of creation. Go to 'My Orders', find the order, and click 'Cancel Order'. If the order status becomes 'Processing' or 'Shipped', you will have to wait until delivery."
+        }
+      ],
+      "order-issues": [
+        {
+          "q": "Can I cancel part of my order?",
+          "a": "Yes, you can cancel specific items from the order before they are processed for shipping. Open the order details and choose 'Cancel Item' for the desired product."
+        },
+        {
+          "q": "How do I ask for help with an order?",
+          "a": "Select the order from the 'My Orders' section and click 'Get Help'. You will be connected directly with the seller or the official support team via messaging."
+        },
+        {
+          "q": "I ordered several products together, why do I only see some of them?",
+          "a": "Mahally is a multi-vendor marketplace. Orders are managed by different sellers separately, so you might receive multiple packages and tracking numbers for one order."
+        }
+      ],
+      "buying": [
+        {
+          "q": "How do I use a discount code?",
+          "a": "You can enter the discount code on the checkout page under the 'Payment' section. Click 'Apply Coupon' before completing the purchase."
+        },
+        {
+          "q": "Is shopping on Mahally safe?",
+          "a": "Absolutely. We use SSL encryption for all transactions and provide Mahally Buyer Protection to guarantee your funds until the order is delivered safely."
+        }
+      ],
+      "shipping": [
+        {
+          "q": "How long does shipping take?",
+          "a": "Standard shipping within Jordan usually takes 2 to 5 business days. The duration may vary depending on the seller's location."
+        },
+        {
+          "q": "Is there express shipping?",
+          "a": "Express shipping options are available for some products. Look for the 'Express' shipping speed during checkout."
+        }
+      ],
+      "account": [
+        {
+          "q": "How do I secure my account?",
+          "a": "We recommend using a strong, unique password and enabling any additional verification options available in account settings."
+        }
+      ],
+      "promotions": [
+        {
+          "q": "How do promo credits work?",
+          "a": "Promo credits are automatically applied to your cart at checkout for eligible products. You can view your available credits in your profile."
+        }
+      ],
+      "technical": [
+        {
+          "q": "The website is slow or not working.",
+          "a": "Try clearing your browser cache and cookies or using another device. If the problem persists, contact the support team."
+        }
+      ]
+    },
+    "searchSuggestions": [
+      "How do I track my order?",
+      "Where is the order number?",
+      "How do I cancel my order?",
+      "Can I cancel part of my order?"
+    ],
+    "breadcrumbs": {
+      "home": "Home",
+      "helpCenter": "Help Center",
+      "searchResults": "Search Results"
+    },
+    "greeting": "Hello, how can we help you?",
+    "searchPlaceholder": "Ask a question...",
+    "searchButton": "Search",
+    "commonSearches": "Common Searches",
+    "supportLog": "Support Log",
+    "chatWithSupport": "Chat with Customer Service",
+    "allHelpTopics": "All Help Topics",
+    "resultsFound": "Found {count} result(s)",
+    "noResultsTitle": "No results",
+    "noResultsDesc": "We couldn't find any articles matching \"{query}\". Try different keywords.",
+    "clearSearch": "Clear search and show all topics",
+    "stillNeedHelp": "Still need help?",
+    "supportReady": "The support team is ready to help you with any inquiry.",
+    "chatWithUs": "Chat with us"
   }
 }

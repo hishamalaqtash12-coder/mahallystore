@@ -2,8 +2,9 @@
 
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { Link } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
+import { usePathname } from "@/i18n/routing";
 import UserAvatar from '@/components/UserAvatar';
 import { 
   RotateCcw, 
@@ -124,7 +125,7 @@ export default function AccountSidebar({ user, customerName, logout, isVendor, v
               )}
               
               {item.expandable && isOrdersExpanded && (
-                <div className="mr-9 mt-0.5 space-y-0.5 mb-2">
+                <div className="ms-9 mt-0.5 space-y-0.5 mb-2">
                   {item.subItems.map((sub) => {
                     const isSubActive = pathname === '/account/orders' && (
                       (sub.id === 'all' && activeStatus === 'all') ||
@@ -135,7 +136,7 @@ export default function AccountSidebar({ user, customerName, logout, isVendor, v
                       <Link
                         key={sub.id}
                         href={sub.href}
-                        className={`w-full block text-right px-3 py-1.5 rounded-md text-[13px] transition-all ${isSubActive ? 'text-[#be374f] font-bold bg-[#be374f]/5' : 'text-gray-500 font-medium hover:text-black hover:bg-gray-50'}`}
+                        className={`w-full block text-start px-3 py-1.5 rounded-md text-[13px] transition-all ${isSubActive ? 'text-[#be374f] font-bold bg-[#be374f]/5' : 'text-gray-500 font-medium hover:text-black hover:bg-gray-50'}`}
                       >
                         {sub.label}
                       </Link>

@@ -240,13 +240,13 @@ export default function AdminAnnouncementsPage() {
           {/* Filters & Total Info */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+              <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
               <input
                 type="text"
                 placeholder="Search history..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#800000] focus:border-[#800000]"
+                className="w-full h-10 pe-10 ps-4 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#800000] focus:border-[#800000]"
               />
             </div>
             <div className="text-xs font-semibold text-zinc-500 bg-zinc-100 border border-zinc-200 rounded-full px-3.5 py-1 w-fit shadow-sm">
@@ -256,12 +256,12 @@ export default function AdminAnnouncementsPage() {
 
           {/* Table */}
           <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-end border-collapse">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-200">
                   <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">Announcement</th>
                   <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">Sent Date</th>
-                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest text-right">Actions</th>
+                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest text-start">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -302,7 +302,7 @@ export default function AdminAnnouncementsPage() {
                           <span className="text-[11px] text-zinc-400">{formatTime(a.createdAt)}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-start">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => { setSelectedAnnouncement(a); setIsEditing(false); }}

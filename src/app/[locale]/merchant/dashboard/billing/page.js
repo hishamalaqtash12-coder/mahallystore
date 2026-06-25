@@ -76,7 +76,7 @@ export default function BillingPage() {
               }`}
             >
               {isCurrent && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#be374f] text-white text-[11px] font-bold uppercase tracking-wider rounded-full shadow-sm">
+                <div className="absolute -top-3 end-1/2 -translate-x-1/2 px-3 py-1 bg-[#be374f] text-white text-[11px] font-bold uppercase tracking-wider rounded-full shadow-sm">
                   Current Plan
                 </div>
               )}

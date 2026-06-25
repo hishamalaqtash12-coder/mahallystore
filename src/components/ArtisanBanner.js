@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 
@@ -27,7 +27,7 @@ export default function ArtisanBanner() {
         </div>
 
         {/* eBay-style Floating Images on Right */}
-        <div className="hidden md:flex flex-1 h-full relative items-center justify-center pr-12">
+        <div className="hidden md:flex flex-1 h-full relative items-center justify-center ps-12">
           <div className="grid grid-cols-2 gap-4 rotate-6 scale-110">
             <div className="w-32 h-40 bg-white rounded-lg shadow-2xl relative overflow-hidden transform -translate-y-4">
               <Image src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=300&auto=format&fit=crop" alt="Handcrafted home decor" fill className="object-cover" />
@@ -44,7 +44,7 @@ export default function ArtisanBanner() {
           </div>
 
           {/* Abstract background shapes */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-400/20 rounded-full blur-3xl -z-0" />
+          <div className="absolute top-1/2 end-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-400/20 rounded-full blur-3xl -z-0" />
         </div>
       </div>
     </section>

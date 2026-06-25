@@ -116,14 +116,14 @@ export default function AdminFeedbackPage() {
         <div className="relative flex-1">
           <Search
             size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400"
           />
           <input
             type="text"
             placeholder="Search comments or issues..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-9 bg-white border border-zinc-200 rounded-lg pl-9 pr-4 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors"
+            className="w-full h-9 bg-white border border-zinc-200 rounded-lg pe-9 ps-4 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors"
           />
         </div>
         <div className="flex gap-2">
@@ -195,9 +195,9 @@ export default function AdminFeedbackPage() {
                       ))}
                     </div>
                     {item.rating <= 2 ? (
-                      <AlertTriangle size={13} className="text-red-400 ml-1" />
+                      <AlertTriangle size={13} className="text-red-400 me-1" />
                     ) : item.rating >= 4 ? (
-                      <CheckCircle size={13} className="text-emerald-400 ml-1" />
+                      <CheckCircle size={13} className="text-emerald-400 me-1" />
                     ) : null}
                   </div>
 

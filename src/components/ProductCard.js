@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Star, ShoppingCart, Check, Eye, BadgeCheck, Heart, AlertCircle, Clock, Zap, Settings, TrendingDown } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useTranslations } from "next-intl";
@@ -165,12 +165,12 @@ export default function ProductCard({ product }) {
 
         {/* Badges (only when in stock) */}
         {!outOfStock && isBestSeller && (
-          <div className="absolute top-0 left-0 bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md shadow-sm z-10">
+          <div className="absolute top-0 end-0 bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md shadow-sm z-10">
             {t("bestSeller")}
           </div>
         )}
         {!outOfStock && onSale && !isBestSeller && (
-          <div className={`absolute top-0 left-0 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md shadow-sm z-10 flex items-center gap-1 ${isLimitedOffer ? "bg-gradient-to-r from-brand to-brand-dark" : "bg-brand"}`}>
+          <div className={`absolute top-0 end-0 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md shadow-sm z-10 flex items-center gap-1 ${isLimitedOffer ? "bg-gradient-to-r from-brand to-brand-dark" : "bg-brand"}`}>
             {isLimitedOffer && <Zap size={10} className="fill-white animate-bounce" />}
             {isLimitedOffer ? t("limitedTimeOffer") : t("savePercent", {percent: ((1 - price / regularPrice) * 100).toFixed(0)})}
           </div>
@@ -191,7 +191,7 @@ export default function ProductCard({ product }) {
         {/* Wishlist */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product); }}
-          className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all z-20 group/wishlist"
+          className="absolute top-2 start-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all z-20 group/wishlist"
         >
           <Heart
             size={16}
@@ -212,7 +212,7 @@ export default function ProductCard({ product }) {
               {product.name}
             </h3>
           </Link>
-          <div className="absolute left-0 top-full mt-1 w-[200%] sm:w-64 bg-white border border-zinc-200 shadow-xl p-2.5 rounded-md text-[12px] text-zinc-800 opacity-0 invisible group-hover/title:opacity-100 group-hover/title:visible transition-all z-[60] pointer-events-none font-medium">
+          <div className="absolute end-0 top-full mt-1 w-[200%] sm:w-64 bg-white border border-zinc-200 shadow-xl p-2.5 rounded-md text-[12px] text-zinc-800 opacity-0 invisible group-hover/title:opacity-100 group-hover/title:visible transition-all z-[60] pointer-events-none font-medium">
             {product.name}
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function ProductCard({ product }) {
             <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5 leading-snug cursor-default">
               {plainDescription}
             </p>
-            <div className="absolute left-0 top-full mt-1 w-[200%] sm:w-64 bg-white border border-zinc-200 shadow-xl p-2.5 rounded-md text-[11px] text-zinc-600 opacity-0 invisible group-hover/desc:opacity-100 group-hover/desc:visible transition-all z-[60] pointer-events-none leading-relaxed">
+            <div className="absolute end-0 top-full mt-1 w-[200%] sm:w-64 bg-white border border-zinc-200 shadow-xl p-2.5 rounded-md text-[11px] text-zinc-600 opacity-0 invisible group-hover/desc:opacity-100 group-hover/desc:visible transition-all z-[60] pointer-events-none leading-relaxed">
               {plainDescription}
             </div>
           </div>
@@ -269,10 +269,10 @@ export default function ProductCard({ product }) {
             <div className="flex items-center gap-2">
               {onSale && <span className="text-brand text-[20px] font-light">-{Math.round((1 - price / regularPrice) * 100)}%</span>}
               <div className="flex items-start text-zinc-900">
-                {product.type === "variable" && <span className="text-[12px] mt-1 font-normal text-zinc-600 mr-1">{t("from")}</span>}
+                {product.type === "variable" && <span className="text-[12px] mt-1 font-normal text-zinc-600 ms-1">{t("from")}</span>}
                 <span className="text-2xl font-medium tracking-tight leading-none">{whole}</span>
-                <span className="text-[12px] font-medium leading-none mt-1 mr-0.5">{decimal}</span>
-                <span className="text-[12px] mt-1 font-medium mr-1">{t("jod")}</span>
+                <span className="text-[12px] font-medium leading-none mt-1 ms-0.5">{decimal}</span>
+                <span className="text-[12px] mt-1 font-medium ms-1">{t("jod")}</span>
               </div>
             </div>
           )}
@@ -294,7 +294,7 @@ export default function ProductCard({ product }) {
           if (outOfStock) {
             return (
               <div
-                className="absolute bottom-3 left-3 w-[42px] h-8 rounded-full bg-white text-zinc-300 border border-zinc-200 flex items-center justify-center cursor-not-allowed shadow-sm"
+                className="absolute bottom-3 end-3 w-[42px] h-8 rounded-full bg-white text-zinc-300 border border-zinc-200 flex items-center justify-center cursor-not-allowed shadow-sm"
                 title={t("outOfStock")}
               >
                 <AlertCircle size={16} />
@@ -306,7 +306,7 @@ export default function ProductCard({ product }) {
             return (
               <Link
                 href="/merchant/dashboard/products"
-                className="absolute bottom-3 left-3 w-[42px] h-8 rounded-full bg-white text-zinc-900 border border-zinc-900 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-colors shadow-sm"
+                className="absolute bottom-3 end-3 w-[42px] h-8 rounded-full bg-white text-zinc-900 border border-zinc-900 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-colors shadow-sm"
                 title={t("manageProduct")}
               >
                 <Settings size={16} />
@@ -317,7 +317,7 @@ export default function ProductCard({ product }) {
           if (isVendor) {
             return (
               <div
-                className="absolute bottom-3 left-3 w-[42px] h-8 rounded-full bg-white text-zinc-300 border border-zinc-200 flex items-center justify-center cursor-not-allowed shadow-sm"
+                className="absolute bottom-3 end-3 w-[42px] h-8 rounded-full bg-white text-zinc-300 border border-zinc-200 flex items-center justify-center cursor-not-allowed shadow-sm"
                 title={t("purchaseDisabled")}
               >
                 <ShoppingCart size={16} />
@@ -328,14 +328,14 @@ export default function ProductCard({ product }) {
           return (
             <button
               onClick={handleCartToggle}
-              className={`absolute bottom-3 left-3 w-[42px] h-8 rounded-full flex items-center justify-center transition-all shadow-sm hover:scale-105 active:scale-95
+              className={`absolute bottom-3 end-3 w-[42px] h-8 rounded-full flex items-center justify-center transition-all shadow-sm hover:scale-105 active:scale-95
                 ${alreadyInCart ? "bg-brand text-white border border-brand hover:bg-brand-dark" : "bg-white text-brand border border-brand hover:bg-brand-light/30"}`}
               title={alreadyInCart ? t("removeFromCart") : t("addToCart")}
             >
               {alreadyInCart ? <Check size={16} /> : (
                  <div className="relative flex items-center justify-center">
                    <ShoppingCart size={16} strokeWidth={2.5} />
-                   <span className="absolute -top-0.5 -right-1.5 text-[10px] font-black leading-none">+</span>
+                   <span className="absolute -top-0.5 -start-1.5 text-[10px] font-black leading-none">+</span>
                  </div>
               )}
             </button>

@@ -11,7 +11,7 @@ import {
   CircleCheck,
   Heart,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
 
@@ -122,7 +122,7 @@ function ReviewCard({ f, index }) {
             avatarBgColor={f.avatarBgColor || "#9b8676"}
             className="w-9 h-9 rounded-full text-xs font-semibold border border-zinc-200 text-white"
           />
-          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+          <span className="absolute -bottom-0.5 -start-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
         </div>
         <div>
           <p className="text-[13px] font-semibold text-zinc-900 leading-tight">
@@ -239,7 +239,7 @@ export default async function ReviewsPage() {
 
             {/* Average rating pill */}
             <div className="flex items-center gap-5 bg-zinc-900 text-white px-6 py-4 rounded-2xl shrink-0">
-              <div className="text-center border-r border-white/10 pr-5">
+              <div className="text-center border-r border-white/10 ps-5">
                 <p className="text-3xl font-bold leading-none">{avgRating}</p>
                 <div className="flex justify-center mt-2">
                   <StarRating rating={Math.round(parseFloat(avgRating))} size={13} />
@@ -292,7 +292,7 @@ export default async function ReviewsPage() {
               <MessageCircle size={18} className="text-zinc-400" />
               <h2 className="text-base font-semibold text-zinc-900">Recent Feedback</h2>
               {totalReviews > 0 && (
-                <span className="ml-auto text-xs text-zinc-400 bg-zinc-100 rounded-full px-2.5 py-0.5">
+                <span className="me-auto text-xs text-zinc-400 bg-zinc-100 rounded-full px-2.5 py-0.5">
                   {totalReviews} reviews
                 </span>
               )}

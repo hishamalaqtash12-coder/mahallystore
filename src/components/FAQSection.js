@@ -38,7 +38,7 @@ export default function FAQSection() {
         >
           <button 
             onClick={() => setOpenIndex(openIndex === i ? null : i)}
-            className="w-full flex items-center justify-between py-4 text-left group transition-all"
+            className="w-full flex items-center justify-between py-4 text-end group transition-all"
           >
             <span className={`text-[14px] font-medium transition-colors ${openIndex === i ? 'text-[#8f2d4a] font-bold' : 'text-zinc-700 group-hover:text-[#8f2d4a]'}`}>
               {faq.q}
@@ -50,7 +50,7 @@ export default function FAQSection() {
           </button>
           
           <div className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === i ? 'max-h-40 pb-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-            <p className="text-[13px] text-zinc-600 leading-relaxed pl-1">
+            <p className="text-[13px] text-zinc-600 leading-relaxed pe-1">
               {faq.a}
             </p>
           </div>

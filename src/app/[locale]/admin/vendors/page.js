@@ -14,7 +14,7 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import AdminSearch from "@/components/admin/AdminSearch";
 
 const STATUS_MAP = {
@@ -108,7 +108,7 @@ export default function AdminVendorsPage() {
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg animate-in slide-in-from-right-4 duration-300 ${
+          className={`fixed top-6 start-6 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg animate-in slide-in-from-start-4 duration-300 ${
             toast.type === "success"
               ? "bg-emerald-600 text-white"
               : "bg-red-600 text-white"
@@ -147,7 +147,7 @@ export default function AdminVendorsPage() {
           <button
             key={s.key}
             onClick={() => setFilter(s.key)}
-            className={`rounded-xl border p-4 text-left transition-colors ${
+            className={`rounded-xl border p-4 text-end transition-colors ${
               filter === s.key
                 ? "bg-zinc-900 border-zinc-900 text-white"
                 : "bg-white border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
@@ -232,7 +232,7 @@ export default function AdminVendorsPage() {
                       value={v.membershipPlan || "free"}
                       onChange={(e) => handleAction(v.id, "change_plan", e.target.value)}
                       disabled={isActioning}
-                      className="ml-2 border border-zinc-200 rounded-md text-xs py-0.5 px-2 bg-zinc-50 focus:outline-none focus:border-zinc-400"
+                      className="me-2 border border-zinc-200 rounded-md text-xs py-0.5 px-2 bg-zinc-50 focus:outline-none focus:border-zinc-400"
                     >
                       <option value="free">Free</option>
                       <option value="silver">Silver</option>

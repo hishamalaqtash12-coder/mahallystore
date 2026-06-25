@@ -14,7 +14,7 @@ export default function AccountPaymentsPage() {
          <div className="grid grid-cols-1 gap-6">
             {/* Active Payment Method: COD */}
             <div className="bg-white border-2 border-emerald-500 rounded-md p-8 relative overflow-hidden shadow-sm">
-               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-[50px] flex items-center justify-end pr-5 pt-5 text-emerald-500">
+               <div className="absolute top-0 start-0 w-24 h-24 bg-emerald-50 rounded-bl-[50px] flex items-center justify-end ps-5 pt-5 text-emerald-500">
                   <CheckCircle2 size={32} />
                </div>
 
@@ -61,7 +61,7 @@ export default function AccountPaymentsPage() {
                   We ensure every transaction is protected. With Cash on Delivery, you have the opportunity to inspect your package before payment, ensuring 100% satisfaction.
                </p>
             </div>
-            <div className="absolute -bottom-10 -right-10 opacity-10">
+            <div className="absolute -bottom-10 -start-10 opacity-10">
                <ShieldCheck size={180} />
             </div>
          </div>

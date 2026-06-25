@@ -1,5 +1,5 @@
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function ContactPage() {
   return (

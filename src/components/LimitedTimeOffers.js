@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronRight, ChevronLeft, Clock } from "lucide-react";
@@ -73,14 +73,14 @@ export default function LimitedTimeOffers({ products }) {
       <div className="relative group">
         <button
           onClick={() => scroll("left")}
-          className={`flex absolute left-0 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-10 md:h-10 bg-white border border-zinc-200 rounded-full items-center justify-center shadow-md transition-opacity hover:bg-zinc-50 ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          className={`flex absolute end-0 md:-end-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-10 md:h-10 bg-white border border-zinc-200 rounded-full items-center justify-center shadow-md transition-opacity hover:bg-zinc-50 ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         >
           <ChevronLeft size={20} className="text-zinc-700 w-4 h-4 md:w-5 md:h-5" />
         </button>
 
         <button
           onClick={() => scroll("right")}
-          className={`flex absolute right-0 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-10 md:h-10 bg-white border border-zinc-200 rounded-full items-center justify-center shadow-md transition-opacity hover:bg-zinc-50 ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          className={`flex absolute start-0 md:-start-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 md:w-10 md:h-10 bg-white border border-zinc-200 rounded-full items-center justify-center shadow-md transition-opacity hover:bg-zinc-50 ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         >
           <ChevronRight size={20} className="text-zinc-700 w-4 h-4 md:w-5 md:h-5" />
         </button>

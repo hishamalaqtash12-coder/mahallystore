@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, Store, Star, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 
 export default function AccountFollowedStoresPage() {
@@ -117,7 +117,7 @@ export default function AccountFollowedStoresPage() {
               </Link>
 
               {/* Logo Overlay */}
-              <div className="absolute top-14 left-4 w-12 h-12 rounded-md bg-white border border-zinc-200 shadow-md overflow-hidden p-0.5 flex items-center justify-center">
+              <div className="absolute top-14 end-4 w-12 h-12 rounded-md bg-white border border-zinc-200 shadow-md overflow-hidden p-0.5 flex items-center justify-center">
                 {v.storeLogo ? (
                   <Image src={v.storeLogo} alt={v.storeName || "Store logo"} fill className="object-contain p-0.5" />
                 ) : (

@@ -65,13 +65,13 @@ export default function MerchantAnnouncementsPage() {
         </div>
         
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+          <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
           <input 
             type="text" 
             placeholder="Search announcements..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-10 pl-10 pr-4 bg-white border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-[#800000] w-full md:w-64 transition-all"
+            className="h-10 pe-10 ps-4 bg-white border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-[#800000] w-full md:w-64 transition-all"
           />
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function MerchantAnnouncementsPage() {
                 <span className="px-2 py-1 bg-[#800000]/5 text-[#800000] text-[10px] font-black uppercase tracking-widest rounded-md">
                    {a.editedAt ? 'Updated' : 'Official'}
                 </span>
-                <span className="text-[11px] text-zinc-400 ml-auto font-medium">{formatDate(a.createdAt)}</span>
+                <span className="text-[11px] text-zinc-400 me-auto font-medium">{formatDate(a.createdAt)}</span>
               </div>
               
               <h3 className="text-[17px] font-bold text-zinc-900 mb-2 group-hover:text-[#800000] transition-colors line-clamp-2">{a.title}</h3>

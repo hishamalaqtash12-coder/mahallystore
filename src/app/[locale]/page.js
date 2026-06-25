@@ -8,7 +8,7 @@ import Testimonials from "@/components/Testimonials";
 import VideoPromo from "@/components/VideoPromo";
 import ProductGrid from "@/components/ProductGrid";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { ChevronRight, Smartphone, Watch, Laptop, Shirt, Home as HomeIcon, Zap, Tag, Star, ShieldCheck, Truck, ShoppingBag, Flame, Trophy, Clock, Menu, ChevronDown, Lock, CreditCard, RefreshCcw, Bell } from "lucide-react";
 
 export default async function Home() {

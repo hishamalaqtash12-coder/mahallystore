@@ -3,11 +3,11 @@
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useLocation } from "@/context/LocationContext";
 import { JORDAN_GOVERNORATES } from "@/lib/constants";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Lock, ChevronRight, CheckCircle2, ChevronDown, Package, ShieldCheck } from "lucide-react";
 import Loader from "@/components/Loader";
 
@@ -302,7 +302,7 @@ export default function CheckoutPage() {
             <CheckCircle2 size={32} />
             <h1 className="text-[21px] font-bold">تم تقديم الطلب، شكراً لك!</h1>
           </div>
-          <div className="bg-zinc-50 border border-zinc-200 rounded-md p-8 text-right mb-8" dir="rtl">
+          <div className="bg-zinc-50 border border-zinc-200 rounded-md p-8 text-start mb-8" dir="rtl">
             <div className="flex items-start gap-4">
               <div className="bg-white border border-zinc-200 p-2 rounded">
                 <Package size={24} className="text-zinc-400" />
@@ -354,22 +354,22 @@ export default function CheckoutPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex flex-col">
                         <input type="text" name="firstName" placeholder="الاسم الأول *" value={formData.firstName} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[13px] md:text-[13px] text-[16px] outline-none shadow-inner w-full`} />
-                        {validationErrors.firstName && <span className="text-[11px] text-red-600 mt-1 font-medium pl-0.5">{validationErrors.firstName}</span>}
+                        {validationErrors.firstName && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.firstName}</span>}
                       </div>
                       <div className="flex flex-col">
                         <input type="text" name="lastName" placeholder="الاسم الأخير" value={formData.lastName} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-3 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-inner w-full" />
                       </div>
                       <div className="flex flex-col md:col-span-2">
                         <input type="email" name="email" placeholder="البريد الإلكتروني *" value={formData.email} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
-                        {validationErrors.email && <span className="text-[11px] text-red-600 mt-1 font-medium pl-0.5">{validationErrors.email}</span>}
+                        {validationErrors.email && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.email}</span>}
                       </div>
                       <div className="flex flex-col md:col-span-2">
-                        <input type="tel" name="phone" placeholder="رقم الهاتف (مثال: 079XXXXXXX) *" value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-right h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
-                        {validationErrors.phone && <span className="text-[11px] text-red-600 mt-1 font-medium pl-0.5">{validationErrors.phone}</span>}
+                        <input type="tel" name="phone" placeholder="رقم الهاتف (مثال: 079XXXXXXX) *" value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        {validationErrors.phone && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.phone}</span>}
                       </div>
                       <div className="flex flex-col md:col-span-2">
                         <input type="text" name="address" placeholder="اسم الشارع والمنطقة *" value={formData.address} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
-                        {validationErrors.address && <span className="text-[11px] text-red-600 mt-1 font-medium pl-0.5">{validationErrors.address}</span>}
+                        {validationErrors.address && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.address}</span>}
                       </div>
                       <div className="flex flex-col">
                         <select name="city" value={city} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-2 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-sm cursor-pointer w-full">
@@ -399,7 +399,7 @@ export default function CheckoutPage() {
                         <input type="radio" checked readOnly className="accent-brand" />
                         <span className="text-[14px] font-bold text-zinc-900">الدفع عند الاستلام (COD)</span>
                       </div>
-                      <p className="text-[12px] text-zinc-600 mr-6 mt-1">ادفع نقداً عند استلام طلبك.</p>
+                      <p className="text-[12px] text-zinc-600 ms-6 mt-1">ادفع نقداً عند استلام طلبك.</p>
                     </div>
                   </div>
                 </div>
@@ -469,7 +469,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-600 text-[13px]">الشحن والتوصيل:</span>
-                  <div className="text-left">
+                  <div className="text-end">
                     <span className="text-zinc-900" dir="ltr">
                       {fetchingShipping ? "..." : `JOD ${shippingFee.toFixed(2)}`}
                     </span>

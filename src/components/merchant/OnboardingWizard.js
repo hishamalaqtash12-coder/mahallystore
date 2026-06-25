@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CheckCircle2, Circle, ChevronRight, Upload, Package, Link as LinkIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function OnboardingWizard({ stats, user }) {
   const [isDismissed, setIsDismissed] = useState(false);
@@ -64,7 +64,7 @@ export default function OnboardingWizard({ stats, user }) {
 
   return (
     <div className="bg-gradient-to-r from-[#be374f]/5 to-[#febd69]/10 border border-[#be374f]/20 rounded-xl p-6 mb-8 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#febd69] opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+      <div className="absolute top-0 start-0 w-64 h-64 bg-[#febd69] opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
       
       <div className="flex justify-between items-start mb-6">
         <div>
@@ -76,7 +76,7 @@ export default function OnboardingWizard({ stats, user }) {
           </h2>
           <p className="text-[13px] text-zinc-600 mt-1">Complete these steps to publish your store and start selling.</p>
         </div>
-        <div className="text-right">
+        <div className="text-start">
           <div className="text-[24px] font-bold text-[#be374f] leading-none">{progressPercent}%</div>
           <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Completed</p>
         </div>

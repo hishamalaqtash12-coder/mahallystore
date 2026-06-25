@@ -56,21 +56,21 @@ export default function MerchantOrdersPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+            <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <input 
               type="text" 
               placeholder="Search orders..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-[36px] bg-white border border-zinc-300 rounded-md pl-9 pr-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
+              className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
             />
           </div>
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+            <Filter className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-[36px] pl-9 pr-8 bg-white border border-zinc-300 rounded-md text-[13px] outline-none hover:bg-zinc-50 shadow-sm appearance-none cursor-pointer"
+              className="h-[36px] pe-9 ps-8 bg-white border border-zinc-300 rounded-md text-[13px] outline-none hover:bg-zinc-50 shadow-sm appearance-none cursor-pointer"
             >
               <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
@@ -85,7 +85,7 @@ export default function MerchantOrdersPage() {
 
       <div className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-end">
             <thead className="bg-zinc-100/50 border-b border-zinc-200">
               <tr className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                 <th className="px-6 py-4">Order ID</th>
@@ -94,7 +94,7 @@ export default function MerchantOrdersPage() {
                 <th className="px-6 py-4">Payment & Shipping</th>
                 <th className="px-6 py-4">Order Total</th>
                 <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-right">Action</th>
+                <th className="px-6 py-4 text-start">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
@@ -140,18 +140,18 @@ export default function MerchantOrdersPage() {
                          {order.status}
                        </span>
                   </td>
-                  <td className="px-6 py-5 text-right">
+                  <td className="px-6 py-5 text-start">
                      {order.status === 'cancelled' || order.status === 'completed' ? (
                        <button 
                           onClick={() => setSelectedOrder(order)}
-                          className="h-[32px] px-5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 border border-zinc-300 rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center gap-2 ml-auto"
+                          className="h-[32px] px-5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 border border-zinc-300 rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center gap-2 me-auto"
                        >
                           <Eye size={14} /> View Details
                        </button>
                      ) : (
                        <button 
                           onClick={() => setSelectedOrder(order)}
-                          className="h-[32px] px-6 bg-brand hover:bg-brand-dark text-white border-brand rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center gap-2 ml-auto"
+                          className="h-[32px] px-6 bg-brand hover:bg-brand-dark text-white border-brand rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center gap-2 me-auto"
                        >
                           <Eye size={14} /> Manage
                        </button>

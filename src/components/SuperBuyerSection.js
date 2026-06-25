@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ChevronRight, Megaphone, Store, ExternalLink } from "lucide-react";
@@ -68,7 +68,7 @@ export default function SuperBuyerSection({ products = [], vendors = [], adverti
                   <div className="flex items-center gap-2">
                      <Megaphone size={18} className="text-brand" />
                      <h2 className="text-[18px] font-bold text-zinc-900">{t("sponsoredProducts")}</h2>
-                     <span className="mr-2 text-[10px] bg-zinc-200 text-zinc-600 px-2 py-0.5 rounded uppercase font-bold tracking-wider">{t("ad")}</span>
+                     <span className="ms-2 text-[10px] bg-zinc-200 text-zinc-600 px-2 py-0.5 rounded uppercase font-bold tracking-wider">{t("ad")}</span>
                   </div>
                   <Link href="/browse" className="text-[13px] text-brand hover:text-brand-dark font-medium transition-colors hover:underline">
                      {t("shopMore")}
@@ -108,13 +108,13 @@ export default function SuperBuyerSection({ products = [], vendors = [], adverti
              {/* Featured Store (Store Ad) */}
              <div className="bg-gradient-to-br from-brand to-brand-dark border border-brand-dark rounded-lg overflow-hidden shadow-sm relative text-white flex flex-col">
                 {/* Decorative background */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute top-0 start-0 w-64 h-64 bg-white/5 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 
                 <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 relative z-10">
                    <div className="flex items-center gap-2">
                       <Store size={18} className="text-[#be374f]" />
                       <h2 className="text-[18px] font-bold text-white">{t("featuredStore")}</h2>
-                      <span className="mr-2 text-[10px] bg-white/20 text-white px-2 py-0.5 rounded uppercase font-bold tracking-wider backdrop-blur-sm border border-white/10">{t("ad")}</span>
+                      <span className="ms-2 text-[10px] bg-white/20 text-white px-2 py-0.5 rounded uppercase font-bold tracking-wider backdrop-blur-sm border border-white/10">{t("ad")}</span>
                    </div>
                 </div>
  

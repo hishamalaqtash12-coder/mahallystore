@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { JORDAN_GOVERNORATES, DEFAULT_SHIPPING_DATA } from "@/lib/constants";
 import { useEffect, useState } from "react";
 import { Truck, Save, Info, CheckCircle2, Loader2, MapPin } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function MerchantShippingPage() {
   const { user, wooId } = useAuth();
@@ -84,7 +84,7 @@ export default function MerchantShippingPage() {
       </div>
 
       <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-end border-collapse">
           <thead className="bg-zinc-50 border-b border-zinc-200">
             <tr>
               <th className="px-6 py-4 text-[13px] font-bold text-zinc-600 uppercase">Governorate</th>
@@ -103,26 +103,26 @@ export default function MerchantShippingPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="relative w-32">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">JOD</span>
+                    <span className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">JOD</span>
                     <input
                       type="number"
                       step="0.5"
                       value={shippingData[gov]?.fee || 0}
                       onChange={e => handleUpdate(gov, "fee", parseFloat(e.target.value) || 0)}
-                      className="w-full pl-12 pr-3 py-2 border border-zinc-200 rounded-md text-sm focus:border-brand outline-none transition-all"
+                      className="w-full pe-12 ps-3 py-2 border border-zinc-200 rounded-md text-sm focus:border-brand outline-none transition-all"
                     />
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="relative w-32">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">JOD</span>
+                    <span className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm">JOD</span>
                     <input
                       type="number"
                       step="1"
                       placeholder="Optional"
                       value={shippingData[gov]?.free_over || ""}
                       onChange={e => handleUpdate(gov, "free_over", e.target.value ? parseFloat(e.target.value) : null)}
-                      className="w-full pl-12 pr-3 py-2 border border-zinc-200 rounded-md text-sm focus:border-brand outline-none transition-all"
+                      className="w-full pe-12 ps-3 py-2 border border-zinc-200 rounded-md text-sm focus:border-brand outline-none transition-all"
                     />
                   </div>
                 </td>
@@ -133,7 +133,7 @@ export default function MerchantShippingPage() {
       </div>
       
       {success && (
-        <div className="fixed bottom-8 right-8 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
+        <div className="fixed bottom-8 start-8 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
           <CheckCircle2 size={20} />
           <span className="font-medium">Shipping settings updated successfully!</span>
         </div>

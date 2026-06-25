@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import { X, ChevronRight, Star, Truck, ShieldCheck, RotateCcw, Plus, Minus, Trash2, AlertCircle, Clock } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { isProductOutOfStock, getProductMerchant } from "@/lib/product-utils";
@@ -171,7 +171,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 z-50 w-8 h-8 flex items-center justify-center bg-white border border-zinc-200 hover:bg-zinc-100 rounded-full text-zinc-600 transition-all shadow-sm"
+          className="absolute top-3 start-3 z-50 w-8 h-8 flex items-center justify-center bg-white border border-zinc-200 hover:bg-zinc-100 rounded-full text-zinc-600 transition-all shadow-sm"
         >
           <X size={18} />
         </button>
@@ -245,12 +245,12 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                 </div>
                 <div className="flex items-start gap-1">
                   <span className="text-[28px] font-medium leading-none text-zinc-900">{salePrice.toFixed(2)}</span>
-                  <span className="text-[13px] mt-1 font-medium text-zinc-900 mr-1">د.أ</span>
+                  <span className="text-[13px] mt-1 font-medium text-zinc-900 ms-1">د.أ</span>
                 </div>
                 {regularPrice > salePrice && (
                   <p className="text-[13px] text-zinc-500 mt-1">
                     السعر الأصلي: <span className="line-through">{regularPrice.toFixed(2)} د.أ</span>
-                    <span className="mr-2 text-rose-700">({discount}% خصم)</span>
+                    <span className="ms-2 text-rose-700">({discount}% خصم)</span>
                   </p>
                 )}
               </div>
@@ -347,7 +347,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                       <div className="w-full rounded-lg bg-zinc-100 border border-zinc-200 p-3 flex items-center gap-2 text-zinc-500">
                         <AlertCircle size={16} className="text-rose-400" />
                         <span className="text-[13px] font-semibold text-rose-600">نفدت الكمية</span>
-                        <span className="text-[12px] text-zinc-400 ml-1">— غير متاح للشراء</span>
+                        <span className="text-[12px] text-zinc-400 me-1">— غير متاح للشراء</span>
                       </div>
                     );
                   }

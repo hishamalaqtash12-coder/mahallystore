@@ -4,8 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import AccountSidebar from "@/components/AccountSidebar";
 import FeedbackModal from "@/components/FeedbackModal";
 import { ShieldAlert, MessageCircle, ChevronRight } from "lucide-react";
-import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { useRouter, usePathname } from "@/i18n/routing";
 import { useEffect, useState, Suspense } from "react";
 
 export default function AccountLayout({ children }) {
@@ -70,13 +70,13 @@ export default function AccountLayout({ children }) {
       </main>
 
       {/* Floating Widgets */}
-      {/* <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-50">
+      {/* <div className="fixed bottom-8 start-8 flex flex-col gap-3 z-50">
         <button
           onClick={() => setIsFeedbackOpen(true)}
           className="bg-white p-3 rounded-md shadow-lg border border-gray-100 cursor-pointer hover:shadow-xl transition-all group relative flex items-center justify-center"
         >
           <ShieldAlert size={22} className="text-gray-600 group-hover:text-[#be374f]" />
-          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-black text-white text-[11px] px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-bold">Feedback</span>
+          <span className="absolute start-full ms-3 top-1/2 -translate-y-1/2 bg-black text-white text-[11px] px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-bold">Feedback</span>
         </button>
       </div> */}
 
