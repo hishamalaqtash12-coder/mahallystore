@@ -48,10 +48,14 @@ const MerchantCarousel = memo(({ activeVendors }) => {
   };
 
   useEffect(() => {
-    checkScroll();
+    // Re-check after vendors load and DOM renders
+    const timer = setTimeout(checkScroll, 100);
     window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [activeVendors]);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -103,16 +107,16 @@ const MerchantCarousel = memo(({ activeVendors }) => {
         {/* Scroll Buttons */}
         <button
           onClick={() => scroll('left')}
-          disabled={!canScrollRight}
-          className={`hidden md:flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          disabled={!canScrollLeft}
+          className={`hidden md:flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         >
           <ChevronLeft size={24} className="rtl:rotate-180" />
         </button>
 
         <button
           onClick={() => scroll('right')}
-          disabled={!canScrollLeft}
-          className={`hidden md:flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          disabled={!canScrollRight}
+          className={`hidden md:flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         >
           <ChevronRight size={24} className="rtl:rotate-180" />
         </button>
@@ -205,10 +209,14 @@ const CategoryCarousel = memo(({ categories }) => {
   };
 
   useEffect(() => {
-    checkScroll();
+    // Re-check after categories load and DOM renders
+    const timer = setTimeout(checkScroll, 100);
     window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [uniqueCategories]);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -234,7 +242,7 @@ const CategoryCarousel = memo(({ categories }) => {
         {/* Persistent Navigation Buttons */}
         <button
           onClick={() => scroll('left')}
-          className={`flex absolute start-0 md:-start-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          className={`flex absolute start-0 md:-start-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           aria-label="Scroll Left"
         >
           <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
@@ -242,7 +250,7 @@ const CategoryCarousel = memo(({ categories }) => {
 
         <button
           onClick={() => scroll('right')}
-          className={`flex absolute end-0 md:-end-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          className={`flex absolute end-0 md:-end-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           aria-label="Scroll Right"
         >
           <ChevronRight className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
