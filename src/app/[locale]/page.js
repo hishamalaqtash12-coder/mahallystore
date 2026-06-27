@@ -10,6 +10,8 @@ import ProductGrid from "@/components/ProductGrid";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { ChevronRight, Smartphone, Watch, Laptop, Shirt, Home as HomeIcon, Zap, Tag, Star, ShieldCheck, Truck, ShoppingBag, Flame, Trophy, Clock, Menu, ChevronDown, Lock, CreditCard, RefreshCcw, Bell } from "lucide-react";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 
 export default async function Home() {
   let products = [];
@@ -24,7 +26,31 @@ export default async function Home() {
     products = result.data;
     totalPages = result.totalPages;
     categories = await getCategories({ hide_empty: false, per_page: 100 });
-    vendors = await getVendors({ per_page: 20 });
+
+    // Load all approved vendors then filter to only featured IDs chosen by admin
+    const allVendors = await getVendors({ per_page: 100 });
+    // Filter to approved only (dokan_enable_selling === "yes")
+    const approvedVendors = allVendors.filter(v => {
+      const meta = Object.fromEntries((v.meta_data || []).map(m => [m.key, m.value]));
+      return meta.dokan_enable_selling === "yes";
+    });
+    try {
+      const featuredPath = join(process.cwd(), "src/data/featured-vendors.json");
+      if (existsSync(featuredPath)) {
+        const { featuredIds = [] } = JSON.parse(readFileSync(featuredPath, "utf8"));
+        if (featuredIds.length > 0) {
+          // Admin has selected specific vendors
+          vendors = approvedVendors.filter(v => featuredIds.includes(v.id));
+        } else {
+          // No selection yet — show all approved
+          vendors = approvedVendors;
+        }
+      } else {
+        vendors = approvedVendors;
+      }
+    } catch (e) {
+      vendors = approvedVendors;
+    }
 
     try {
       const settingsPath = require("path").join(process.cwd(), "src/data/settings.json");
