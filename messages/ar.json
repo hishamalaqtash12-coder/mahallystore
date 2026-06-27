@@ -345,5 +345,31 @@
     "stillNeedHelp": "هل ما زلت بحاجة للمساعدة؟",
     "supportReady": "فريق الدعم جاهز لمساعدتك في أي استفسار.",
     "chatWithUs": "تحدث معنا"
+  },
+  "VendorsPage": {
+    "title": "دليل المتاجر",
+    "subtitle": "اكتشف وتابع تجارك المحلية المفضلة على محلي.",
+    "searchPlaceholder": "ابحث عن المتاجر بالاسم أو الوصف...",
+    "category": "القسم",
+    "all": "الكل",
+    "storeRating": "تقييم المتجر",
+    "andAbove": "وأعلى",
+    "merchantStatus": "حالة التاجر",
+    "verifiedOnly": "المتاجر الموثقة فقط",
+    "sortBy": "ترتيب حسب:",
+    "featured": "مميزة",
+    "newest": "الأحدث",
+    "topRated": "الأعلى تقييمًا",
+    "loadingStores": "جارٍ تحميل المتاجر...",
+    "storeCount": "{count} متجرًا",
+    "noStoresTitle": "لا توجد متاجر مطابقة للبحث",
+    "noStoresDesc": "جرّب كلمات مختلفة أو أعد ضبط الفلاتر.",
+    "clearFilters": "مسح جميع الفلاتر",
+    "newStore": "متجر جديد",
+    "rating": "{rating} تقييم",
+    "visitStore": "زيارة المتجر",
+    "follow": "متابعة",
+    "following": "متابع",
+    "unfollow": "إلغاء المتابعة"
   }
 }

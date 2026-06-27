@@ -345,5 +345,31 @@
     "stillNeedHelp": "Still need help?",
     "supportReady": "The support team is ready to help you with any inquiry.",
     "chatWithUs": "Chat with us"
+  },
+  "VendorsPage": {
+    "title": "Merchant Directory",
+    "subtitle": "Discover and follow your favorite local merchants on Mahally.",
+    "searchPlaceholder": "Search merchants by name or description...",
+    "category": "Category",
+    "all": "All",
+    "storeRating": "Store Rating",
+    "andAbove": "& above",
+    "merchantStatus": "Merchant Status",
+    "verifiedOnly": "Verified stores only",
+    "sortBy": "Sort by:",
+    "featured": "Featured",
+    "newest": "Newest",
+    "topRated": "Top Rated",
+    "loadingStores": "Loading stores...",
+    "storeCount": "{count} stores",
+    "noStoresTitle": "No stores found",
+    "noStoresDesc": "Try different keywords or reset the filters.",
+    "clearFilters": "Clear all filters",
+    "newStore": "New Store",
+    "rating": "{rating} rating",
+    "visitStore": "Visit Store",
+    "follow": "Follow",
+    "following": "Following",
+    "unfollow": "Unfollow"
   }
 }

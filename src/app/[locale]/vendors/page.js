@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import { Search, Store, MapPin, ChevronRight, Star, Loader2, Filter, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
+import { Search, Store, ChevronRight, Star, Loader2, CheckCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 
 export default function VendorsPage() {
+  const t = useTranslations("VendorsPage");
   const { wooId } = useAuth();
   const [vendors, setVendors] = useState([]);
   const [followedStores, setFollowedStores] = useState([]);
@@ -21,9 +23,8 @@ export default function VendorsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [vRes, fRes] = await Promise.all([
+        const [vRes] = await Promise.all([
           fetch(`/api/vendors?t=${Date.now()}`, { cache: 'no-store' }),
-          wooId ? fetch(`/api/messages/conversations?userId=${wooId}&t=${Date.now()}`, { cache: 'no-store' }) : Promise.resolve({ json: () => ({}) })
         ]);
 
         const vData = await vRes.json();
@@ -51,7 +52,6 @@ export default function VendorsPage() {
     const isFollowing = followedStores.some(id => String(id) === String(vId));
     const action = isFollowing ? 'unfollow' : 'follow';
 
-    // Optimistic UI
     setFollowedStores(prev =>
       action === 'follow' ? [...prev, vId] : prev.filter(id => String(id) !== String(vId))
     );
@@ -64,7 +64,6 @@ export default function VendorsPage() {
       });
     } catch (err) {
       console.error("Follow error:", err);
-      // Rollback
       setFollowedStores(prev =>
         action === 'unfollow' ? [...prev, vId] : prev.filter(id => String(id) !== String(vId))
       );
@@ -81,13 +80,13 @@ export default function VendorsPage() {
       v.storeDescription?.toLowerCase().includes(query.toLowerCase());
     const matchC = catFilter === "All" || v.storeCategory === catFilter;
     const matchR = !minRating || Math.round(v.rating || 0) >= minRating;
-    const matchV = !onlyVerified || v.isVerified; // Assuming isVerified exists or check meta
+    const matchV = !onlyVerified || v.isVerified;
 
     return matchQ && matchC && matchR && matchV;
   }).sort((a, b) => {
     if (sortBy === "Top Rated") return (b.rating || 0) - (a.rating || 0);
     if (sortBy === "Newest") return new Date(b.dateCreated || 0) - new Date(a.dateCreated || 0);
-    return 0; // Featured/Default
+    return 0;
   });
 
   return (
@@ -98,8 +97,8 @@ export default function VendorsPage() {
         <div className="max-w-[1400px] mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h1 className="text-[28px] font-medium text-zinc-900 leading-tight">دليل المتاجر</h1>
-              <p className="text-[14px] text-zinc-600 mt-1">اكتشف وتابع تجارك المحلية المفضلة على محلي.</p>
+              <h1 className="text-[28px] font-medium text-zinc-900 leading-tight">{t("title")}</h1>
+              <p className="text-[14px] text-zinc-600 mt-1">{t("subtitle")}</p>
             </div>
 
             <div className="relative w-full max-w-md">
@@ -107,7 +106,7 @@ export default function VendorsPage() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="ابحث عن المتاجر بالاسم أو الوصف..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full h-11 bg-white border border-zinc-300 rounded-md pe-11 ps-4 text-[14px] outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-sm"
               />
             </div>
@@ -120,7 +119,7 @@ export default function VendorsPage() {
         {/* Sidebar Filters */}
         <aside className="w-[240px] shrink-0 hidden md:block">
           <div className="border-b border-zinc-200 pb-3 mb-4">
-            <h2 className="text-[14px] font-bold text-zinc-900">القسم</h2>
+            <h2 className="text-[14px] font-bold text-zinc-900">{t("category")}</h2>
           </div>
           <ul className="space-y-1">
             {categories.map((c) => (
@@ -129,14 +128,14 @@ export default function VendorsPage() {
                   onClick={() => setCatFilter(c)}
                   className={`text-[13px] w-full text-start py-1 hover:text-brand transition-colors ${catFilter === c ? "font-bold text-zinc-950" : "text-brand-dark"}`}
                 >
-                  {c === "All" ? "الكل" : c}
+                  {c === "All" ? t("all") : c}
                 </button>
               </li>
             ))}
           </ul>
 
           <div className="mt-8 border-b border-zinc-200 pb-3 mb-4">
-            <h2 className="text-[14px] font-bold text-zinc-900">تقييم المتجر</h2>
+            <h2 className="text-[14px] font-bold text-zinc-900">{t("storeRating")}</h2>
           </div>
           <div className="space-y-1">
             {[4, 3, 2, 1].map(stars => (
@@ -150,20 +149,20 @@ export default function VendorsPage() {
                     <Star key={i} size={15} className={i <= stars ? "fill-[#FFA41C] text-[#FFA41C]" : "text-zinc-200 fill-zinc-200"} />
                   ))}
                 </div>
-                <span className={`text-[13px] ${minRating === stars ? "font-bold text-brand" : "text-zinc-600 group-hover:text-brand"}`}>وأعلى</span>
+                <span className={`text-[13px] ${minRating === stars ? "font-bold text-brand" : "text-zinc-600 group-hover:text-brand"}`}>{t("andAbove")}</span>
               </button>
             ))}
           </div>
 
           <div className="mt-8 border-b border-zinc-200 pb-3 mb-4">
-            <h2 className="text-[14px] font-bold text-zinc-900">حالة التاجر</h2>
+            <h2 className="text-[14px] font-bold text-zinc-900">{t("merchantStatus")}</h2>
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-2 cursor-pointer group" onClick={() => setOnlyVerified(!onlyVerified)}>
               <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${onlyVerified ? 'bg-brand border-brand' : 'border-zinc-300'}`}>
                 {onlyVerified && <CheckCircle size={10} className="text-white" />}
               </div>
-              <span className="text-[13px] text-zinc-700 group-hover:text-brand">المتاجر الموثقة فقط</span>
+              <span className="text-[13px] text-zinc-700 group-hover:text-brand">{t("verifiedOnly")}</span>
             </label>
           </div>
 
@@ -174,18 +173,18 @@ export default function VendorsPage() {
 
           <div className="flex items-center justify-between mb-6 pb-2 border-b border-zinc-100">
             <span className="text-[14px] text-zinc-600">
-              {loading ? "جارٍ تحميل المتاجر..." : `${filtered.length} متجرًا`}
+              {loading ? t("loadingStores") : t("storeCount", { count: filtered.length })}
             </span>
             <div className="flex items-center gap-2 text-[13px]">
-              <span className="text-zinc-500">ترتيب حسب:</span>
+              <span className="text-zinc-500">{t("sortBy")}</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-zinc-50 border border-zinc-300 rounded-md px-2 py-1 outline-none text-[13px] font-medium"
               >
-                <option value="Featured">مميزة</option>
-                <option value="Newest">الأحدث</option>
-                <option value="Top Rated">الأعلى تقييمًا</option>
+                <option value="Featured">{t("featured")}</option>
+                <option value="Newest">{t("newest")}</option>
+                <option value="Top Rated">{t("topRated")}</option>
               </select>
             </div>
           </div>
@@ -207,13 +206,13 @@ export default function VendorsPage() {
           {!loading && filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-zinc-200 rounded-xl bg-zinc-50">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-3xl mb-4 shadow-sm">🏪</div>
-              <h3 className="text-[18px] font-bold text-zinc-900">لا توجد متاجر مطابقة للبحث</h3>
-              <p className="text-sm text-zinc-500 mt-1">جرّب كلمات مختلفة أو أعد ضبط الفلاتر.</p>
+              <h3 className="text-[18px] font-bold text-zinc-900">{t("noStoresTitle")}</h3>
+              <p className="text-sm text-zinc-500 mt-1">{t("noStoresDesc")}</p>
               <button
                 onClick={() => { setQuery(""); setCatFilter("All"); }}
                 className="mt-4 text-[13px] text-brand-dark font-medium hover:underline"
               >
-                مسح جميع الفلاتر
+                {t("clearFilters")}
               </button>
             </div>
           )}
@@ -267,7 +266,7 @@ export default function VendorsPage() {
                         ))}
                       </div>
                       <span className="text-[12px] text-brand-dark hover:text-brand cursor-pointer">
-                        {v.rating > 0 ? `${v.rating.toFixed(1)} تقييم` : "متجر جديد"}
+                        {v.rating > 0 ? t("rating", { rating: v.rating.toFixed(1) }) : t("newStore")}
                       </span>
                     </div>
 
@@ -286,7 +285,7 @@ export default function VendorsPage() {
                         href={`/vendors/${v.id}`}
                         className="text-[13px] font-medium text-brand hover:text-brand-dark hover:underline flex items-center gap-1"
                       >
-                        زيارة المتجر <ChevronRight size={14} className="rtl:-scale-x-100" />
+                        {t("visitStore")} <ChevronRight size={14} className="rtl:-scale-x-100" />
                       </Link>
 
                       {Number(v.id) !== Number(wooId) && (
@@ -303,11 +302,11 @@ export default function VendorsPage() {
                           )}
                           {followedStores.some(id => String(id) === String(v.id)) ? (
                             <>
-                              <span className="group-hover:hidden">متابع</span>
-                              <span className="hidden group-hover:inline">إلغاء المتابعة</span>
+                              <span className="group-hover:hidden">{t("following")}</span>
+                              <span className="hidden group-hover:inline">{t("unfollow")}</span>
                             </>
                           ) : (
-                            <>متابعة</>
+                            <>{t("follow")}</>
                           )}
                         </button>
                       )}
