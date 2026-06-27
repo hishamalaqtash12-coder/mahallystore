@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CheckCircle,
   XCircle,
@@ -29,13 +30,16 @@ const STATUS_MAP = {
 };
 
 export default function AdminVendorsPage() {
+  const searchParams = useSearchParams();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [filter, setFilter] = useState("pending");
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState(null);
-  const [activeTab, setActiveTab] = useState("vendors"); // "vendors" | "carousel"
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") === "carousel" ? "carousel" : "vendors"
+  );
 
   // Carousel state
   const [featuredIds, setFeaturedIds] = useState([]);

@@ -16,7 +16,8 @@ import {
   TrendingUp,
   AlertTriangle,
   Zap,
-  Megaphone
+  Megaphone,
+  LayoutGrid
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -25,6 +26,7 @@ const menuItems = [
     group: "Main", items: [
       { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { name: "Vendors", href: "/admin/vendors", icon: Store },
+      { name: "Homepage Carousel", href: "/admin/vendors?tab=carousel", icon: LayoutGrid },
     ]
   },
   {
