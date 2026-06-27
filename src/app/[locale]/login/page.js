@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
-import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Info, Clock, Mail, Store, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Info, Clock, Mail, Store, ChevronDown, Eye, EyeOff, KeyRound } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import Loader from "@/components/Loader";
@@ -17,13 +17,20 @@ function LoginContent() {
   const accountRemoved = searchParams.get("reason") === "account_removed";
   const redirectTo = searchParams.get("redirect") || "/";
 
-  const [step, setStep] = useState("phone"); // "phone" | "email" | "otp" | "success" | "pending"
+  // mode: "login" | "reset"  — determines what happens after OTP succeeds
+  const [mode, setMode] = useState("login");
+
+  const [step, setStep] = useState("phone"); // "phone" | "email" | "otp" | "set_password" | "success" | "pending"
   const [phone, setPhone] = useState("+962");
   const [email, setEmail] = useState("");
   const [pendingVendorName, setPendingVendorName] = useState("");
   const [pendingVendorStore, setPendingVendorStore] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -45,17 +52,16 @@ function LoginContent() {
     }
   }, [countdown]);
 
-  // Auto-focus first input box when entering verification step
+  // Auto-focus first OTP input
   useEffect(() => {
     if (step === "otp") {
       setTimeout(() => {
-        if (otpRefs.current[0]) {
-          otpRefs.current[0].focus();
-        }
+        if (otpRefs.current[0]) otpRefs.current[0].focus();
       }, 50);
     }
   }, [step]);
 
+  // ── SEND OTP (login mode) ──
   const handleSendOTP = async (e) => {
     e.preventDefault();
     setError("");
@@ -65,7 +71,6 @@ function LoginContent() {
     }
     setLoading(true);
     try {
-      // 1. Verify if user is registered in the database first
       const checkRes = await fetch("/api/auth/check-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,9 +78,7 @@ function LoginContent() {
       });
 
       if (!checkRes.ok) {
-        if (checkRes.status === 503) {
-          throw new Error("Our store servers are currently undergoing maintenance. Please try again in a few minutes.");
-        }
+        if (checkRes.status === 503) throw new Error("Our store servers are currently undergoing maintenance. Please try again in a few minutes.");
         throw new Error(`Authentication service unavailable (${checkRes.status})`);
       }
 
@@ -87,7 +90,6 @@ function LoginContent() {
         return;
       }
 
-      // 2. Security Check: Block Pending Vendors — show dedicated pending screen
       if ((checkData.customer?.role === "vendor" || checkData.customer?.role === "shop_manager") && checkData.customer?.vendorStatus !== "approved") {
         setPendingVendorName(checkData.customer?.displayName || "");
         setPendingVendorStore(checkData.customer?.storeSlug || "");
@@ -96,7 +98,6 @@ function LoginContent() {
         return;
       }
 
-      // 3. Send custom NGT OTP
       const res = await fetch("/api/auth/phone-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,6 +119,52 @@ function LoginContent() {
     }
   };
 
+  // ── SEND OTP (forgot password mode) ──
+  const handleSendResetOTP = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (phone.replace(/\D/g, "").length < 10) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+    setLoading(true);
+    try {
+      // Verify the phone is registered
+      const checkRes = await fetch("/api/auth/check-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone })
+      });
+      const checkData = await checkRes.json();
+
+      if (!checkData.exists) {
+        setError("This phone number is not registered.");
+        setLoading(false);
+        return;
+      }
+
+      // Send OTP
+      const res = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, action: "send" })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setStep("otp");
+        setCountdown(60);
+      } else {
+        throw new Error(data.error || "Failed to send code.");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to send verification code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── OTP INPUT ──
   const handleOtpChange = (val, idx) => {
     if (!/^\d?$/.test(val)) return;
     const next = [...otp];
@@ -132,6 +179,7 @@ function LoginContent() {
     }
   };
 
+  // ── VERIFY OTP ──
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     const code = otp.join("");
@@ -147,55 +195,15 @@ function LoginContent() {
       const data = await res.json();
 
       if (res.ok) {
-        // Sync WooCommerce session
-        try {
-          await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: phone, password: "otp_login" })
-          });
-        } catch (err) {
-          console.warn("Failed to set session cookie for OTP login");
+        if (mode === "reset") {
+          // ✅ PASSWORD RESET: go to set new password screen
+          setNewPassword("");
+          setConfirmPassword("");
+          setStep("set_password");
+        } else {
+          // ✅ LOGIN: authenticate and redirect
+          await completeLogin();
         }
-
-        // Fetch user data from check-user to populate localStorage
-        try {
-          const checkRes = await fetch("/api/auth/check-user", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone })
-          });
-          if (checkRes.ok) {
-            const checkData = await checkRes.json();
-            if (checkData.exists && checkData.customer) {
-              const cust = checkData.customer;
-              localStorage.setItem("mahally_user", JSON.stringify({
-                uid: String(cust.id),
-                role: cust.role,
-                vendorStatus: cust.vendorStatus,
-                publicId: cust.publicId,
-                wooId: cust.id,
-                name: cust.displayName,
-                email: cust.email,
-                phone: cust.phone
-              }));
-            } else {
-              // Fallback if check-user fails or customer doesn't exist yet
-              localStorage.setItem("mahally_user", JSON.stringify({ phone }));
-            }
-          } else {
-            localStorage.setItem("mahally_user", JSON.stringify({ phone }));
-          }
-        } catch(e) {
-          localStorage.setItem("mahally_user", JSON.stringify({ phone }));
-        }
-
-        // Force a small delay then redirect, then reload to let AuthContext pick it up
-        setStep("success");
-        setTimeout(() => {
-          router.replace(redirectTo);
-          setTimeout(() => window.location.reload(), 100);
-        }, 1500);
       } else {
         setError(data.error || "Invalid verification code.");
       }
@@ -206,13 +214,95 @@ function LoginContent() {
     }
   };
 
+  // ── COMPLETE LOGIN (after OTP verified in login mode) ──
+  const completeLogin = async () => {
+    try {
+      await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: phone, password: "otp_login" })
+      });
+    } catch {}
+
+    try {
+      const checkRes = await fetch("/api/auth/check-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone })
+      });
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        if (checkData.exists && checkData.customer) {
+          const cust = checkData.customer;
+          localStorage.setItem("mahally_user", JSON.stringify({
+            uid: String(cust.id),
+            role: cust.role,
+            vendorStatus: cust.vendorStatus,
+            publicId: cust.publicId,
+            wooId: cust.id,
+            name: cust.displayName,
+            email: cust.email,
+            phone: cust.phone
+          }));
+        } else {
+          localStorage.setItem("mahally_user", JSON.stringify({ phone }));
+        }
+      } else {
+        localStorage.setItem("mahally_user", JSON.stringify({ phone }));
+      }
+    } catch {
+      localStorage.setItem("mahally_user", JSON.stringify({ phone }));
+    }
+
+    setStep("success");
+    setTimeout(() => {
+      router.replace(redirectTo);
+      setTimeout(() => window.location.reload(), 100);
+    }, 1500);
+  };
+
+  // ── SUBMIT NEW PASSWORD ──
+  const handleSetNewPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, newPassword })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to reset password.");
+      }
+
+      // Password updated — now log the user in
+      await completeLogin();
+    } catch (err) {
+      setError(err.message || "Failed to update password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── EMAIL LOGIN ──
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      // 1. Attempt WordPress Login first (Directly to WP database)
-      // This supports both Email and Username
       const wpRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,7 +317,6 @@ function LoginContent() {
       const wpData = await wpRes.json();
       const loginIdentity = wpData.user?.email || email;
 
-      // Check if vendor is approved BEFORE syncing Firebase
       const checkRes = await fetch("/api/auth/check-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -242,14 +331,6 @@ function LoginContent() {
           setLoading(false);
           return;
         }
-      }
-
-      // 2. WordPress authorized successfully!
-      // (Firebase sync removed completely)
-      
-      // Save user to localStorage for AuthContext to pick up
-      if (checkRes && checkRes.ok) {
-        const checkData = await checkRes.clone().json();
         if (checkData.exists && checkData.customer) {
           const cust = checkData.customer;
           localStorage.setItem("mahally_user", JSON.stringify({
@@ -285,7 +366,29 @@ function LoginContent() {
   const handleResend = async () => {
     setOtp(["", "", "", "", "", ""]);
     setError("");
-    await handleSendOTP({ preventDefault: () => { } });
+    const fakeEvent = { preventDefault: () => {} };
+    if (mode === "reset") {
+      await handleSendResetOTP(fakeEvent);
+    } else {
+      await handleSendOTP(fakeEvent);
+    }
+  };
+
+  // ── Switch to Forgot Password mode ──
+  const enterForgotPassword = () => {
+    setMode("reset");
+    setStep("phone");
+    setPhone("+962");
+    setOtp(["", "", "", "", "", ""]);
+    setError("");
+  };
+
+  const backToLogin = () => {
+    setMode("login");
+    setStep("phone");
+    setPhone("+962");
+    setOtp(["", "", "", "", "", ""]);
+    setError("");
   };
 
   return (
@@ -295,11 +398,11 @@ function LoginContent() {
         {/* Logo */}
         <div className="text-center mb-4 flex justify-center">
           <Link href="/" className="inline-block">
-            <Image 
-              src="/mahally-logo.webp" 
-              alt="Mahally.jo Logo" 
-              width={160} 
-              height={50} 
+            <Image
+              src="/mahally-logo.webp"
+              alt="Mahally.jo Logo"
+              width={160}
+              height={50}
               className="object-contain"
               priority
             />
@@ -322,8 +425,8 @@ function LoginContent() {
             </div>
           )}
 
-          {/* ── STEP 1A: Phone Input ── */}
-          {(step === "phone" || step === "email") && (
+          {/* ── STEP 1A: Phone Input (Login) ── */}
+          {(step === "phone" || step === "email") && mode === "login" && (
             <form onSubmit={step === "phone" ? handleSendOTP : handleEmailLogin} className="space-y-4">
               <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{step === "phone" ? "تسجيل الدخول برقم الهاتف" : "تسجيل الدخول"}</h1>
 
@@ -405,7 +508,7 @@ function LoginContent() {
                   بالمتابعة، فإنك توافق على <Link href="/conditions" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">شروط الاستخدام</Link> الخاصة بمحلي.
                 </p>
 
-                <div className="border-t border-zinc-100 pt-3">
+                <div className="border-t border-zinc-100 pt-3 space-y-2">
                   <button
                     type="button"
                     onClick={() => setStep(step === "phone" ? "email" : "phone")}
@@ -413,18 +516,86 @@ function LoginContent() {
                   >
                     {step === "phone" ? "تسجيل الدخول بالبريد الإلكتروني بدلاً من ذلك" : "تسجيل الدخول برقم الهاتف بدلاً من ذلك"}
                   </button>
+                  {/* Forgot password link — only on phone step */}
+                  {step === "phone" && (
+                    <button
+                      type="button"
+                      onClick={enterForgotPassword}
+                      className="cursor-pointer text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline flex items-center gap-1"
+                    >
+                      <KeyRound size={13} /> نسيت كلمة المرور؟
+                    </button>
+                  )}
                 </div>
               </div>
             </form>
           )}
 
+          {/* ── STEP 1B: Phone Input (Forgot Password mode) ── */}
+          {step === "phone" && mode === "reset" && (
+            <form onSubmit={handleSendResetOTP} className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <button type="button" onClick={backToLogin} className="text-zinc-400 hover:text-zinc-700">
+                  <ArrowRight size={18} className="rtl:rotate-180" />
+                </button>
+                <h1 className="text-[24px] font-medium text-zinc-900">إعادة تعيين كلمة المرور</h1>
+              </div>
+
+              <p className="text-[13px] text-zinc-500 leading-snug">
+                أدخل رقم هاتفك المسجّل وسنرسل لك رمز التحقق.
+              </p>
+
+              <div className="space-y-1">
+                <label className="text-[13px] font-bold text-zinc-900 block">رقم الهاتف</label>
+                <div dir="ltr" className="flex h-[31px] rounded-[3px] border border-zinc-400 shadow-inner focus-within:border-[#be374f] focus-within:ring-1 focus-within:ring-[#be374f] overflow-hidden transition-all bg-white">
+                  <div className="flex items-center gap-1 bg-zinc-50 border-r border-zinc-400 px-2 text-[13px] text-zinc-700 select-none">
+                    <span>+962</span>
+                    <ChevronDown size={14} className="text-zinc-500" />
+                  </div>
+                  <input
+                    type="tel"
+                    dir="ltr"
+                    value={phone.replace(/^\+962/, "")}
+                    onChange={e => {
+                      let val = e.target.value.replace(/[^\d\s-]/g, "");
+                      if (val.startsWith("0")) val = val.substring(1);
+                      setPhone("+962" + val);
+                    }}
+                    placeholder="7X XXX XXXX"
+                    className="flex-1 h-full bg-transparent px-2 text-[13px] outline-none min-w-0"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded flex gap-2">
+                  <Info size={16} className="text-red-600 shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-red-700 leading-tight">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] rounded-[3px] text-[13px] shadow-sm flex items-center justify-center disabled:opacity-60"
+              >
+                {loading ? <Loader size="sm" text="" /> : "إرسال رمز التحقق"}
+              </button>
+            </form>
+          )}
 
           {/* ── STEP 2: OTP Verification ── */}
           {step === "otp" && (
             <form onSubmit={handleVerifyOTP} className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">
+                {mode === "reset" ? "التحقق من الهوية" : "التحقق"}
+              </h1>
               <p className="text-[13px] text-zinc-900 leading-snug">
-                لأمانك، أرسلنا رمزاً من 6 أرقام إلى <span className="font-bold inline-block" dir="ltr">{phone}</span>.
+                {mode === "reset"
+                  ? "لإعادة تعيين كلمة مرورك، أدخل الرمز المرسل إلى "
+                  : "لأمانك، أرسلنا رمزاً من 6 أرقام إلى "}
+                <span className="font-bold inline-block" dir="ltr">{phone}</span>.
               </p>
 
               <div className="flex gap-2 justify-center py-4" dir="ltr">
@@ -470,7 +641,93 @@ function LoginContent() {
             </form>
           )}
 
-          {/* ── STEP 3: Success ── */}
+          {/* ── STEP 3: Set New Password (reset mode only) ── */}
+          {step === "set_password" && (
+            <form onSubmit={handleSetNewPassword} className="space-y-4">
+              <h1 className="text-[24px] font-medium text-zinc-900 mb-1">كلمة مرور جديدة</h1>
+              <p className="text-[13px] text-zinc-500 leading-snug mb-4">
+                أدخل كلمة مرور جديدة لحسابك. يجب أن تكون 8 أحرف على الأقل.
+              </p>
+
+              {/* New Password */}
+              <div className="space-y-1">
+                <label className="text-[13px] font-bold text-zinc-900 block">كلمة المرور الجديدة</label>
+                <div className="relative" dir="ltr">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    dir="ltr"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 ps-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all"
+                    autoFocus
+                  />
+                  <button type="button" onClick={() => setShowNewPassword(v => !v)} className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                    {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div className="space-y-1">
+                <label className="text-[13px] font-bold text-zinc-900 block">تأكيد كلمة المرور</label>
+                <div className="relative" dir="ltr">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    dir="ltr"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 ps-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all"
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(v => !v)} className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Password strength indicator */}
+              {newPassword.length > 0 && (
+                <div className="space-y-1">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4].map(level => (
+                      <div
+                        key={level}
+                        className={`h-1 flex-1 rounded-full transition-colors ${
+                          newPassword.length >= level * 2
+                            ? level <= 1 ? "bg-red-400"
+                            : level <= 2 ? "bg-amber-400"
+                            : level <= 3 ? "bg-yellow-400"
+                            : "bg-emerald-400"
+                            : "bg-zinc-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-zinc-400">
+                    {newPassword.length < 8 ? "كلمة المرور قصيرة جداً" : newPassword.length < 10 ? "مقبولة" : newPassword.length < 14 ? "جيدة" : "قوية جداً"}
+                  </p>
+                </div>
+              )}
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded flex gap-2">
+                  <Info size={16} className="text-red-600 shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-red-700 leading-tight">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || newPassword.length < 8 || newPassword !== confirmPassword}
+                className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] rounded-[3px] text-[13px] shadow-sm flex items-center justify-center disabled:opacity-60"
+              >
+                {loading ? <Loader size="sm" text="" /> : "حفظ كلمة المرور وتسجيل الدخول"}
+              </button>
+            </form>
+          )}
+
+          {/* ── STEP 4: Success ── */}
           {step === "success" && (
             <div className="text-center py-8 space-y-4">
               <CheckCircle2 size={48} className="text-emerald-600 mx-auto" />
@@ -479,10 +736,9 @@ function LoginContent() {
             </div>
           )}
 
-          {/* ── STEP 4: Pending Vendor Approval ── */}
+          {/* ── STEP 5: Pending Vendor Approval ── */}
           {step === "pending" && (
             <div className="text-center py-2 space-y-5">
-              {/* Animated clock icon */}
               <div className="relative mx-auto w-20 h-20">
                 <div className="absolute inset-0 rounded-full bg-amber-50 border-4 border-amber-100 animate-pulse" />
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -491,9 +747,7 @@ function LoginContent() {
               </div>
 
               <div>
-                <h2 className="text-[20px] font-bold text-zinc-900 mb-1">
-                  الطلب قيد المراجعة
-                </h2>
+                <h2 className="text-[20px] font-bold text-zinc-900 mb-1">الطلب قيد المراجعة</h2>
                 {pendingVendorName && (
                   <p className="text-[13px] text-zinc-500">
                     مرحباً <span className="font-bold text-zinc-800">{pendingVendorName}</span>،
@@ -525,7 +779,7 @@ function LoginContent() {
                   الاتصال بالدعم
                 </a>
                 <button
-                  onClick={() => { setStep("phone"); setError(""); }}
+                  onClick={backToLogin}
                   className="w-full text-[12px] text-zinc-500 hover:text-zinc-800 transition-colors"
                 >
                   ← العودة لتسجيل الدخول
