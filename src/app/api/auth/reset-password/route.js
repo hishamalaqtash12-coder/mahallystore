@@ -31,27 +31,40 @@ export async function POST(request) {
     // 1. Find the customer by phone (billing_phone)
     const cleanPhone = phone.replace(/\D/g, "");
     
-    let customers = [];
-    try {
-      const custRes = await api.get("customers", { per_page: 50, order: 'desc', orderby: 'registered_date' });
-      const sellerRes = await api.get("customers", { per_page: 50, role: 'seller', order: 'desc', orderby: 'registered_date' });
-      const adminRes = await api.get("customers", { per_page: 50, role: 'administrator', order: 'desc', orderby: 'registered_date' });
-      
-      customers = [
-        ...(custRes.data || []),
-        ...(sellerRes.data || []),
-        ...(adminRes.data || [])
-      ];
-    } catch (e) {
-      return NextResponse.json({ error: "Failed to look up account." }, { status: 502 });
-    }
+    let customer = null;
+    let page = 1;
+    let hasMore = true;
+    
+    while (hasMore && page <= 10) {
+      let pageCustomers = [];
+      try {
+        const custRes = await api.get("customers", { per_page: 100, page: page, order: 'desc', orderby: 'registered_date' });
+        const sellerRes = await api.get("customers", { per_page: 100, page: page, role: 'seller', order: 'desc', orderby: 'registered_date' });
+        const adminRes = await api.get("customers", { per_page: 50, page: page, role: 'administrator', order: 'desc', orderby: 'registered_date' });
+        
+        pageCustomers = [
+          ...(custRes.data || []),
+          ...(sellerRes.data || []),
+          ...(adminRes.data || [])
+        ];
+        
+        if ((custRes.data || []).length < 100 && (sellerRes.data || []).length < 100) {
+          hasMore = false;
+        }
+      } catch (e) {
+        return NextResponse.json({ error: "Failed to look up account." }, { status: 502 });
+      }
 
-    // Match by billing phone
-    const customer = customers.find(c => {
-      const cPhone = (c.billing?.phone || "").replace(/\D/g, "");
-      if (!cPhone || !cleanPhone) return false;
-      return cPhone === cleanPhone || cPhone.endsWith(cleanPhone) || cleanPhone.endsWith(cPhone);
-    });
+      // Match by billing phone
+      customer = pageCustomers.find(c => {
+        const cPhone = (c.billing?.phone || "").replace(/\D/g, "");
+        if (!cPhone || !cleanPhone) return false;
+        return cPhone === cleanPhone || cPhone.endsWith(cleanPhone) || cleanPhone.endsWith(cPhone);
+      });
+
+      if (customer) break;
+      page++;
+    }
 
     if (!customer) {
       return NextResponse.json({ error: "No account found for this phone number." }, { status: 404 });

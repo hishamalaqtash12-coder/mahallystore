@@ -58,34 +58,44 @@ export async function POST(request) {
     if (!found && phone) {
       const cleanPhone = phone.replace(/\D/g, "");
       
-      // Search both 'customer' and 'seller' roles, since registered vendors have the seller role
-      // and the WC API doesn't return sellers when role is unspecified
-      let customers = [];
-      for (let i = 0; i < 3; i++) {
-        try {
-          // Sequential fetch instead of parallel to prevent 502 Bad Gateway
-          const custRes = await api.get("customers", { per_page: 50, order: 'desc', orderby: 'registered_date' });
-          const sellerRes = await api.get("customers", { per_page: 50, role: 'seller', order: 'desc', orderby: 'registered_date' });
-
-          customers = [
-            ...(custRes.data || []),
-            ...(sellerRes.data || [])
-          ];
-          break;
-        } catch (e) {
-          if (i === 2) throw e;
-          // Exponential backoff with jitter
-          const delay = 1000 * Math.pow(2, i) + Math.random() * 500;
-          console.warn(`Retry ${i + 1} for check-user due to: ${e.message}. Waiting ${Math.round(delay)}ms...`);
-          await new Promise(r => setTimeout(r, delay));
-        }
-      }
+      let page = 1;
+      let hasMore = true;
       
-      found = customers.find(c => {
-        const cPhone = (c.billing?.phone || "").replace(/\D/g, "");
-        if (!cPhone || !cleanPhone) return false;
-        return cPhone === cleanPhone || cPhone.endsWith(cleanPhone) || cleanPhone.endsWith(cPhone);
-      });
+      while (hasMore && page <= 10) {
+        let pageCustomers = [];
+        for (let i = 0; i < 3; i++) {
+          try {
+            const custRes = await api.get("customers", { per_page: 100, page: page, order: 'desc', orderby: 'registered_date' });
+            const sellerRes = await api.get("customers", { per_page: 100, page: page, role: 'seller', order: 'desc', orderby: 'registered_date' });
+            const adminRes = await api.get("customers", { per_page: 50, page: page, role: 'administrator', order: 'desc', orderby: 'registered_date' });
+
+            pageCustomers = [
+              ...(custRes.data || []),
+              ...(sellerRes.data || []),
+              ...(adminRes.data || [])
+            ];
+            
+            // If all responses have less than their per_page limit, we've reached the end
+            if ((custRes.data || []).length < 100 && (sellerRes.data || []).length < 100) {
+              hasMore = false;
+            }
+            break;
+          } catch (e) {
+            if (i === 2) { hasMore = false; break; }
+            const delay = 500 * Math.pow(2, i) + Math.random() * 500;
+            await new Promise(r => setTimeout(r, delay));
+          }
+        }
+        
+        found = pageCustomers.find(c => {
+          const cPhone = (c.billing?.phone || "").replace(/\D/g, "");
+          if (!cPhone || !cleanPhone) return false;
+          return cPhone === cleanPhone || cPhone.endsWith(cleanPhone) || cleanPhone.endsWith(cPhone);
+        });
+
+        if (found) break;
+        page++;
+      }
     }
 
     if (!found) {
