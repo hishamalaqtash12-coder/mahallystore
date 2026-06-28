@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "@/i18n/routing";
 import { useLocation } from "@/context/LocationContext";
@@ -12,6 +13,7 @@ import { Lock, ChevronRight, CheckCircle2, ChevronDown, Package, ShieldCheck } f
 import Loader from "@/components/Loader";
 
 export default function CheckoutPage() {
+  const t = useTranslations("Checkout");
   const { cart, clearCart } = useCart();
   const { user, loading: authLoading, wooId, customerName, email: authEmail, phone: authPhone, address: authAddress, city: authCity, isVendor } = useAuth();
   const { governorate, updateGovernorate } = useLocation();
@@ -220,29 +222,29 @@ export default function CheckoutPage() {
     // Field-level Validation
     const errors = {};
     if (!formData.firstName?.trim()) {
-      errors.firstName = "الاسم الأول مطلوب.";
+      errors.firstName = t("errFirstNameRequired");
     }
     if (!formData.email?.trim()) {
-      errors.email = "البريد الإلكتروني مطلوب.";
+      errors.email = t("errEmailRequired");
     } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      errors.email = "يرجى إدخال بريد إلكتروني صحيح.";
+      errors.email = t("errEmailInvalid");
     }
     if (!formData.phone?.trim()) {
-      errors.phone = "رقم الهاتف مطلوب.";
+      errors.phone = t("errPhoneRequired");
     }
     if (!formData.address?.trim()) {
-      errors.address = "العنوان مطلوب.";
+      errors.address = t("errAddressRequired");
     }
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
-      setError("يرجى إصلاح الأخطاء في نموذج الشحن.");
+      setError(t("errFormFix"));
       return;
     }
     setValidationErrors({});
 
     if (cart.length === 0) {
-      setError("سلة التسوق فارغة.");
+      setError(t("errCartEmpty"));
       return;
     }
 
@@ -266,9 +268,9 @@ export default function CheckoutPage() {
         try {
           errorData = await response.json();
         } catch (e) {
-          throw new Error(`خطأ في الخادم (${response.status}). يرجى المحاولة لاحقاً.`);
+          throw new Error(t("errServer", { status: response.status }));
         }
-        throw new Error(errorData.error || "فشل تقديم الطلب.");
+        throw new Error(errorData.error || t("errOrderFailed"));
       }
 
       const data = await response.json();
@@ -280,14 +282,14 @@ export default function CheckoutPage() {
         router.push(`/account/orders?order=${data.orderId}`);
       }, 2500);
     } catch (err) {
-      setError(err.message || "فشل تقديم الطلب. يرجى المحاولة مرة أخرى.");
+      setError(err.message || t("errOrderFailedTryAgain"));
     } finally {
       setLoading(false);
     }
   };
 
   if (authLoading || !user) {
-    return <Loader fullPage size="lg" text="جاري التحقق من جلستك..." />;
+    return <Loader fullPage size="lg" text=t("loadingSession") />;
   }
 
   if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
@@ -300,7 +302,7 @@ export default function CheckoutPage() {
         <div className="max-w-xl w-full text-center">
           <div className="flex items-center justify-center gap-2 mb-8 text-[#007600]">
             <CheckCircle2 size={32} />
-            <h1 className="text-[21px] font-bold">تم تقديم الطلب، شكراً لك!</h1>
+            <h1 className="text-[21px] font-bold">{t("orderSuccessTitle")}</h1>
           </div>
           <div className="bg-zinc-50 border border-zinc-200 rounded-md p-8 text-start mb-8" dir="rtl">
             <div className="flex items-start gap-4">
@@ -308,8 +310,8 @@ export default function CheckoutPage() {
                 <Package size={24} className="text-zinc-400" />
               </div>
               <div>
-                <p className="text-[14px] font-bold text-zinc-900">رقم الطلب #{orderId}</p>
-                <p className="text-[13px] text-zinc-600">جاري معالجة طلبك وسيتم شحنه قريباً.</p>
+                <p className="text-[14px] font-bold text-zinc-900">{t("orderNumber", { orderId })}</p>
+                <p className="text-[13px] text-zinc-600">{t("orderProcessing")}</p>
               </div>
             </div>
           </div>
@@ -317,7 +319,7 @@ export default function CheckoutPage() {
             onClick={() => router.push('/')}
             className="h-[31px] px-8 bg-brand hover:bg-brand-dark text-white border-brand rounded-md text-[13px] font-medium shadow-sm transition-all"
           >
-            متابعة التسوق
+            {t("continueShopping")}
           </button>
         </div>
       </div>
@@ -330,10 +332,10 @@ export default function CheckoutPage() {
       <div className="bg-zinc-100 border-b border-zinc-200 h-[60px] flex items-center shadow-sm">
         <div className="container mx-auto px-4 max-w-5xl flex items-center justify-between">
           <Link href="/" className="flex items-center gap-1">
-            <span className="text-2xl font-black italic tracking-tighter text-zinc-900">محلي</span>
+            <span className="text-2xl font-black italic tracking-tighter text-zinc-900">{t("mahally")}</span>
             <span className="text-brand font-bold text-xl">.jo</span>
           </Link>
-          <h1 className="text-[28px] font-normal text-zinc-600 hidden md:block">إتمام الطلب</h1>
+          <h1 className="text-[28px] font-normal text-zinc-600 hidden md:block">{t("checkoutTitle")}</h1>
           <Lock size={20} className="text-zinc-400" />
         </div>
       </div>
@@ -350,25 +352,25 @@ export default function CheckoutPage() {
                 <div className="flex items-start gap-6">
                   <span className="text-[18px] font-bold text-zinc-900 shrink-0">1</span>
                   <div className="flex-1">
-                    <h3 className="text-[18px] font-bold text-zinc-900 mb-4">عنوان الشحن</h3>
+                    <h3 className="text-[18px] font-bold text-zinc-900 mb-4">{t("shippingAddress")}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex flex-col">
-                        <input type="text" name="firstName" placeholder="الاسم الأول *" value={formData.firstName} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[13px] md:text-[13px] text-[16px] outline-none shadow-inner w-full`} />
+                        <input type="text" name="firstName" placeholder=t("firstNamePlaceholder") value={formData.firstName} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[13px] md:text-[13px] text-[16px] outline-none shadow-inner w-full`} />
                         {validationErrors.firstName && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.firstName}</span>}
                       </div>
                       <div className="flex flex-col">
-                        <input type="text" name="lastName" placeholder="الاسم الأخير" value={formData.lastName} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-3 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-inner w-full" />
+                        <input type="text" name="lastName" placeholder=t("lastNamePlaceholder") value={formData.lastName} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-3 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-inner w-full" />
                       </div>
                       <div className="flex flex-col md:col-span-2">
-                        <input type="email" name="email" placeholder="البريد الإلكتروني *" value={formData.email} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <input type="email" name="email" placeholder=t("emailPlaceholder") value={formData.email} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.email && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.email}</span>}
                       </div>
                       <div className="flex flex-col md:col-span-2">
-                        <input type="tel" name="phone" placeholder="رقم الهاتف (مثال: 079XXXXXXX) *" value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <input type="tel" name="phone" placeholder=t("phonePlaceholder") value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.phone && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.phone}</span>}
                       </div>
                       <div className="flex flex-col md:col-span-2">
-                        <input type="text" name="address" placeholder="اسم الشارع والمنطقة *" value={formData.address} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <input type="text" name="address" placeholder=t("addressPlaceholder") value={formData.address} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.address && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.address}</span>}
                       </div>
                       <div className="flex flex-col">
@@ -379,7 +381,7 @@ export default function CheckoutPage() {
                         </select>
                       </div>
                       <div className="flex flex-col">
-                        <input readOnly value="الأردن" className="h-[44px] md:h-[31px] px-3 bg-zinc-50 border border-zinc-200 rounded-md text-[16px] md:text-[13px] text-zinc-500 w-full" />
+                        <input readOnly value=t("countryJordan") className="h-[44px] md:h-[31px] px-3 bg-zinc-50 border border-zinc-200 rounded-md text-[16px] md:text-[13px] text-zinc-500 w-full" />
                       </div>
                     </div>
                   </div>
@@ -393,13 +395,13 @@ export default function CheckoutPage() {
                 <div className="flex items-start gap-6">
                   <span className="text-[18px] font-bold text-zinc-900 shrink-0">2</span>
                   <div className="flex-1">
-                    <h3 className="text-[18px] font-bold text-zinc-900 mb-4">طريقة الدفع</h3>
+                    <h3 className="text-[18px] font-bold text-zinc-900 mb-4">{t("paymentMethod")}</h3>
                     <div className="bg-white border border-brand bg-brand-light rounded-md p-4">
                       <div className="flex items-center gap-3">
                         <input type="radio" checked readOnly className="accent-brand" />
-                        <span className="text-[14px] font-bold text-zinc-900">الدفع عند الاستلام (COD)</span>
+                        <span className="text-[14px] font-bold text-zinc-900">{t("cashOnDelivery")}</span>
                       </div>
-                      <p className="text-[12px] text-zinc-600 ms-6 mt-1">ادفع نقداً عند استلام طلبك.</p>
+                      <p className="text-[12px] text-zinc-600 ms-6 mt-1">{t("payCashOnDelivery")}</p>
                     </div>
                   </div>
                 </div>
@@ -412,7 +414,7 @@ export default function CheckoutPage() {
                 <div className="flex items-start gap-6">
                   <span className="text-[18px] font-bold text-zinc-900 shrink-0">3</span>
                   <div className="flex-1">
-                    <h3 className="text-[18px] font-bold text-zinc-900 mb-4">مراجعة المنتجات والشحن</h3>
+                    <h3 className="text-[18px] font-bold text-zinc-900 mb-4">{t("reviewItems")}</h3>
                     <div className="space-y-4">
                       {(enrichedCartItems.length > 0 ? enrichedCartItems : cart).map((item, i) => (
                         <div key={i} className="flex gap-4 border border-zinc-200 rounded-md p-3">
@@ -421,7 +423,7 @@ export default function CheckoutPage() {
                           </div>
                           <div className="flex-1">
                             <p className="text-[13px] font-bold text-zinc-900 line-clamp-1">{item.name}</p>
-                            <p className="text-[12px] text-[#007600] font-bold">الكمية: {item.quantity}</p>
+                            <p className="text-[12px] text-[#007600] font-bold">{t("qty", { quantity: item.quantity })}</p>
                             <p className="text-[12px] font-bold text-brand" dir="ltr">JOD {parseFloat(item.price).toFixed(2)}</p>
                           </div>
                         </div>
@@ -439,7 +441,7 @@ export default function CheckoutPage() {
                 disabled={loading || cart.length === 0}
                 className="w-full h-[44px] bg-brand hover:bg-brand-dark text-white border border-brand rounded-md text-[14px] font-bold shadow-sm transition-all"
               >
-                {loading ? "جاري تأكيد الطلب..." : "تأكيد الطلب"}
+                {loading ? t("confirmingOrder") : t("confirmOrder")}
               </button>
             </div>
           </div>
@@ -452,40 +454,40 @@ export default function CheckoutPage() {
                 disabled={loading || cart.length === 0}
                 className="cursor-pointer w-full h-[29px] bg-brand hover:bg-brand-dark text-white border border-brand rounded-md text-[12px] font-bold shadow-sm transition-all mb-4"
               >
-                {loading ? "جاري المعالجة..." : "تأكيد الطلب"}
+                {loading ? t("processing") : t("confirmOrder")}
               </button>
 
               <p className="text-[11px] text-zinc-500 text-center mb-4 leading-snug">
-                بتأكيد طلبك، أنت توافق على <Link href="/conditions" aria-label="conditions" target="_blank" className="text-brand hover:underline cursor-pointer">شروط الاستخدام</Link> الخاصة بمحلي.
+                {t("agreeToConditions")} <Link href="/conditions" aria-label="conditions" target="_blank" className="text-brand hover:underline cursor-pointer">{t("termsOfUse")}</Link> {t("termsSuffix")}
               </p>
 
               <div className="h-px bg-zinc-200 w-full mb-4" />
 
-              <h3 className="text-[14px] font-bold text-zinc-900 mb-4">ملخص الطلب</h3>
+              <h3 className="text-[14px] font-bold text-zinc-900 mb-4">{t("orderSummary")}</h3>
               <div className="space-y-2 text-[12px]">
                 <div className="flex justify-between">
-                  <span className="text-zinc-600 text-[13px]">المنتجات:</span>
+                  <span className="text-zinc-600 text-[13px]">{t("items")}</span>
                   <span className="text-zinc-900" dir="ltr">JOD {cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-600 text-[13px]">الشحن والتوصيل:</span>
+                  <span className="text-zinc-600 text-[13px]">{t("shippingAndHandling")}</span>
                   <div className="text-end">
                     <span className="text-zinc-900" dir="ltr">
                       {fetchingShipping ? "..." : `JOD ${shippingFee.toFixed(2)}`}
                     </span>
                     {Object.keys(vendorShippingMap).length > 0 && (
                       <div className="text-[10px] text-zinc-500 italic mt-0.5">
-                        تم تطبيق أسعار التاجر
+                        {t("vendorRatesApplied")}
                       </div>
                     )}
                   </div>
                 </div>
                 <div className="flex justify-between border-t border-zinc-100 pt-2 text-[11px] text-zinc-500">
-                  <span>المجموع قبل الضريبة:</span>
+                  <span>{t("totalBeforeTax")}</span>
                   <span dir="ltr">JOD {orderTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-[11px] text-zinc-500">
-                  <span>الضريبة المقدرة:</span>
+                  <span>{t("estimatedTax")}</span>
                   <span dir="ltr">JOD 0.00</span>
                 </div>
               </div>
@@ -493,7 +495,7 @@ export default function CheckoutPage() {
               <div className="h-px bg-zinc-200 w-full my-4" />
 
               <div className="flex justify-between text-brand font-bold text-[18px]">
-                <span>المجموع الكلي:</span>
+                <span>{t("orderTotal")}</span>
                 <span dir="ltr">JOD {orderTotal.toFixed(2)}</span>
               </div>
 
