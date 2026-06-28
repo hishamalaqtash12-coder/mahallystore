@@ -13,7 +13,7 @@ import Loader from "@/components/Loader";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
-  const { user, loading: authLoading, wooId, customerName, email: authEmail, phone: authPhone, address: authAddress, city: authCity, isVendor } = useAuth();
+  const { user, loading: authLoading, wooId, customerName, email: authEmail, phone: authPhone, address: authAddress, city: authCity, isVendor, isAdmin } = useAuth();
   const { governorate, updateGovernorate } = useLocation();
   const router = useRouter();
 
@@ -24,12 +24,12 @@ export default function CheckoutPage() {
     }
   }, [user, authLoading, router]);
 
-  // Redirect to home if vendor/admin
+  // Redirect to home if vendor (but allow admins)
   useEffect(() => {
-    if (isVendor) {
+    if (isVendor && !isAdmin) {
       router.replace("/");
     }
-  }, [isVendor, router]);
+  }, [isVendor, isAdmin, router]);
 
   const [formData, setFormData] = useState({
     firstName: "",
