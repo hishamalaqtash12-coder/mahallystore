@@ -224,7 +224,7 @@ export default function CheckoutPage() {
     }
     if (!formData.email?.trim()) {
       errors.email = "البريد الإلكتروني مطلوب.";
-    } else if (!/\\S+@\\S+\\.\\S+/.test(formData.email)) {
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
       errors.email = "يرجى إدخال بريد إلكتروني صحيح.";
     }
     if (!formData.phone?.trim()) {
