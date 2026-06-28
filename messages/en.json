@@ -498,5 +498,31 @@
     "noFollowersYet": "No Followers Yet",
     "beFirstToFollow": "Be the first to follow",
     "toGetUpdates": "to get updates on their new products and offers!"
+  },
+  "QuickLook": {
+    "ratingSingular": "Rating",
+    "ratingPlural": "Ratings",
+    "limitedTimeOffer": "Limited time offer",
+    "jod": "JOD",
+    "originalPrice": "Original price:",
+    "discount": "({discount}% off)",
+    "noReturns": "Not eligible for return",
+    "eligibleForReturn": "Eligible for return or refund within {days} days",
+    "eligibleForReturnGlobal": "Eligible for return or refund",
+    "expectedDelivery": "Expected Delivery:",
+    "merchantView": "Merchant View:",
+    "cannotBuyOwnProducts": "You cannot purchase your own products.",
+    "manageProduct": "Manage Product",
+    "purchasingDisabled": "Purchasing Disabled",
+    "adminsCannotBuy": "Sellers and admins cannot purchase products.",
+    "outOfStock": "Out of Stock",
+    "unavailableForPurchase": "— Unavailable for purchase",
+    "productInCart": "Product in your cart",
+    "remove": "Remove",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "viewFullDetails": "View full product details",
+    "soldBy": "Sold by {merchantName}",
+    "mahallyOfficial": "Mahally Official"
   }
 }

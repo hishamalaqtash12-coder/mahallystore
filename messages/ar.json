@@ -498,5 +498,31 @@
     "noFollowersYet": "لا يوجد متابعون بعد",
     "beFirstToFollow": "كن أول من يتابع",
     "toGetUpdates": "لتصلك تحديثاتهم عن المنتجات والعروض الجديدة!"
+  },
+  "QuickLook": {
+    "ratingSingular": "تقييم",
+    "ratingPlural": "تقييمات",
+    "limitedTimeOffer": "عرض لفترة محدودة",
+    "jod": "د.أ",
+    "originalPrice": "السعر الأصلي:",
+    "discount": "({discount}% خصم)",
+    "noReturns": "لا يقبل الإرجاع",
+    "eligibleForReturn": "مؤهل للإرجاع أو الاسترداد خلال {days} يوماً",
+    "eligibleForReturnGlobal": "مؤهل للإرجاع أو الاسترداد",
+    "expectedDelivery": "التوصيل المتوقع:",
+    "merchantView": "عرض التاجر:",
+    "cannotBuyOwnProducts": "لا يمكنك شراء منتجاتك الخاصة.",
+    "manageProduct": "إدارة المنتج",
+    "purchasingDisabled": "الشراء معطل",
+    "adminsCannotBuy": "لا يمكن للتجار والمشرفين شراء المنتجات.",
+    "outOfStock": "نفدت الكمية",
+    "unavailableForPurchase": "— غير متاح للشراء",
+    "productInCart": "المنتج في سلتك",
+    "remove": "إزالة",
+    "addToCart": "أضف إلى السلة",
+    "buyNow": "اشتري الآن",
+    "viewFullDetails": "عرض تفاصيل المنتج كاملة",
+    "soldBy": "يباع بواسطة {merchantName}",
+    "mahallyOfficial": "محلي الرسمي"
   }
 }

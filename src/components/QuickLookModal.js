@@ -8,10 +8,12 @@ import { X, ChevronRight, Star, Truck, ShieldCheck, RotateCcw, Plus, Minus, Tras
 import { useCart } from "@/context/CartContext";
 import { isProductOutOfStock, getProductMerchant } from "@/lib/product-utils";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 import ProductCountdown from "./ProductCountdown";
 import ShippingInfoDisplay from "./ShippingInfoDisplay";
 
 export default function QuickLookModal({ product: initialProduct, isOpen, onClose }) {
+  const t = useTranslations("QuickLook");
   const router = useRouter();
   const { user, wooId, isVendor } = useAuth();
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
@@ -113,8 +115,8 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
     const itemReturnPolicy = product.meta_data?.find(m => m.key === "mahally_return_policy")?.value;
     const itemReturnPeriod = product.meta_data?.find(m => m.key === "mahally_return_period")?.value;
 
-    if (itemReturnPolicy === "no-returns") return "لا يقبل الإرجاع";
-    if (itemReturnPolicy === "custom") return `مؤهل للإرجاع أو الاسترداد خلال ${itemReturnPeriod || "14"} يوماً`;
+    if (itemReturnPolicy === "no-returns") return t("noReturns");
+    if (itemReturnPolicy === "custom") return t("eligibleForReturn", { days: itemReturnPeriod || "14" });
 
     // Check Vendor Global Policy
     if (vendorData) {
@@ -122,13 +124,13 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
       const globalPolicy = vendorData.returnPolicy || vendorData.meta_data?.find(m => m.key === "mahally_return_policy")?.value;
       const globalPeriod = vendorData.returnPeriod || vendorData.meta_data?.find(m => m.key === "mahally_return_period")?.value;
 
-      if (globalPolicy === "no-returns") return "لا يقبل الإرجاع";
+      if (globalPolicy === "no-returns") return t("noReturns");
       if (globalPolicy === "global" || globalPolicy === "eligible" || globalPeriod) {
-        return `مؤهل للإرجاع أو الاسترداد خلال ${globalPeriod || "14"} يوماً`;
+        return t("eligibleForReturn", { days: globalPeriod || "14" });
       }
     }
 
-    return "مؤهل للإرجاع أو الاسترداد";
+    return t("eligibleForReturnGlobal");
   }, [product, vendorData]);
 
   // Delivery Dates
@@ -226,7 +228,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     ))}
                   </div>
                   <span className="text-[13px] text-brand hover:text-brand-dark hover:underline cursor-pointer">
-                    {ratingCount} {ratingCount === 1 ? 'تقييم' : 'تقييمات'}
+                    {ratingCount} {ratingCount === 1 ? t("ratingSingular") : t("ratingPlural")}
                   </span>
                 </div>
               </div>
@@ -238,19 +240,19 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   {discount > 0 && (
                     <div className="inline-block bg-brand text-white text-[11px] font-bold px-2 py-0.5 rounded-sm">
-                      عرض لفترة محدودة
+                      {t("limitedTimeOffer")}
                     </div>
                   )}
                   <ProductCountdown endDate={product.date_on_sale_to} />
                 </div>
                 <div className="flex items-start gap-1">
                   <span className="text-[28px] font-medium leading-none text-zinc-900">{salePrice.toFixed(2)}</span>
-                  <span className="text-[13px] mt-1 font-medium text-zinc-900 ms-1">د.أ</span>
+                  <span className="text-[13px] mt-1 font-medium text-zinc-900 ms-1">{t("jod")}</span>
                 </div>
                 {regularPrice > salePrice && (
                   <p className="text-[13px] text-zinc-500 mt-1">
-                    السعر الأصلي: <span className="line-through">{regularPrice.toFixed(2)} د.أ</span>
-                    <span className="ms-2 text-rose-700">({discount}% خصم)</span>
+                    {t("originalPrice")} <span className="line-through">{regularPrice.toFixed(2)} {t("jod")}</span>
+                    <span className="ms-2 text-rose-700">{t("discount", { discount })}</span>
                   </p>
                 )}
               </div>
@@ -263,12 +265,12 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                   merchantName={merchantName}
                 />
                 <div className="flex items-center gap-3 text-[13px] pt-3 px-1">
-                  <RotateCcw size={16} className={returnPolicyStr === "لا يقبل الإرجاع" ? "text-rose-500" : "text-zinc-600"} />
-                  <span className={`font-medium ${returnPolicyStr === "لا يقبل الإرجاع" ? "text-rose-600" : "text-brand hover:text-brand-dark hover:underline cursor-pointer"}`}>{returnPolicyStr}</span>
+                  <RotateCcw size={16} className={returnPolicyStr === t("noReturns") ? "text-rose-500" : "text-zinc-600"} />
+                  <span className={`font-medium ${returnPolicyStr === t("noReturns") ? "text-rose-600" : "text-brand hover:text-brand-dark hover:underline cursor-pointer"}`}>{returnPolicyStr}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[12px] pt-1 px-1">
                   <Clock size={14} className="text-zinc-400" />
-                  <span className="text-zinc-500">التوصيل المتوقع: <span className="font-bold text-zinc-700">{deliveryDates}</span></span>
+                  <span className="text-zinc-500">{t("expectedDelivery")} <span className="font-bold text-zinc-700">{deliveryDates}</span></span>
                 </div>
                 {/* <div className="flex items-center gap-3 text-[13px] pt-1 px-1">
                   <ShieldCheck size={16} className="text-zinc-600" />
@@ -320,13 +322,13 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                       <div className="space-y-3">
                         <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-[12px] text-amber-800 leading-tight flex gap-2">
                           <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                          <span><strong>عرض التاجر:</strong> لا يمكنك شراء منتجاتك الخاصة.</span>
+                          <span><strong>{t("merchantView")}</strong> {t("cannotBuyOwnProducts")}</span>
                         </div>
                         <Link
                           href="/merchant/dashboard/products"
                           className="w-full h-[33px] bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-300 rounded-full text-[13px] font-bold flex items-center justify-center transition-all"
                         >
-                          إدارة المنتج
+                          {t("manageProduct")}
                         </Link>
                       </div>
                     );
@@ -336,8 +338,8 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     return (
                       <div className="w-full rounded-lg bg-zinc-50 border border-zinc-200 p-3 flex flex-col items-center justify-center gap-1 text-zinc-500">
                         <AlertCircle size={20} className="text-zinc-400" />
-                        <span className="text-[13px] font-bold text-zinc-600">الشراء معطل</span>
-                        <span className="text-[11px] text-zinc-400 text-center">لا يمكن للتجار والمشرفين شراء المنتجات.</span>
+                        <span className="text-[13px] font-bold text-zinc-600">{t("purchasingDisabled")}</span>
+                        <span className="text-[11px] text-zinc-400 text-center">{t("adminsCannotBuy")}</span>
                       </div>
                     );
                   }
@@ -346,8 +348,8 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     return (
                       <div className="w-full rounded-lg bg-zinc-100 border border-zinc-200 p-3 flex items-center gap-2 text-zinc-500">
                         <AlertCircle size={16} className="text-rose-400" />
-                        <span className="text-[13px] font-semibold text-rose-600">نفدت الكمية</span>
-                        <span className="text-[12px] text-zinc-400 me-1">— غير متاح للشراء</span>
+                        <span className="text-[13px] font-semibold text-rose-600">{t("outOfStock")}</span>
+                        <span className="text-[12px] text-zinc-400 me-1">{t("unavailableForPurchase")}</span>
                       </div>
                     );
                   }
@@ -356,7 +358,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     return (
                       <div className="space-y-3">
                         <p className="text-[14px] font-bold text-emerald-600 flex items-center gap-2">
-                          <ShieldCheck size={16} /> المنتج في سلتك
+                          <ShieldCheck size={16} /> {t("productInCart")}
                         </p>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center bg-[#F0F2F2] border border-[#D5D9D9] rounded-lg h-[33px] px-1 shadow-sm">
@@ -369,7 +371,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                             </button>
                           </div>
                           <button onClick={() => removeFromCart(product.id)} className="text-[12px] text-brand hover:text-brand-dark hover:underline flex items-center gap-1 font-medium">
-                            <Trash2 size={14} /> إزالة
+                            <Trash2 size={14} /> {t("remove")}
                           </button>
                         </div>
                       </div>
@@ -389,13 +391,13 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                         }}
                         className="w-full h-[33px] bg-brand hover:bg-brand-dark text-white border border-brand rounded-full text-[13px] font-medium shadow-sm transition-all"
                       >
-                        أضف إلى السلة
+                        {t("addToCart")}
                       </button>
                       <button
                         onClick={handleBuyNow}
                         className="w-full h-[33px] bg-brand-light hover:bg-brand/20 text-brand-dark border border-brand-light rounded-full text-[13px] font-medium shadow-sm transition-all"
                       >
-                        اشتري الآن
+                        {t("buyNow")}
                       </button>
                     </>
                   );
@@ -404,10 +406,10 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
 
               <div className="mt-auto pt-4 border-t border-zinc-100 flex justify-between items-center">
                 <a href={`/product/${product.slug}`} className="text-[13px] text-brand hover:text-brand-dark hover:underline flex items-center gap-1">
-                  عرض تفاصيل المنتج كاملة <ChevronRight size={14} className="rtl:-scale-x-100" />
+                  {t("viewFullDetails")} <ChevronRight size={14} className="rtl:-scale-x-100" />
                 </a>
                 <a href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="text-[11px] text-zinc-400 hover:text-brand hover:underline transition-colors">
-                  يباع بواسطة {merchantName || "محلي الرسمي"}
+                  {t("soldBy", { merchantName: merchantName || (typeof t === 'function' ? t('mahallyOfficial', { fallback: "Mahally Official" }) : "Mahally Official") })}
                 </a>
               </div>
             </div>
