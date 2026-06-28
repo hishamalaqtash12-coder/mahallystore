@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
 /**
  * POST /api/auth/reset-password
@@ -18,50 +19,49 @@ export async function POST(request) {
       return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
     }
 
-    const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
-    const auth = Buffer.from(
-      `${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`
-    ).toString("base64");
+    const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://fallback.mahally.local';
+    
+    const api = new WooCommerceRestApi({
+      url: WP_URL,
+      consumerKey: process.env.WC_CONSUMER_KEY,
+      consumerSecret: process.env.WC_CONSUMER_SECRET,
+      version: "wc/v3",
+    });
 
     // 1. Find the customer by phone (billing_phone)
-    const searchRes = await fetch(
-      `${WP_URL}/wp-json/wc/v3/customers?search=${encodeURIComponent(phone)}&per_page=10`,
-      { headers: { Authorization: `Basic ${auth}` } }
-    );
-
-    if (!searchRes.ok) {
+    const cleanPhone = phone.replace(/\D/g, "");
+    
+    let customers = [];
+    try {
+      const custRes = await api.get("customers", { per_page: 50, order: 'desc', orderby: 'registered_date' });
+      const sellerRes = await api.get("customers", { per_page: 50, role: 'seller', order: 'desc', orderby: 'registered_date' });
+      const adminRes = await api.get("customers", { per_page: 50, role: 'administrator', order: 'desc', orderby: 'registered_date' });
+      
+      customers = [
+        ...(custRes.data || []),
+        ...(sellerRes.data || []),
+        ...(adminRes.data || [])
+      ];
+    } catch (e) {
       return NextResponse.json({ error: "Failed to look up account." }, { status: 502 });
     }
 
-    const customers = await searchRes.json();
-
-    // Match by billing phone or metadata phone
-    const customer = customers.find((c) => {
-      const billingPhone = c.billing?.phone?.replace(/\s+/g, "") || "";
-      const normalizedPhone = phone.replace(/\s+/g, "");
-      return billingPhone === normalizedPhone || billingPhone.endsWith(normalizedPhone.replace(/^\+962/, ""));
+    // Match by billing phone
+    const customer = customers.find(c => {
+      const cPhone = (c.billing?.phone || "").replace(/\D/g, "");
+      if (!cPhone || !cleanPhone) return false;
+      return cPhone === cleanPhone || cPhone.endsWith(cleanPhone) || cleanPhone.endsWith(cPhone);
     });
 
     if (!customer) {
-      // Try searching meta_data for mahally_phone
       return NextResponse.json({ error: "No account found for this phone number." }, { status: 404 });
     }
 
     // 2. Update the customer password
-    const updateRes = await fetch(
-      `${WP_URL}/wp-json/wc/v3/customers/${customer.id}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password: newPassword }),
-      }
-    );
-
-    if (!updateRes.ok) {
-      const errData = await updateRes.json().catch(() => ({}));
+    try {
+      await api.put(`customers/${customer.id}`, { password: newPassword });
+    } catch (updateErr) {
+      const errData = updateErr.response?.data || {};
       return NextResponse.json(
         { error: errData.message || "Failed to update password." },
         { status: 502 }
