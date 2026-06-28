@@ -83,7 +83,8 @@ export async function POST(request) {
       
       found = customers.find(c => {
         const cPhone = (c.billing?.phone || "").replace(/\D/g, "");
-        return cPhone.includes(cleanPhone) || cleanPhone.includes(cPhone);
+        if (!cPhone || !cleanPhone) return false;
+        return cPhone === cleanPhone || cPhone.endsWith(cleanPhone) || cleanPhone.endsWith(cPhone);
       });
     }
 

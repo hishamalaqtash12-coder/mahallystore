@@ -9,6 +9,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import Loader from "@/components/Loader";
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
 
 function LoginContent() {
   const router = useRouter();
@@ -16,6 +17,7 @@ function LoginContent() {
   const { user, supportEmail } = useAuth();
   const accountRemoved = searchParams.get("reason") === "account_removed";
   const redirectTo = searchParams.get("redirect") || "/";
+  const t = useTranslations("LoginPage");
 
   // mode: "login" | "reset"  — determines what happens after OTP succeeds
   const [mode, setMode] = useState("login");
@@ -47,8 +49,8 @@ function LoginContent() {
   // Countdown timer for resend
   useEffect(() => {
     if (countdown > 0) {
-      const t = setTimeout(() => setCountdown(c => c - 1), 1000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
+      return () => clearTimeout(timer);
     }
   }, [countdown]);
 
@@ -267,7 +269,7 @@ function LoginContent() {
     setError("");
 
     if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(t("passwordTooShort"));
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -417,9 +419,9 @@ function LoginContent() {
             <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded flex items-start gap-3">
               <Info size={18} className="text-red-600 shrink-0 mt-0.5" />
               <div>
-                <p className="text-[13px] font-bold text-red-900 mb-0.5">تم حذف الحساب</p>
+                <p className="text-[13px] font-bold text-red-900 mb-0.5">{t("accountRemoved")}</p>
                 <p className="text-[12px] text-red-700 leading-tight">
-                  تم حذف حسابك من محلي. يرجى الاتصال بالدعم.
+                  {t("accountRemovedDesc")}
                 </p>
               </div>
             </div>
@@ -428,11 +430,11 @@ function LoginContent() {
           {/* ── STEP 1A: Phone Input (Login) ── */}
           {(step === "phone" || step === "email") && mode === "login" && (
             <form onSubmit={step === "phone" ? handleSendOTP : handleEmailLogin} className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{step === "phone" ? "تسجيل الدخول برقم الهاتف" : "تسجيل الدخول"}</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{step === "phone" ? t("loginPhone") : t("login")}</h1>
 
               <div className="space-y-1">
                 <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">
-                  {step === "phone" ? "رقم الهاتف" : "البريد الإلكتروني أو اسم المستخدم"}
+                  {step === "phone" ? t("phoneLabel") : t("emailLabel")}
                 </label>
                 {step === "phone" ? (
                   <div dir="ltr" className="flex h-[31px] rounded-[3px] border border-zinc-400 shadow-inner focus-within:border-[#be374f] focus-within:ring-1 focus-within:ring-[#be374f] overflow-hidden transition-all bg-white">
@@ -468,7 +470,7 @@ function LoginContent() {
 
               {step === "email" && (
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">كلمة المرور</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("passwordLabel")}</label>
                   <div className="relative" dir="ltr">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -500,12 +502,12 @@ function LoginContent() {
                 disabled={loading}
                 className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] hover:border-[#9c7d2e] rounded-[3px] text-[13px] shadow-sm active:from-[#edc04b] active:to-[#edc04b] flex items-center justify-center disabled:opacity-60"
               >
-                {loading ? <Loader size="sm" text="" /> : "متابعة"}
+                {loading ? <Loader size="sm" text="" /> : t("continue")}
               </button>
 
               <div className="pt-4 space-y-3">
                 <p className="text-[12px] text-zinc-900 leading-snug">
-                  بالمتابعة، فإنك توافق على <Link href="/conditions" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">شروط الاستخدام</Link> الخاصة بمحلي.
+                  {t("agreeTerms")} <Link href="/conditions" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">{t("termsLink")}</Link>
                 </p>
 
                 <div className="border-t border-zinc-100 pt-3 space-y-2">
@@ -514,7 +516,7 @@ function LoginContent() {
                     onClick={() => setStep(step === "phone" ? "email" : "phone")}
                     className="cursor-pointer text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline flex items-center gap-1"
                   >
-                    {step === "phone" ? "تسجيل الدخول بالبريد الإلكتروني بدلاً من ذلك" : "تسجيل الدخول برقم الهاتف بدلاً من ذلك"}
+                    {step === "phone" ? t("loginWithEmail") : t("loginWithPhone")}
                   </button>
                   {/* Forgot password link — only on phone step */}
                   {step === "phone" && (
@@ -523,7 +525,7 @@ function LoginContent() {
                       onClick={enterForgotPassword}
                       className="cursor-pointer text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline flex items-center gap-1"
                     >
-                      <KeyRound size={13} /> نسيت كلمة المرور؟
+                      <KeyRound size={13} /> {t("forgotPassword")}
                     </button>
                   )}
                 </div>
@@ -538,15 +540,15 @@ function LoginContent() {
                 <button type="button" onClick={backToLogin} className="text-zinc-400 hover:text-zinc-700">
                   <ArrowRight size={18} className="rtl:rotate-180" />
                 </button>
-                <h1 className="text-[24px] font-medium text-zinc-900">إعادة تعيين كلمة المرور</h1>
+                <h1 className="text-[24px] font-medium text-zinc-900">{t("resetPasswordTitle")}</h1>
               </div>
 
               <p className="text-[13px] text-zinc-500 leading-snug">
-                أدخل رقم هاتفك المسجّل وسنرسل لك رمز التحقق.
+                {t("resetPasswordDesc")}
               </p>
 
               <div className="space-y-1">
-                <label className="text-[13px] font-bold text-zinc-900 block">رقم الهاتف</label>
+                <label className="text-[13px] font-bold text-zinc-900 block">{t("phoneLabel")}</label>
                 <div dir="ltr" className="flex h-[31px] rounded-[3px] border border-zinc-400 shadow-inner focus-within:border-[#be374f] focus-within:ring-1 focus-within:ring-[#be374f] overflow-hidden transition-all bg-white">
                   <div className="flex items-center gap-1 bg-zinc-50 border-r border-zinc-400 px-2 text-[13px] text-zinc-700 select-none">
                     <span>+962</span>
@@ -580,7 +582,7 @@ function LoginContent() {
                 disabled={loading}
                 className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] rounded-[3px] text-[13px] shadow-sm flex items-center justify-center disabled:opacity-60"
               >
-                {loading ? <Loader size="sm" text="" /> : "إرسال رمز التحقق"}
+                {loading ? <Loader size="sm" text="" /> : t("sendCode")}
               </button>
             </form>
           )}
@@ -589,12 +591,12 @@ function LoginContent() {
           {step === "otp" && (
             <form onSubmit={handleVerifyOTP} className="space-y-4">
               <h1 className="text-[28px] font-medium text-zinc-900 mb-4">
-                {mode === "reset" ? "التحقق من الهوية" : "التحقق"}
+                {mode === "reset" ? t("verifyTitleReset") : t("verifyTitle")}
               </h1>
               <p className="text-[13px] text-zinc-900 leading-snug">
                 {mode === "reset"
-                  ? "لإعادة تعيين كلمة مرورك، أدخل الرمز المرسل إلى "
-                  : "لأمانك، أرسلنا رمزاً من 6 أرقام إلى "}
+                  ? t("verifyDescReset")
+                  : t("verifyDesc")}
                 <span className="font-bold inline-block" dir="ltr">{phone}</span>.
               </p>
 
@@ -626,15 +628,15 @@ function LoginContent() {
                 disabled={loading || otp.join("").length < 6}
                 className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] rounded-[3px] text-[13px] shadow-sm flex items-center justify-center disabled:opacity-60"
               >
-                {loading ? <Loader size="sm" text="" /> : "التحقق من الرمز"}
+                {loading ? <Loader size="sm" text="" /> : t("verifyCodeBtn")}
               </button>
 
               <div className="text-center pt-4">
                 {countdown > 0 ? (
-                  <p className="text-[12px] text-zinc-600">إعادة إرسال الرمز خلال {countdown}ث</p>
+                  <p className="text-[12px] text-zinc-600">{t("resendCodeIn", { seconds: countdown })}</p>
                 ) : (
                   <button type="button" onClick={handleResend} className="text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline">
-                    إعادة إرسال الرمز
+                    {t("resendCode")}
                   </button>
                 )}
               </div>
@@ -644,14 +646,14 @@ function LoginContent() {
           {/* ── STEP 3: Set New Password (reset mode only) ── */}
           {step === "set_password" && (
             <form onSubmit={handleSetNewPassword} className="space-y-4">
-              <h1 className="text-[24px] font-medium text-zinc-900 mb-1">كلمة مرور جديدة</h1>
+              <h1 className="text-[24px] font-medium text-zinc-900 mb-1">{t("newPasswordTitle")}</h1>
               <p className="text-[13px] text-zinc-500 leading-snug mb-4">
-                أدخل كلمة مرور جديدة لحسابك. يجب أن تكون 8 أحرف على الأقل.
+                {t("newPasswordDesc")}
               </p>
 
               {/* New Password */}
               <div className="space-y-1">
-                <label className="text-[13px] font-bold text-zinc-900 block">كلمة المرور الجديدة</label>
+                <label className="text-[13px] font-bold text-zinc-900 block">{t("newPasswordLabel")}</label>
                 <div className="relative" dir="ltr">
                   <input
                     type={showNewPassword ? "text" : "password"}
@@ -670,7 +672,7 @@ function LoginContent() {
 
               {/* Confirm Password */}
               <div className="space-y-1">
-                <label className="text-[13px] font-bold text-zinc-900 block">تأكيد كلمة المرور</label>
+                <label className="text-[13px] font-bold text-zinc-900 block">{t("confirmPasswordLabel")}</label>
                 <div className="relative" dir="ltr">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -705,7 +707,7 @@ function LoginContent() {
                     ))}
                   </div>
                   <p className="text-[11px] text-zinc-400">
-                    {newPassword.length < 8 ? "كلمة المرور قصيرة جداً" : newPassword.length < 10 ? "مقبولة" : newPassword.length < 14 ? "جيدة" : "قوية جداً"}
+                    {newPassword.length < 8 ? t("passwordTooShort") : newPassword.length < 10 ? t("passwordAcceptable") : newPassword.length < 14 ? t("passwordGood") : t("passwordStrong")}
                   </p>
                 </div>
               )}
@@ -722,7 +724,7 @@ function LoginContent() {
                 disabled={loading || newPassword.length < 8 || newPassword !== confirmPassword}
                 className="w-full h-[31px] bg-gradient-to-b from-[#f7dfa1] to-[#f0c14b] border border-[#a88734] rounded-[3px] text-[13px] shadow-sm flex items-center justify-center disabled:opacity-60"
               >
-                {loading ? <Loader size="sm" text="" /> : "حفظ كلمة المرور وتسجيل الدخول"}
+                {loading ? <Loader size="sm" text="" /> : t("saveAndLogin")}
               </button>
             </form>
           )}
@@ -731,8 +733,8 @@ function LoginContent() {
           {step === "success" && (
             <div className="text-center py-8 space-y-4">
               <CheckCircle2 size={48} className="text-emerald-600 mx-auto" />
-              <h2 className="text-[20px] font-bold text-zinc-900">تم تسجيل الدخول بنجاح</h2>
-              <p className="text-[13px] text-zinc-500">جاري التوجيه للصفحة الرئيسية...</p>
+              <h2 className="text-[20px] font-bold text-zinc-900">{t("loginSuccess")}</h2>
+              <p className="text-[13px] text-zinc-500">{t("redirecting")}</p>
             </div>
           )}
 
@@ -747,10 +749,10 @@ function LoginContent() {
               </div>
 
               <div>
-                <h2 className="text-[20px] font-bold text-zinc-900 mb-1">الطلب قيد المراجعة</h2>
+                <h2 className="text-[20px] font-bold text-zinc-900 mb-1">{t("pendingTitle")}</h2>
                 {pendingVendorName && (
                   <p className="text-[13px] text-zinc-500">
-                    مرحباً <span className="font-bold text-zinc-800">{pendingVendorName}</span>،
+                    {t("pendingHello", { name: pendingVendorName })}
                   </p>
                 )}
               </div>
@@ -759,13 +761,17 @@ function LoginContent() {
                 <div className="flex items-start gap-3">
                   <Store size={16} className="text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-[12px] text-amber-800 leading-relaxed">
-                    تم تسجيل حساب البائع الخاص بك بنجاح وهو <span className="font-bold">قيد المراجعة حالياً</span> من قبل فريقنا.
+                    {t("pendingStatus1")}
+                    <span className="font-bold">{t("pendingStatus1Bold")}</span>
+                    {t("pendingStatus1End")}
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <Clock size={16} className="text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-[12px] text-amber-800 leading-relaxed">
-                    تستغرق الموافقة عادةً <span className="font-bold">من 1-2 يوم عمل</span>. ستتلقى رسالة بريد إلكتروني بمجرد تفعيل متجرك.
+                    {t("pendingStatus2")}
+                    <span className="font-bold">{t("pendingStatus2Bold")}</span>
+                    {t("pendingStatus2End")}
                   </p>
                 </div>
               </div>
@@ -776,13 +782,13 @@ function LoginContent() {
                   className="w-full h-[38px] bg-white border border-zinc-300 rounded-[3px] text-[13px] font-medium flex items-center justify-center gap-2 hover:bg-zinc-50 transition-all shadow-sm"
                 >
                   <Mail size={14} className="text-zinc-500" />
-                  الاتصال بالدعم
+                  {t("contactSupport")}
                 </a>
                 <button
                   onClick={backToLogin}
                   className="w-full text-[12px] text-zinc-500 hover:text-zinc-800 transition-colors"
                 >
-                  ← العودة لتسجيل الدخول
+                  {t("backToLogin")}
                 </button>
               </div>
             </div>
@@ -792,21 +798,21 @@ function LoginContent() {
         <div className="mt-8 space-y-4">
           <div className="relative">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-200"></div></div>
-            <div className="relative flex justify-center text-[12px]"><span className="bg-white px-2 text-zinc-500">مستخدم جديد في محلي؟</span></div>
+            <div className="relative flex justify-center text-[12px]"><span className="bg-white px-2 text-zinc-500">{t("newToMahally")}</span></div>
           </div>
 
           <Link
             href={redirectTo ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}
             className="w-full h-[31px] bg-gradient-to-b from-zinc-50 to-zinc-100 border border-zinc-300 rounded-[3px] text-[13px] flex items-center justify-center shadow-sm hover:from-zinc-100 hover:to-zinc-200 transition-all active:bg-zinc-200"
           >
-            إنشاء حساب في محلي
+            {t("createAccount")}
           </Link>
         </div>
 
         <div className="mt-12 pt-4 border-t border-zinc-100 text-center space-y-2">
           <div className="flex justify-center gap-6 text-[11px] text-[#0066c0]">
-            <Link href="/conditions" className="hover:text-[#8f2d4a] hover:underline">شروط الاستخدام</Link>
-            <Link href="/help" className="hover:text-[#8f2d4a] hover:underline">المساعدة</Link>
+            <Link href="/conditions" className="hover:text-[#8f2d4a] hover:underline">{t("termsLink")}</Link>
+            <Link href="/help" className="hover:text-[#8f2d4a] hover:underline">{t("help")}</Link>
           </div>
           <p className="text-[11px] text-zinc-500" suppressHydrationWarning>&copy; {new Date().getFullYear()} Mahally.jo</p>
         </div>
