@@ -428,7 +428,7 @@ export default function Header() {
                             <li className="border-b border-zinc-100 pb-1 mb-1"></li>
                           </>
                         )}
-                        {!isVendor && (
+                        {(!isVendor || user?.email === "motasem.udeh@gmail.com") && (
                           <>
                             <li><Link href="/account" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><UserCircle size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
                             <li><Link href="/account/security" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><ShieldCheck size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('accountSecurity')}</Link></li>
@@ -464,7 +464,7 @@ export default function Header() {
                                 )}
                                 <div className="flex items-center justify-between">
                                   <p className="text-[16px] font-bold">{p.price || "0.00"} {t('jod')}</p>
-                                  {p.stock_status !== 'outofstock' && !isVendor && (
+                                  {p.stock_status !== 'outofstock' && (!isVendor || user?.email === "motasem.udeh@gmail.com") && (
                                     <button
                                       onClick={(e) => {
                                         e.preventDefault();
@@ -525,7 +525,7 @@ export default function Header() {
               <Globe size={18} className="me-1 sm:ms-1" />
               {locale === 'ar' ? 'EN' : 'AR'}
             </button>
-            {!isVendor && (
+            {(!isVendor || user?.email === "motasem.udeh@gmail.com") && (
               <button onClick={() => setIsCartOpen(true)} className="flex items-end p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer relative shrink-0 group touch-target text-zinc-900">
                 <div className="relative group-hover:scale-105 transition-transform flex items-center justify-center w-[36px] sm:w-[40px] h-[30px] sm:h-[34px]">
                   <span className="absolute top-0 end-1/2 -translate-x-1/2 text-brand text-[15px] sm:text-[16px] font-bold z-10 leading-none">{cartItemsCount}</span>
@@ -729,7 +729,7 @@ export default function Header() {
                     <li className="border-b border-zinc-200 my-2"></li>
                   </>
                 )}
-                {!isVendor && (
+                {(!isVendor || user?.email === "motasem.udeh@gmail.com") && (
                   <>
                     <li><Link href="/account" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><UserCircle size={20} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
                     <li><Link href="/account/orders" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Package size={20} className="text-zinc-600" /> {t('yourOrders')}</Link></li>

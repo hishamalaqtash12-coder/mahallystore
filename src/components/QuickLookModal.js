@@ -332,7 +332,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     );
                   }
 
-                  if (isVendor) {
+                  if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
                     return (
                       <div className="w-full rounded-lg bg-zinc-50 border border-zinc-200 p-3 flex flex-col items-center justify-center gap-1 text-zinc-500">
                         <AlertCircle size={20} className="text-zinc-400" />

@@ -30,10 +30,10 @@ export default function CartPage() {
   const [isLoadingPicks, setIsLoadingPicks] = useState(true);
 
   useEffect(() => {
-    if (isVendor) {
+    if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
       router.replace("/");
     }
-  }, [isVendor, router]);
+  }, [isVendor, user, router]);
 
   // Live WooCommerce Data States
   const [liveProductsMap, setLiveProductsMap] = useState({});
@@ -141,7 +141,7 @@ export default function CartPage() {
       .finally(() => setIsLoadingPicks(false));
   }, []);
 
-  if (isVendor) {
+  if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
     return null; // Prevent flash while redirecting
   }
 

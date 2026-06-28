@@ -13,7 +13,7 @@ import Loader from "@/components/Loader";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
-  const { user, loading: authLoading, wooId, customerName, email: authEmail, phone: authPhone, address: authAddress, city: authCity, isVendor, isAdmin } = useAuth();
+  const { user, loading: authLoading, wooId, customerName, email: authEmail, phone: authPhone, address: authAddress, city: authCity, isVendor } = useAuth();
   const { governorate, updateGovernorate } = useLocation();
   const router = useRouter();
 
@@ -24,12 +24,12 @@ export default function CheckoutPage() {
     }
   }, [user, authLoading, router]);
 
-  // Redirect to home if vendor (but allow admins)
+  // Redirect to home if vendor/admin (except for allowed admin email)
   useEffect(() => {
-    if (isVendor && !isAdmin) {
+    if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
       router.replace("/");
     }
-  }, [isVendor, isAdmin, router]);
+  }, [isVendor, user, router]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -290,7 +290,7 @@ export default function CheckoutPage() {
     return <Loader fullPage size="lg" text="جاري التحقق من جلستك..." />;
   }
 
-  if (isVendor) {
+  if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
     return null; // Prevent flash while redirecting
   }
 

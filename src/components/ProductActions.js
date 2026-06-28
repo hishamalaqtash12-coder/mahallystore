@@ -261,7 +261,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
             );
           }
 
-          if (isVendor) {
+          if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
             return (
               <div className="space-y-3">
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-[12px] text-amber-800 leading-tight">
