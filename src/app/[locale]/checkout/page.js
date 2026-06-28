@@ -289,7 +289,7 @@ export default function CheckoutPage() {
   };
 
   if (authLoading || !user) {
-    return <Loader fullPage size="lg" text=t("loadingSession") />;
+    return <Loader fullPage size="lg" text={t("loadingSession")} />;
   }
 
   if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
