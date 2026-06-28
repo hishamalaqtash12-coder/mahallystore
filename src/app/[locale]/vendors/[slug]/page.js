@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 import ProductCard from "@/components/ProductCard";
 import {
   ArrowLeft, Star, MapPin, Mail, Phone as PhoneIcon, ShoppingCart,
@@ -18,6 +19,7 @@ import ReportModal from "@/components/ReportModal";
 import QuickLookModal from "@/components/QuickLookModal";
 
 export default function VendorProfilePage() {
+  const t = useTranslations("VendorProfile");
   const params = useParams();
   const slug = params?.slug;
   const { user, wooId, messagingEnabled } = useAuth();
@@ -117,12 +119,12 @@ export default function VendorProfilePage() {
       if (!res.ok) throw new Error(`Server error (${res.status})`);
       const result = await res.json();
       if (result.success) {
-        alert("تم تحديث الملف الشخصي بنجاح!");
+        alert(t("profileUpdated"));
       } else {
         throw new Error(result.error);
       }
     } catch (err) {
-      alert("فشل حفظ الملف الشخصي: " + err.message);
+      alert(`${t("profileUpdateFailed")} ${err.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -169,10 +171,10 @@ export default function VendorProfilePage() {
   if (notFound || !data) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-4 p-4 text-center">
       <div className="text-5xl">🏪</div>
-      <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">المتجر غير موجود</h1>
-      <p className="text-zinc-500 text-[14px]">هذا التاجر غير موجود أو تم تعطيله.</p>
+      <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">{t("storeNotFound")}</h1>
+      <p className="text-zinc-500 text-[14px]">{t("storeDisabledDesc")}</p>
       <Link href="/vendors" className="mt-4 px-6 py-2 bg-brand text-white rounded-md text-[13px] font-medium border border-brand hover:bg-brand-dark shadow-sm">
-        العودة إلى المتاجر
+        {t("backToStores")}
       </Link>
     </div>
   );
@@ -181,7 +183,7 @@ export default function VendorProfilePage() {
 
   const handleFollow = async () => {
     if (!wooId) {
-      alert("يرجى تسجيل الدخول لمتابعة هذا المتجر!");
+      alert(t("loginToFollow"));
       return;
     }
     if (isFollowPending) return;
@@ -203,7 +205,7 @@ export default function VendorProfilePage() {
       } else {
         newFollowers.push({
           id: Number(wooId),
-          name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "أنت"
+          name: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : t("you")
         });
       }
 
@@ -236,7 +238,7 @@ export default function VendorProfilePage() {
         let newCount = currentIsFollowing ? currentCount : Math.max(0, currentCount - 1);
         let newFollowers = [...(prev.vendor.followers || [])];
         if (currentIsFollowing) {
-          newFollowers.push({ id: Number(wooId), name: "أنت" });
+          newFollowers.push({ id: Number(wooId), name: t("you") });
         } else {
           newFollowers = newFollowers.filter(f => String(f.id) !== String(wooId));
         }
@@ -297,11 +299,11 @@ export default function VendorProfilePage() {
               onClick={() => document.getElementById('cover-upload').click()}
               className="bg-white/90 hover:bg-white text-zinc-950 px-4 py-2 rounded-md text-[12px] font-bold shadow-xl flex items-center gap-2"
             >
-              <Camera size={16} /> تغيير صورة الغلاف
+              <Camera size={16} /> {t("changeCover")}
             </button>
             {v.storeBanner && (
               <div className="bg-black/60 p-2 rounded-lg w-48">
-                <p className="text-[10px] text-white text-center mb-1">تعديل الموضع</p>
+                <p className="text-[10px] text-white text-center mb-1">{t("adjustPosition")}</p>
                 <input type="range" min="0" max="100" value={bannerPos} onChange={(e) => setBannerPos(e.target.value)} className="w-full accent-brand" />
               </div>
             )}
@@ -338,7 +340,7 @@ export default function VendorProfilePage() {
             <div className="flex-1 text-center md:text-end">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-1">
                 <h1 className="text-[24px] md:text-[28px] font-bold text-zinc-900 leading-tight">
-                  {v.storeName} {isOwner && <span className="text-[14px] font-medium text-zinc-400 me-1">(أنا)</span>}
+                  {v.storeName} {isOwner && <span className="text-[14px] font-medium text-zinc-400 me-1">({t("me")})</span>}
                 </h1>
                 <div className="flex items-center gap-0.5 me-2">
                   {[...Array(5)].map((_, i) => (
@@ -349,9 +351,9 @@ export default function VendorProfilePage() {
               </div>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[13px] text-zinc-600">
-                <span className="flex items-center gap-1"><Store size={14} className="text-zinc-400" /> {v.storeCategory || "متجر"}</span>
-                <span className="flex items-center gap-1"><Users size={14} className="text-zinc-400" /> {v.followerCount || "0"} متابع</span>
-                <span className="flex items-center gap-1 text-emerald-600 font-medium"><ShieldCheck size={14} /> بائع موثوق</span>
+                <span className="flex items-center gap-1"><Store size={14} className="text-zinc-400" /> {v.storeCategory || t("storeFallback")}</span>
+                <span className="flex items-center gap-1"><Users size={14} className="text-zinc-400" /> {t("followerCount", { count: v.followerCount || 0 })}</span>
+                <span className="flex items-center gap-1 text-emerald-600 font-medium"><ShieldCheck size={14} /> {t("trustedSeller")}</span>
               </div>
             </div>
 
@@ -370,11 +372,11 @@ export default function VendorProfilePage() {
                     )}
                     {isFollowing ? (
                       <>
-                        <span className="group-hover:hidden">متابع</span>
-                        <span className="hidden group-hover:inline">إلغاء المتابعة</span>
+                        <span className="group-hover:hidden">{t("following")}</span>
+                        <span className="hidden group-hover:inline">{t("unfollow")}</span>
                       </>
                     ) : (
-                      <>متابعة</>
+                      <>{t("follow")}</>
                     )}
                   </button>
                   {messagingEnabled && v.whatsappNumber && v.showWhatsapp && (
@@ -387,7 +389,7 @@ export default function VendorProfilePage() {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.031 0C5.383 0 0 5.383 0 12.031C0 14.156 0.556 16.208 1.583 17.989L0.117 23.351L5.617 21.908C7.339 22.84 9.278 23.351 11.272 23.351H11.277C17.925 23.351 23.311 17.965 23.311 11.317C23.311 8.093 22.056 5.068 19.78 2.788C17.504 0.509 14.479 0 12.031 0ZM12.031 19.467C10.231 19.467 8.5 18.983 6.983 18.083L6.633 17.872L3.372 18.728L4.244 15.544L4.017 15.183C3.028 13.611 2.506 11.8 2.506 9.928C2.506 4.672 6.772 0.406 12.033 0.406C14.583 0.406 16.933 1.4 18.739 3.206C20.544 5.011 21.539 7.361 21.539 9.917C21.539 15.172 17.272 19.439 12.031 19.467ZM17.261 14.133C16.972 13.989 15.544 13.283 15.278 13.189C15.011 13.094 14.817 13.044 14.628 13.333C14.433 13.617 13.889 14.283 13.722 14.472C13.556 14.661 13.389 14.683 13.106 14.539C12.817 14.394 11.878 14.089 10.767 13.094C9.889 12.306 9.306 11.356 9.139 11.067C8.972 10.778 9.122 10.622 9.267 10.478C9.394 10.35 9.55 10.15 9.694 9.983C9.839 9.817 9.889 9.694 9.983 9.506C10.078 9.317 10.028 9.15 9.956 9.006C9.883 8.861 9.306 7.444 9.067 6.861C8.833 6.294 8.6 6.372 8.433 6.361C8.278 6.356 8.083 6.35 7.894 6.35C7.706 6.35 7.394 6.422 7.133 6.706C6.872 6.989 6.133 7.678 6.133 9.083C6.133 10.489 7.156 11.844 7.3 12.033C7.444 12.222 9.306 15.111 12.189 16.35C12.878 16.644 13.406 16.822 13.817 16.956C14.506 17.178 15.133 17.144 15.628 17.067C16.183 16.978 17.261 16.4 17.483 15.756C17.706 15.111 17.706 14.567 17.628 14.472C17.556 14.372 17.361 14.278 17.072 14.133L17.261 14.133Z" />
                       </svg>
-                      واتساب
+                      {t("whatsapp")}
                     </a>
                   )}
                   {messagingEnabled && (
@@ -396,14 +398,14 @@ export default function VendorProfilePage() {
                         href={`/messages?to=${v.id}`}
                         className="h-9 px-4 rounded-md text-[13px] font-medium border border-zinc-300 text-zinc-700 flex items-center gap-2 hover:bg-zinc-50"
                       >
-                        <Mail size={14} /> مراسلة
+                        <Mail size={14} /> {t("message")}
                       </Link>
                     ) : (
                       <Link
                         href={`/login?redirect=/vendors/${slug}`}
                         className="h-9 px-4 rounded-md text-[13px] font-medium border border-zinc-300 text-zinc-700 flex items-center gap-2 hover:bg-zinc-50"
                       >
-                        <Mail size={14} /> مراسلة
+                        <Mail size={14} /> {t("message")}
                       </Link>
                     )
                   )}
@@ -415,14 +417,14 @@ export default function VendorProfilePage() {
                   disabled={isSaving}
                   className="h-9 px-6 bg-brand hover:bg-brand-dark text-white rounded-md text-[13px] font-bold shadow-md transition-all flex items-center gap-2"
                 >
-                  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Settings size={14} />} حفظ ملف المتجر
+                  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Settings size={14} />} {t("saveProfile")}
                 </button>
               )}
               {!isOwner && (
                 <button
                   onClick={() => setIsReportOpen(true)}
                   className="cursor-pointer p-2 border border-zinc-300 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
-                  title="الإبلاغ عن المتجر"
+                  title="t("reportStore")"
                 >
                   <ShieldAlert size={16} />
                 </button>
@@ -433,10 +435,10 @@ export default function VendorProfilePage() {
           {/* Store Navigation Tabs */}
           <div className="flex gap-1">
             {[
-              { id: 'products', label: 'المنتجات', icon: null },
-              { id: 'about', label: 'معلومات البائع', icon: null },
-              { id: 'reviews', label: 'التقييمات', icon: null },
-              { id: 'followers', label: 'المتابعون', icon: null },
+              { id: 'products', label: t("tabProducts"), icon: null },
+              { id: 'about', label: t("tabAbout"), icon: null },
+              { id: 'reviews', label: t("tabReviews"), icon: null },
+              { id: 'followers', label: '{t("tabFollowers")}', icon: null },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -462,24 +464,24 @@ export default function VendorProfilePage() {
             {/* Store Sidebar (Filtering) */}
             <aside className="w-full md:w-[220px] shrink-0">
               <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">ابحث داخل المتجر</h3>
+                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("searchStore")}</h3>
                 <div className="relative">
                   <Search size={14} className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                   <input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="ابحث عن منتجات..."
+                    placeholder={t("searchProductsPlaceholder")}
                     className="w-full h-9 border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   />
                 </div>
               </div>
 
               <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">نطاق السعر</h3>
+                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("priceRange")}</h3>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
-                    placeholder="الحد الأدنى"
+                    placeholder={t("minPrice")}
                     value={priceRange.min}
                     onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
                     className="w-full h-8 border border-zinc-300 rounded-md px-2 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
@@ -487,7 +489,7 @@ export default function VendorProfilePage() {
                   <span className="text-zinc-400">-</span>
                   <input
                     type="number"
-                    placeholder="الحد الأقصى"
+                    placeholder={t("maxPrice")}
                     value={priceRange.max}
                     onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
                     className="w-full h-8 border border-zinc-300 rounded-md px-2 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
@@ -496,21 +498,21 @@ export default function VendorProfilePage() {
               </div>
 
               <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">ترتيب حسب</h3>
+                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("sortBy")}</h3>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="w-full h-9 border border-zinc-300 rounded-md px-2 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                 >
-                  <option value="default">الأكثر ملاءمة</option>
-                  <option value="price_asc">السعر من الأقل إلى الأعلى</option>
-                  <option value="price_desc">السعر من الأعلى إلى الأقل</option>
-                  <option value="newest">الأحدث</option>
+                  <option value="default">{t("sortRelevant")}</option>
+                  <option value="price_asc">{t("sortPriceAsc")}</option>
+                  <option value="price_desc">{t("sortPriceDesc")}</option>
+                  <option value="newest">{t("sortNewest")}</option>
                 </select>
               </div>
 
               <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-4">فئات المتجر</h3>
+                <h3 className="text-[14px] font-bold text-zinc-900 mb-4">{t("storeCategories")}</h3>
                 <div className="flex flex-wrap gap-2">
                   {productCategories.map((cat) => (
                     <button
@@ -521,7 +523,7 @@ export default function VendorProfilePage() {
                         : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-400'
                         }`}
                     >
-                      {cat === "All" ? "الكل" : cat}
+                      {cat === "All" ? t("all") : cat}
                     </button>
                   ))}
                 </div>
@@ -529,9 +531,9 @@ export default function VendorProfilePage() {
 
 
               <div className="border-t border-zinc-100 pt-4">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">خدمة العملاء</h3>
+                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("customerService")}</h3>
                 <p className="text-[12px] text-zinc-500 leading-relaxed">
-                  هذا التاجر عادةً يرد خلال 24 ساعة. لمعلومات الإرجاع، يرجى مراجعة سياسة مهالي للإرجاع.
+                  {t("customerServiceDesc")}
                 </p>
               </div>
             </aside>
@@ -539,9 +541,9 @@ export default function VendorProfilePage() {
             {/* Product Grid */}
             <div className="flex-1">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[18px] font-bold text-zinc-900">المنتجات المميزة</h2>
+                <h2 className="text-[18px] font-bold text-zinc-900">{t("featuredProducts")}</h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] text-zinc-500">عرض:</span>
+                  <span className="text-[12px] text-zinc-500">{t("viewLabel")}</span>
                   <div className="flex border border-zinc-200 rounded-md overflow-hidden">
                     <button onClick={() => setView("grid")} className={`p-1.5 ${view === 'grid' ? 'bg-zinc-100' : 'bg-white hover:bg-zinc-50'}`}><Grid3X3 size={14} /></button>
                     <button onClick={() => setView("list")} className={`p-1.5 ${view === 'list' ? 'bg-zinc-100' : 'bg-white hover:bg-zinc-50'}`}><List size={14} /></button>
@@ -552,7 +554,7 @@ export default function VendorProfilePage() {
               {filteredProducts.length === 0 ? (
                 <div className="py-20 text-center border border-dashed border-zinc-200 rounded-xl">
                   <Package size={40} className="mx-auto text-zinc-200 mb-3" />
-                  <p className="text-zinc-500 text-[14px]">لم يتم العثور على منتجات تطابق بحثك.</p>
+                  <p className="text-zinc-500 text-[14px]">{t("noProductsFound")}</p>
                 </div>
               ) : (
                 <>
@@ -563,10 +565,10 @@ export default function VendorProfilePage() {
                           <thead>
                             <tr className="border-b border-zinc-200 bg-white text-[13px] text-zinc-600">
                               <th className="px-4 py-3 w-16 text-center"><Camera size={16} className="text-zinc-400 inline" /></th>
-                              <th className="px-4 py-3 font-bold">اسم المنتج</th>
-                              <th className="px-4 py-3 font-bold">السعر</th>
-                              <th className="px-4 py-3 font-bold">الفئة</th>
-                              <th className="px-4 py-3 font-bold text-start">الإجراء</th>
+                              <th className="px-4 py-3 font-bold">{t("colProductName")}</th>
+                              <th className="px-4 py-3 font-bold">{t("colPrice")}</th>
+                              <th className="px-4 py-3 font-bold">{t("colCategory")}</th>
+                              <th className="px-4 py-3 font-bold text-start">{t("colAction")}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-zinc-100">
@@ -576,7 +578,7 @@ export default function VendorProfilePage() {
                                   <Link href={`/product/${p.id}`}>
                                     <div className="w-[50px] h-[50px] border border-zinc-200 bg-[#F7F7F7] rounded-sm overflow-hidden relative mx-auto">
                                       {p.images?.[0]?.src ? (
-                                        <Image src={p.images[0].src} alt={p.name || "منتج"} fill className="object-contain p-1" sizes="50px" />
+                                        <Image src={p.images[0].src} alt={p.name || t("productImageAlt")} fill className="object-contain p-1" sizes="50px" />
                                       ) : (
                                         <div className="w-full h-full flex items-center justify-center"><Package size={18} className="text-zinc-200" /></div>
                                       )}
@@ -598,15 +600,15 @@ export default function VendorProfilePage() {
                                   <div className="space-y-0.5 font-normal text-zinc-900">
                                     {p.type === "variable" ? (
                                       <div>
-                                        <span className="text-[11px] text-zinc-600 ms-1">من</span>
-                                        <span className="font-medium text-[16px]">د.أ {parseFloat(p.price || 0).toFixed(2)}</span>
+                                        <span className="text-[11px] text-zinc-600 ms-1">{t("from")}</span>
+                                        <span className="font-medium text-[16px]">{t("currency")} {parseFloat(p.price || 0).toFixed(2)}</span>
                                       </div>
                                     ) : (
                                       <div className="flex flex-col">
                                         {(parseFloat(p.regular_price) > parseFloat(p.price)) && (
-                                          <span className="line-through text-zinc-500 text-[11px]">د.أ {parseFloat(p.regular_price).toFixed(2)}</span>
+                                          <span className="line-through text-zinc-500 text-[11px]">{t("currency")} {parseFloat(p.regular_price).toFixed(2)}</span>
                                         )}
-                                        <span className="font-medium text-[16px] text-brand">د.أ {parseFloat(p.price || 0).toFixed(2)}</span>
+                                        <span className="font-medium text-[16px] text-brand">{t("currency")} {parseFloat(p.price || 0).toFixed(2)}</span>
                                       </div>
                                     )}
                                   </div>
@@ -620,13 +622,13 @@ export default function VendorProfilePage() {
                                       onClick={(e) => { e.preventDefault(); setQuickLookProduct(p); }}
                                       className="inline-flex items-center justify-center h-8 px-3 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 text-zinc-900 text-[12px] font-medium rounded-full shadow-sm transition-colors"
                                     >
-                                      نظرة سريعة
+                                      {t("quickLook")}
                                     </button>
                                     <Link
                                       href={`/product/${p.id}`}
                                       className="inline-flex items-center justify-center h-8 px-4 bg-brand hover:bg-brand-dark border border-brand text-white text-[12px] font-medium rounded-full shadow-sm transition-colors"
                                     >
-                                      عرض الخيارات
+                                      {t("viewOptions")}
                                     </Link>
                                   </div>
                                 </td>
@@ -651,43 +653,43 @@ export default function VendorProfilePage() {
 
         {activeTab === "about" && (
           <div className="max-w-3xl mx-auto bg-[#fcfcfc] border border-zinc-200 rounded-lg p-8">
-            <h2 className="text-[20px] font-bold text-zinc-900 mb-4 flex items-center gap-2"><Info size={20} className="text-zinc-400" /> نبذة عن {v.storeName}</h2>
+            <h2 className="text-[20px] font-bold text-zinc-900 mb-4 flex items-center gap-2"><Info size={20} className="text-zinc-400" /> {t("aboutStore")} {v.storeName}</h2>
 
             <div className="space-y-6">
               <div>
-                <h3 className="text-[13px] font-bold text-zinc-700 uppercase tracking-wider mb-2">نبذة عن التاجر</h3>
+                <h3 className="text-[13px] font-bold text-zinc-700 uppercase tracking-wider mb-2">{t("aboutSellerLabel")}</h3>
                 <p className="text-[14px] text-zinc-600 leading-relaxed">
-                  {v.storeDescription || "هذا التاجر عضو موثوق في مجتمع مهالي، ويسعى لتقديم منتجات عالية الجودة وخدمة عملاء متميزة."}
+                  {v.storeDescription || t("defaultStoreDesc")}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-zinc-200">
                 <div className="space-y-3">
-                  <h3 className="text-[13px] font-bold text-zinc-700 uppercase tracking-wider">معلومات النشاط التجاري</h3>
+                  <h3 className="text-[13px] font-bold text-zinc-700 uppercase tracking-wider">{t("businessInfo")}</h3>
                   <div className="space-y-2 text-[14px]">
-                    <p className="flex items-center gap-2 text-zinc-600"><MapPin size={14} /> الموقع: عمان، الأردن</p>
-                    <p className="flex items-center gap-2 text-zinc-600"><Package size={14} /> عضو في مهالي منذ: {new Date(v.dateCreated).toLocaleDateString()}</p>
-                    <p className="flex items-center gap-2 text-zinc-600"><ShieldCheck size={14} className="text-emerald-600" /> بائع موثوق</p>
+                    <p className="flex items-center gap-2 text-zinc-600"><MapPin size={14} /> {t("locationAmman")}</p>
+                    <p className="flex items-center gap-2 text-zinc-600"><Package size={14} /> {t("memberSince")} {new Date(v.dateCreated).toLocaleDateString()}</p>
+                    <p className="flex items-center gap-2 text-zinc-600"><ShieldCheck size={14} className="text-emerald-600" /> {t("trustedSeller")}</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <h3 className="text-[13px] font-bold text-zinc-700 uppercase tracking-wider">طرق الاتصال</h3>
+                  <h3 className="text-[13px] font-bold text-zinc-700 uppercase tracking-wider">{t("contactMethods")}</h3>
                   <div className="space-y-2 text-[14px]">
                     {messagingEnabled && v.whatsappNumber && v.showWhatsapp && (
                       <a href={`https://wa.me/${v.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#25D366] font-bold hover:underline mb-1">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 0C5.383 0 0 5.383 0 12.031C0 14.156 0.556 16.208 1.583 17.989L0.117 23.351L5.617 21.908C7.339 22.84 9.278 23.351 11.272 23.351H11.277C17.925 23.351 23.311 17.965 23.311 11.317C23.311 8.093 22.056 5.068 19.78 2.788C17.504 0.509 14.479 0 12.031 0ZM12.031 19.467C10.231 19.467 8.5 18.983 6.983 18.083L6.633 17.872L3.372 18.728L4.244 15.544L4.017 15.183C3.028 13.611 2.506 11.8 2.506 9.928C2.506 4.672 6.772 0.406 12.033 0.406C14.583 0.406 16.933 1.4 18.739 3.206C20.544 5.011 21.539 7.361 21.539 9.917C21.539 15.172 17.272 19.439 12.031 19.467ZM17.261 14.133C16.972 13.989 15.544 13.283 15.278 13.189C15.011 13.094 14.817 13.044 14.628 13.333C14.433 13.617 13.889 14.283 13.722 14.472C13.556 14.661 13.389 14.683 13.106 14.539C12.817 14.394 11.878 14.089 10.767 13.094C9.889 12.306 9.306 11.356 9.139 11.067C8.972 10.778 9.122 10.622 9.267 10.478C9.394 10.35 9.55 10.15 9.694 9.983C9.839 9.817 9.889 9.694 9.983 9.506C10.078 9.317 10.028 9.15 9.956 9.006C9.883 8.861 9.306 7.444 9.067 6.861C8.833 6.294 8.6 6.372 8.433 6.361C8.278 6.356 8.083 6.35 7.894 6.35C7.706 6.35 7.394 6.422 7.133 6.706C6.872 6.989 6.133 7.678 6.133 9.083C6.133 10.489 7.156 11.844 7.3 12.033C7.444 12.222 9.306 15.111 12.189 16.35C12.878 16.644 13.406 16.822 13.817 16.956C14.506 17.178 15.133 17.144 15.628 17.067C16.183 16.978 17.261 16.4 17.483 15.756C17.706 15.111 17.706 14.567 17.628 14.472C17.556 14.372 17.361 14.278 17.072 14.133L17.261 14.133Z" /></svg>
-                        الدردشة عبر واتساب
+                        {t("chatViaWhatsapp")}
                       </a>
                     )}
                     {v.showEmail && <p className="flex items-center gap-2 text-zinc-600 hover:text-brand"><Mail size={14} /> {v.email}</p>}
                     {v.showPhone && <p className="flex items-center gap-2 text-zinc-600"><PhoneIcon size={14} /> {v.phone}</p>}
-                    {(!messagingEnabled || !v.whatsappNumber || !v.showWhatsapp) && !v.showEmail && !v.showPhone && <p className="text-zinc-400 italic text-[13px]">معلومات الاتصال خاصة.</p>}
+                    {(!messagingEnabled || !v.whatsappNumber || !v.showWhatsapp) && !v.showEmail && !v.showPhone && <p className="text-zinc-400 italic text-[13px]">{t("contactPrivate")}</p>}
                     {messagingEnabled && !isOwner && (
                       user ? (
-                        <Link href={`/messages?to=${v.id}`} className="inline-block text-brand font-medium hover:underline">مراسلة عبر مهالي &gt;</Link>
+                        <Link href={`/messages?to=${v.id}`} className="inline-block text-brand font-medium hover:underline">{t("message")} {t("viaMahally")} &gt;</Link>
                       ) : (
-                        <Link href={`/login?redirect=/vendors/${slug}`} className="inline-block text-brand font-medium hover:underline">مراسلة عبر مهالي &gt;</Link>
+                        <Link href={`/login?redirect=/vendors/${slug}`} className="inline-block text-brand font-medium hover:underline">{t("message")} {t("viaMahally")} &gt;</Link>
                       )
                     )}
                   </div>
@@ -701,14 +703,14 @@ export default function VendorProfilePage() {
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row gap-12 bg-[#fcfcfc] border border-zinc-200 rounded-lg p-8 relative overflow-hidden">
               <div className="w-full md:w-64 text-center md:text-end">
-                <h2 className="text-[24px] font-bold text-zinc-900 mb-1">{v.averageRating || "0.0"} من 5</h2>
+                <h2 className="text-[24px] font-bold text-zinc-900 mb-1">{v.averageRating || "0.0"} {t("from")} 5</h2>
                 <div className="flex justify-center md:justify-start gap-0.5 mb-2">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={20} className={i < Math.round(v.averageRating || 0) ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'} />
                   ))}
                 </div>
                 <p className="text-zinc-500 text-[14px] mb-6">
-                  ({v.reviewCount || 0}) {v.reviewCount === 1 ? "تقييم" : "التقييمات"}
+                  ({v.reviewCount || 0}) {v.reviewCount === 1 ? t("ratingSingular") : t("ratingPlural")}
                 </p>
               </div>
 
@@ -717,7 +719,7 @@ export default function VendorProfilePage() {
                   const percentage = v.ratingDistribution?.[stars] || "0%";
                   return (
                     <div key={stars} className="flex items-center gap-4 text-[13px]">
-                      <span className="w-12 text-brand hover:underline cursor-pointer">{stars} نجوم</span>
+                      <span className="w-12 text-brand hover:underline cursor-pointer">{stars} {t("stars")}</span>
                       <div className="flex-1 h-5 bg-zinc-100 rounded-sm overflow-hidden border border-zinc-200 shadow-inner">
                         <div className="h-full bg-brand" style={{ width: percentage }}></div>
                       </div>
@@ -730,7 +732,7 @@ export default function VendorProfilePage() {
 
             {v.recentReviews?.length > 0 ? (
               <div className="space-y-6">
-                <h3 className="text-[18px] font-bold text-zinc-900 border-b border-zinc-100 pb-4">أبرز التقييمات لهذا البائع</h3>
+                <h3 className="text-[18px] font-bold text-zinc-900 border-b border-zinc-100 pb-4">{t("topReviews")}</h3>
                 {v.recentReviews.map((rev, idx) => (
                   <div key={idx} className="border-b border-zinc-100 pb-6 last:border-0">
                     <div className="flex items-center gap-2 mb-2">
@@ -745,9 +747,9 @@ export default function VendorProfilePage() {
                           <Star key={i} size={14} className={i < rev.rating ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'} />
                         ))}
                       </div>
-                      <span className="text-[13px] font-bold text-zinc-900">شراء موثوق</span>
+                      <span className="text-[13px] font-bold text-zinc-900">{t("verifiedPurchase")}</span>
                     </div>
-                    <p className="text-[12px] text-zinc-500 mb-2">تمت المراجعة في {new Date(rev.date_created).toLocaleDateString('ar-EG', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                    <p className="text-[12px] text-zinc-500 mb-2">{t("reviewedOn")} {new Date(rev.date_created).toLocaleDateString()}</p>
                     <p className="text-[14px] text-zinc-900 leading-relaxed" dangerouslySetInnerHTML={{ __html: rev.review }} />
                   </div>
                 ))}
@@ -755,9 +757,9 @@ export default function VendorProfilePage() {
             ) : (
               <div className="text-center py-20 border border-dashed border-zinc-200 rounded-xl">
                 <MessageSquare size={40} className="mx-auto text-zinc-100 mb-4" />
-                <h3 className="text-[18px] font-bold text-zinc-900 mb-2">لا توجد تقييمات بعد</h3>
+                <h3 className="text-[18px] font-bold text-zinc-900 mb-2">{t("noReviewsYet")}</h3>
                 <p className="text-[14px] text-zinc-500 max-w-sm mx-auto">
-                  لم يترك العملاء أي ملاحظات بعد على متجر هذا البائع. التقييمات تساعد المشترين الآخرين على اتخاذ قرار أفضل.
+                  {t("noReviewsDesc")}
                 </p>
               </div>
             )}
@@ -766,7 +768,7 @@ export default function VendorProfilePage() {
 
         {activeTab === "followers" && (
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-[20px] font-bold text-zinc-900 mb-6 flex items-center gap-2"><Users size={20} className="text-zinc-400" /> المتابعون</h2>
+            <h2 className="text-[20px] font-bold text-zinc-900 mb-6 flex items-center gap-2"><Users size={20} className="text-zinc-400" /> {t("tabFollowers")}</h2>
 
             {v.followers?.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -777,7 +779,7 @@ export default function VendorProfilePage() {
                     </div>
                     <div>
                       <p className="text-[14px] font-bold text-zinc-900">{f.name}</p>
-                      <p className="text-[12px] text-zinc-500">عضو موثوق</p>
+                      <p className="text-[12px] text-zinc-500">{t("trustedMember")}</p>
                     </div>
                   </div>
                 ))}
@@ -785,9 +787,9 @@ export default function VendorProfilePage() {
             ) : (
               <div className="text-center py-20 border border-dashed border-zinc-200 rounded-xl">
                 <Users size={40} className="mx-auto text-zinc-200 mb-4" />
-                <h3 className="text-[18px] font-bold text-zinc-900 mb-2">لا يوجد متابعون بعد</h3>
+                <h3 className="text-[18px] font-bold text-zinc-900 mb-2">{t("noFollowersYet")}</h3>
                 <p className="text-[14px] text-zinc-500 max-w-sm mx-auto">
-                  كن أول من يتابع {v.storeName} لتصلك تحديثاتهم عن المنتجات والعروض الجديدة!
+                  {t("beFirstToFollow")} {v.storeName} {t("toGetUpdates")}
                 </p>
               </div>
             )}
