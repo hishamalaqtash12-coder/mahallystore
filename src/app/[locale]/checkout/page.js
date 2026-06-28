@@ -355,22 +355,22 @@ export default function CheckoutPage() {
                     <h3 className="text-[18px] font-bold text-zinc-900 mb-4">{t("shippingAddress")}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex flex-col">
-                        <input type="text" name="firstName" placeholder=t("firstNamePlaceholder") value={formData.firstName} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[13px] md:text-[13px] text-[16px] outline-none shadow-inner w-full`} />
+                        <input type="text" name="firstName" placeholder={t("firstNamePlaceholder")} value={formData.firstName} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[13px] md:text-[13px] text-[16px] outline-none shadow-inner w-full`} />
                         {validationErrors.firstName && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.firstName}</span>}
                       </div>
                       <div className="flex flex-col">
-                        <input type="text" name="lastName" placeholder=t("lastNamePlaceholder") value={formData.lastName} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-3 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-inner w-full" />
+                        <input type="text" name="lastName" placeholder={t("lastNamePlaceholder")} value={formData.lastName} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-3 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-inner w-full" />
                       </div>
                       <div className="flex flex-col md:col-span-2">
-                        <input type="email" name="email" placeholder=t("emailPlaceholder") value={formData.email} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <input type="email" name="email" placeholder={t("emailPlaceholder")} value={formData.email} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.email && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.email}</span>}
                       </div>
                       <div className="flex flex-col md:col-span-2">
-                        <input type="tel" name="phone" placeholder=t("phonePlaceholder") value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <input type="tel" name="phone" placeholder={t("phonePlaceholder")} value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.phone && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.phone}</span>}
                       </div>
                       <div className="flex flex-col md:col-span-2">
-                        <input type="text" name="address" placeholder=t("addressPlaceholder") value={formData.address} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <input type="text" name="address" placeholder={t("addressPlaceholder")} value={formData.address} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.address && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.address}</span>}
                       </div>
                       <div className="flex flex-col">
@@ -381,7 +381,7 @@ export default function CheckoutPage() {
                         </select>
                       </div>
                       <div className="flex flex-col">
-                        <input readOnly value=t("countryJordan") className="h-[44px] md:h-[31px] px-3 bg-zinc-50 border border-zinc-200 rounded-md text-[16px] md:text-[13px] text-zinc-500 w-full" />
+                        <input readOnly value={t("countryJordan")} className="h-[44px] md:h-[31px] px-3 bg-zinc-50 border border-zinc-200 rounded-md text-[16px] md:text-[13px] text-zinc-500 w-full" />
                       </div>
                     </div>
                   </div>
