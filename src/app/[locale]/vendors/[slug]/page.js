@@ -424,7 +424,7 @@ export default function VendorProfilePage() {
                 <button
                   onClick={() => setIsReportOpen(true)}
                   className="cursor-pointer p-2 border border-zinc-300 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
-                  title="t("reportStore")"
+                  title={t("reportStore")}
                 >
                   <ShieldAlert size={16} />
                 </button>
