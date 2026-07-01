@@ -27,11 +27,7 @@ export default function CheckoutPage() {
   }, [user, authLoading, router]);
 
   // Redirect to home if vendor/admin (except for allowed admin email)
-  useEffect(() => {
-    if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
-      router.replace("/");
-    }
-  }, [isVendor, user, router]);
+  // Vendor restriction removed
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -292,9 +288,7 @@ export default function CheckoutPage() {
     return <Loader fullPage size="lg" text={t("loadingSession")} />;
   }
 
-  if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
-    return null; // Prevent flash while redirecting
-  }
+  // Vendor flash prevention removed
 
   if (success) {
     return (

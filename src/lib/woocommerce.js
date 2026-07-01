@@ -516,9 +516,32 @@ export async function getVendorBySlug(slug) {
     
     // Fetch all vendors (with full meta_data) and find by slug
     const vendors = await getVendors({ per_page: 100, includeRestricted: true });
-    const matchedVendor = vendors.find(c =>
-      c.meta_data?.some(m => m.key === "mahally_store_slug" && m.value === slug)
-    );
+    const matchedVendor = vendors.find(c => {
+      // 1. Check mahally_store_slug
+      const hasMahallySlug = c.meta_data?.some(m => m.key === "mahally_store_slug" && m.value === slug);
+      if (hasMahallySlug) return true;
+
+      // 2. Check username
+      if (c.username === slug) return true;
+
+      // 3. Check Dokan store name slugified
+      const dokanProfileMeta = c.meta_data?.find(m => m.key === "dokan_profile_settings")?.value;
+      if (dokanProfileMeta) {
+        try {
+          const dokanSettings = typeof dokanProfileMeta === 'string' 
+            ? JSON.parse(dokanProfileMeta) 
+            : dokanProfileMeta;
+          
+          if (dokanSettings.store_name) {
+            const dokanSlug = dokanSettings.store_name.toLowerCase().replace(/\s+/g, '-');
+            if (dokanSlug === slug) return true;
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+      return false;
+    });
     
     if (!matchedVendor) return null;
     

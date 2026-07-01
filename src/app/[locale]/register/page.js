@@ -6,13 +6,21 @@ import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Mail, User, Lock, Store, ChevronRight, Clock, Info, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Loader from "@/components/Loader";
 
-const STORE_CATEGORIES = [
-  "الأزياء والملابس", "الإلكترونيات", "المنزل والمعيشة", "الأطعمة والمشروبات",
-  "الصحة والجمال", "الرياضة في الهواء الطلق", "السيارات", "الكتب والقرطاسية",
-  "ألعاب وأطفال", "أخرى",
+const getStoreCategories = (t) => [
+  t("catFashion") || "الأزياء والملابس", 
+  t("catElectronics") || "الإلكترونيات", 
+  t("catHome") || "المنزل والمعيشة", 
+  t("catFood") || "الأطعمة والمشروبات",
+  t("catBeauty") || "الصحة والجمال", 
+  t("catOutdoor") || "الرياضة في الهواء الطلق", 
+  t("catCars") || "السيارات", 
+  t("catBooks") || "الكتب والقرطاسية",
+  t("catToys") || "ألعاب وأطفال", 
+  t("catOther") || "أخرى"
 ];
 
 function RegisterContent() {
@@ -20,6 +28,7 @@ function RegisterContent() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
   const { user } = useAuth();
+  const t = useTranslations("Register");
 
   const [step, setStep] = useState("role");     // "role" | "form" | "vendor_store" | "verify_method" | "phone_otp" | "email_sent" | "success"
   const [selectedRole, setSelectedRole] = useState(null); // "customer" | "vendor"
@@ -59,6 +68,15 @@ function RegisterContent() {
     if (user && step === "role") router.replace(redirectTo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, redirectTo]);
+
+  // Read ?role parameter on mount
+  useEffect(() => {
+    const roleParam = searchParams.get("role");
+    if (roleParam === "vendor" || roleParam === "customer") {
+      setSelectedRole(roleParam);
+      setStep("form");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -354,10 +372,10 @@ function RegisterContent() {
           {/* ── STEP 0: Role Picker ── */}
           {step === "role" && (
             <div className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">إنشاء حساب</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{t("title")}</h1>
 
               <div className="space-y-3">
-                <p className="text-[13px] font-bold text-zinc-900">كيف ترغب بالانضمام إلينا؟</p>
+                <p className="text-[13px] font-bold text-zinc-900">{t("howToJoin")}</p>
 
                 <div className="space-y-2">
                   <button
@@ -367,8 +385,8 @@ function RegisterContent() {
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-lg">🛍️</div>
                       <div>
-                        <p className="text-[13px] font-bold text-zinc-900">عميل</p>
-                        <p className="text-[11px] text-zinc-500">أنا عميل / مشتري</p>
+                        <p className="text-[13px] font-bold text-zinc-900">{t("customer")}</p>
+                        <p className="text-[11px] text-zinc-500">{t("customerDesc")}</p>
                       </div>
                     </div>
                   </button>
@@ -380,8 +398,8 @@ function RegisterContent() {
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-zinc-100 rounded-full flex items-center justify-center text-lg">🏪</div>
                       <div>
-                        <p className="text-[13px] font-bold text-zinc-900">بائع</p>
-                        <p className="text-[11px] text-zinc-500">أنا بائع / تاجر</p>
+                        <p className="text-[13px] font-bold text-zinc-900">{t("vendor")}</p>
+                        <p className="text-[11px] text-zinc-500">{t("vendorDesc")}</p>
                       </div>
                     </div>
                   </button>
@@ -390,7 +408,7 @@ function RegisterContent() {
 
               <div className="pt-4 border-t border-zinc-100">
                 <p className="text-[12px] text-zinc-900 leading-snug">
-                  هل لديك حساب بالفعل؟ <Link href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"} className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline font-bold">تسجيل الدخول</Link>
+                  {t("alreadyHaveAccount")} <Link href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"} className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline font-bold">{t("login")}</Link>
                 </p>
               </div>
             </div>
@@ -399,17 +417,17 @@ function RegisterContent() {
           {/* ── STEP 1: Basic Details Form ── */}
           {step === "form" && (
             <form onSubmit={handleFormSubmit} className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">إنشاء حساب</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{t("title")}</h1>
 
               <div className="space-y-3">
                 {selectedRole === "customer" && (
                   <div className="space-y-1">
-                    <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">الاسم الكامل</label>
+                    <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("fullName")}</label>
                     <input
                       type="text"
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      placeholder="الاسم الأول والأخير"
+                      placeholder={t("fullNamePlaceholder")}
                       required
                       className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all"
                     />
@@ -417,7 +435,7 @@ function RegisterContent() {
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">رقم الهاتف المحمول</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("mobileNumber")}</label>
                   <div dir="ltr" className="flex h-[31px] rounded-[3px] border border-zinc-400 shadow-inner focus-within:border-[#be374f] focus-within:ring-1 focus-within:ring-[#be374f] overflow-hidden transition-all bg-white">
                     <div className="flex items-center gap-1 bg-zinc-50 border-r border-zinc-400 px-2 text-[13px] text-zinc-700 select-none">
                       <span>+962</span>
@@ -440,7 +458,7 @@ function RegisterContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">البريد الإلكتروني</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("emailAddress")}</label>
                   <input
                     type="email"
                     dir="ltr"
@@ -453,14 +471,14 @@ function RegisterContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">كلمة المرور</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("password")}</label>
                   <div className="relative" dir="ltr">
                     <input
                       type={showPassword ? "text" : "password"}
                       dir="ltr"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      placeholder="8 أحرف على الأقل"
+                      placeholder={t("passwordPlaceholder")}
                       required
                       className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 ps-8 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all text-end"
                     />
@@ -492,7 +510,7 @@ function RegisterContent() {
                 </div>
 
                 <div className="space-y-1 pt-2">
-                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">تأكيد كلمة المرور</label>
+                  <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("confirmPassword")}</label>
                   <div className="relative" dir="ltr">
                     <input
                       type={showConfirmPassword ? "text" : "password"}
@@ -511,47 +529,47 @@ function RegisterContent() {
                     </button>
                   </div>
                   {confirmPassword && !passwordsMatch && (
-                    <p className="text-[11px] text-red-600 mt-1">كلمتا المرور غير متطابقتين.</p>
+                    <p className="text-[11px] text-red-600 mt-1">{t("passwordMismatch")}</p>
                   )}
                 </div>
 
                 {selectedRole === "vendor" && (
                   <div className="pt-2">
                     <div className="w-full h-px bg-zinc-200 my-4" />
-                    <h3 className="text-[16px] font-bold text-zinc-900 mb-4">تفاصيل المتجر</h3>
+                    <h3 className="text-[16px] font-bold text-zinc-900 mb-4">{t("storeDetails")}</h3>
                     <div className="space-y-3">
                       <div className="space-y-1">
-                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">اسم النشاط التجاري/المتجر</label>
+                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("storeNameLabel")}</label>
                         <input
                           type="text"
                           value={storeName}
                           onChange={e => setStoreName(e.target.value)}
-                          placeholder="مثال: إلكترونيات زيد"
+                          placeholder={t("storeNamePlaceholder")}
                           required
                           className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all"
                         />
-                        <p className="text-[11px] text-zinc-500 mt-1 pe-0.5">يمكنك تغيير اسم نشاطك التجاري ونوعه لاحقاً.</p>
+                        <p className="text-[11px] text-zinc-500 mt-1 pe-0.5">{t("storeNameHint")}</p>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">فئة النشاط التجاري</label>
+                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("storeCategory")}</label>
                         <select
                           value={storeCategory}
                           onChange={e => setStoreCategory(e.target.value)}
                           required
                           className="w-full h-[31px] bg-white border border-zinc-400 rounded-[3px] px-2 text-[13px] shadow-sm focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all"
                         >
-                          <option value="">اختر الفئة...</option>
-                          {STORE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                          <option value="">{t("chooseCategory")}</option>
+                          {getStoreCategories(t).map((c) => <option key={c} value={c}>{c}</option>)}
                         </select>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">وصف المتجر (اختياري)</label>
+                        <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">{t("storeDescLabel")}</label>
                         <textarea
                           value={storeDescription}
                           onChange={e => setStoreDescription(e.target.value)}
-                          placeholder="صف باختصار ما تبيعه..."
+                          placeholder={t("storeDescPlaceholder")}
                           rows={3}
                           className="w-full bg-white border border-zinc-400 rounded-[3px] px-2 py-1 text-[13px] shadow-inner focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none transition-all resize-none"
                         />
@@ -578,7 +596,7 @@ function RegisterContent() {
 
               <div className="pt-4 space-y-3">
                 <p className="text-[12px] text-zinc-900 leading-snug">
-                  بإنشائك لحساب، فإنك توافق على <Link href="/condition" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">شروط الاستخدام</Link> الخاصة بمحلي.
+                  {t("termsAgreed")} <Link href="/condition" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">{t("termsOfUse")}</Link> {t("termsAgreedSuffix")}
                 </p>
 
                 <div className="border-t border-zinc-100 pt-3">
@@ -599,9 +617,9 @@ function RegisterContent() {
           {/* ── STEP 3: Choose Verification Method ── */}
           {step === "verify_method" && (
             <div className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق من الحساب</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{t("accountVerification")}</h1>
 
-              <p className="text-[13px] text-zinc-900 leading-snug">كيف تود استلام رمز التحقق الخاص بك؟</p>
+              <p className="text-[13px] text-zinc-900 leading-snug">{t("howToReceiveOTP")}</p>
 
               <div className="space-y-2">
                 <button
@@ -614,8 +632,8 @@ function RegisterContent() {
                       <Phone size={16} className="text-zinc-600" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-bold text-zinc-900">التحقق عبر رسالة قصيرة SMS</p>
-                      <p className="text-[11px] text-zinc-500">إرسال الرمز إلى <span dir="ltr" className="inline-block">{phone}</span></p>
+                      <p className="text-[13px] font-bold text-zinc-900">{t("verifyViaSMS")}</p>
+                      <p className="text-[11px] text-zinc-500">{t("sendCodeTo")} <span dir="ltr" className="inline-block">{phone}</span></p>
                     </div>
                   </div>
                 </button>
@@ -630,8 +648,8 @@ function RegisterContent() {
                       <Mail size={16} className="text-zinc-600" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-bold text-zinc-900">التحقق عبر البريد الإلكتروني</p>
-                      <p className="text-[11px] text-zinc-500">{email ? `إرسال الرمز إلى ${email}` : "يرجى توفير بريد إلكتروني أولاً"}</p>
+                      <p className="text-[13px] font-bold text-zinc-900">{t("verifyViaEmail")}</p>
+                      <p className="text-[11px] text-zinc-500">{email ? `{t("sendCodeTo")} ${email}` : t("provideEmailFirst")}</p>
                     </div>
                   </div>
                 </button>
@@ -659,9 +677,9 @@ function RegisterContent() {
           {/* ── STEP 4A: Phone OTP ── */}
           {step === "phone_otp" && (
             <form onSubmit={handleVerifyOTP} className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{t("verification")}</h1>
               <p className="text-[13px] text-zinc-900 leading-snug">
-                لقد أرسلنا رمزاً من 6 أرقام إلى <span className="font-bold inline-block" dir="ltr">{phone}</span>.
+                {t("codeSentSMS")} <span className="font-bold inline-block" dir="ltr">{phone}</span>.
               </p>
 
               <div className="flex gap-2 justify-center py-4" dir="ltr">
@@ -697,7 +715,7 @@ function RegisterContent() {
 
               <div className="text-center pt-4">
                 {countdown > 0 ? (
-                  <p className="text-[12px] text-zinc-600">إعادة إرسال الرمز خلال {countdown}ث</p>
+                  <p className="text-[12px] text-zinc-600">{t("resendCodeIn")} {countdown}ث</p>
                 ) : (
                   <button type="button" onClick={handleChoosePhone} className="text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline">
                     إعادة إرسال الرمز
@@ -710,9 +728,9 @@ function RegisterContent() {
           {/* ── STEP 4B: Email OTP ── */}
           {step === "email_otp" && (
             <form onSubmit={handleVerifyEmailOTP} className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{t("verification")}</h1>
               <p className="text-[13px] text-zinc-900 leading-snug">
-                لقد أرسلنا رمزاً من 6 أرقام إلى <span className="font-bold">{email}</span>.
+                {t("codeSentSMS")} <span className="font-bold">{email}</span>.
               </p>
 
               <div className="flex gap-2 justify-center py-4" dir="ltr">
@@ -757,7 +775,7 @@ function RegisterContent() {
 
               <div className="text-center pt-4">
                 {countdown > 0 ? (
-                  <p className="text-[12px] text-zinc-600">إعادة إرسال الرمز خلال {countdown}ث</p>
+                  <p className="text-[12px] text-zinc-600">{t("resendCodeIn")} {countdown}ث</p>
                 ) : (
                   <button type="button" onClick={handleChooseEmail} className="text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline">
                     إعادة إرسال الرمز
@@ -771,9 +789,9 @@ function RegisterContent() {
           {step === "vendor_pending" && (
             <div className="text-center py-8 space-y-4">
               <Clock size={48} className="text-amber-500 mx-auto" />
-              <h2 className="text-[20px] font-bold text-zinc-900">تم تقديم الطلب</h2>
+              <h2 className="text-[20px] font-bold text-zinc-900">{t("applicationSubmitted")}</h2>
               <p className="text-[13px] text-zinc-600 leading-relaxed">
-                شكراً لتقديمك، <span className="font-bold">{selectedRole === "vendor" ? storeName : name}</span>. متجرك الآن قيد الموافقة من قبل الإدارة.
+                {t("thanksForSubmitting")} <span className="font-bold">{selectedRole === "vendor" ? storeName : name}</span>{t("storeUnderApproval")}
               </p>
               <div className="pt-4 space-y-3">
                 <button
@@ -793,16 +811,16 @@ function RegisterContent() {
           {step === "success" && (
             <div className="text-center py-8 space-y-4">
               <CheckCircle2 size={48} className="text-emerald-600 mx-auto" />
-              <h2 className="text-[20px] font-bold text-zinc-900">مرحباً، {selectedRole === "vendor" ? storeName : name}!</h2>
-              <p className="text-[13px] text-zinc-500">حسابك جاهز الآن. جاري التوجيه...</p>
+              <h2 className="text-[20px] font-bold text-zinc-900">{t("welcome")}{selectedRole === "vendor" ? storeName : name}!</h2>
+              <p className="text-[13px] text-zinc-500">{t("accountReady")}</p>
             </div>
           )}
         </div>
 
         <div className="mt-8 pt-4 border-t border-zinc-100 text-center space-y-2">
           <div className="flex justify-center gap-6 text-[11px] text-[#0066c0]">
-            <Link href="/conditions" className="hover:text-[#8f2d4a] hover:underline">شروط الاستخدام</Link>
-            <Link href="/help" className="hover:text-[#8f2d4a] hover:underline">المساعدة</Link>
+            <Link href="/conditions" className="hover:text-[#8f2d4a] hover:underline">{t("termsOfUse")}</Link>
+            <Link href="/help" className="hover:text-[#8f2d4a] hover:underline">{t("help")}</Link>
           </div>
           <p className="text-[11px] text-zinc-500" suppressHydrationWarning>&copy; {new Date().getFullYear()} Mahally.jo</p>
         </div>

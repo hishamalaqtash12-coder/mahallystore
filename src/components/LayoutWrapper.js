@@ -5,6 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import ServiceStatusBanner from "./ServiceStatusBanner";
 import LocaleDirectionSetter from "./LocaleDirectionSetter";
+import RegistrationPopup from "./RegistrationPopup";
 
 export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
@@ -25,6 +26,7 @@ export default function LayoutWrapper({ children }) {
   return (
     <>
       <LocaleDirectionSetter />
+      <RegistrationPopup />
       <Header />
       <main className="flex-1">
         <ServiceStatusBanner />

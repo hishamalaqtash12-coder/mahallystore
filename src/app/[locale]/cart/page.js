@@ -29,11 +29,7 @@ export default function CartPage() {
   const [explorePicks, setExplorePicks] = useState([]);
   const [isLoadingPicks, setIsLoadingPicks] = useState(true);
 
-  useEffect(() => {
-    if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
-      router.replace("/");
-    }
-  }, [isVendor, user, router]);
+  // Vendor restriction removed
 
   // Live WooCommerce Data States
   const [liveProductsMap, setLiveProductsMap] = useState({});
@@ -141,9 +137,7 @@ export default function CartPage() {
       .finally(() => setIsLoadingPicks(false));
   }, []);
 
-  if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
-    return null; // Prevent flash while redirecting
-  }
+  // Vendor flash prevention removed
 
   if (cart.length === 0) {
     return (

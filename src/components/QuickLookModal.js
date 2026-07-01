@@ -334,15 +334,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     );
                   }
 
-                  if (isVendor && user?.email !== "motasem.udeh@gmail.com") {
-                    return (
-                      <div className="w-full rounded-lg bg-zinc-50 border border-zinc-200 p-3 flex flex-col items-center justify-center gap-1 text-zinc-500">
-                        <AlertCircle size={20} className="text-zinc-400" />
-                        <span className="text-[13px] font-bold text-zinc-600">{t("purchasingDisabled")}</span>
-                        <span className="text-[11px] text-zinc-400 text-center">{t("adminsCannotBuy")}</span>
-                      </div>
-                    );
-                  }
+                  // Removed vendor purchasing restriction
 
                   if (outOfStock) {
                     return (

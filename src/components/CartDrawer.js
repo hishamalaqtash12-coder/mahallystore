@@ -10,7 +10,7 @@ export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, clearCart } = useCart();
   const { isVendor, user } = useAuth();
 
-  if (!isCartOpen || (isVendor && user?.email !== "motasem.udeh@gmail.com")) return null;
+  if (!isCartOpen) return null;
 
   const cartTotal = cart.reduce((total, item) => total + parseFloat(item.price || 0) * item.quantity, 0);
   const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
