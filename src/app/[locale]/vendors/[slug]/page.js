@@ -322,7 +322,10 @@ export default function VendorProfilePage() {
                 {v.storeLogo ? (
                   <Image src={v.storeLogo} alt={v.storeName || "Store logo"} fill className="object-cover p-1" style={{ objectPosition: `${logoPos}% 50%` }} />
                 ) : (
-                  <span className="text-zinc-300 font-bold text-5xl">{v.storeName?.[0]}</span>
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand/10 to-brand/20 rounded-sm">
+                    <Store size={36} className="text-brand/50 mb-1" />
+                    <span className="text-brand font-extrabold text-xl leading-none">{v.storeName?.[0]?.toUpperCase()}</span>
+                  </div>
                 )}
 
                 {isOwner && (

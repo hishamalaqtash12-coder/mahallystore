@@ -1,0 +1,1 @@
+Line 461: {t("agreeToConditions")} <Link href="/conditions" aria-label="conditions" target="_blank" className="text-brand hover:underline cursor-pointer">{t("termsOfUse")}</Link> الخاصة ب{t("mahally")}.

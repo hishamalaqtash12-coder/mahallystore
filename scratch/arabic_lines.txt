@@ -1,0 +1,8 @@
+Line 174: <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">المتجر غير موجود</h1>
+Line 175: <p className="text-zinc-500 text-[14px]">هذا التاجر غير موجود أو تم تعطيله.</p>
+Line 302: <Camera size={16} /> تغيير صورة الغلاف
+Line 306: <p className="text-[10px] text-white text-center mb-1">تعديل الموضع</p>
+Line 660: <h3 className="text-[13px] font-bold text-zinc-700 uppercase tracking-wider mb-2">{t("aboutStore")} التاجر</h3>
+Line 662: {v.storeDescription || "هذا التاجر {t("trustedMember")} في مجتمع مهالي، ويسعى لتقديم {t("from")}تجات عالية الجودة وخدمة عملاء متميزة."}
+Line 671: <p className="flex items-center gap-2 text-zinc-600"><Package size={14} /> عضو في مهالي {t("from")}ذ: {new Date(v.dateCreated).toLocaleDateString()}</p>
+Line 792: كن أول {t("from")} يتابع {v.storeName} لتصلك تحديثاتهم عن ال{t("from")}تجات والعروض الجديدة!

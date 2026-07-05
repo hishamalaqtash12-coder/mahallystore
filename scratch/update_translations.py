@@ -1,0 +1,138 @@
+import json
+
+def update_json(filepath, lang):
+    with open(filepath, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    if lang == 'en':
+        data["ProductGrid"].update({
+            "noProducts": "No products match the selected filters",
+            "noProductsDesc": "Adjust filters or search keywords to help you find what you are looking for.",
+            "foundFeatured": "Found {count} featured product{suffix}",
+            "featuredSuffixSingle": "",
+            "featuredSuffixPlural": "s",
+            "showingResults": "Showing 1-{end} out of more than {total} results for ",
+            "category": "Category",
+            "allProducts": "All Products",
+            "sortBy": "Sort by:",
+            "sortRecommended": "Recommended",
+            "sortPriceLowHigh": "Price: Low to High",
+            "sortPriceHighLow": "Price: High to Low",
+            "sortTopRated": "Top Rated",
+            "sortNewest": "Newest Arrivals",
+            "featuredPicks": "Featured Picks",
+            "results": "Results",
+            "featuredDesc": "A carefully curated collection of selected products from our top merchants.",
+            "resultsDesc": "Check each product page for other buying options. Price and other details may vary based on product size and color.",
+            "filters": "Filters",
+            "andUp": "& Up",
+            "discounted": "Discounted",
+            "discountOrMore": "% Off or more",
+            "freeShipping": "Free Shipping",
+            "inStockOnly": "In Stock Only",
+            "currency": "JOD",
+            "brand": "Brand:",
+            "seller": "Seller:",
+            "officialMahally": "Official Mahally",
+            "loadingProducts": "Loading products...",
+            "clearAllFilters": "Clear all filters",
+            "showMore": "Show More"
+        })
+        data["SidebarFilter"] = {
+            "category": "Category",
+            "allCategories": "All Categories",
+            "viewAllProducts": "View All Products",
+            "activeFilters": "Active Filters",
+            "clearAll": "Clear All",
+            "customerReviews": "Customer Reviews",
+            "andUp": "& Up",
+            "brands": "Brands",
+            "showLess": "Show Less",
+            "showMoreCount": "Show More ({count})",
+            "seller": "Seller",
+            "officialMahally": "Official Mahally",
+            "price": "Price",
+            "under10": "Under 10 JOD",
+            "10to25": "10 to 25 JOD",
+            "25to50": "25 to 50 JOD",
+            "50andUp": "50 JOD & Up",
+            "currency": "JOD",
+            "minPrice": "Min",
+            "maxPrice": "Max",
+            "apply": "Apply",
+            "dealsAndDiscounts": "Deals & Discounts",
+            "discountedProducts": "Discounted Products",
+            "discountOrMore": "% off or more",
+            "shippingAndAvailability": "Shipping & Availability",
+            "eligibleForFreeShipping": "Eligible for Free Shipping",
+            "inStockOnly": "In Stock Only"
+        }
+    else:
+        data["ProductGrid"].update({
+            "noProducts": "لا توجد منتجات تطابق الفلاتر المحددة",
+            "noProductsDesc": "تعديل الفلاتر أو كلمات البحث لمساعدتك في العثور على ما تبحث عنه.",
+            "foundFeatured": "تم العثور على {count} منتج{suffix}",
+            "featuredSuffixSingle": " مميز",
+            "featuredSuffixPlural": "ات مميزة",
+            "showingResults": "عرض 1-{end} من أصل أكثر من {total} نتيجة لـ ",
+            "category": "القسم",
+            "allProducts": "جميع المنتجات",
+            "sortBy": "ترتيب حسب:",
+            "sortRecommended": "الموصى به",
+            "sortPriceLowHigh": "السعر: من الأقل إلى الأعلى",
+            "sortPriceHighLow": "السعر: من الأعلى إلى الأقل",
+            "sortTopRated": "الأعلى تقييمًا",
+            "sortNewest": "أحدث المنتجات",
+            "featuredPicks": "مختارات مميزة",
+            "results": "النتائج",
+            "featuredDesc": "مجموعة منسقة بعناية من المنتجات المختارة من كبار تجارنا.",
+            "resultsDesc": "تحقق من صفحة كل منتج لمشاهدة خيارات الشراء الأخرى. قد تختلف الأسعار والتفاصيل الأخرى بناءً على حجم المنتج ولونه.",
+            "filters": "الفلاتر",
+            "andUp": "وأعلى",
+            "discounted": "مخفض",
+            "discountOrMore": "% خصم أو أكثر",
+            "freeShipping": "شحن مجاني",
+            "inStockOnly": "المتوفر في المخزن فقط",
+            "currency": "د.أ",
+            "brand": "العلامة التجارية:",
+            "seller": "البائع:",
+            "officialMahally": "محلي الرسمي",
+            "loadingProducts": "جارٍ تحميل المنتجات...",
+            "clearAllFilters": "مسح جميع الفلاتر",
+            "showMore": "عرض المزيد"
+        })
+        data["SidebarFilter"] = {
+            "category": "القسم",
+            "allCategories": "جميع الأقسام",
+            "viewAllProducts": "عرض جميع المنتجات",
+            "activeFilters": "الفلاتر النشطة",
+            "clearAll": "مسح الكل",
+            "customerReviews": "تقييمات العملاء",
+            "andUp": "وأعلى",
+            "brands": "العلامات التجارية",
+            "showLess": "عرض أقل",
+            "showMoreCount": "عرض المزيد ({count})",
+            "seller": "البائع",
+            "officialMahally": "محلي الرسمي",
+            "price": "السعر",
+            "under10": "أقل من 10 د.أ",
+            "10to25": "من 10 د.أ إلى 25 د.أ",
+            "25to50": "من 25 د.أ إلى 50 د.أ",
+            "50andUp": "50 د.أ وأعلى",
+            "currency": "د.أ",
+            "minPrice": "الحد الأدنى",
+            "maxPrice": "الحد الأقصى",
+            "apply": "تطبيق",
+            "dealsAndDiscounts": "العروض والخصومات",
+            "discountedProducts": "المنتجات المخفضة",
+            "discountOrMore": "% خصم أو أكثر",
+            "shippingAndAvailability": "الشحن والتوافر",
+            "eligibleForFreeShipping": "مؤهل للشحن المجاني",
+            "inStockOnly": "المتوفر في المخزن فقط"
+        }
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+update_json('c:\\Users\\ASUS\\Desktop\\FE\\messages\\en.json', 'en')
+update_json('c:\\Users\\ASUS\\Desktop\\FE\\messages\\ar.json', 'ar')

@@ -1,0 +1,506 @@
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\account\page.js
+========================================
+Line 41: <h2 className="text-xl font-bold text-zinc-900 mb-2">خطأ في الاتصال</h2>
+Line 47: إعادة المحاولة
+Line 53: الذهاب إلى صفحة تسجيل الدخول
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\account\orders\page.js
+========================================
+Line 138: { id: 'all', label: 'جميع الطلبات' },
+Line 139: { id: 'processing', label: 'قيد المعالجة' },
+Line 140: { id: 'on-hold', label: 'قيد الانتظار' },
+Line 141: { id: 'completed', label: 'مكتملة' },
+Line 142: { id: 'cancelled', label: 'ملغاة' },
+Line 167: placeholder="اسم المنتج / رقم الطلب"
+Line 188: <p className="uppercase tracking-tight mb-0.5">تاريخ الطلب</p>
+Line 192: <p className="uppercase tracking-tight mb-0.5">المجموع</p>
+Line 196: <p className="uppercase tracking-tight mb-0.5">رقم الطلب</p>
+Line 202: {order.status === 'completed' ? "عرض التفاصيل" : "عرض/تعديل التفاصيل"}
+Line 234: شحنة من {vendor.name}
+Line 245: <p className="text-[12px] text-gray-500 mb-2">الكمية: {item.quantity}</p>
+Line 247: <Link href={`/product/${item.product_id}`} className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors flex items-center">شراء مرة أخرى</Link>
+Line 249: <button onClick={() => { setSelectedOrder(order); setIsTrackingOpen(true); }} className="cursor-pointer h-8 px-4 border border-gray-200 rounded-full text-[12px] font-bold hover:bg-gray-50 transition-colors">تتبع الشحنة</button>
+Line 270: مشاهدة تقييمك
+Line 277: <button onClick={() => { setSelectedOrder(order); setIsReviewOpen(true); }} className="cursor-pointer w-full py-2 border border-gray-200 hover:bg-gray-50 rounded-lg text-[13px] font-bold transition-colors">كتابة تقييم</button>
+Line 288: إلغاء الطلب
+Line 303: <h2 className="text-[18px] font-bold mb-2">ليس لديك أي طلبات</h2>
+Line 304: <p className="text-[14px] text-gray-500 mb-12">ابحث أو تصفح للبدء في التسوق!</p>
+Line 306: ابدأ التسوق
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\cart\page.js
+========================================
+Line 154: <h2 className="text-2xl font-bold text-gray-900 mb-2">سلة التسوق فارغة</h2>
+Line 155: <p className="text-gray-500 mb-8 font-medium">أضف منتجاتك المفضلة إليها.</p>
+Line 160: تصفح المنتجات الرائجة
+Line 167: اختيارات محلي لك
+Line 194: <span>شحن مجاني</span>
+Line 198: <span>إرجاع مجاني</span>
+Line 203: <span>جميع البيانات محمية</span>
+Line 218: <p className="text-[14px] font-bold text-[#be374f]">شحن مجاني (باستثناء المنتجات المشحونة من البائعين)</p>
+Line 223: <h1 className="text-xl font-black text-gray-900 tracking-tight">السلة ({enrichedCart.length})</h1>
+Line 224: <button onClick={clearCart} className="text-[12px] font-bold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest">حذف الكل</button>
+Line 231: <p className="text-[13px] text-gray-500 font-bold animate-pulse">جارٍ مزامنة الأسعار والمخزون...</p>
+Line 254: <span className="text-[18px] font-black text-gray-900">د.أ {parseFloat(item.price || 0).toFixed(2)}</span>
+Line 256: <span className="text-[13px] text-gray-400 line-through">د.أ {parseFloat(item.regular_price).toFixed(2)}</span>
+Line 281: <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded uppercase tracking-wider">وصلت لأقصى كمية</span>
+Line 287: <span className="text-rose-600 font-bold bg-rose-50 px-2.5 py-1 rounded uppercase tracking-wider text-[10px]">نفدت الكمية</span>
+Line 290: <Clock size={11} /> كمية محدودة - بقي {item.stock_quantity} فقط!
+Line 293: <span className="text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded uppercase tracking-wider text-[10px]">متوفر</span>
+Line 308: <h2 className="text-xl font-black text-gray-900 mb-8">ملخص الطلب</h2>
+Line 312: <span>المجموع الفرعي ({enrichedCart.length})</span>
+Line 313: <span className="font-bold text-gray-900">د.أ {subtotal.toFixed(2)}</span>
+Line 316: <span>الشحن</span>
+Line 317: <span className="text-emerald-600 font-bold">مجاني</span>
+Line 321: <span className="text-[18px] font-black text-gray-900">الإجمالي</span>
+Line 322: <span className="text-[24px] font-black text-[#be374f]">د.أ {subtotal.toFixed(2)}</span>
+Line 324: <p className="text-[12px] text-gray-400 font-medium text-center">يُرجى الرجوع إلى المبلغ الفعلي النهائي.</p>
+Line 332: أضف <span className="font-bold">د.أ {remainingForMin.toFixed(2)}</span> إضافية للوصول للحد الأدنى للشراء.
+Line 341: {canCheckout ? "الدفع والتسوية" : `أدنى ${MIN_CHECKOUT_AMOUNT} د.أ للشراء`}
+Line 347: دفع آمن ومحمي
+Line 350: لن يتم الخصم حتى تراجع طلبك في الصفحة التالية.
+Line 359: <h4 className="font-black text-[16px] mb-1">حمّل التطبيق</h4>
+Line 360: <p className="text-[13px] text-emerald-100 font-medium">احصل على باقة كوبونات بقيمة 40 د.أ!</p>
+Line 373: موصى به لك
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\featured-products\page.js
+========================================
+Line 31: <h1 className="text-[28px] font-medium text-zinc-900 leading-tight">منتجات مميزة</h1>
+Line 32: <p className="text-[14px] text-zinc-600 mt-1">مجموعات منتقاة من أفضل التجار لدينا لتسهيل اكتشاف أفضل العروض.</p>
+Line 37: <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">المعروض الآن</p>
+Line 39: <p className="text-[12px] text-zinc-600">العناصر المميزة المعروضة على هذه الصفحة</p>
+Line 42: <p className="text-[11px] uppercase tracking-[0.24em] text-zinc-500">اختيارات التجار</p>
+Line 43: <p className="mt-1 text-2xl font-black text-zinc-900">الأعلى تقييمًا</p>
+Line 44: <p className="text-[12px] text-zinc-600">مختارة لتحسين تجربة الاكتشاف</p>
+Line 56: <h2 className="text-2xl font-bold text-zinc-700 mb-2">لا توجد منتجات مميزة بعد</h2>
+Line 57: <p className="text-zinc-500">ستظهر هنا المنتجات التي يختارها تجارنا.</p>
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\messages\page.js
+========================================
+Line 24: completed: "تم التوصيل", processing: "قيد المعالجة", "on-hold": "في الانتظار",
+Line 25: pending: "في انتظار الدفع", "pending payment": "في انتظار الدفع",
+Line 26: cancelled: "ملغي", refunded: "مُسترد",
+Line 27: shipped: "تم الشحن", "in-transit": "في الطريق",
+Line 220: list.unshift({ id: "admin", storeName: "دعم Mahally الرسمي", role: "admin", isVerified: true });
+Line 261: setVendor({ id: 1, storeName: "دعم Mahally", role: "admin", isVerified: true });
+Line 418: if (!confirm("هل تريد حذف هذه الرسالة للجميع؟")) return;
+Line 421: ? { ...m, text: "تم حذف الرسالة", isDeleted: true, mediaUrl: null, mediaType: null, customMeta: null, reaction: null }
+Line 456: الرسائل
+Line 462: title="تحديث المحادثات"
+Line 478: placeholder="ابحث في المحادثات…"
+Line 494: غير المقروءة فقط
+Line 519: <p className={`text-[13px] font-medium ${(vendorId === "admin" || String(vendorId) === "1") ? "text-[#be374f]" : "text-zinc-900"}`}>دعم Mahally</p>
+Line 520: <p className="text-[12px] text-zinc-500 truncate mt-0.5">مدير النظام</p>
+Line 532: <p className="text-[11px] text-zinc-400 font-medium uppercase tracking-wide px-3 pt-3 pb-1">المحادثات الأخيرة</p>
+Line 543: lastMessage: "متصل",
+Line 615: <p className="text-[13px] font-medium text-zinc-600">جارٍ تحميل المحادثة...</p>
+Line 637: {vendor?.storeName || "المحادثة"}
+Line 642: <p className="text-[11px] text-emerald-600">نشط الآن</p>
+Line 650: title="تحديث الرسائل"
+Line 690: : <div className="flex items-center gap-2 p-2.5 text-[12px]"><File size={14} /><span>عرض المستند</span></div>
+Line 702: <p className={`text-[12px] font-semibold mt-0.5 ${isMe ? "text-white" : "text-[#be374f]"}`}>د.أ {msg.customMeta.price}</p>
+Line 719: <button onClick={(e) => { e.stopPropagation(); setReplyTo(msg); setSelectedMessageId(null); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-[#be374f] rounded transition-all" title="الرد">
+Line 722: <button onClick={(e) => { e.stopPropagation(); setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-[#be374f] rounded transition-all" title="تفاعل">
+Line 726: <button onClick={(e) => { e.stopPropagation(); handleDelete(msg.id); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-rose-500 rounded transition-all" title="حذف">
+Line 752: <Reply size={12} /> الرد على: <span className="text-zinc-700 truncate max-w-xs">{replyTo.text}</span>
+Line 805: placeholder="اكتب رسالة..."
+Line 814: {sending ? <Loader2 size={14} className="animate-spin" /> : <><Send size={14} /> إرسال</>}
+Line 826: اضغط Enter للإرسال
+Line 835: <h2 className="text-[22px] font-semibold text-zinc-900 mb-2">الرسائل</h2>
+Line 837: تواصل بأمان مع البائعين الموثوقين حول طلباتك واستفساراتك.
+Line 843: ابحث عن جهة اتصال
+Line 855: <div className="pb-2 text-[13px] font-medium text-zinc-900">معلومات الدعم</div>
+Line 863: {tab === "info" ? "معلومات" : tab === "products" ? "المنتجات" : "الطلبات"}
+Line 876: <h3 className="text-[15px] font-semibold text-zinc-900">دعم Mahally</h3>
+Line 878: <BadgeCheck size={11} /> مسؤول موثوق
+Line 882: <p className="text-[12px] text-zinc-500 text-center leading-relaxed">معالجة النزاعات في الطلبات والمشكلات التقنية وإعداد التجار في المنصة.</p>
+Line 902: <BadgeCheck size={11} /> {vendor?.role === "customer" ? "مشتري موثوق" : "متجر رسمي"}
+Line 908: <span className="text-zinc-500">عضو منذ</span>
+Line 913: <span className="text-zinc-500">إجمالي الطلبات</span>
+Line 925: واتساب
+Line 931: تيليجرام
+Line 953: <p className="text-[12px] text-[#be374f] font-semibold mt-0.5">د.أ {p.price}</p>
+Line 957: onClick={() => handleSend(`استفسار عن: ${p.name}`, { type: "product", id: p.id, name: p.name, price: p.price, image: p.images?.[0]?.src })}
+Line 960: إرفاق بطاقة المنتج
+Line 978: <p className="text-[12px] font-medium text-zinc-700">طلب رقم #{order.id}</p>
+Line 986: <span className="text-[12px] text-zinc-600">د.أ {parseFloat(order.total || 0).toFixed(2)}</span>
+Line 989: onClick={() => handleSend(`طلب تحديث حول الطلب #${order.id}`, { type: "order", id: order.id, status: order.status, total: order.total })}
+Line 992: اطلب تحديث هذا الطلب
+Line 1014: <h2 className="text-[18px] font-semibold text-zinc-900">محادثة جديدة</h2>
+Line 1023: placeholder="ابحث عن البائعين…"
+Line 1051: <p className="text-[11px] text-zinc-400 mt-0.5">{v.role === "admin" ? "دعم النظام" : "تاجر رسمي"}</p>
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\product\[slug]\page.js
+========================================
+Line 100: <h1 className="text-2xl font-black text-zinc-900 mb-2">المنتج غير موجود</h1>
+Line 101: <p className="text-sm text-zinc-400 mb-6">ربما تمت إزالة هذا العنصر أو لم يعد متاحًا.</p>
+Line 103: متابعة التسوق
+Line 133: countdownText = `ينتهي في ${saleEndDateStr} (متبقي ${days} أيام، ${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')})`;
+Line 143: let returnPolicyStr = "لا توجد معلومات متوفرة";
+Line 148: returnPolicyStr = "لا نقبل الاسترجاع";
+Line 150: returnPolicyStr = `مؤهل للاسترجاع أو الاسترداد خلال ${itemReturnPeriod || "14"} يوم`;
+Line 156: returnPolicyStr = "لا نقبل الاسترجاع";
+Line 158: returnPolicyStr = `مؤهل للاسترجاع أو الاسترداد خلال ${globalPeriod || "14"} يوم`;
+Line 178: <a href="#top" className="hover:text-brand transition-colors">أعلى الصفحة</a>
+Line 179: <a href="#about" className="hover:text-brand transition-colors">عن هذا المنتج</a>
+Line 180: <a href="#similar" className="hover:text-brand transition-colors">منتجات مشابهة</a>
+Line 181: <a href="#reviews" className="hover:text-brand transition-colors">التقييمات</a>
+Line 182: <a href="#" className="hover:text-brand transition-colors">قائمة الهدايا</a>
+Line 191: <Link href="/" className="hover:text-[#be374f] hover:underline transition-colors">الرئيسية</Link>
+Line 234: زيارة متجر {storeName || "محلي الرسمي"}
+Line 248: <a href="#" className="text-[#be374f] hover:text-[#9b2c41] hover:underline me-2">{ratingCount.toLocaleString()} تقييمات</a>
+Line 252: {soldCount > 100 ? `أكثر من ${Math.floor(soldCount / 10) * 10}` : soldCount} شخص اشتروا هذا الشهر
+Line 263: عرض لفترة محدودة
+Line 273: <span className="text-[14px] mt-1 ms-0.5 me-1">د.أ</span>{salePrice.toFixed(2)}
+Line 278: السعر الأصلي: <span className="line-through">{regularPrice.toFixed(2)} د.أ</span>
+Line 302: <div className="font-bold text-[#0F1111]">رقم المنتج</div>
+Line 318: <h2 className="text-[16px] font-bold text-[#0F1111] mb-2">عن هذا المنتج</h2>
+Line 325: <li>مواد عالية الجودة وصناعة متقنة.</li>
+Line 326: <li>مثالي للاستخدام اليومي.</li>
+Line 327: <li>أداء متين وموثوق.</li>
+Line 346: <h2 className="text-base font-bold text-zinc-900 mb-4 uppercase tracking-widest">قد يعجبك أيضاً</h2>
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\register\page.js
+========================================
+Line 13: "الأزياء والملابس", "الإلكترونيات", "المنزل والمعيشة", "الأطعمة والمشروبات",
+Line 14: "الصحة والجمال", "الرياضة في الهواء الطلق", "السيارات", "الكتب والقرطاسية",
+Line 15: "ألعاب وأطفال", "أخرى",
+Line 366: <h1 className="text-[28px] font-medium text-zinc-900 mb-4">إنشاء حساب</h1>
+Line 369: <p className="text-[13px] font-bold text-zinc-900">كيف ترغب بالانضمام إلينا؟</p>
+Line 379: <p className="text-[13px] font-bold text-zinc-900">عميل</p>
+Line 380: <p className="text-[11px] text-zinc-500">أنا عميل / مشتري</p>
+Line 392: <p className="text-[13px] font-bold text-zinc-900">بائع</p>
+Line 393: <p className="text-[11px] text-zinc-500">أنا بائع / تاجر</p>
+Line 402: هل لديك حساب بالفعل؟ <Link href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"} className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline font-bold">تسجيل الدخول</Link>
+Line 411: <h1 className="text-[28px] font-medium text-zinc-900 mb-4">إنشاء حساب</h1>
+Line 416: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">الاسم الكامل</label>
+Line 421: placeholder="الاسم الأول والأخير"
+Line 429: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">رقم الهاتف المحمول</label>
+Line 452: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">البريد الإلكتروني</label>
+Line 465: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">كلمة المرور</label>
+Line 472: placeholder="8 أحرف على الأقل"
+Line 488: <CheckCircle2 size={12} className={isLengthValid ? 'text-emerald-600' : 'text-zinc-300'} /> 8 أحرف على الأقل
+Line 491: <CheckCircle2 size={12} className={hasUpper && hasLower ? 'text-emerald-600' : 'text-zinc-300'} /> أحرف كبيرة وصغيرة
+Line 494: <CheckCircle2 size={12} className={hasNumber ? 'text-emerald-600' : 'text-zinc-300'} /> رقم واحد على الأقل
+Line 497: <CheckCircle2 size={12} className={hasSpecial ? 'text-emerald-600' : 'text-zinc-300'} /> رمز خاص واحد على الأقل
+Line 504: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">تأكيد كلمة المرور</label>
+Line 523: <p className="text-[11px] text-red-600 mt-1">كلمتا المرور غير متطابقتين.</p>
+Line 530: <h3 className="text-[16px] font-bold text-zinc-900 mb-4">تفاصيل المتجر</h3>
+Line 533: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">اسم النشاط التجاري/المتجر</label>
+Line 538: placeholder="مثال: إلكترونيات زيد"
+Line 542: <p className="text-[11px] text-zinc-500 mt-1 pe-0.5">يمكنك تغيير اسم نشاطك التجاري ونوعه لاحقاً.</p>
+Line 546: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">فئة النشاط التجاري</label>
+Line 553: <option value="">اختر الفئة...</option>
+Line 559: <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">وصف المتجر (اختياري)</label>
+Line 563: placeholder="صف باختصار ما تبيعه..."
+Line 585: {loading ? <Loader size="sm" text="" /> : "المتابعة للتحقق"}
+Line 590: بإنشائك لحساب، فإنك توافق على <Link href="/condition" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">شروط الاستخدام</Link> الخاصة بمحلي.
+Line 599: تغيير نوع الحساب
+Line 611: <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق من الحساب</h1>
+Line 613: <p className="text-[13px] text-zinc-900 leading-snug">كيف تود استلام رمز التحقق الخاص بك؟</p>
+Line 626: <p className="text-[13px] font-bold text-zinc-900">التحقق عبر رسالة قصيرة SMS</p>
+Line 627: <p className="text-[11px] text-zinc-500">إرسال الرمز إلى <span dir="ltr" className="inline-block">{phone}</span></p>
+Line 642: <p className="text-[13px] font-bold text-zinc-900">التحقق عبر البريد الإلكتروني</p>
+Line 643: <p className="text-[11px] text-zinc-500">{email ? `إرسال الرمز إلى ${email}` : "يرجى توفير بريد إلكتروني أولاً"}</p>
+Line 662: رجوع
+Line 671: <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق</h1>
+Line 673: لقد أرسلنا رمزاً من 6 أرقام إلى <span className="font-bold inline-block" dir="ltr">{phone}</span>.
+Line 704: {loading ? <Loader size="sm" text="" /> : "التحقق من الرمز"}
+Line 709: <p className="text-[12px] text-zinc-600">إعادة إرسال الرمز خلال {countdown}ث</p>
+Line 712: إعادة إرسال الرمز
+Line 722: <h1 className="text-[28px] font-medium text-zinc-900 mb-4">التحقق</h1>
+Line 724: لقد أرسلنا رمزاً من 6 أرقام إلى <span className="font-bold">{email}</span>.
+Line 764: {loading ? <Loader size="sm" text="" /> : "التحقق من الرمز"}
+Line 769: <p className="text-[12px] text-zinc-600">إعادة إرسال الرمز خلال {countdown}ث</p>
+Line 772: إعادة إرسال الرمز
+Line 783: <h2 className="text-[20px] font-bold text-zinc-900">تم تقديم الطلب</h2>
+Line 785: شكراً لتقديمك، <span className="font-bold">{selectedRole === "vendor" ? storeName : name}</span>. متجرك الآن قيد الموافقة من قبل الإدارة.
+Line 792: قيد المراجعة
+Line 795: العودة للصفحة الرئيسية
+Line 805: <h2 className="text-[20px] font-bold text-zinc-900">مرحباً، {selectedRole === "vendor" ? storeName : name}!</h2>
+Line 806: <p className="text-[13px] text-zinc-500">حسابك جاهز الآن. جاري التوجيه...</p>
+Line 813: <Link href="/conditions" className="hover:text-[#8f2d4a] hover:underline">شروط الاستخدام</Link>
+Line 814: <Link href="/help" className="hover:text-[#8f2d4a] hover:underline">المساعدة</Link>
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\app\[locale]\wishlist\page.js
+========================================
+Line 43: <h1 className="text-2xl font-bold text-zinc-900 mb-2">قائمة المفضلة فارغة</h1>
+Line 44: <p className="text-zinc-500 mb-8 text-sm">احفظ المنتجات التي تعجبك لتتبعها هنا.</p>
+Line 46: ابدأ التسوق <ArrowRight size={16} />
+Line 61: <Link href="/" className="hover:text-zinc-900">الرئيسية</Link>
+Line 63: <span className="text-zinc-900 font-medium">المفضلة</span>
+Line 66: قوائمك <span className="text-zinc-300 font-medium text-[20px]">({wishlist.length})</span>
+Line 76: placeholder="ابحث عن المنتجات..."
+Line 100: <option value="all">جميع المتاجر</option>
+Line 112: <Trash2 size={16} /> مسح القائمة
+Line 129: <p className="text-zinc-400 font-semibold text-lg">لا توجد نتائج</p>
+Line 130: <p className="text-zinc-300 text-sm">جرّب تعديل الفلاتر أو مصطلح البحث</p>
+Line 135: إعادة ضبط الفلاتر
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\AccountSidebar.js
+========================================
+Line 34: label: 'طلباتك',
+Line 38: { id: 'all', label: 'جميع الطلبات', href: '/account/orders' },
+Line 39: { id: 'processing', label: 'قيد المعالجة', href: '/account/orders?status=processing' },
+Line 40: { id: 'on-hold', label: 'قيد الانتظار', href: '/account/orders?status=on-hold' },
+Line 41: { id: 'completed', label: 'مكتملة', href: '/account/orders?status=completed' },
+Line 42: { id: 'cancelled', label: 'ملغاة', href: '/account/orders?status=cancelled' },
+Line 45: { id: 'reviews', icon: Star, label: 'تقييماتك', href: '/account/reviews' },
+Line 46: { id: 'profile', icon: User, label: 'الملف الشخصي', href: '/account/profile' },
+Line 47: { id: 'coupons', icon: Ticket, label: 'الكوبونات والعروض', href: '/account/coupons' },
+Line 48: { id: 'balance', icon: Wallet, label: 'رصيد المحفظة', href: '/account/balance' },
+Line 49: { id: 'stores', icon: Store, label: 'المتاجر المتابعة', href: '/account/followed-stores' },
+Line 50: { id: 'history', icon: History, label: 'سجل التصفح', href: '/account/recently-viewed' },
+Line 51: { id: 'addresses', icon: MapPin, label: 'العناوين', href: '/account/addresses' },
+Line 52: { id: 'language', icon: Globe, label: 'الدولة واللغة', href: '/account/settings' },
+Line 53: { id: 'payments', icon: CreditCard, label: 'طرق الدفع', href: '/account/payments' },
+Line 54: { id: 'security', icon: ShieldCheck, label: 'أمان الحساب', href: '/account/security' },
+Line 55: { id: 'permissions', icon: Lock, label: 'الصلاحيات', href: '/account/permissions' },
+Line 56: { id: 'notifications', icon: Bell, label: 'الإشعارات', href: '/account/notifications' },
+Line 57: { id: 'feedback', icon: MessageSquare, label: 'الشكاوي والملاحظات', href: '/account/feedback' },
+Line 83: <span className="text-[15px] font-bold leading-tight text-gray-900">{customerName || user?.displayName || 'حساب المستخدم'}</span>
+Line 94: <span>لوحة تحكم التاجر</span>
+Line 157: <span>تسجيل الخروج</span>
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\CartDrawer.js
+========================================
+Line 33: <h2 className="text-lg font-bold">سلة التسوق</h2>
+Line 42: عرض السلة كاملة
+Line 59: <h3 className="text-xl font-bold text-zinc-900 mb-2">سلتك فارغة</h3>
+Line 60: <p className="text-sm text-zinc-500 mb-6">أضف منتجات رائعة من تجارنا المحليين إلى سلتك.</p>
+Line 66: استمر التسوق
+Line 74: <span className="text-xs font-bold text-zinc-600 uppercase tracking-tight">عناصر السلة</span>
+Line 75: <button onClick={clearCart} className="text-[10px] font-bold text-red-600 hover:underline uppercase">حذف الكل</button>
+Line 86: <p className="text-sm font-bold text-zinc-900 mt-1">د.أ {parseFloat(item.price || 0).toFixed(2)}</p>
+Line 106: <span className="text-[9px] font-bold text-amber-600 uppercase">وصلت لأقصى كمية</span>
+Line 110: حذف
+Line 126: <span className="text-sm text-zinc-600">المجموع ({itemCount} عناصر):</span>
+Line 127: <span className="text-lg font-bold text-[#be374f]">د.أ {cartTotal.toFixed(2)}</span>
+Line 136: {cartTotal >= 10 ? "الدفع والتسوية" : "السلة (أدنى 10 د.أ)"}
+Line 143: الذهاب إلى السلة
+Line 148: <ChevronRight size={10} className="text-zinc-300" /> شحن مجاني لطلبك
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\CategoryNav.js
+========================================
+Line 13: { name: "الملابس", icon: Shirt, slug: "clothing" },
+Line 14: { name: "الأطعمة", icon: UtensilsCrossed, slug: "foods" },
+Line 15: { name: "الألعاب", icon: Gamepad2, slug: "games" },
+Line 16: { name: "الإلكترونيات", icon: Smartphone, slug: "electronics" },
+Line 17: { name: "البطاقات الرقمية", icon: CreditCard, slug: "digital-cards" },
+Line 18: { name: "الحيوانات الأليفة", icon: Dog, slug: "pets" },
+Line 19: { name: "المنزل والمعيشة", icon: Home, slug: "home", active: true },
+Line 20: { name: "الجمال والعناية", icon: Sparkles, slug: "beauty" },
+Line 21: { name: "الصيدلية", icon: Pill, slug: "pharmacy" },
+Line 22: { name: "القرطاسية", icon: Pencil, slug: "stationery" },
+Line 23: { name: "الكتب", icon: BookOpen, slug: "books" },
+Line 24: { name: "الهواء الطلق", icon: Tent, slug: "outdoor" },
+Line 25: { name: "قطع السيارات", icon: Car, slug: "car-parts" },
+Line 26: { name: "القهوة", icon: Coffee, slug: "coffee" },
+Line 27: { name: "المنتجات الرقمية", icon: Download, slug: "digital-products" },
+Line 28: { name: "الهدايا", icon: Gift, slug: "gifts" },
+Line 29: { name: "النظارات", icon: Glasses, slug: "eyewear" },
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\FeedbackModal.js
+========================================
+Line 8: { label: 'سيء جداً', value: 1 },
+Line 9: { label: 'سيء', value: 2 },
+Line 10: { label: 'مقبول', value: 3 },
+Line 11: { label: 'جيد', value: 4 },
+Line 12: { label: 'ممتاز', value: 5 },
+Line 18: label: 'تجربة الموقع',
+Line 19: issues: ['نتائج بحث ضعيفة', 'لا أثق في هذا الموقع', 'قلة المنتجات', 'صعب الاستخدام']
+Line 23: label: 'العروض والتخفيضات',
+Line 24: issues: ['لا توجد عروض جذابة', 'الكوبون لا يعمل', 'صعب إيجاد الكوبونات']
+Line 28: label: 'بحث الموقع',
+Line 29: issues: ['لا توجد نتائج', 'نتائج غير ذات صلة', 'البحث بطيء']
+Line 33: label: 'جدول المقاسات',
+Line 34: issues: ['غير دقيق', 'غير موجود', 'مُربك']
+Line 38: label: 'سلة التسوق',
+Line 39: issues: ['المنتجات تختفي', 'لا أستطيع إضافتها', 'عدم تطابق السعر']
+Line 43: label: 'إتمام الشراء',
+Line 44: issues: ['فشل الدفع', 'خطوات كثيرة جداً', 'خطأ في الدفع']
+Line 48: label: 'التوصيل',
+Line 49: issues: ['بطيء جداً', 'غالي', 'لا يوجد تتبع']
+Line 53: label: 'الإرجاع',
+Line 54: issues: ['عملية معقدة', 'إرجاع مدفوع', 'لا يوجد رد']
+Line 58: label: 'خدمة العملاء',
+Line 59: issues: ['رد بطيء', 'غير مفيدة', 'صعب التواصل']
+Line 63: label: 'أخرى',
+Line 94: userName: customerName || user?.displayName || 'ضيف',
+Line 149: <h2 className="text-xl font-bold mb-2">شكراً لك!</h2>
+Line 150: <p className="text-gray-500 text-[14px]">تعليقاتك تساعدنا على تحسين تجربة محلي للجميع.</p>
+Line 155: <h2 className="text-2xl font-bold mb-2 text-gray-900">نحن هنا لتحسين تجربتك!</h2>
+Line 156: <p className="text-gray-500 text-[14px]">رأيك يهمنا! يرجى إخبارنا بما تفكر به حول موقعنا أدناه.</p>
+Line 162: كيف تشعر تجاه زيارتك لموقعنا اليوم؟
+Line 188: عذراً لسماع ذلك! ما هي المشكلة؟
+Line 208: <p className="text-[12px] text-gray-500 mb-3">ما هي المشكلة بالتحديد؟</p>
+Line 220: onClick={() => setSpecificIssue('أخرى')}
+Line 221: className={`px-4 py-2 rounded-md border text-[12px] font-medium transition-all ${specificIssue === 'أخرى' ? 'bg-black border-black text-white' : 'bg-white border-gray-200 hover:border-gray-400'}`}
+Line 223: أخرى
+Line 234: placeholder="يرجى إخبارنا المزيد!"
+Line 249: {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'إرسال التقييم لمحلي'}
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\Hero.js
+========================================
+Line 102: عرض جميع المتاجر<ChevronLeft size={14} />
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\OrderDetailsModal.js
+========================================
+Line 291: <h2 className="text-[15px] font-bold text-zinc-900">تفاصيل الطلب</h2>
+Line 293: طلب #{order.id}
+Line 309: <p className="text-zinc-500 uppercase text-[11px] font-bold tracking-wide mb-0.5">تاريخ الطلب</p>
+Line 315: <p className="text-zinc-500 uppercase text-[11px] font-bold tracking-wide mb-0.5">الحالة</p>
+Line 317: {isCOD && order.status === "on-hold" ? "مؤكد (دفع عند الاستلام)" : order.status}
+Line 321: <p className="text-zinc-500 uppercase text-[11px] font-bold tracking-wide mb-0.5">المنتجات</p>
+Line 326: <Printer size={14} /> طباعة الفاتورة
+Line 335: <p className="text-[13px] font-bold text-amber-800">طلب الدفع عند الاستلام</p>
+Line 336: <p className="text-[12px] text-amber-700 mt-0.5">سيتم تحصيل الدفع عند تسليم طلبك. تم تأكيد طلبك وجاري تجهيزه.</p>
+Line 348: <h3 className="text-[15px] font-bold text-zinc-900 mb-1">هل استلمت طلبك؟</h3>
+Line 349: <p className="text-[13px] text-zinc-600 mb-3">يرجى تأكيد استلام جميع المنتجات بحالة جيدة لإتمام العملية.</p>
+Line 355: {confirming ? <RefreshCw size={14} className="animate-spin" /> : "نعم، أؤكد الاستلام"}
+Line 367: <h3 className="text-[15px] font-bold text-zinc-900 mb-1">{hasReviewedItems ? "تم تقديم التقييم مسبقاً" : "تم تأكيد الاستلام!"}</h3>
+Line 370: ? "لقد قمت مسبقاً بتقديم تقييم لهذا الطلب. يمكنك مراجعته من سجل حسابك."
+Line 371: : "شكراً لك! تقييمك يساعد تجارنا على التحسين."}
+Line 379: <Star size={14} className="text-amber-200 fill-amber-200" /> شاهد تقييمك
+Line 387: <Star size={14} className="text-amber-400 fill-amber-400" /> اكتب تقييماً
+Line 399: <p className="text-rose-700 text-[13px] font-bold">تتبع الطلب غير متاح لطلبات {order.status}.</p>
+Line 405: { step: 1, label: "تم تأكيد الطلب" },
+Line 406: { step: 2, label: "تمت معالجة الطلب" },
+Line 407: { step: 3, label: "جاهز للشحن" },
+Line 408: { step: 4, label: "في الطريق للتسليم*" },
+Line 409: { step: 5, label: "تم تسليم الطلب" }
+Line 473: <MapPin size={12} className="text-brand" /> عنوان الشحن
+Line 477: <Edit2 size={10} /> تعديل
+Line 485: <input value={addressForm.first_name} onChange={e => setAddressForm(prev => ({...prev, first_name: e.target.value}))} placeholder="الاسم الأول" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+Line 486: <input value={addressForm.last_name} onChange={e => setAddressForm(prev => ({...prev, last_name: e.target.value}))} placeholder="الاسم الأخير" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+Line 488: <input value={addressForm.address_1} onChange={e => setAddressForm(prev => ({...prev, address_1: e.target.value}))} placeholder="العنوان" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+Line 489: <input value={addressForm.city} onChange={e => setAddressForm(prev => ({...prev, city: e.target.value}))} placeholder="المدينة" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+Line 490: <input value={addressForm.phone} onChange={e => setAddressForm(prev => ({...prev, phone: e.target.value}))} placeholder="الهاتف" className="w-full h-7 px-2 border border-zinc-300 rounded outline-none focus:border-brand focus:ring-1 focus:ring-brand" dir="ltr" />
+Line 493: {savingAddress ? "جاري الحفظ..." : "حفظ"}
+Line 506: إلغاء
+Line 521: <CreditCard size={12} className="text-zinc-400" /> الدفع
+Line 524: {isCOD && <p className="text-[11px] text-amber-600 font-bold mt-1">الدفع عند التسليم</p>}
+Line 527: <h4 className="text-[12px] font-bold text-zinc-900 mb-2 uppercase tracking-wide">ملخص الطلب</h4>
+Line 533: {vendor.name} ({vendor.items.reduce((a, i) => a + (i.quantity || 1), 0)} منتجات)
+Line 539: <span>المجموع الفرعي ({totalItems} منتجات)</span>
+Line 543: <span>الشحن</span>
+Line 544: <span dir="ltr">{parseFloat(order.shipping_total || 0) > 0 ? `JOD ${parseFloat(order.shipping_total).toFixed(2)}` : "مجاني"}</span>
+Line 548: <span>خصم</span>
+Line 553: <span>المجموع الكلي</span>
+Line 563: <RefreshCw size={14} className="animate-spin" /> جاري تحميل التحديثات…
+Line 569: <h4 className="text-[13px] font-bold text-zinc-900">تحديثات الطلب والجدول الزمني</h4>
+Line 602: فاتورة من: {hasRealMerchant ? (
+Line 607: "محلي (رسمي)"
+Line 612: مجموع التاجر: JOD {vendor.subtotal.toFixed(2)}
+Line 648: <span className="text-[11px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded">الكمية: {item.quantity}</span>
+Line 657: شراء مرة أخرى
+Line 661: إرجاع المنتجات
+Line 667: href={`/messages?to=${vendor.id}&msg=${encodeURIComponent(`مرحباً ${vendor.name}، لدي سؤال بخصوص منتجي الذي اشتريته: "${item.name}" (طلب #${order.id}).`)}`}
+Line 671: محادثة مع التاجر
+Line 681: تواصل واتساب
+Line 692: الإبلاغ عن التاجر
+Line 789: إغلاق
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\ProductActions.js
+========================================
+Line 183: <span>التوصيل المتوقع: <span className="font-bold">{new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString('ar-JO', { month: 'short', day: 'numeric' })} - {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('ar-JO', { month: 'short', day: 'numeric' })}</span></span>
+Line 188: {currentStockStatus === 'outofstock' ? 'نفدت الكمية' : 'متوفر'}
+Line 231: <option key={n} value={n}>الكمية: {n}</option>
+Line 252: <strong>عرض البائع:</strong> أنت تملك هذا المنتج. خيارات الشراء معطلة لمنتجاتك.
+Line 258: إدارة المنتج
+Line 278: {added ? 'تمت الإضافة للسلة' : 'أضف إلى السلة'}
+Line 291: اشتري الآن
+Line 300: <div className="text-[#565959]">يشحن من</div>
+Line 301: <div className="text-[#0F1111]">{product.meta_data?.find(m => m.key === "mahally_shipped_by")?.value || "لا توجد معلومات متوفرة"}</div>
+Line 302: <div className="text-[#565959]">يباع بواسطة</div>
+Line 310: {product.store?.shop_name || "متجر غير معروف"}
+Line 316: <div className="text-[#565959]">الاسترجاع</div>
+Line 317: <div className={`text-[12px] font-medium ${returnPolicy === "لا نقبل الاسترجاع" ? "text-rose-600" : "text-brand hover:text-brand-dark hover:underline cursor-pointer"}`}>
+Line 327: {isFavorite ? 'إزالة من القائمة' : 'أضف للقائمة'}
+Line 337: إبلاغ عن هذا المنتج أو البائع
+Line 348: اسأل البائع عن هذا المنتج
+Line 369: تواصل عبر واتساب
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\ProductReviews.js
+========================================
+Line 29: <h2 className="text-[21px] font-bold text-[#0F1111] mb-2">تقييمات العملاء</h2>
+Line 37: <span className="text-[18px] font-bold text-[#0F1111]">{avgRating} من 5</span>
+Line 40: <p className="text-[14px] text-[#565959] mb-4">{totalReviews.toLocaleString()} تقييم</p>
+Line 46: <span className="text-[13px] text-[#be374f] group-hover:underline w-12 shrink-0">{item.stars} نجوم</span>
+Line 66: <h3 className="text-[21px] font-bold text-[#0F1111]">أهم التقييمات من الأردن</h3>
+Line 73: <option>الأهم</option>
+Line 74: <option>الأحدث</option>
+Line 83: <p className="text-[14px] text-zinc-500 font-medium">لا توجد تقييمات لهذا المنتج حتى الآن.</p>
+Line 94: <span className="text-[13px] text-[#0F1111] font-medium">{review.reviewer || "مستخدم غير معروف"}</span>
+Line 108: تم التقييم في الأردن في {review.date_created ? new Date(review.date_created).toLocaleDateString('ar-JO', { month: 'long', day: 'numeric', year: 'numeric' }) : "تاريخ غير معروف"}
+Line 111: <span className="text-[12px] font-bold text-[#C45500]">شراء مؤكد</span>
+Line 123: مفيد
+Line 125: <span className="text-[12px] text-[#565959] border-r border-zinc-200 ps-4">إبلاغ</span>
+
+
+========================================
+FILE: c:\Users\ASUS\Desktop\FE\src\components\TrackingModal.js
+========================================
+Line 8: cancelled:          { step: 0, label: "ملغى",         color: "rose",    headline: "تم إلغاء الطلب",        sub: "تم إلغاء هذا الطلب." },
+Line 9: refunded:           { step: 0, label: "مسترجع",          color: "rose",    headline: "تم استرجاع الطلب",         sub: "تم إصدار استرداد لهذا الطلب." },
+Line 13: 1: { label: "مؤكد", color: "amber",   headline: "تم تأكيد الطلب",      sub: "تم استلام طلبك وتأكيده." },
+Line 14: 2: { label: "معالجة",color: "amber",   headline: "جاري تجهيز الطلب", sub: "جاري تغليف طلبك وسيتم شحنه قريباً." },
+Line 15: 3: { label: "جاهز",     color: "blue",    headline: "جاهز للشحن",        sub: "تم تغليف طلبك وبانتظار شركة الشحن." },
+Line 16: 4: { label: "في الطريق",       color: "blue",    headline: "في الطريق للتسليم",     sub: "شحنتك في طريقها إليك." },
+Line 17: 5: { label: "تم التسليم", color: "emerald", headline: "تم التسليم!",           sub: "تم تسليم شحنتك بنجاح." },
+Line 21: { id: 1, icon: ShoppingBag,  label: "مؤكد" },
+Line 22: { id: 2, icon: Package,      label: "معالجة" },
+Line 23: { id: 3, icon: Store,        label: "جاهز" },
+Line 24: { id: 4, icon: Truck,        label: "في الطريق" },
+Line 25: { id: 5, icon: CheckCircle2, label: "تم التسليم" },
+Line 79: <h2 className="text-[16px] font-bold text-zinc-900">تتبع الشحنة</h2>
+Line 80: <p className="text-[12px] text-zinc-500">طلب #{order.id} · {totalItems} {totalItems === 1 ? "منتج" : "منتجات"}</p>
+Line 97: <p className={`text-[11px] font-bold uppercase tracking-widest ${col.text}`}>الحالة الحالية</p>
+Line 103: <CreditCard size={11} /> الدفع عند الاستلام
+Line 140: {isCurrent && <p className="text-[9px] md:text-[10px] text-zinc-400">قيد التقدم</p>}
+Line 148: <Clock size={13} /> <span>تاريخ الطلب {date}</span>
+Line 156: <h4 className="text-[13px] font-bold text-zinc-900">المنتجات في هذا الطلب</h4>
+Line 157: <span className="text-[11px] text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded font-bold">الإجمالي {totalItems}</span>
+Line 175: <span className="text-[11px] text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">الكمية: {item.quantity}</span>
+Line 178: <span className="text-[11px] text-zinc-400" dir="ltr">({parseFloat(item.price || 0).toFixed(2)} لكل قطعة)</span>
+Line 185: مباع بواسطة:{" "}
+Line 191: <span className="font-bold text-zinc-600">محلي (رسمي)</span>
+Line 207: <span>الشحن</span><span dir="ltr">JOD {parseFloat(order.shipping_total).toFixed(2)}</span>
+Line 212: <span>خصم</span><span dir="ltr">-JOD {parseFloat(order.discount_total).toFixed(2)}</span>
+Line 216: <span>المجموع</span><span dir="ltr">JOD {parseFloat(order.total || 0).toFixed(2)}</span>
+Line 228: <MapPin size={13} className="text-[#be374f]" /> عنوان التسليم
+Line 237: <h4 className="text-[12px] font-bold text-zinc-900 uppercase tracking-wider mb-3">معلومات الاتصال</h4>
+Line 253: إغلاق
+
+
+Total files with hardcoded Arabic: 17

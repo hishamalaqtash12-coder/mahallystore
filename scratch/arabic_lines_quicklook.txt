@@ -1,0 +1,4 @@
+Line 254: {t("originalPrice")} <span className="line-through">{regularPrice.toFixed(2)} د.أ</span>
+Line 394: أضف إلى السلة
+Line 400: اشتري الآن
+Line 412: {t("soldBy", { merchantName: merchantName || "محلي الرسمي" })}

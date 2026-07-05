@@ -91,22 +91,37 @@ export async function GET(request, { params }) {
       };
     });
 
+    // Fetch from Dokan vendor API to get fully-resolved image URLs (banner/logo)
+    let dokanStore = {};
+    try {
+      const dokanStoreRes = await fetch(
+        `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/dokan/v1/stores/${v.id}`,
+        { headers: { Authorization: `Basic ${Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64")}` }, next: { revalidate: 0 } }
+      );
+      if (dokanStoreRes.ok) {
+        dokanStore = await dokanStoreRes.json();
+      }
+    } catch (e) {
+      console.warn("Dokan store fetch failed, falling back to meta", e.message);
+    }
+
     const profile = {
       id: v.id,
       name: `${v.first_name} ${v.last_name}`.trim(),
-      storeName: dokanSettings.store_name || meta.mahally_store_name || v.first_name,
+      storeName: dokanStore.store_name || dokanSettings.store_name || meta.mahally_store_name || v.first_name,
       storeSlug: dokanSettings.store_name?.toLowerCase().replace(/\s+/g, '-') || meta.mahally_store_slug || slug,
-      storeDescription: dokanSettings.store_description || meta.mahally_store_description || "",
+      storeDescription: dokanStore.store_description || dokanSettings.store_description || meta.mahally_store_description || "",
       storeCategory: meta.mahally_store_category || "",
-      // Prefer our own mahally_ meta keys — dokan gravatar_url/banner_url are not populated by our save logic
-      storeLogo: meta.mahally_avatar_url || meta.mahally_store_logo || dokanSettings.gravatar_url || dokanSettings.gravatar || null,
-      storeBanner: meta.mahally_store_banner || dokanSettings.banner_url || dokanSettings.banner || null,
+      // Use Dokan store API for resolved image URLs (banner/gravatar come as full URLs from this endpoint)
+      // Also check wp_user_avatar (WP User Avatar plugin) and WC avatar_url as fallbacks
+      storeLogo: meta.mahally_store_logo || dokanStore.gravatar || meta.wp_user_avatar || v.avatar_url || dokanSettings.gravatar_url || dokanSettings.gravatar || null,
+      storeBanner: meta.mahally_store_banner || dokanStore.banner || dokanSettings.banner_url || null,
       showPhone: dokanSettings.show_phone !== "no",
-      phone: dokanSettings.phone || v.billing?.phone || meta.billing_phone || "",
+      phone: dokanStore.phone || dokanSettings.phone || v.billing?.phone || meta.billing_phone || "",
       showEmail: dokanSettings.show_email === "yes",
       email: v.email || null,
       whatsappNumber: meta.mahally_whatsapp_number || null,
-      showWhatsapp: meta.mahally_show_whatsapp !== "no", // Default to true if not "no"
+      showWhatsapp: meta.mahally_show_whatsapp !== "no",
       bannerPos: parseInt(meta.mahally_banner_pos || 50),
       logoPos: parseInt(meta.mahally_logo_pos || 50),
       dateCreated: v.date_created,
