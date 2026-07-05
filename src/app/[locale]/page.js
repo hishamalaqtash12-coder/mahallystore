@@ -21,93 +21,88 @@ export default async function Home() {
   let promoData = { url: '', thumbnail: '', title: '' };
   let totalPages = 1;
 
+  // 1. Read local files first (instant synchronous operations)
+  let featuredIds = [];
   try {
-    const result = await getProducts({ per_page: 40, status: 'publish' }, true);
-    products = result.data;
-    totalPages = result.totalPages;
-    categories = await getCategories({ hide_empty: false, per_page: 100 });
-
-    // Load all approved vendors then filter to only featured IDs chosen by admin
-    const allVendors = await getVendors({ per_page: 100 });
-    // Filter to approved only (dokan_enable_selling === "yes")
-    const approvedVendors = allVendors.filter(v => {
-      const meta = Object.fromEntries((v.meta_data || []).map(m => [m.key, m.value]));
-      return meta.dokan_enable_selling === "yes";
-    });
-    try {
-      const featuredPath = join(process.cwd(), "src/data/featured-vendors.json");
-      if (existsSync(featuredPath)) {
-        const { featuredIds = [] } = JSON.parse(readFileSync(featuredPath, "utf8"));
-        if (featuredIds.length > 0) {
-          // Admin has selected specific vendors
-          vendors = approvedVendors.filter(v => featuredIds.includes(v.id));
-        } else {
-          // No selection yet — show all approved
-          vendors = approvedVendors;
-        }
-      } else {
-        vendors = approvedVendors;
-      }
-    } catch (e) {
-      vendors = approvedVendors;
+    const featuredPath = join(process.cwd(), "src/data/featured-vendors.json");
+    if (existsSync(featuredPath)) {
+      const parsed = JSON.parse(readFileSync(featuredPath, "utf8"));
+      featuredIds = parsed.featuredIds || [];
     }
+  } catch (e) {}
 
-    try {
-      const settingsPath = require("path").join(process.cwd(), "src/data/settings.json");
-      const settingsContent = require("fs").readFileSync(settingsPath, "utf8");
-      const siteSettings = JSON.parse(settingsContent);
+  try {
+    const settingsPath = join(process.cwd(), "src/data/settings.json");
+    if (existsSync(settingsPath)) {
+      const siteSettings = JSON.parse(readFileSync(settingsPath, "utf8"));
       promoData.url = siteSettings.promoVideoUrl || '';
       promoData.thumbnail = siteSettings.promoVideoThumbnail || '';
       promoData.title = siteSettings.promoVideoTitle || '';
       promoData.description = siteSettings.promoVideoDescription || '';
-    } catch (fErr) { }
-
-    try {
-      const fs = require("fs");
-      const path = require("path");
-      const FEEDBACK_FILE_PATH = path.join(process.cwd(), "src/data/feedback.json");
-      if (fs.existsSync(FEEDBACK_FILE_PATH)) {
-        const fileContent = fs.readFileSync(FEEDBACK_FILE_PATH, "utf8");
-        feedback = JSON.parse(fileContent);
-      }
-
-      // Dynamically resolve customer avatars from WooCommerce
-      if (feedback && feedback.length > 0) {
-        const userIds = feedback
-          .map(f => f.userId)
-          .filter(id => id && Number(id) !== 999 && !isNaN(Number(id)));
-
-        if (userIds.length > 0) {
-          try {
-            const customers = await getCustomersByIds(userIds);
-            const customerMap = {};
-            customers.forEach(c => {
-              const meta = c.meta_data || [];
-              const avatarUrl = meta.find(m => m.key === "mahally_avatar_url")?.value || meta.find(m => m.key === "mahally_store_logo")?.value || c.avatar_url || null;
-              const avatarBgColor = meta.find(m => m.key === "mahally_avatar_bg_color")?.value || "#9b8676";
-              customerMap[c.id] = { avatarUrl, avatarBgColor };
-            });
-
-            feedback = feedback.map(f => {
-              if (f.userId && customerMap[f.userId]) {
-                return {
-                  ...f,
-                  avatarUrl: customerMap[f.userId].avatarUrl || f.avatarUrl || "",
-                  avatarBgColor: customerMap[f.userId].avatarBgColor || f.avatarBgColor || "#9b8676"
-                };
-              }
-              return f;
-            });
-          } catch (wcErr) {
-            console.warn("WooCommerce feedback avatars lookup failed:", wcErr.message);
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("Could not load feedback.json:", e.message);
     }
+  } catch (e) {}
+
+  try {
+    const FEEDBACK_FILE_PATH = join(process.cwd(), "src/data/feedback.json");
+    if (existsSync(FEEDBACK_FILE_PATH)) {
+      feedback = JSON.parse(readFileSync(FEEDBACK_FILE_PATH, "utf8"));
+    }
+  } catch (e) {}
+
+  // 2. Determine userIds for avatar lookup
+  const userIds = feedback && feedback.length > 0
+    ? feedback.map(f => f.userId).filter(id => id && Number(id) !== 999 && !isNaN(Number(id)))
+    : [];
+
+  // 3. Fetch all remote APIs in parallel to prevent sequential blockages
+  try {
+    const [productsResult, categoriesResult, allVendors, customersResult] = await Promise.all([
+      getProducts({ per_page: 40, status: 'publish' }, true),
+      getCategories({ hide_empty: false, per_page: 100 }),
+      getVendors({ per_page: 100 }),
+      userIds.length > 0 ? getCustomersByIds(userIds).catch(() => []) : Promise.resolve([])
+    ]);
+
+    products = productsResult?.data || [];
+    totalPages = productsResult?.totalPages || 1;
+    categories = categoriesResult || [];
+
+    // Filter approved vendors and featured selection
+    const approvedVendors = (allVendors || []).filter(v => {
+      const meta = Object.fromEntries((v.meta_data || []).map(m => [m.key, m.value]));
+      return meta.dokan_enable_selling === "yes";
+    });
+
+    if (featuredIds.length > 0) {
+      vendors = approvedVendors.filter(v => featuredIds.includes(v.id));
+    } else {
+      vendors = approvedVendors;
+    }
+
+    // Map customer avatars to feedback reviews
+    if (customersResult && customersResult.length > 0) {
+      const customerMap = {};
+      customersResult.forEach(c => {
+        const meta = c.meta_data || [];
+        const avatarUrl = meta.find(m => m.key === "mahally_avatar_url")?.value || meta.find(m => m.key === "mahally_store_logo")?.value || c.avatar_url || null;
+        const avatarBgColor = meta.find(m => m.key === "mahally_avatar_bg_color")?.value || "#9b8676";
+        customerMap[c.id] = { avatarUrl, avatarBgColor };
+      });
+
+      feedback = feedback.map(f => {
+        if (f.userId && customerMap[f.userId]) {
+          return {
+            ...f,
+            avatarUrl: customerMap[f.userId].avatarUrl || f.avatarUrl || "",
+            avatarBgColor: customerMap[f.userId].avatarBgColor || f.avatarBgColor || "#9b8676"
+          };
+        }
+        return f;
+      });
+    }
+
   } catch (error) {
-    console.error("Home page data fetch error:", error);
+    console.error("Home page parallel data fetch error:", error);
   }
 
   let advertisingEnabled = true;

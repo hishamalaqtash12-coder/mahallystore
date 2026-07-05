@@ -19,6 +19,13 @@ export default function VendorsPage() {
   const [minRating, setMinRating] = useState(null);
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [sortBy, setSortBy] = useState("Featured");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  // Reset page to 1 when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, catFilter, minRating, onlyVerified, sortBy]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,6 +95,25 @@ export default function VendorsPage() {
     if (sortBy === "Newest") return new Date(b.dateCreated || 0) - new Date(a.dateCreated || 0);
     return 0;
   });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -219,102 +245,150 @@ export default function VendorsPage() {
 
           {/* Vendor Cards Grid */}
           {!loading && filtered.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((v) => (
-                <div key={v.id} className="flex flex-col border border-zinc-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow group bg-white">
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginated.map((v) => (
+                  <div key={v.id} className="flex flex-col border border-zinc-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow group bg-white">
 
-                  {/* Store Header/Banner */}
-                  <Link href={`/vendors/${v.id}`} className="relative h-32 bg-zinc-100 overflow-hidden">
-                    {v.storeBanner ? (
-                      <Image
-                        src={v.storeBanner}
-                        alt={v.storeName}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-zinc-200 to-zinc-100" />
-                    )}
-                    <div className="absolute inset-0 bg-black/5" />
-
-                    {/* Logo Overlay */}
-                    <div className="absolute -bottom-6 end-4 w-16 h-16 rounded-md bg-white border border-zinc-200 shadow-md overflow-hidden p-1 flex items-center justify-center">
-                      {v.storeLogo ? (
-                        <Image src={v.storeLogo} alt={v.storeName || "Vendor Logo"} fill className="object-contain p-1" />
+                    {/* Store Header/Banner */}
+                    <Link href={`/vendor/${v.storeSlug || v.id}`} className="relative h-32 bg-zinc-100 overflow-hidden">
+                      {v.storeBanner ? (
+                        <Image
+                          src={v.storeBanner}
+                          alt={v.storeName}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
                       ) : (
-                        <span className="text-zinc-900 font-bold text-xl">{v.storeName[0]?.toUpperCase()}</span>
+                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-200 to-zinc-100" />
                       )}
-                    </div>
-                  </Link>
+                      <div className="absolute inset-0 bg-black/5" />
 
-                  {/* Store Body */}
-                  <div className="pt-8 pb-5 px-5 flex flex-col flex-1">
-                    <Link href={`/vendors/${v.id}`} className="block">
-                      <h2 className="text-[17px] font-bold text-zinc-900 hover:text-brand transition-colors leading-tight">
-                        {v.storeName}
-                      </h2>
+                      {/* Logo Overlay */}
+                      <div className="absolute -bottom-6 end-4 w-16 h-16 rounded-md bg-white border border-zinc-200 shadow-md overflow-hidden p-1 flex items-center justify-center">
+                        {v.storeLogo ? (
+                          <Image src={v.storeLogo} alt={v.storeName || "Vendor Logo"} fill className="object-contain p-1" />
+                        ) : (
+                          <span className="text-zinc-900 font-bold text-xl">{v.storeName[0]?.toUpperCase()}</span>
+                        )}
+                      </div>
                     </Link>
 
-                    <div className="flex items-center gap-2 mt-1 mb-3">
-                      <div className="flex items-center gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={14}
-                            className={`${i < Math.round(v.rating || 0) ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'}`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[12px] text-brand-dark hover:text-brand cursor-pointer">
-                        {v.rating > 0 ? t("rating", { rating: v.rating.toFixed(1) }) : t("newStore")}
-                      </span>
-                    </div>
-
-                    {v.storeCategory && (
-                      <span className="text-[12px] font-medium text-zinc-500 mb-2">{v.storeCategory}</span>
-                    )}
-
-                    {v.storeDescription && (
-                      <p className="text-[13px] text-zinc-600 line-clamp-2 mb-4 leading-normal flex-1">
-                        {v.storeDescription}
-                      </p>
-                    )}
-
-                    <div className="mt-auto pt-4 border-t border-zinc-100 flex items-center justify-between">
-                      <Link
-                        href={`/vendors/${v.id}`}
-                        className="text-[13px] font-medium text-brand hover:text-brand-dark hover:underline flex items-center gap-1"
-                      >
-                        {t("visitStore")} <ChevronRight size={14} className="rtl:-scale-x-100" />
+                    {/* Store Body */}
+                    <div className="pt-8 pb-5 px-5 flex flex-col flex-1">
+                      <Link href={`/vendor/${v.storeSlug || v.id}`} className="block">
+                        <h2 className="text-[17px] font-bold text-zinc-900 hover:text-brand transition-colors leading-tight">
+                          {v.storeName}
+                        </h2>
                       </Link>
 
-                      {Number(v.id) !== Number(wooId) && (
-                        <button
-                          onClick={() => handleToggleFollow(v.id)}
-                          disabled={loadingStores[v.id]}
-                          className={`cursor-pointer h-8 px-4 rounded-md text-[12px] font-medium shadow-sm transition-all border flex items-center justify-center gap-1.5 group ${followedStores.some(id => String(id) === String(v.id))
-                              ? 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                              : 'bg-brand hover:bg-brand-dark text-white border-brand'
-                            } ${loadingStores[v.id] ? 'opacity-70 cursor-not-allowed' : ''}`}
-                        >
-                          {loadingStores[v.id] && (
-                            <span className="w-3.5 h-3.5 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
-                          )}
-                          {followedStores.some(id => String(id) === String(v.id)) ? (
-                            <>
-                              <span className="group-hover:hidden">{t("following")}</span>
-                              <span className="hidden group-hover:inline">{t("unfollow")}</span>
-                            </>
-                          ) : (
-                            <>{t("follow")}</>
-                          )}
-                        </button>
+                      <div className="flex items-center gap-2 mt-1 mb-3">
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={14}
+                              className={`${i < Math.round(v.rating || 0) ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[12px] text-brand-dark hover:text-brand cursor-pointer">
+                          {v.rating > 0 ? t("rating", { rating: v.rating.toFixed(1) }) : t("newStore")}
+                        </span>
+                      </div>
+
+                      {v.storeCategory && (
+                        <span className="text-[12px] font-medium text-zinc-500 mb-2">{v.storeCategory}</span>
                       )}
+
+                      {v.storeDescription && (
+                        <p className="text-[13px] text-zinc-600 line-clamp-2 mb-4 leading-normal flex-1">
+                          {v.storeDescription}
+                        </p>
+                      )}
+
+                      <div className="mt-auto pt-4 border-t border-zinc-100 flex items-center justify-between">
+                        <Link
+                          href={`/vendor/${v.storeSlug || v.id}`}
+                          className="text-[13px] font-medium text-brand hover:text-brand-dark hover:underline flex items-center gap-1"
+                        >
+                          {t("visitStore")} <ChevronRight size={14} className="rtl:-scale-x-100" />
+                        </Link>
+
+                        {Number(v.id) !== Number(wooId) && (
+                          <button
+                            onClick={() => handleToggleFollow(v.id)}
+                            disabled={loadingStores[v.id]}
+                            className={`cursor-pointer h-8 px-4 rounded-md text-[12px] font-medium shadow-sm transition-all border flex items-center justify-center gap-1.5 group ${followedStores.some(id => String(id) === String(v.id))
+                                ? 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                                : 'bg-brand hover:bg-brand-dark text-white border-brand'
+                              } ${loadingStores[v.id] ? 'opacity-70 cursor-not-allowed' : ''}`}
+                          >
+                            {loadingStores[v.id] && (
+                              <span className="w-3.5 h-3.5 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
+                            )}
+                            {followedStores.some(id => String(id) === String(v.id)) ? (
+                              <>
+                                <span className="group-hover:hidden">{t("following")}</span>
+                                <span className="hidden group-hover:inline">{t("unfollow")}</span>
+                              </>
+                            ) : (
+                              <>{t("follow")}</>
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-12 border-t border-zinc-100 pt-6">
+                  <button
+                    onClick={() => {
+                      setCurrentPage(prev => Math.max(prev - 1, 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === 1}
+                    className="h-9 px-4 rounded-md border border-zinc-200 text-[13px] font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center"
+                  >
+                    {t("previous")}
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {getPageNumbers().map((pageNumber) => (
+                      <button
+                        key={pageNumber}
+                        onClick={() => {
+                          setCurrentPage(pageNumber);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className={`h-9 w-9 rounded-md text-[13px] font-medium transition-all cursor-pointer flex items-center justify-center ${
+                          currentPage === pageNumber
+                            ? "bg-brand text-white shadow-sm font-semibold"
+                            : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="h-9 px-4 rounded-md border border-zinc-200 text-[13px] font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center"
+                  >
+                    {t("next")}
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>

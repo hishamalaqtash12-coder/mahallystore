@@ -380,7 +380,9 @@
     "visitStore": "زيارة المتجر",
     "follow": "متابعة",
     "following": "متابع",
-    "unfollow": "إلغاء المتابعة"
+    "unfollow": "إلغاء المتابعة",
+    "previous": "السابق",
+    "next": "التالي"
   },
   "LoginPage": {
     "accountRemoved": "تم حذف الحساب",

@@ -29,7 +29,10 @@ export async function GET(request) {
     
     // 1. Fetch current user and their chat history
     const userResponse = await wcApi.get(`customers/${targetUserId}`);
-    const user = userResponse.data;
+    const user = userResponse?.data;
+    if (!user) {
+      return NextResponse.json({ conversations: [] });
+    }
     const meta = Object.fromEntries((user.meta_data || []).map((m) => [m.key, m.value]));
     
     const isMerchant = meta.mahally_role === "vendor";

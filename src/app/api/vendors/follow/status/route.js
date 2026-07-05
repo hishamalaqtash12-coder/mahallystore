@@ -12,7 +12,7 @@ export async function GET(request) {
     }
 
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
-    const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
     const res = await fetch(`${WP_URL}/wp-json/wc/v3/customers/${userId}`, {
       headers: { Authorization: `Basic ${auth}` }

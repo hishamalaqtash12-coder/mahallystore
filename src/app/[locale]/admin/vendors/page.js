@@ -407,7 +407,7 @@ export default function AdminVendorsPage() {
                       )}
                       {v.status === "approved" && v.storeSlug && (
                         <Link
-                          href={`/vendors/${v.storeSlug}`}
+                          href={`/vendor/${v.storeSlug}`}
                           target="_blank"
                           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors"
                         >

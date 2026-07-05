@@ -600,7 +600,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                       <Store size={18} className="text-brand" />
                       <h3 className="text-[14px] font-bold text-zinc-900">
                         فاتورة من: {hasRealMerchant ? (
-                          <Link href={`/vendors/${vendor.id}`} className="text-brand hover:text-brand-dark hover:underline">
+                          <Link href={`/vendor/${vendor.storeSlug || vendor.id}`} className="text-brand hover:text-brand-dark hover:underline">
                             {vendor.name}
                           </Link>
                         ) : (

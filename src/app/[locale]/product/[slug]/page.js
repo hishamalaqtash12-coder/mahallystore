@@ -225,10 +225,10 @@ export default async function ProductPage({ params }) {
             <div className="mb-3 border-b border-zinc-200 pb-3">
               <h1 className="text-[20px] sm:text-[24px] font-medium text-[#0F1111] leading-tight mb-1">{product.name}</h1>
               {(() => {
-                const { name: storeName, id: storeId } = getProductMerchant(product);
+                const { name: storeName, id: storeId, slug: storeSlug } = getProductMerchant(product);
                 return (
                   <Link
-                    href={storeId ? `/vendors/${storeId}` : "/vendors"}
+                    href={storeSlug || storeId ? `/vendor/${storeSlug || storeId}` : "/vendors"}
                     className="text-[14px] text-[#be374f] hover:text-[#9b2c41] hover:underline mb-2 inline-block"
                   >
                     زيارة متجر {storeName || "محلي الرسمي"}

@@ -380,7 +380,9 @@
     "visitStore": "Visit Store",
     "follow": "Follow",
     "following": "Following",
-    "unfollow": "Unfollow"
+    "unfollow": "Unfollow",
+    "previous": "Previous",
+    "next": "Next"
   },
   "LoginPage": {
     "accountRemoved": "Account Deleted",

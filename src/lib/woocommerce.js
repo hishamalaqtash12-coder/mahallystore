@@ -17,6 +17,40 @@ const getAuthHeaders = () => {
   };
 };
 
+// Simple in-memory cache for fallback product queries
+if (!globalThis.WC_PRODUCTS_FALLBACK_CACHE) {
+  globalThis.WC_PRODUCTS_FALLBACK_CACHE = {
+    data: null,
+    timestamp: 0
+  };
+}
+const WC_PRODUCTS_FALLBACK_CACHE = globalThis.WC_PRODUCTS_FALLBACK_CACHE;
+const FALLBACK_CACHE_TTL = 300000; // 5 minutes cache
+
+// Simple in-memory cache for vendors list
+if (!globalThis.WC_VENDORS_CACHE) {
+  globalThis.WC_VENDORS_CACHE = {};
+}
+const WC_VENDORS_CACHE = globalThis.WC_VENDORS_CACHE;
+const VENDORS_CACHE_TTL = 300000; // 5 minutes cache
+
+// Simple in-memory cache for categories list
+if (!globalThis.WC_CATEGORIES_CACHE) {
+  globalThis.WC_CATEGORIES_CACHE = {
+    data: null,
+    timestamp: 0
+  };
+}
+const WC_CATEGORIES_CACHE = globalThis.WC_CATEGORIES_CACHE;
+const CATEGORIES_CACHE_TTL = 600000; // 10 minutes cache
+
+// Simple in-memory cache for GraphQL product queries
+if (!globalThis.WC_PRODUCTS_GRAPHQL_CACHE) {
+  globalThis.WC_PRODUCTS_GRAPHQL_CACHE = {};
+}
+const WC_PRODUCTS_GRAPHQL_CACHE = globalThis.WC_PRODUCTS_GRAPHQL_CACHE;
+const PRODUCTS_CACHE_TTL = 300000; // 5 minutes cache
+
 // Maps WPGraphQL Product to WooCommerce REST API format to prevent UI breakage
 const mapProduct = (node) => {
   if (!node) return null;
@@ -163,6 +197,13 @@ export async function getPage(slug) {
 }
 
 export async function getProducts(options = {}, withRealRatings = false, retries = 3, includeRestricted = false) {
+  const cacheKey = JSON.stringify({ options, withRealRatings, includeRestricted });
+  const now = Date.now();
+  
+  if (WC_PRODUCTS_GRAPHQL_CACHE[cacheKey] && (now - WC_PRODUCTS_GRAPHQL_CACHE[cacheKey].timestamp < PRODUCTS_CACHE_TTL)) {
+    return WC_PRODUCTS_GRAPHQL_CACHE[cacheKey].data;
+  }
+
   try {
     let category = null;
     let categoryId = null;
@@ -206,11 +247,20 @@ export async function getProducts(options = {}, withRealRatings = false, retries
       products = products.filter(p => String(p.status || 'publish').toLowerCase() === String(options.status).toLowerCase());
     }
 
-    return {
+    const result = {
       data: products,
       total: products.length, // GraphQL doesn't give total count easily without extra plugins
       totalPages: data?.products?.pageInfo?.hasNextPage ? 2 : 1
     };
+
+    if (!options.search) {
+      WC_PRODUCTS_GRAPHQL_CACHE[cacheKey] = {
+        data: result,
+        timestamp: now
+      };
+    }
+
+    return result;
   } catch (e) {
     console.error("GraphQL error fetching products:", e);
     return { data: [], total: 0, totalPages: 1 };
@@ -271,9 +321,20 @@ export async function getProductVariations(id, retries = 3) {
 }
 
 export async function getCategories(options = {}, retries = 3) {
+  const perPage = options.per_page ? parseInt(options.per_page, 10) : 100;
+  const now = Date.now();
+  
+  if (WC_CATEGORIES_CACHE.data && (now - WC_CATEGORIES_CACHE.timestamp < CATEGORIES_CACHE_TTL)) {
+    return WC_CATEGORIES_CACHE.data;
+  }
+
   try {
-    const data = await fetchGraphQL(GET_CATEGORIES, { first: options.per_page ? parseInt(options.per_page, 10) : 100 });
-    return (data?.productCategories?.nodes || []).map(mapCategory);
+    const data = await fetchGraphQL(GET_CATEGORIES, { first: perPage });
+    const categories = (data?.productCategories?.nodes || []).map(mapCategory);
+    
+    WC_CATEGORIES_CACHE.data = categories;
+    WC_CATEGORIES_CACHE.timestamp = now;
+    return categories;
   } catch (error) {
     console.error("GraphQL error fetching categories:", error);
     return [];
@@ -341,6 +402,13 @@ export async function checkCustomerExists(email, phone) {
 }
 
 export async function getVendors({ page = 1, per_page = 40, includeRestricted = false } = {}) {
+  const cacheKey = `${page}_${per_page}_${includeRestricted}`;
+  const now = Date.now();
+  
+  if (WC_VENDORS_CACHE[cacheKey] && (now - WC_VENDORS_CACHE[cacheKey].timestamp < VENDORS_CACHE_TTL)) {
+    return WC_VENDORS_CACHE[cacheKey].data;
+  }
+
   try {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
     const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
@@ -357,19 +425,42 @@ export async function getVendors({ page = 1, per_page = 40, includeRestricted = 
     
     let customers = await response.json();
     
-    // Convert to the shape the frontend expects (similar to mapUser)
-    let vendors = customers.map(c => ({
-      id: c.id,
-      email: c.email,
-      first_name: c.first_name,
-      last_name: c.last_name,
-      name: `${c.first_name} ${c.last_name}`.trim(),
-      username: c.username,
-      date_created: c.date_created,
-      avatar_url: c.avatar_url,
-      meta_data: c.meta_data || [],
-      roles: [c.role]
-    }));
+    let vendors = customers.map(c => {
+      const meta = Object.fromEntries((c.meta_data || []).map((m) => [m.key, m.value]));
+      let dokan = meta.dokan_profile_settings || {};
+      if (typeof dokan === 'string') {
+        try { dokan = JSON.parse(dokan); } catch(e) { dokan = {}; }
+      }
+
+      let storeSlug = "";
+      const rawStoreName = dokan.store_name || meta.mahally_store_name;
+      if (rawStoreName) {
+        storeSlug = rawStoreName
+          .toLowerCase()
+          .trim()
+          .replace(/[\s_]+/g, '-')
+          .replace(/[^\u0600-\u06FFa-z0-9\-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+      if (!storeSlug) {
+        storeSlug = c.username || String(c.id);
+      }
+
+      return {
+        id: c.id,
+        email: c.email,
+        first_name: c.first_name,
+        last_name: c.last_name,
+        name: `${c.first_name} ${c.last_name}`.trim(),
+        username: c.username,
+        date_created: c.date_created,
+        avatar_url: c.avatar_url,
+        meta_data: c.meta_data || [],
+        roles: [c.role],
+        storeSlug
+      };
+    });
     
     // Ensure we only return vendors/sellers
     vendors = vendors.filter(v => 
@@ -384,6 +475,10 @@ export async function getVendors({ page = 1, per_page = 40, includeRestricted = 
       );
     }
     
+    WC_VENDORS_CACHE[cacheKey] = {
+      data: vendors,
+      timestamp: now
+    };
     return vendors;
   } catch (error) {
     console.error("Error fetching vendors:", error);
@@ -396,12 +491,18 @@ export async function getVendorById(vendorId) {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
     const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
-    const response = await fetch(`${WP_URL}/wp-json/wc/v3/customers/${vendorId}`, {
-      headers: { Authorization: `Basic ${auth}` }
-    });
+    // Fetch customer details and Dokan products in parallel
+    const [customerRes, dokanRes] = await Promise.all([
+      fetch(`${WP_URL}/wp-json/wc/v3/customers/${vendorId}`, {
+        headers: { Authorization: `Basic ${auth}` }
+      }),
+      fetch(`${WP_URL}/wp-json/dokan/v1/products?seller_id=${vendorId}&per_page=100&status=publish`, {
+        headers: { Authorization: `Basic ${auth}` }
+      }).catch(() => null)
+    ]);
     
-    if (!response.ok) return null;
-    const c = await response.json();
+    if (!customerRes.ok) return null;
+    const c = await customerRes.json();
     
     const vendor = {
       id: c.id,
@@ -415,18 +516,11 @@ export async function getVendorById(vendorId) {
       roles: [c.role]
     };
 
-    // Fetch vendor products using Dokan REST API (filters by actual vendor/seller)
-    // Dokan exposes /wp-json/dokan/v1/products?seller_id=X which is the correct filter.
-    // Fallback: fetch all products and filter by _dokan_vendor_id meta if Dokan endpoint fails.
     let vendorProducts = [];
     let dokanFailed = false;
 
-    try {
-      const dokanRes = await fetch(
-        `${WP_URL}/wp-json/dokan/v1/products?seller_id=${vendorId}&per_page=100&status=publish`,
-        { headers: { Authorization: `Basic ${auth}` } }
-      );
-      if (dokanRes.ok) {
+    if (dokanRes && dokanRes.ok) {
+      try {
         const dokanData = await dokanRes.json();
         const rawProducts = Array.isArray(dokanData) ? dokanData : (dokanData.products || []);
         vendorProducts = rawProducts.map(p => ({
@@ -451,51 +545,65 @@ export async function getVendorById(vendorId) {
           attributes: p.attributes || [],
           meta_data: p.meta_data || []
         }));
-      } else {
+      } catch {
         dokanFailed = true;
       }
-    } catch {
+    } else {
       dokanFailed = true;
     }
 
-    // Fallback: use WC REST API and filter by _dokan_vendor_id meta
+    // Fallback: use WC REST API (cached) and filter by store.id / _dokan_vendor_id in JS
     if (dokanFailed || vendorProducts.length === 0) {
-      const productsRes = await fetch(
-        `${WP_URL}/wp-json/wc/v3/products?per_page=100&status=publish`,
-        { headers: { Authorization: `Basic ${auth}` } }
-      );
-      if (productsRes.ok) {
-        const allProducts = await productsRes.json();
-        vendorProducts = (Array.isArray(allProducts) ? allProducts : [])
-          .filter(p => {
-            const dokanVendorId = (p.meta_data || []).find(
-              m => m.key === '_dokan_vendor_id' || m.key === '_vendor_id'
-            )?.value;
-            return String(dokanVendorId) === String(vendorId);
-          })
-          .map(p => ({
-            id: p.id,
-            name: p.name,
-            slug: p.slug,
-            type: p.type,
-            status: p.status,
-            description: p.description,
-            short_description: p.short_description,
-            price: p.price,
-            regular_price: p.regular_price,
-            sale_price: p.sale_price,
-            average_rating: p.average_rating,
-            rating_count: p.rating_count,
-            on_sale: p.on_sale,
-            stock_status: p.stock_status,
-            stock_quantity: p.stock_quantity,
-            manage_stock: p.manage_stock,
-            images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
-            categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
-            attributes: p.attributes || [],
-            meta_data: p.meta_data || []
-          }));
+      let allProducts = [];
+      const now = Date.now();
+      
+      if (WC_PRODUCTS_FALLBACK_CACHE.data && (now - WC_PRODUCTS_FALLBACK_CACHE.timestamp < FALLBACK_CACHE_TTL)) {
+        allProducts = WC_PRODUCTS_FALLBACK_CACHE.data;
+      } else {
+        try {
+          const productsRes = await fetch(
+            `${WP_URL}/wp-json/wc/v3/products?per_page=100&status=publish`,
+            { headers: { Authorization: `Basic ${auth}` } }
+          );
+          if (productsRes.ok) {
+            allProducts = await productsRes.json();
+            WC_PRODUCTS_FALLBACK_CACHE.data = allProducts;
+            WC_PRODUCTS_FALLBACK_CACHE.timestamp = now;
+          }
+        } catch (e) {
+          console.warn("Fallback WC products fetch failed:", e.message);
+        }
       }
+
+      vendorProducts = (Array.isArray(allProducts) ? allProducts : [])
+        .filter(p => {
+          const dokanVendorId = p.store?.id || (p.meta_data || []).find(
+            m => m.key === '_dokan_vendor_id' || m.key === '_vendor_id'
+          )?.value;
+          return String(dokanVendorId) === String(vendorId);
+        })
+        .map(p => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          type: p.type,
+          status: p.status,
+          description: p.description,
+          short_description: p.short_description,
+          price: p.price,
+          regular_price: p.regular_price,
+          sale_price: p.sale_price,
+          average_rating: p.average_rating,
+          rating_count: p.rating_count,
+          on_sale: p.on_sale,
+          stock_status: p.stock_status,
+          stock_quantity: p.stock_quantity,
+          manage_stock: p.manage_stock,
+          images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
+          categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
+          attributes: p.attributes || [],
+          meta_data: p.meta_data || []
+        }));
     }
       
     vendor.products = vendorProducts;
@@ -520,30 +628,18 @@ export async function getVendorBySlug(slug) {
     
     // Fetch all vendors (with full meta_data) and find by slug
     const vendors = await getVendors({ per_page: 100, includeRestricted: true });
+    const cleanQuerySlug = slug.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '');
     const matchedVendor = vendors.find(c => {
       // 1. Check mahally_store_slug
-      const hasMahallySlug = c.meta_data?.some(m => m.key === "mahally_store_slug" && m.value === slug);
-      if (hasMahallySlug) return true;
+      const mahallyStoreSlug = c.meta_data?.find(m => m.key === "mahally_store_slug")?.value || "";
+      if (mahallyStoreSlug && mahallyStoreSlug.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '') === cleanQuerySlug) return true;
 
       // 2. Check username
-      if (c.username === slug) return true;
+      if (c.username && c.username.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '') === cleanQuerySlug) return true;
 
-      // 3. Check Dokan store name slugified
-      const dokanProfileMeta = c.meta_data?.find(m => m.key === "dokan_profile_settings")?.value;
-      if (dokanProfileMeta) {
-        try {
-          const dokanSettings = typeof dokanProfileMeta === 'string' 
-            ? JSON.parse(dokanProfileMeta) 
-            : dokanProfileMeta;
-          
-          if (dokanSettings.store_name) {
-            const dokanSlug = dokanSettings.store_name.toLowerCase().replace(/\s+/g, '-');
-            if (dokanSlug === slug) return true;
-          }
-        } catch (e) {
-          // Ignore parse errors
-        }
-      }
+      // 3. Check pre-generated storeSlug (from dokan_profile_settings)
+      if (c.storeSlug && c.storeSlug.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '') === cleanQuerySlug) return true;
+
       return false;
     });
     
@@ -583,32 +679,47 @@ export async function getVendorBySlug(slug) {
       dokanFailed = true;
     }
 
+    // Fallback: use WC REST API (cached) and filter by store.id / _dokan_vendor_id in JS
     if (dokanFailed || vendorProducts.length === 0) {
-      const productsRes = await fetch(
-        `${WP_URL}/wp-json/wc/v3/products?per_page=100&status=publish`,
-        { headers: { Authorization: `Basic ${auth}` } }
-      );
-      if (productsRes.ok) {
-        const allProducts = await productsRes.json();
-        vendorProducts = (Array.isArray(allProducts) ? allProducts : [])
-          .filter(p => {
-            const dokanVendorId = (p.meta_data || []).find(
-              m => m.key === '_dokan_vendor_id' || m.key === '_vendor_id'
-            )?.value;
-            return String(dokanVendorId) === String(matchedVendor.id);
-          })
-          .map(p => ({
-            id: p.id, name: p.name, slug: p.slug, type: p.type, status: p.status,
-            description: p.description, short_description: p.short_description,
-            price: p.price, regular_price: p.regular_price, sale_price: p.sale_price,
-            average_rating: p.average_rating, rating_count: p.rating_count,
-            on_sale: p.on_sale, stock_status: p.stock_status, stock_quantity: p.stock_quantity,
-            manage_stock: p.manage_stock,
-            images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
-            categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
-            attributes: p.attributes || [], meta_data: p.meta_data || []
-          }));
+      let allProducts = [];
+      const now = Date.now();
+      
+      if (WC_PRODUCTS_FALLBACK_CACHE.data && (now - WC_PRODUCTS_FALLBACK_CACHE.timestamp < FALLBACK_CACHE_TTL)) {
+        allProducts = WC_PRODUCTS_FALLBACK_CACHE.data;
+      } else {
+        try {
+          const productsRes = await fetch(
+            `${WP_URL}/wp-json/wc/v3/products?per_page=100&status=publish`,
+            { headers: { Authorization: `Basic ${auth}` } }
+          );
+          if (productsRes.ok) {
+            allProducts = await productsRes.json();
+            WC_PRODUCTS_FALLBACK_CACHE.data = allProducts;
+            WC_PRODUCTS_FALLBACK_CACHE.timestamp = now;
+          }
+        } catch (e) {
+          console.warn("Fallback WC products fetch failed:", e.message);
+        }
       }
+
+      vendorProducts = (Array.isArray(allProducts) ? allProducts : [])
+        .filter(p => {
+          const dokanVendorId = p.store?.id || (p.meta_data || []).find(
+            m => m.key === '_dokan_vendor_id' || m.key === '_vendor_id'
+          )?.value;
+          return String(dokanVendorId) === String(matchedVendor.id);
+        })
+        .map(p => ({
+          id: p.id, name: p.name, slug: p.slug, type: p.type, status: p.status,
+          description: p.description, short_description: p.short_description,
+          price: p.price, regular_price: p.regular_price, sale_price: p.sale_price,
+          average_rating: p.average_rating, rating_count: p.rating_count,
+          on_sale: p.on_sale, stock_status: p.stock_status, stock_quantity: p.stock_quantity,
+          manage_stock: p.manage_stock,
+          images: (p.images || []).map(img => ({ src: img.src, alt: img.alt })),
+          categories: (p.categories || []).map(c => ({ id: c.id, name: c.name, slug: c.slug })),
+          attributes: p.attributes || [], meta_data: p.meta_data || []
+        }));
     }
 
     

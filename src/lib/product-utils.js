@@ -10,7 +10,7 @@ export function isProductOutOfStock(product) {
 }
 
 export function getProductMerchant(product) {
-  if (!product) return { name: null, id: null };
+  if (!product) return { name: null, id: null, slug: null };
   const name =
     product.store?.shop_name ||
     product.store?.name ||
@@ -23,5 +23,12 @@ export function getProductMerchant(product) {
     product.store?.id ||
     product.author ||
     null;
-  return { name, id };
+  
+  let slug = null;
+  if (product.store?.url) {
+    const parts = product.store.url.replace(/\/$/, '').split('/');
+    slug = parts[parts.length - 1];
+  }
+  
+  return { name, id, slug };
 }

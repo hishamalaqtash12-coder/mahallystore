@@ -150,7 +150,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
 
   const ratingCount = product.rating_count || 0;
   const avgRating = product.average_rating ? parseFloat(product.average_rating) : 0;
-  const { name: merchantName, id: merchantId } = getProductMerchant(product);
+  const { name: merchantName, id: merchantId, slug: merchantSlug } = getProductMerchant(product);
 
 
 
@@ -400,7 +400,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                 <a href={`/product/${product.slug}`} className="text-[13px] text-brand hover:text-brand-dark hover:underline flex items-center gap-1">
                   {t("viewFullDetails")} <ChevronRight size={14} className="rtl:-scale-x-100" />
                 </a>
-                <a href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="text-[11px] text-zinc-400 hover:text-brand hover:underline transition-colors">
+                <a href={merchantSlug || merchantId ? `/vendor/${merchantSlug || merchantId}` : "/vendors"} className="text-[11px] text-zinc-400 hover:text-brand hover:underline transition-colors">
                   {t("soldBy", { merchantName: merchantName || (typeof t === 'function' ? t('mahallyOfficial', { fallback: "Mahally Official" }) : "Mahally Official") })}
                 </a>
               </div>

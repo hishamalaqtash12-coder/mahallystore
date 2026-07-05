@@ -301,10 +301,10 @@ export default function ProductActions({ product, variations = [], returnPolicy 
         <div className="text-[#0F1111]">{product.meta_data?.find(m => m.key === "mahally_shipped_by")?.value || "لا توجد معلومات متوفرة"}</div>
         <div className="text-[#565959]">يباع بواسطة</div>
         {(() => {
-          const { name: storeName, id: storeId } = getProductMerchant(product);
+          const { name: storeName, id: storeId, slug: storeSlug } = getProductMerchant(product);
           return (
             <Link
-              href={storeId ? `/vendors/${storeId}` : "/vendors"}
+              href={storeSlug || storeId ? `/vendor/${storeSlug || storeId}` : "/vendors"}
               className="text-brand hover:text-brand-dark hover:underline font-medium"
             >
               {product.store?.shop_name || "متجر غير معروف"}

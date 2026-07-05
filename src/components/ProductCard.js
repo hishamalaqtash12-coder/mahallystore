@@ -117,8 +117,8 @@ export default function ProductCard({ product }) {
   deliveryDate.setDate(deliveryDate.getDate() + 3);
   const deliveryStr = deliveryDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-  const { name: merchantName, id: merchantId } = getProductMerchant(product);
-  const merchantLink = merchantId ? `/vendors/${merchantId}` : "/vendors";
+  const { name: merchantName, id: merchantId, slug: merchantSlug } = getProductMerchant(product);
+  const merchantLink = merchantSlug || merchantId ? `/vendor/${merchantSlug || merchantId}` : "/vendors";
   const isVerifiedMerchant = !!merchantId;
 
   const descriptionText = product.short_description || product.description || "";

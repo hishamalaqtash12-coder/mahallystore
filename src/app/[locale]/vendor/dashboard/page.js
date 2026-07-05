@@ -133,7 +133,7 @@ export default function VendorDashboardPage() {
   const navItems = [
     { label: "Overview", icon: LayoutGrid, href: "#overview", active: true },
     { label: "Products", icon: Package, href: "/merchant/dashboard", active: false },
-    { label: "Store Page", icon: ExternalLink, href: `/vendors/${profile?.storeSlug}`, active: false, external: true },
+    { label: "Store Page", icon: ExternalLink, href: `/vendor/${profile?.storeSlug}`, active: false, external: true },
     { label: "Settings", icon: Settings, href: "#settings", active: false },
   ];
 
@@ -152,7 +152,7 @@ export default function VendorDashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           {profile?.storeSlug && (
-            <Link href={`/vendors/${profile.storeSlug}`} target="_blank"
+            <Link href={`/vendor/${profile.storeSlug}`} target="_blank"
               className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400 hover:text-white transition-colors">
               <ExternalLink size={13} /> View Store
             </Link>
@@ -256,7 +256,7 @@ export default function VendorDashboardPage() {
 
             <div className="pt-4 border-t border-zinc-50 flex items-center justify-between">
               {profile?.storeSlug && (
-                <Link href={`/vendors/${profile.storeSlug}`} target="_blank"
+                <Link href={`/vendor/${profile.storeSlug}`} target="_blank"
                   className="text-[11px] font-black text-zinc-400 hover:text-brand transition-colors uppercase tracking-widest flex items-center gap-1.5">
                   <ExternalLink size={12} /> Preview store page
                 </Link>
@@ -274,7 +274,7 @@ export default function VendorDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { label: "Manage Products", desc: "Add, edit, and manage your listed products", href: "/merchant/dashboard", icon: Package, color: "brand" },
-            { label: "View Your Store Page", desc: "See how customers see your store", href: `/vendors/${profile?.storeSlug || "#"}`, icon: Store, color: "emerald-600", external: true },
+            { label: "View Your Store Page", desc: "See how customers see your store", href: `/vendor/${profile?.storeSlug || "#"}`, icon: Store, color: "emerald-600", external: true },
           ].map((item) => (
             <Link key={item.label} href={item.href} target={item.external ? "_blank" : undefined}
               className="bg-white p-6 rounded-2xl border border-zinc-100 hover:border-brand hover:shadow-lg transition-all group flex items-center gap-5">

@@ -184,7 +184,7 @@ export default function TrackingModal({ order, isOpen, onClose }) {
                         <span className="text-[11px] text-zinc-500">
                           مباع بواسطة:{" "}
                           {hasRealMerchant ? (
-                            <Link href={merchantId ? `/vendors/${merchantId}` : "/vendors"} className="font-bold text-[#be374f] hover:underline">
+                            <Link href={merchantId ? `/vendor/${merchantId}` : "/vendors"} className="font-bold text-[#be374f] hover:underline">
                               {merchantName}
                             </Link>
                           ) : (

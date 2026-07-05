@@ -13,7 +13,7 @@ export async function GET(request) {
 
   try {
     const [vendors, productsRes] = await Promise.all([
-      getVendors({ includeRestricted }),
+      getVendors({ includeRestricted, per_page: 100 }),
       getProducts({ per_page: 100 }, false, 3, includeRestricted)
     ]);
 
@@ -60,7 +60,7 @@ export async function GET(request) {
         id: v.id,
         name: `${v.first_name} ${v.last_name}`.trim(),
         storeName: dokan.store_name || meta.mahally_store_name || v.first_name || "Merchant",
-        storeSlug: dokan.store_name?.toLowerCase().replace(/\s+/g, '-') || meta.mahally_store_slug || "",
+        storeSlug: v.storeSlug || v.username || String(v.id),
         storeLogo,
         storeBanner,
         storeDescription: dokan.store_description || meta.mahally_store_description || "",

@@ -102,7 +102,7 @@ export default function AccountFollowedStoresPage() {
             <div key={v.id} className="flex flex-col border border-zinc-200 rounded-md overflow-hidden hover:shadow-md transition-shadow bg-white relative">
               
               {/* Store Header/Banner */}
-              <Link href={`/vendors/${v.id}`} className="relative h-24 bg-zinc-100 overflow-hidden block">
+              <Link href={`/vendor/${v.storeSlug || v.id}`} className="relative h-24 bg-zinc-100 overflow-hidden block">
                 {v.storeBanner ? (
                   <Image 
                     src={v.storeBanner} 
@@ -129,7 +129,7 @@ export default function AccountFollowedStoresPage() {
               <div className="pt-6 pb-4 px-4 flex flex-col flex-1">
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <Link href={`/vendors/${v.id}`} className="block">
+                    <Link href={`/vendor/${v.storeSlug || v.id}`} className="block">
                       <h3 className="text-[15px] font-bold text-zinc-900 hover:text-[#9b2c41] transition-colors leading-tight">
                         {v.storeName}
                       </h3>

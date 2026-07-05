@@ -137,7 +137,7 @@ const MerchantCarousel = memo(({ activeVendors }) => {
           {activeVendors.map((vendor, i) => (
             <Link
               key={i}
-              href={`/vendors/${vendor.id}`}
+              href={`/vendor/${vendor.storeSlug || vendor.id}`}
               className="flex flex-col shrink-0 w-[160px] h-[200px] bg-white group/v transition-all duration-300 rounded-xl border border-white/10 shadow-lg overflow-hidden"
             >
               {/* Top yellow banner */}

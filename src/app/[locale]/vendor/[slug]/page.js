@@ -405,7 +405,7 @@ export default function VendorProfilePage() {
                       </Link>
                     ) : (
                       <Link
-                        href={`/login?redirect=/vendors/${slug}`}
+                        href={`/login?redirect=/vendor/${slug}`}
                         className="h-9 px-4 rounded-md text-[13px] font-medium border border-zinc-300 text-zinc-700 flex items-center gap-2 hover:bg-zinc-50"
                       >
                         <Mail size={14} /> {t("message")}
@@ -692,7 +692,7 @@ export default function VendorProfilePage() {
                       user ? (
                         <Link href={`/messages?to=${v.id}`} className="inline-block text-brand font-medium hover:underline">{t("message")} {t("viaMahally")} &gt;</Link>
                       ) : (
-                        <Link href={`/login?redirect=/vendors/${slug}`} className="inline-block text-brand font-medium hover:underline">{t("message")} {t("viaMahally")} &gt;</Link>
+                        <Link href={`/login?redirect=/vendor/${slug}`} className="inline-block text-brand font-medium hover:underline">{t("message")} {t("viaMahally")} &gt;</Link>
                       )
                     )}
                   </div>
