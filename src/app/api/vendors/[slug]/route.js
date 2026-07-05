@@ -94,15 +94,21 @@ export async function GET(request, { params }) {
     // Fetch from Dokan vendor API to get fully-resolved image URLs (banner/logo)
     let dokanStore = {};
     try {
+      const dokanController = new AbortController();
+      const dokanTimeout = setTimeout(() => dokanController.abort(), 4000); // 4s timeout
       const dokanStoreRes = await fetch(
         `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/dokan/v1/stores/${v.id}`,
-        { headers: { Authorization: `Basic ${Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64")}` }, next: { revalidate: 0 } }
+        { 
+          headers: { Authorization: `Basic ${Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64")}` },
+          signal: dokanController.signal
+        }
       );
+      clearTimeout(dokanTimeout);
       if (dokanStoreRes.ok) {
         dokanStore = await dokanStoreRes.json();
       }
     } catch (e) {
-      console.warn("Dokan store fetch failed, falling back to meta", e.message);
+      console.warn("Dokan store fetch failed or timed out, falling back to meta:", e.message);
     }
 
     const profile = {
