@@ -508,8 +508,12 @@ export async function getVendorById(vendorId) {
 
 export async function getVendorBySlug(slug) {
   try {
-    // If slug is numeric, check by ID first
+    // If slug is a plain number OR starts with a number followed by a dash, look up by ID
+    const plainId = /^\d+$/.test(slug) ? parseInt(slug) : null;
     const idMatch = slug.match(/^(\d+)-/);
+    if (plainId) {
+      return await getVendorById(plainId);
+    }
     if (idMatch) {
       return await getVendorById(parseInt(idMatch[1]));
     }
