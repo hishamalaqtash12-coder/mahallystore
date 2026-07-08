@@ -22,15 +22,25 @@ export async function GET(request) {
 
     const list = vendors.map((v) => {
       const meta = Object.fromEntries((v.meta_data || []).map((m) => [m.key, m.value]));
+      let dokanSettings = {};
+      try {
+        const dokanMeta = meta.dokan_profile_settings;
+        dokanSettings = typeof dokanMeta === 'string' ? JSON.parse(dokanMeta) : (dokanMeta || {});
+      } catch (e) {}
+
+      const storeName = dokanSettings.store_name || meta.mahally_store_name || `${v.first_name} ${v.last_name}`.trim() || v.username || "Store";
+      const storeSlug = dokanSettings.store_name?.toLowerCase().replace(/\s+/g, '-') || meta.mahally_store_slug || "";
+      const storeDescription = dokanSettings.store_description || meta.mahally_store_description || "";
+
       return {
         id: v.id,
-        name: `${v.first_name} ${v.last_name}`.trim(),
+        name: storeName,
         email: v.email,
         phone: v.billing?.phone || "",
-        storeName: meta.mahally_store_name || "",
-        storeSlug: meta.mahally_store_slug || "",
+        storeName: storeName,
+        storeSlug: storeSlug,
         storeCategory: meta.mahally_store_category || "",
-        storeDescription: meta.mahally_store_description || "",
+        storeDescription: storeDescription,
         status: (meta.dokan_enable_selling === "yes") ? "approved" : (meta.mahally_vendor_status || "pending"),
         membershipPlan: meta.mahally_membership_plan || "free",
         dateCreated: v.date_created,

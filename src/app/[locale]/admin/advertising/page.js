@@ -201,11 +201,10 @@ export default function AdminAdvertisingPage() {
                       className="w-full h-10 px-3 rounded-lg border border-zinc-300 text-[13px] outline-none focus:border-[#be374f]"
                    >
                       <option value="">-- Select Store --</option>
-                      {vendors.map(v => {
-                        const storeName = v.meta_data?.find(m => m.key === "dokan_store_name" || m.key === "mahally_store_name")?.value;
-                        const name = storeName || v.first_name || `Store #${v.id}`;
-                        return <option key={v.id} value={v.id}>{name} (ID: {v.id})</option>;
-                      })}
+                       {vendors.map(v => {
+                         const name = v.storeName || v.name || `Store #${v.id}`;
+                         return <option key={v.id} value={v.id}>{name} (ID: {v.id})</option>;
+                       })}
                    </select>
                  )}
               </div>
