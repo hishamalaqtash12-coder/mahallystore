@@ -6,7 +6,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Search,
   RefreshCw,
   Store,
   Mail,
@@ -17,8 +16,9 @@ import {
   Star,
   LayoutGrid,
   Save,
-  Eye,
-  EyeOff,
+  ToggleLeft,
+  ToggleRight,
+  Users,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import AdminSearch from "@/components/admin/AdminSearch";
@@ -34,6 +34,7 @@ export default function AdminVendorsPage() {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [bulkLoading, setBulkLoading] = useState(null); // "approve" | "reject" | null
   const [filter, setFilter] = useState("pending");
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState(null);
@@ -107,6 +108,48 @@ export default function AdminVendorsPage() {
       showToast("Action failed. Please try again.", "error");
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleBulkAction = async (action) => {
+    const targets = filtered.filter((v) =>
+      action === "approve" ? v.status !== "approved" : v.status !== "rejected"
+    );
+    if (targets.length === 0) {
+      showToast("No vendors to update in the current filter.", "error");
+      return;
+    }
+    const label = action === "approve" ? "activate" : "deactivate";
+    if (!confirm(`Are you sure you want to ${label} all ${targets.length} vendor(s) shown?`)) return;
+
+    setBulkLoading(action);
+    try {
+      const res = await fetch("/api/admin/vendors", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vendorIds: targets.map((v) => v.id), action }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const newStatus = action === "approve" ? "approved" : "rejected";
+        setVendors((prev) =>
+          prev.map((v) =>
+            targets.find((t) => t.id === v.id) ? { ...v, status: newStatus } : v
+          )
+        );
+        showToast(
+          `Done! ${data.succeeded} vendor(s) ${action === "approve" ? "activated" : "deactivated"}${
+            data.failed > 0 ? `, ${data.failed} failed` : ""
+          }.`,
+          data.failed > 0 ? "error" : "success"
+        );
+      } else {
+        showToast("Bulk action failed. Please try again.", "error");
+      }
+    } catch {
+      showToast("Bulk action failed. Please try again.", "error");
+    } finally {
+      setBulkLoading(null);
     }
   };
 
@@ -285,6 +328,43 @@ export default function AdminVendorsPage() {
             value={query}
             onChange={setQuery}
           />
+
+          {/* Bulk Actions Bar */}
+          {!loading && filtered.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+              <div className="flex items-center gap-2 text-sm text-zinc-600 me-auto">
+                <Users size={15} className="text-zinc-400" />
+                <span>
+                  <strong className="text-zinc-900">{filtered.length}</strong> vendor{filtered.length !== 1 ? "s" : ""} shown
+                </span>
+              </div>
+              <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider hidden sm:block">Bulk:</span>
+              <button
+                onClick={() => handleBulkAction("approve")}
+                disabled={bulkLoading !== null || filtered.every((v) => v.status === "approved")}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {bulkLoading === "approve" ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <ToggleRight size={14} />
+                )}
+                Activate All
+              </button>
+              <button
+                onClick={() => handleBulkAction("reject")}
+                disabled={bulkLoading !== null || filtered.every((v) => v.status === "rejected")}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 bg-white text-zinc-700 text-xs font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {bulkLoading === "reject" ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <ToggleLeft size={14} />
+                )}
+                Deactivate All
+              </button>
+            </div>
+          )}
 
           {/* Vendor List */}
           {loading ? (

@@ -44,14 +44,58 @@ export async function GET(request) {
   }
 }
 
-/** PATCH /api/admin/vendors — approve or reject a vendor */
+/** Helper: approve or reject a single vendor */
+async function applySingleAction(vendorId, action) {
+  const dokanEnable = action === "approve" ? "yes" : "no";
+  await updateCustomerMeta(vendorId, { dokan_enable_selling: dokanEnable });
+
+  if (action === "approve") {
+    try {
+      const WooCommerceRestApi = (await import("@woocommerce/woocommerce-rest-api")).default;
+      const api = new WooCommerceRestApi({
+        url: process.env.NEXT_PUBLIC_WORDPRESS_URL || "https://fallback.mahally.local",
+        consumerKey: process.env.WC_CONSUMER_KEY,
+        consumerSecret: process.env.WC_CONSUMER_SECRET,
+        version: "wc/v3",
+      });
+      await api.put(`customers/${vendorId}`, { role: "seller" });
+    } catch (e) {
+      console.warn(`Failed to update user role to seller for vendor ${vendorId}:`, e.message);
+    }
+  }
+}
+
+/** PATCH /api/admin/vendors — approve, reject, change plan, or bulk action */
 export async function PATCH(request) {
   if (!isAdmin(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const { vendorId, action, plan } = await request.json(); // action: "approve" | "reject" | "change_plan"
+    const body = await request.json();
+
+    // ── Bulk action: { vendorIds: number[], action: "approve" | "reject" } ──
+    if (Array.isArray(body.vendorIds)) {
+      const { vendorIds, action } = body;
+      if (!["approve", "reject"].includes(action)) {
+        return NextResponse.json({ error: "action must be approve or reject for bulk operations" }, { status: 400 });
+      }
+
+      const newStatus = action === "approve" ? "approved" : "rejected";
+
+      // Process all vendors concurrently
+      const results = await Promise.allSettled(
+        vendorIds.map((id) => applySingleAction(id, action))
+      );
+
+      const succeeded = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.length - succeeded;
+
+      return NextResponse.json({ success: true, status: newStatus, succeeded, failed, total: vendorIds.length });
+    }
+
+    // ── Single action: { vendorId, action, plan? } ──
+    const { vendorId, action, plan } = body;
 
     if (!vendorId || !["approve", "reject", "change_plan"].includes(action)) {
       return NextResponse.json({ error: "vendorId and valid action are required" }, { status: 400 });
@@ -64,30 +108,9 @@ export async function PATCH(request) {
     }
 
     const newStatus = action === "approve" ? "approved" : "rejected";
-    const dokanEnable = action === "approve" ? "yes" : "no";
-
-    // Update Dokan meta
-    await updateCustomerMeta(vendorId, { 
-      dokan_enable_selling: dokanEnable
-    });
-
-    // If approved, also ensure the user has the 'seller' role in WooCommerce/Dokan
-    if (action === "approve") {
-      try {
-        const WooCommerceRestApi = (await import("@woocommerce/woocommerce-rest-api")).default;
-        const api = new WooCommerceRestApi({
-          url: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://fallback.mahally.local',
-          consumerKey: process.env.WC_CONSUMER_KEY,
-          consumerSecret: process.env.WC_CONSUMER_SECRET,
-          version: "wc/v3",
-        });
-        await api.put(`customers/${vendorId}`, { role: 'seller' });
-      } catch (e) {
-        console.warn("Failed to update user role to seller:", e.message);
-      }
-    }
-
+    await applySingleAction(vendorId, action);
     return NextResponse.json({ success: true, status: newStatus });
+
   } catch (error) {
     console.error("Admin vendor action error:", error.message);
     return NextResponse.json({ error: "Failed to update vendor status" }, { status: 500 });
