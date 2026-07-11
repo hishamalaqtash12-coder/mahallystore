@@ -1,12 +1,12 @@
 {
   "RegistrationPopup": {
-    "welcomeTitle": "Join Mahally",
-    "buyerTitle": "Shoppers!",
-    "buyerDesc": "Register now to receive exclusive offers, discounts, and coupons for free as an early subscriber.",
-    "buyerButton": "Register as Buyer",
-    "sellerTitle": "Sellers!",
-    "sellerDesc": "Confirm free registration and free features. Start selling today.",
-    "sellerButton": "Register as Seller",
+    "welcomeTitle": "🚀 Early Bird Membership!",
+    "buyerTitle": "🛍️ Buyer",
+    "buyerDesc": "🎁 Free Membership + Exclusive Coupons & Discounts",
+    "buyerButton": "Get Your Free Membership",
+    "sellerTitle": "🏪 Seller",
+    "sellerDesc": "🚀 Free Integrated E-Store & Start Selling with Zero Fees",
+    "sellerButton": "Open Your Store For Free",
     "close": "Close"
   },
   "Header": {

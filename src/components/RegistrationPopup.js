@@ -54,30 +54,30 @@ export default function RegistrationPopup() {
       />
       
       {/* Modal */}
-      <div className={`relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
+      <div className={`relative w-full max-w-3xl max-h-[90vh] sm:max-h-[85vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 transform ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
         
         {/* Close button */}
         <button 
           onClick={handleClose}
-          className="absolute top-4 end-4 w-8 h-8 flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 text-zinc-500 rounded-full transition-colors z-10"
+          className="absolute top-4 end-4 w-8 h-8 flex items-center justify-center bg-zinc-100/90 backdrop-blur-sm hover:bg-zinc-200 text-zinc-500 rounded-full transition-colors z-20"
           aria-label={t("close")}
         >
           <X size={18} />
         </button>
 
-        <div className="p-8 md:p-10 text-center border-b border-zinc-100 bg-brand/5">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-zinc-900 mb-2">{t("welcomeTitle")}</h2>
+        <div className="p-6 md:p-8 text-center border-b border-zinc-100 bg-brand/5 shrink-0">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-extrabold text-zinc-900 leading-tight">{t("welcomeTitle")}</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-zinc-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-zinc-100 overflow-y-auto flex-1">
           
           {/* Buyer Section */}
-          <div className="p-8 flex flex-col items-center text-center group hover:bg-zinc-50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <ShoppingBag size={32} strokeWidth={1.5} />
+          <div className="p-6 sm:p-8 flex flex-col items-center text-center group hover:bg-zinc-50 transition-colors">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+              <ShoppingBag size={28} className="sm:w-8 sm:h-8" strokeWidth={1.5} />
             </div>
-            <h3 className="text-xl font-bold text-zinc-900 mb-3">{t("buyerTitle")}</h3>
-            <p className="text-[14px] text-zinc-600 mb-8 leading-relaxed flex-1">
+            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 mb-2 sm:mb-3">{t("buyerTitle")}</h3>
+            <p className="text-[13px] sm:text-[14px] text-zinc-600 mb-5 sm:mb-8 leading-relaxed flex-1">
               {t("buyerDesc")}
             </p>
             <Link 
@@ -90,12 +90,12 @@ export default function RegistrationPopup() {
           </div>
 
           {/* Seller Section */}
-          <div className="p-8 flex flex-col items-center text-center group hover:bg-zinc-50 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-brand/10 text-brand flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Store size={32} strokeWidth={1.5} />
+          <div className="p-6 sm:p-8 flex flex-col items-center text-center group hover:bg-zinc-50 transition-colors">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-brand/10 text-brand flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+              <Store size={28} className="sm:w-8 sm:h-8" strokeWidth={1.5} />
             </div>
-            <h3 className="text-xl font-bold text-zinc-900 mb-3">{t("sellerTitle")}</h3>
-            <p className="text-[14px] text-zinc-600 mb-8 leading-relaxed flex-1">
+            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 mb-2 sm:mb-3">{t("sellerTitle")}</h3>
+            <p className="text-[13px] sm:text-[14px] text-zinc-600 mb-5 sm:mb-8 leading-relaxed flex-1">
               {t("sellerDesc")}
             </p>
             <Link 

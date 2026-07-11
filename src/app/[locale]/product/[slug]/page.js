@@ -227,12 +227,15 @@ export default async function ProductPage({ params }) {
               {(() => {
                 const { name: storeName, id: storeId, slug: storeSlug } = getProductMerchant(product);
                 return (
-                  <Link
-                    href={storeSlug || storeId ? `/vendor/${storeSlug || storeId}` : "/vendors"}
-                    className="text-[14px] text-[#be374f] hover:text-[#9b2c41] hover:underline mb-2 inline-block"
-                  >
-                    زيارة متجر {storeName || "محلي الرسمي"}
-                  </Link>
+                  <div className="flex items-center gap-1.5 text-[14px] mb-2">
+                    <span className="text-zinc-500">التاجر:</span>
+                    <Link
+                      href={storeSlug || storeId ? `/vendor/${storeSlug || storeId}` : "/vendors"}
+                      className="text-[#be374f] hover:text-[#9b2c41] hover:underline font-bold"
+                    >
+                      {storeName || "محلي الرسمي"}
+                    </Link>
+                  </div>
                 );
               })()}
 

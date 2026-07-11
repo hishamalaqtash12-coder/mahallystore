@@ -307,7 +307,7 @@ export default function ProductActions({ product, variations = [], returnPolicy 
               href={storeSlug || storeId ? `/vendor/${storeSlug || storeId}` : "/vendors"}
               className="text-brand hover:text-brand-dark hover:underline font-medium"
             >
-              {product.store?.shop_name || "متجر غير معروف"}
+              {storeName || "محلي (رسمي)"}
             </Link>
           );
         })()}
