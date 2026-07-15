@@ -57,7 +57,13 @@ export async function GET(request) {
 /** Helper: approve or reject a single vendor */
 async function applySingleAction(vendorId, action) {
   const dokanEnable = action === "approve" ? "yes" : "no";
-  await updateCustomerMeta(vendorId, { dokan_enable_selling: dokanEnable });
+  const mahallyStatus = action === "approve" ? "approved" : "rejected";
+
+  // Update BOTH fields atomically so both Dokan and the Mahally plugin stay in sync
+  await updateCustomerMeta(vendorId, {
+    dokan_enable_selling: dokanEnable,
+    mahally_vendor_status: mahallyStatus,
+  });
 
   if (action === "approve") {
     try {
@@ -71,6 +77,20 @@ async function applySingleAction(vendorId, action) {
       await api.put(`customers/${vendorId}`, { role: "seller" });
     } catch (e) {
       console.warn(`Failed to update user role to seller for vendor ${vendorId}:`, e.message);
+    }
+  } else if (action === "reject") {
+    // Optionally demote role back to customer so they cannot sell
+    try {
+      const WooCommerceRestApi = (await import("@woocommerce/woocommerce-rest-api")).default;
+      const api = new WooCommerceRestApi({
+        url: process.env.NEXT_PUBLIC_WORDPRESS_URL || "https://fallback.mahally.local",
+        consumerKey: process.env.WC_CONSUMER_KEY,
+        consumerSecret: process.env.WC_CONSUMER_SECRET,
+        version: "wc/v3",
+      });
+      await api.put(`customers/${vendorId}`, { role: "customer" });
+    } catch (e) {
+      console.warn(`Failed to demote vendor ${vendorId} role to customer:`, e.message);
     }
   }
 }

@@ -122,9 +122,15 @@ export async function POST(request) {
     if (found.role === 'administrator') {
       vendorStatus = "approved";
     } else if (role === 'vendor' || role === 'shop_manager' || found.role === 'seller') {
-      vendorStatus = meta.dokan_enable_selling === "yes" ? "approved" : "pending";
-      
-      // Auto-sync back to WordPress customer meta if out of sync
+      if (meta.dokan_enable_selling === "yes") {
+        vendorStatus = "approved";
+      } else {
+        // Preserve "rejected" if explicitly set — don't downgrade it to "pending"
+        vendorStatus = meta.mahally_vendor_status === "rejected" ? "rejected" : "pending";
+      }
+
+      // Auto-sync mahally_vendor_status back to WordPress if it's out of sync
+      // (e.g. admin approved via Dokan directly but mahally meta wasn't updated)
       if (meta.mahally_vendor_status !== vendorStatus) {
         try {
           await updateCustomerMeta(found.id, { mahally_vendor_status: vendorStatus });

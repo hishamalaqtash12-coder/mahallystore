@@ -19,7 +19,9 @@ export default function MerchantLayout({ children }) {
       } else if (!isApprovedVendor) {
         router.replace("/");
       } else if (isAdmin) {
-        router.replace("/admin");
+        if (user.email !== "motasem.udeh@gmail.com") {
+          router.replace("/admin");
+        }
       }
     }
   }, [user, isApprovedVendor, isAdmin, loading, router]);
@@ -33,7 +35,7 @@ export default function MerchantLayout({ children }) {
   }
 
   if (!user || !isApprovedVendor) return null;
-  if (isAdmin) return null;
+  if (isAdmin && user.email !== "motasem.udeh@gmail.com") return null;
 
   return (
     <div dir="ltr" className="min-h-screen bg-white flex font-sans">

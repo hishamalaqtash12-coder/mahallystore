@@ -34,9 +34,217 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import RichTextEditor from "./RichTextEditor";
+import { useLocale } from "next-intl";
+
+
+const arKeys = {
+  // General layout / Header
+  "Add New Product": "إضافة منتج جديد",
+  "Edit Product": "تعديل المنتج",
+  "Complete all sections to publish your product.": "أكمل جميع الأقسام لنشر منتجك.",
+  "Virtual": "افتراضي",
+  "Downloadable": "قابل للتنزيل",
+  "Cancel": "إلغاء",
+  "Publish Product": "نشر المنتج",
+  "Save Draft": "حفظ كمسودة",
+  "Save Product": "حفظ المنتج",
+  "Updating product...": "جاري تحديث المنتج...",
+  "All changes are saved locally.": "تم حفظ جميع التغييرات محلياً.",
+
+  // Tab Sidebar labels
+  "General": "عام",
+  "Inventory": "المخزون",
+  "Pricing & Schedule": "الأسعار والجدولة",
+  "Media & Gallery": "الوسائط والمعرض",
+  "Categories & Tags": "الأقسام والوسوم",
+  "Shipping": "الشحن",
+  "Linked Products": "المنتجات المرتبطة",
+  "Attributes": "السمات والمواصفات",
+  "Variations": "الخيارات المتعددة",
+  "Advanced": "خيارات متقدمة",
+  "Bulk Upload": "رفع جماعي",
+
+  // Tab General
+  "Product Name": "اسم المنتج",
+  "Product Type": "نوع المنتج",
+  "Simple Product": "منتج بسيط",
+  "Variable Product": "منتج متعدد الخيارات",
+  "External/Affiliate Product": "منتج خارجي / رابط خارجي",
+  "Product URL": "رابط المنتج الخارجي",
+  "Button Text": "نص زر الشراء",
+  "Buy product": "شراء المنتج",
+  "Product Description": "وصف المنتج",
+  "Short Description": "وصف قصير",
+  "e.g. Premium Leather Wallet": "مثال: محفظة جلدية فاخرة",
+  "Write a detailed, high-converting product description here...": "اكتب وصفاً تفصيلياً وجذاباً للمنتج هنا...",
+  "Write a brief, catchy summary of key highlights...": "اكتب ملخصاً قصيراً وجذاباً لأبرز مميزات المنتج...",
+
+  // Tab Inventory
+  "SKU": "رمز المنتج (SKU)",
+  "Manage stock?": "إدارة المخزون؟",
+  "Manage Stock": "إدارة المخزون",
+  "Manage stock level (quantity)": "إدارة المخزون (تحديد الكمية)",
+  "Stock Quantity": "كمية المخزون",
+  "Stock Status": "حالة المخزون",
+  "In Stock": "متوفر",
+  "Out of Stock": "غير متوفر",
+  "On Backorder": "طلب مسبق",
+  "In stock": "متوفر",
+  "Out of stock": "غير متوفر",
+  "On backorder": "طلب مسبق",
+  "Sold Individually?": "يباع بشكل منفرد؟",
+  "Sold individually (Limit purchases to 1 item per order)": "يباع بشكل منفرد (السماح بقطعة واحدة فقط في الطلب)",
+  "Enable this to only allow one of this item to be bought in a single order": "تمكين هذا الخيار للسماح بشراء قطعة واحدة فقط من هذا المنتج في الطلب الواحد",
+
+  // Tab Pricing & Schedule
+  "Regular Price (JOD)": "السعر العادي (بالدينار)",
+  "Sale Price (JOD)": "سعر التخفيض (بالدينار)",
+  "Sale Dates": "تواريخ التخفيض",
+  "Schedule": "جدولة التخفيض",
+  "Cancel Schedule": "إلغاء الجدولة",
+  "From": "من",
+  "To": "إلى",
+  "Default Regular Price (for variations)": "السعر الافتراضي العادي (للخيارات المتعددة)",
+  "This price will be used for any variations you generate below.": "سيتم استخدام هذا السعر لأي خيارات متعددة تقوم بتوليدها أدناه.",
+  "Default Sale Price": "سعر التخفيض الافتراضي",
+  "Sale price must be lower than the regular price.": "يجب أن يكون سعر التخفيض أقل من السعر العادي.",
+  "Sale Schedule (Optional)": "جدولة التخفيض (اختياري)",
+  "From Date": "من تاريخ",
+  "To Date": "إلى تاريخ",
+
+  // Tab Media & Gallery
+  "Product Images": "صور المنتج",
+  "Main Image": "الصورة الرئيسية",
+  "Gallery Images": "معرض الصور",
+  "Upload Image": "رفع صورة",
+  "Add to Gallery": "إضافة للمعرض",
+  "Uploading...": "جاري الرفع...",
+  "Main Product Image": "الصورة الرئيسية للمنتج",
+  "This will be the primary image for search results.": "ستكون هذه هي الصورة الأساسية لنتائج البحث.",
+  "Set Main Image": "تعيين الصورة الرئيسية",
+  "Recommended format:": "الصيغة الموصى بها:",
+  "Product Gallery": "معرض صور المنتج",
+  "Add Gallery Images": "إضافة صور للمعرض",
+
+  // Tab Categories & Tags
+  "Product Categories": "أقسام المنتج",
+  "Product Tags": "وسوم المنتج",
+  "Product Brands": "العلامات التجارية للمنتج",
+  "Add New Category": "إضافة قسم جديد",
+  "Add New Tag": "إضافة وسم جديد",
+  "Add New Brand": "إضافة علامة تجارية جديدة",
+  "Category Name": "اسم القسم",
+  "Tag Name": "اسم الوسم",
+  "Brand Name": "اسم العلامة التجارية",
+  "Add": "إضافة",
+  "Add new category...": "أضف قسماً جديداً...",
+  "Product Brand": "العلامة التجارية للمنتج",
+  "Add new tag...": "أضف وسماً جديداً...",
+  "Add new brand (e.g. Zara)...": "أضف علامة تجارية جديدة (مثال: زارا)...",
+  "Or select:": "أو اختر:",
+  "Choose Existing...": "اختر من الموجود...",
+
+  // Tab Shipping
+  "Weight (kg)": "الوزن (كجم)",
+  "Dimensions (L x W x H) (cm)": "الأبعاد (طول × عرض × ارتفاع) (سم)",
+  "Length": "الطول",
+  "Width": "العرض",
+  "Height": "الارتفاع",
+  "Shipping Class": "فئة الشحن",
+  "No shipping class": "لا توجد فئة شحن",
+  "Dimensions (cm)": "الأبعاد (سم)",
+
+  // Tab Linked Products
+  "Upsells": "منتجات للترقية (Upsells)",
+  "Cross-sells": "منتجات مرتبطة (Cross-sells)",
+  "Select products...": "اختر منتجات...",
+  "Upsells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.": "المنتجات البديلة (Upsells) هي منتجات توصي بها بدلاً من المنتج المعروض حالياً (مثلاً منتجات أكثر ربحاً أو أعلى جودة وسعراً).",
+  "Cross-sells are products which you promote in the cart, based on the current product.": "المنتجات المكملة (Cross-sells) هي منتجات تعرضها في سلة المشتريات بناءً على المنتج الحالي.",
+  "Search for a product... (Coming soon)": "البحث عن منتج... (قريباً)",
+
+  // Tab Attributes
+  "Custom Product Attribute": "سمة منتج مخصصة",
+  "Custom product attribute": "سمة منتج مخصصة",
+  "Add Attribute": "إضافة سمة",
+  "Save Attributes": "حفظ السمات",
+  "Name": "الاسم",
+  "Name:": "الاسم:",
+  "Value(s)": "القيم",
+  "Value(s):": "القيم:",
+  "Enter options separated by | (e.g. Red | Blue | Green)": "أدخل الخيارات مفصولة بـ | (مثال: أحمر | أزرق | أخضر)",
+  "Visible on the product page": "مرئي في صفحة المنتج",
+  "Used for variations": "يستخدم للخيارات المتعددة",
+  "e.g. Color or Size": "مثال: اللون أو المقاس",
+  "New attribute": "سمة جديدة",
+  "Enter options for customers to choose from, f.e. 'Blue' or 'Large'. Use '|' to separate different options.": "أدخل الخيارات ليختار منها العملاء، مثل 'أزرق' أو 'كبير'. استخدم '|' للفصل بين الخيارات.",
+  "Save attributes": "حفظ السمات",
+
+  // Tab Variations
+  "Add Variation": "إضافة خيار متعدد",
+  "Generate Variations": "توليد جميع الخيارات",
+  "Generate variations": "توليد جميع الخيارات",
+  "Add manually": "إضافة يدوية",
+  "No variations added yet. Add attributes and check 'Used for variations' first.": "لا توجد خيارات متعددة مضافة بعد. يرجى إضافة السمات وتحديد 'يستخدم للخيارات المتعددة' أولاً.",
+  "No variations yet. Generate them from all added attributes or add a new variation manually.": "لا توجد خيارات متعددة بعد. قم بتوليدها من السمات المضافة أو أضف خياراً جديداً يدوياً.",
+  "Default Form Values": "القيم الافتراضية للنموذج",
+  "Expand / Close": "توسيع / إغلاق",
+  "Variation Options": "خيارات التنوع",
+  "Are you sure you want to remove this variation?": "هل أنت متأكد من إزالة هذا الخيار المتنوع؟",
+  "Remove": "إزالة",
+  "Image": "الصورة",
+  "UPLOAD": "رفع",
+  "Enabled": "تمكين",
+  "Manage stock?": "إدارة المخزون؟",
+  "Regular price (JOD)": "السعر العادي (بالدينار)",
+  "Regular price (JOD) *": "السعر العادي (بالدينار) *",
+  "Sale price (JOD)": "سعر التخفيض (بالدينار)",
+  "Stock status": "حالة المخزون",
+  "Stock qty": "كمية المخزون",
+  "Allow backorders?": "السماح بالطلبات المسبقة؟",
+  "Do not allow": "عدم السماح",
+  "Allow, but notify customer": "السماح، مع إعلام العميل",
+  "Allow": "السماح",
+  "Low stock threshold": "حد انخفاض المخزون",
+  "Store-wide threshold (2)": "الحد الافتراضي للمتجر (2)",
+  "Shipping class": "فئة الشحن",
+  "Same as parent": "نفس المنتج الأب",
+  "Standard Shipping": "شحن قياسي",
+  "Heavy Items": "البضائع الثقيلة",
+  "Dimensions (L×W×H) (cm)": "الأبعاد (طول × عرض × ارتفاع) (سم)",
+  "Description": "الوصف",
+
+  // Tab Advanced
+  "Purchase Note": "ملاحظة الشراء",
+  "Menu Order": "ترتيب القائمة",
+  "Enable Reviews": "تمكين التقييمات",
+  "Enable reviews": "تمكين التقييمات",
+  "Return Policy": "سياسة الاسترجاع",
+  "Global Policy": "السياسة العامة للموقع",
+  "Custom Policy": "سياسة مخصصة للمنتج",
+  "No Returns": "غير قابل للاسترجاع",
+  "Return Period (Days)": "فترة الاسترجاع (بالأيام)",
+  "Returns & Refunds": "الاسترجاع والاسترداد",
+  "Item Return Policy": "سياسة استرجاع المنتج",
+  "Use Global Store Policy": "استخدام سياسة المتجر العامة",
+  "Custom Policy for this Item": "سياسة مخصصة لهذا المنتج",
+  "No Returns Accepted": "لا يقبل الاسترجاع",
+
+  // Tab Bulk Upload
+  "Bulk Product Upload": "رفع المنتجات جماعياً",
+  "Upload CSV File": "رفع ملف CSV",
+  "Download CSV Template": "تحميل نموذج ملف CSV",
+  "Import Products": "استيراد المنتجات",
+  "Invalid file type. Please upload a CSV file.": "نوع الملف غير صالح. يرجى رفع ملف بتنسيق CSV.",
+  "Upload Bulk Products": "رفع منتجات جماعي",
+  "Upload a JSON file containing an array of product objects.": "ارفع ملف JSON يحتوي على مصفوفة من كائنات المنتجات.",
+  "Choose File": "اختر ملف",
+};
 
 export default function AddProductForm({ onClose, onProductAdded, user, productToEdit }) {
   const { customerName, wooId } = useAuth();
+  const locale = useLocale();
+  const isAr = locale === "ar";
+  const l = (key) => isAr ? arKeys[key] || key : key;
   const [loading, setLoading] = useState(false);
   const [uploadingMain, setUploadingMain] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
@@ -551,17 +759,17 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
   };
 
   const tabs = [
-    { id: "general", label: "General", icon: Settings },
-    { id: "inventory", label: "Inventory", icon: Database },
-    { id: "pricing", label: "Pricing & Schedule", icon: Calendar, hide: formData.type === "variable" },
-    { id: "images", label: "Media & Gallery", icon: ImageIcon },
-    { id: "categories", label: "Categories & Tags", icon: Tag },
-    { id: "shipping", label: "Shipping", icon: Package },
-    { id: "linked", label: "Linked Products", icon: Layers },
-    { id: "attributes", label: "Attributes", icon: Layers },
-    { id: "variations", label: "Variations", icon: Layers, hide: formData.type === "simple" },
-    { id: "advanced", label: "Advanced", icon: Plus },
-    { id: "bulk", label: "Bulk Upload", icon: Layers }
+    { id: "general", label: l("General"), icon: Settings },
+    { id: "inventory", label: l("Inventory"), icon: Database },
+    { id: "pricing", label: l("Pricing & Schedule"), icon: Calendar, hide: formData.type === "variable" },
+    { id: "images", label: l("Media & Gallery"), icon: ImageIcon },
+    { id: "categories", label: l("Categories & Tags"), icon: Tag },
+    { id: "shipping", label: l("Shipping"), icon: Package },
+    { id: "linked", label: l("Linked Products"), icon: Layers },
+    { id: "attributes", label: l("Attributes"), icon: Layers },
+    { id: "variations", label: l("Variations"), icon: Layers, hide: formData.type === "simple" },
+    { id: "advanced", label: l("Advanced"), icon: Plus },
+    { id: "bulk", label: l("Bulk Upload"), icon: Layers }
   ].filter(t => !t.hide);
 
   useEffect(() => {
@@ -577,12 +785,12 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
 
   return (
     <div className="fixed top-0 end-0 w-full h-full z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-5xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-white w-full max-w-5xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" dir={isAr ? "rtl" : "ltr"}>
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
           <div>
-            <h2 className="text-[18px] font-bold text-zinc-900">{productToEdit ? "Edit Product" : "Add New Product"}</h2>
-            <p className="text-[12px] text-zinc-500 font-medium">Complete all sections to publish your product.</p>
+            <h2 className="text-[18px] font-bold text-zinc-900">{productToEdit ? l("Edit Product") : l("Add New Product")}</h2>
+            <p className="text-[12px] text-zinc-500 font-medium">{l("Complete all sections to publish your product.")}</p>
           </div>
           <div className="flex items-center gap-6 ms-12">
             <div className="flex items-center gap-2">
@@ -594,7 +802,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                 onChange={handleInputChange}
                 className="w-4 h-4 accent-[#be374f]"
               />
-              <label htmlFor="virtual" className="text-[13px] font-medium text-zinc-700 cursor-pointer">Virtual</label>
+              <label htmlFor="virtual" className="text-[13px] font-medium text-zinc-700 cursor-pointer">{l("Virtual")}</label>
             </div>
             <div className="flex items-center gap-2">
               <input 
@@ -605,7 +813,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                 onChange={handleInputChange}
                 className="w-4 h-4 accent-[#be374f]"
               />
-              <label htmlFor="downloadable" className="text-[13px] font-medium text-zinc-700 cursor-pointer">Downloadable</label>
+              <label htmlFor="downloadable" className="text-[13px] font-medium text-zinc-700 cursor-pointer">{l("Downloadable")}</label>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-zinc-200 rounded-full transition-colors">
@@ -653,35 +861,35 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               {activeTab === "general" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Product Name</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Product Name")}</label>
                     <input 
                       required
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="e.g. Premium Leather Wallet"
+                      placeholder={l("e.g. Premium Leather Wallet")}
                       className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] transition-all shadow-inner"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Product Type</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Product Type")}</label>
                     <select 
                       name="type"
                       value={formData.type}
                       onChange={handleInputChange}
                       className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all"
                     >
-                      <option value="simple">Simple Product</option>
-                      <option value="variable">Variable Product</option>
-                      <option value="external">External/Affiliate Product</option>
+                      <option value="simple">{l("Simple Product")}</option>
+                      <option value="variable">{l("Variable Product")}</option>
+                      <option value="external">{l("External/Affiliate Product")}</option>
                     </select>
                   </div>
 
                   {formData.type === "external" && (
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[13px] font-bold text-zinc-700">Product URL</label>
+                        <label className="text-[13px] font-bold text-zinc-700">{l("Product URL")}</label>
                         <input 
                           name="external_url"
                           value={formData.external_url}
@@ -691,12 +899,12 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[13px] font-bold text-zinc-700">Button Text</label>
+                        <label className="text-[13px] font-bold text-zinc-700">{l("Button Text")}</label>
                         <input 
                           name="button_text"
                           value={formData.button_text}
                           onChange={handleInputChange}
-                          placeholder="Buy product"
+                          placeholder={l("Buy product")}
                           className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f]"
                         />
                       </div>
@@ -707,8 +915,8 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                     <RichTextEditor 
                       value={formData.description}
                       onChange={(val) => setFormData(prev => ({ ...prev, description: val }))}
-                      placeholder="Write a detailed, high-converting product description here..."
-                      label="Product Description"
+                      placeholder={l("Write a detailed, high-converting product description here...")}
+                      label={l("Product Description")}
                       onEnhanceAi={handleEnhanceWithAI}
                       enhancingAi={enhancingAi}
                     />
@@ -718,8 +926,8 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                     <RichTextEditor 
                       value={formData.short_description}
                       onChange={(val) => setFormData(prev => ({ ...prev, short_description: val }))}
-                      placeholder="Write a brief, catchy summary of key highlights..."
-                      label="Short Description"
+                      placeholder={l("Write a brief, catchy summary of key highlights...")}
+                      label={l("Short Description")}
                       onEnhanceAi={handleEnhanceShortWithAI}
                       enhancingAi={enhancingShortAi}
                     />
@@ -730,7 +938,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               {activeTab === "inventory" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">SKU</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("SKU")}</label>
                     <input 
                       name="sku"
                       value={formData.sku}
@@ -749,13 +957,13 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       className="w-4 h-4 accent-[#be374f]"
                     />
                     <label htmlFor="manage_stock" className="text-[13px] font-bold text-zinc-700 cursor-pointer select-none">
-                      Manage stock level (quantity)
+                      {l("Manage stock level (quantity)")}
                     </label>
                   </div>
 
                   {formData.manage_stock && (
                     <div className="space-y-2">
-                      <label className="text-[13px] font-bold text-zinc-700">Stock Quantity</label>
+                      <label className="text-[13px] font-bold text-zinc-700">{l("Stock Quantity")}</label>
                       <input 
                         type="number"
                         name="stock_quantity"
@@ -767,7 +975,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   )}
 
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Stock Status</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Stock Status")}</label>
                     <div className="flex flex-col gap-2">
                       {[
                         { id: 'instock', label: 'In stock' },
@@ -784,7 +992,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                             onChange={handleInputChange}
                             className="w-4 h-4 accent-[#be374f]"
                           />
-                          <label htmlFor={status.id} className="text-[13px] text-zinc-700 cursor-pointer">{status.label}</label>
+                          <label htmlFor={status.id} className="text-[13px] text-zinc-700 cursor-pointer">{l(status.label)}</label>
                         </div>
                       ))}
                     </div>
@@ -800,7 +1008,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       className="w-4 h-4 accent-[#be374f]"
                     />
                     <label htmlFor="sold_individually" className="text-[13px] font-bold text-zinc-700 cursor-pointer select-none">
-                      Sold individually (Limit purchases to 1 item per order)
+                      {l("Sold individually (Limit purchases to 1 item per order)")}
                     </label>
                   </div>
                 </div>
@@ -811,7 +1019,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-[13px] font-bold text-zinc-700">
-                        {formData.type === "variable" ? "Default Regular Price (for variations)" : "Regular Price (JOD)"}
+                        {formData.type === "variable" ? l("Default Regular Price (for variations)") : l("Regular Price (JOD)")}
                       </label>
                       <input 
                         required
@@ -824,12 +1032,12 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] font-bold outline-none focus:border-[#be374f] transition-all shadow-inner"
                       />
                       {formData.type === "variable" && (
-                        <p className="text-[11px] text-zinc-500 italic">This price will be used for any variations you generate below.</p>
+                        <p className="text-[11px] text-zinc-500 italic">{l("This price will be used for any variations you generate below.")}</p>
                       )}
                     </div>
                     <div className="space-y-2">
                       <label className="text-[13px] font-bold text-zinc-700">
-                        {formData.type === "variable" ? "Default Sale Price" : "Sale Price (JOD)"}
+                        {formData.type === "variable" ? l("Default Sale Price") : l("Sale Price (JOD)")}
                       </label>
                       <input 
                         type="number"
@@ -847,7 +1055,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       {parseFloat(formData.sale_price) >= parseFloat(formData.regular_price) && (
                         <p className="text-[11px] text-rose-500 font-bold mt-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1">
                           <AlertCircle size={12} />
-                          Sale price must be lower than the regular price.
+                          {l("Sale price must be lower than the regular price.")}
                         </p>
                       )}
                     </div>
@@ -856,11 +1064,11 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-xl space-y-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar size={16} className="text-zinc-400" />
-                      <h4 className="text-[13px] font-bold text-zinc-700">Sale Schedule (Optional)</h4>
+                      <h4 className="text-[13px] font-bold text-zinc-700">{l("Sale Schedule (Optional)")}</h4>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-zinc-500">From Date</label>
+                        <label className="text-[11px] font-bold text-zinc-500">{l("From Date")}</label>
                         <input 
                           type="date"
                           name="date_on_sale_from"
@@ -870,7 +1078,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-zinc-500">To Date</label>
+                        <label className="text-[11px] font-bold text-zinc-500">{l("To Date")}</label>
                         <input 
                           type="date"
                           name="date_on_sale_to"
@@ -891,10 +1099,10 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                     <div className="flex items-center justify-between">
                       <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
                         <ImageIcon size={18} className="text-[#be374f]" />
-                        Main Product Image
+                        {l("Main Product Image")}
                       </h3>
                       {formData.images.length > 0 && (
-                        <span className="text-[11px] text-zinc-400 font-medium italic">This will be the primary image for search results.</span>
+                        <span className="text-[11px] text-zinc-400 font-medium italic">{l("This will be the primary image for search results.")}</span>
                       )}
                     </div>
                     
@@ -916,7 +1124,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         ) : (
                           <label className="inset-0 absolute cursor-pointer flex flex-col items-center justify-center gap-2 hover:bg-zinc-100 transition-colors">
                             <Upload size={32} className="text-zinc-300" />
-                            <span className="text-[12px] font-bold text-zinc-400">Set Main Image</span>
+                            <span className="text-[12px] font-bold text-zinc-400">{l("Set Main Image")}</span>
                             <input 
                               type="file" 
                               hidden 
@@ -932,10 +1140,10 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         )}
                       </div>
                       <div className="flex-1 text-[13px] text-zinc-500 leading-relaxed pt-4">
-                        <p className="font-bold text-zinc-700 mb-1">Recommended format:</p>
-                        <p>• 800x800px or larger</p>
-                        <p>• JPG, PNG or WebP</p>
-                        <p>• Max size: 2MB</p>
+                        <p className="font-bold text-zinc-700 mb-1">{l("Recommended format:")}</p>
+                        <p>{l("• 800x800px or larger")}</p>
+                        <p>{l("• JPG, PNG or WebP")}</p>
+                        <p>{l("• Max size: 2MB")}</p>
                       </div>
                     </div>
                   </div>
@@ -944,7 +1152,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   <div className="space-y-4 pt-8 border-t border-zinc-100">
                     <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
                       <Layers size={18} className="text-zinc-400" />
-                      Product Gallery
+                      {l("Product Gallery")}
                     </h3>
                     
                     <div className="grid grid-cols-4 gap-4">
@@ -953,7 +1161,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         uploadingGallery ? "bg-zinc-50 border-zinc-200 cursor-not-allowed" : "hover:bg-zinc-50 border-zinc-200 hover:border-[#be374f] hover:bg-zinc-50"
                       }`}>
                         {uploadingGallery ? <Loader2 size={24} className="text-zinc-300 animate-spin" /> : <Plus size={24} className="text-zinc-300" />}
-                        <span className="text-[11px] font-bold text-zinc-400">{uploadingGallery ? "Uploading..." : "Add Gallery Images"}</span>
+                        <span className="text-[11px] font-bold text-zinc-400">{uploadingGallery ? l("Uploading...") : l("Add Gallery Images")}</span>
                         <input 
                           type="file" 
                           hidden 
@@ -988,12 +1196,12 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                 <div className="space-y-8">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider">Product Categories</h3>
+                      <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider">{l("Product Categories")}</h3>
                     </div>
                     <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl space-y-4">
                       <div className="flex gap-2">
                         <input 
-                          placeholder="Add new category..."
+                          placeholder={l("Add new category...")}
                           value={newCatName}
                           onChange={(e) => setNewCatName(e.target.value)}
                           className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f]"
@@ -1027,11 +1235,11 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider">Product Tags</h3>
+                    <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider">{l("Product Tags")}</h3>
                     <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl space-y-4">
                       <div className="flex gap-2">
                         <input 
-                          placeholder="Add new tag..."
+                          placeholder={l("Add new tag...")}
                           value={newTagName}
                           onChange={(e) => setNewTagName(e.target.value)}
                           className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f]"
@@ -1072,11 +1280,11 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider">Product Brand</h3>
+                    <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-wider">{l("Product Brand")}</h3>
                     <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl space-y-4">
                       <div className="flex gap-2">
                         <input 
-                          placeholder="Add new brand (e.g. Zara)..."
+                          placeholder={l("Add new brand (e.g. Zara)...")}
                           value={newBrandName}
                           onChange={(e) => setNewBrandName(e.target.value)}
                           className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f]"
@@ -1091,7 +1299,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       </div>
                       
                       <div className="flex items-center gap-3">
-                        <span className="text-[11px] font-bold text-zinc-400 uppercase">Or select:</span>
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase">{l("Or select:")}</span>
                         <select 
                           name="brand_select"
                           onChange={(e) => {
@@ -1107,7 +1315,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           }}
                           className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none"
                         >
-                          <option value="">Choose Existing...</option>
+                          <option value="">{l("Choose Existing...")}</option>
                           {brandsList.map(brand => (
                             <option key={brand.id} value={brand.id}>{decodeEntities(brand.name)}</option>
                           ))}
@@ -1146,7 +1354,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               {activeTab === "shipping" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Weight (kg)</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Weight (kg)")}</label>
                     <input 
                       type="number"
                       name="weight"
@@ -1156,24 +1364,24 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                     />
                   </div>
                   <div className="space-y-4">
-                    <label className="text-[13px] font-bold text-zinc-700">Dimensions (cm)</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Dimensions (cm)")}</label>
                     <div className="grid grid-cols-3 gap-4">
                        <input 
-                         placeholder="Length"
+                         placeholder={l("Length")}
                          name="dimensions.length"
                          value={formData.dimensions.length}
                          onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, length: e.target.value } }))}
                          className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                        />
                        <input 
-                         placeholder="Width"
+                         placeholder={l("Width")}
                          name="dimensions.width"
                          value={formData.dimensions.width}
                          onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, width: e.target.value } }))}
                          className="h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] transition-all shadow-inner"
                        />
                        <input 
-                         placeholder="Height"
+                         placeholder={l("Height")}
                          name="dimensions.height"
                          value={formData.dimensions.height}
                          onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, height: e.target.value } }))}
@@ -1187,20 +1395,20 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               {activeTab === "linked" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Upsells</label>
-                    <p className="text-[11px] text-zinc-400">Upsells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.</p>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Upsells")}</label>
+                    <p className="text-[11px] text-zinc-400">{l("Upsells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.")}</p>
                     <input 
                       disabled
-                      placeholder="Search for a product... (Coming soon)"
+                      placeholder={l("Search for a product... (Coming soon)")}
                       className="w-full h-11 px-4 bg-zinc-50 border border-zinc-300 rounded-lg text-[14px] outline-none cursor-not-allowed"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Cross-sells</label>
-                    <p className="text-[11px] text-zinc-400">Cross-sells are products which you promote in the cart, based on the current product.</p>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Cross-sells")}</label>
+                    <p className="text-[11px] text-zinc-400">{l("Cross-sells are products which you promote in the cart, based on the current product.")}</p>
                     <input 
                       disabled
-                      placeholder="Search for a product... (Coming soon)"
+                      placeholder={l("Search for a product... (Coming soon)")}
                       className="w-full h-11 px-4 bg-zinc-50 border border-zinc-300 rounded-lg text-[14px] outline-none cursor-not-allowed"
                     />
                   </div>
@@ -1214,11 +1422,11 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       <Upload className="text-zinc-400" />
                     </div>
                     <div>
-                      <h4 className="text-[14px] font-bold text-zinc-900">Upload Bulk Products</h4>
-                      <p className="text-[12px] text-zinc-500 mt-1">Upload a JSON file containing an array of product objects.</p>
+                      <h4 className="text-[14px] font-bold text-zinc-900">{l("Upload Bulk Products")}</h4>
+                      <p className="text-[12px] text-zinc-500 mt-1">{l("Upload a JSON file containing an array of product objects.")}</p>
                     </div>
                     <label className="inline-block h-10 px-6 bg-zinc-900 text-white rounded-lg text-[13px] font-bold cursor-pointer hover:bg-zinc-800 transition-all">
-                      Choose File
+                      {l("Choose File")}
                       <input 
                         type="file" 
                         accept=".json" 
@@ -1266,7 +1474,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               {activeTab === "advanced" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Purchase Note</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Purchase Note")}</label>
                     <textarea 
                       name="purchase_note"
                       value={formData.purchase_note}
@@ -1276,7 +1484,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[13px] font-bold text-zinc-700">Menu Order</label>
+                    <label className="text-[13px] font-bold text-zinc-700">{l("Menu Order")}</label>
                     <input 
                       type="number"
                       name="menu_order"
@@ -1295,30 +1503,30 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       className="w-4 h-4 accent-[#be374f]"
                     />
                     <label htmlFor="reviews_allowed" className="text-[13px] font-bold text-zinc-700 cursor-pointer select-none">
-                      Enable reviews
+                      {l("Enable reviews")}
                     </label>
                   </div>
                   
                   <div className="pt-4 border-t border-zinc-200 space-y-4">
-                    <h4 className="text-[14px] font-bold text-zinc-900">Returns & Refunds</h4>
+                    <h4 className="text-[14px] font-bold text-zinc-900">{l("Returns & Refunds")}</h4>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[13px] font-bold text-zinc-700">Item Return Policy</label>
+                        <label className="text-[13px] font-bold text-zinc-700">{l("Item Return Policy")}</label>
                         <select 
                           name="return_policy"
                           value={formData.return_policy}
                           onChange={handleInputChange}
                           className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none focus:border-[#be374f] transition-all cursor-pointer"
                         >
-                          <option value="global">Use Global Store Policy</option>
-                          <option value="custom">Custom Policy for this Item</option>
-                          <option value="no-returns">No Returns Accepted</option>
+                          <option value="global">{l("Use Global Store Policy")}</option>
+                          <option value="custom">{l("Custom Policy for this Item")}</option>
+                          <option value="no-returns">{l("No Returns Accepted")}</option>
                         </select>
                       </div>
                       
                       {formData.return_policy === "custom" && (
                         <div className="space-y-2">
-                          <label className="text-[13px] font-bold text-zinc-700">Return Period (Days)</label>
+                          <label className="text-[13px] font-bold text-zinc-700">{l("Return Period (Days)")}</label>
                           <input 
                             type="number"
                             min="1"
@@ -1343,7 +1551,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         id="attr-select"
                         className="h-10 px-4 bg-zinc-50 border border-zinc-300 rounded-lg text-[13px] outline-none flex-1"
                       >
-                        <option value="custom">Custom product attribute</option>
+                        <option value="custom">{l("Custom product attribute")}</option>
                         {globalAttributes?.filter(ga => !formData.attributes?.find(fa => fa.id === ga.id)).map(ga => (
                           <option key={ga.id} value={ga.id}>{ga.name}</option>
                         ))}
@@ -1356,7 +1564,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         }}
                         className="h-10 px-6 bg-white border border-zinc-300 rounded-lg text-[13px] font-bold text-zinc-700 hover:bg-zinc-50 transition-colors"
                       >
-                        Add
+                        {l("Add")}
                       </button>
                     </div>
 
@@ -1364,22 +1572,22 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       {formData.attributes?.map((attr, idx) => (
                         <div key={idx} className="p-5 bg-zinc-50 border border-zinc-200 rounded-lg space-y-4">
                           <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-                            <span className="text-[14px] font-bold text-zinc-900">{attr.name || "New attribute"}</span>
+                            <span className="text-[14px] font-bold text-zinc-900">{attr.name || l("New attribute")}</span>
                             <button 
                               type="button"
                               onClick={() => setFormData(prev => ({ ...prev, attributes: prev.attributes.filter((_, i) => i !== idx) }))}
                               className="text-[12px] font-bold text-rose-600 hover:underline"
                             >
-                              Remove
+                              {l("Remove")}
                             </button>
                           </div>
                           
                           <div className="grid grid-cols-3 gap-6">
                             <div className="col-span-1 space-y-2">
-                              <label className="text-[12px] text-zinc-600">Name:</label>
+                              <label className="text-[12px] text-zinc-600">{l("Name:")}</label>
                               {(attr.isCustom || attr.id === 0) ? (
                                 <input 
-                                  placeholder="e.g. Color or Size"
+                                  placeholder={l("e.g. Color or Size")}
                                   value={attr.name}
                                   onChange={(e) => {
                                     const newAttrs = [...formData.attributes];
@@ -1406,7 +1614,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                     }}
                                     className="accent-[#be374f] w-4 h-4"
                                   />
-                                  <span className="text-[12px] text-zinc-700">Visible on the product page</span>
+                                  <span className="text-[12px] text-zinc-700">{l("Visible on the product page")}</span>
                                 </label>
                                 {formData.type === "variable" && (
                                   <label className="flex items-center gap-2 cursor-pointer">
@@ -1420,17 +1628,17 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                       }}
                                       className="accent-[#be374f] w-4 h-4"
                                     />
-                                    <span className="text-[12px] text-zinc-700">Used for variations</span>
+                                    <span className="text-[12px] text-zinc-700">{l("Used for variations")}</span>
                                   </label>
                                 )}
                               </div>
                             </div>
 
                             <div className="col-span-2 space-y-2">
-                              <label className="text-[12px] text-zinc-600">Value(s):</label>
+                              <label className="text-[12px] text-zinc-600">{l("Value(s):")}</label>
                               {(attr.isCustom || attr.id === 0) ? (
                                 <textarea 
-                                  placeholder="Enter options for customers to choose from, f.e. 'Blue' or 'Large'. Use '|' to separate different options."
+                                  placeholder={l("Enter options for customers to choose from, f.e. 'Blue' or 'Large'. Use '|' to separate different options.")}
                                   value={attr.rawValue !== undefined ? attr.rawValue : attr.options?.join(" | ") || ""}
                                   onChange={(e) => {
                                     const val = e.target.value;
@@ -1470,10 +1678,10 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                     <div className="pt-4 border-t border-zinc-200">
                       <button 
                         type="button"
-                        onClick={() => alert("Attributes saved locally. They will be published when you save the product.")}
+                        onClick={() => alert(l("Attributes saved locally. They will be published when you save the product."))} 
                         className="h-9 px-6 bg-[#0073aa] text-white rounded text-[13px] font-medium hover:bg-[#005177] transition-colors"
                       >
-                        Save attributes
+                        {l("Save attributes")}
                       </button>
                     </div>
                   </div>
@@ -1486,20 +1694,20 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       <button
                         type="button"
                         onClick={() => {
-                          if (window.confirm("Do you want to generate all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).")) {
+                          if (window.confirm(isAr ? "هل تريد توليد جميع الخيارات المتنوعة؟ سيقوم هذا بإنشاء خيار متنوع جديد لكل تركيبة ممكنة من السمات (بحد أقصى 50 لكل مرة)." : "Do you want to generate all variations? This will create a new variation for each and every possible combination of variation attributes (max 50 per run).")) {
                             generateVariations();
                           }
                         }}
                         className="h-9 px-6 bg-white border border-[#0073aa] text-[#0073aa] rounded text-[13px] font-medium hover:bg-zinc-50 transition-colors"
                       >
-                        Generate variations
+                        {l("Generate variations")}
                       </button>
                       <button
                         type="button"
                         onClick={() => alert("Manual addition coming soon. Use Generate for now.")}
                         className="h-9 px-6 bg-white border border-zinc-300 text-zinc-700 rounded text-[13px] font-medium hover:bg-zinc-50 transition-colors"
                       >
-                        Add manually
+                        {l("Add manually")}
                       </button>
                     </div>
 
@@ -1508,13 +1716,13 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         <div className="flex justify-center mb-4 opacity-50">
                           <Layers size={48} />
                         </div>
-                        <p className="text-[14px]">No variations yet. Generate them from all added attributes or add a new variation manually.</p>
+                        <p className="text-[14px]">{l("No variations yet. Generate them from all added attributes or add a new variation manually.")}</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between px-2 pb-2 border-b border-zinc-200 text-[12px] text-zinc-500 font-medium">
-                          <span>{formData.variations?.length || 0} variations</span>
-                          <span className="cursor-pointer hover:text-zinc-900">Expand / Close</span>
+                          <span>{isAr ? `${formData.variations?.length || 0} خيارات` : `${formData.variations?.length || 0} variations`}</span>
+                          <span className="cursor-pointer hover:text-zinc-900">{l("Expand / Close")}</span>
                         </div>
                         {formData.variations?.map((v, i) => (
                           <div key={i} className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
@@ -1522,26 +1730,26 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                               <div className="flex items-center gap-3">
                                 <span className="text-[12px] font-bold text-zinc-400">#{i + 1}</span>
                                 <span className="text-[13px] font-bold text-zinc-900">
-                                  {v.attributes?.map(a => a.option || a.name).join(" - ") || "Variation Options"}
+                                  {v.attributes?.map(a => a.option || a.name).join(" - ") || l("Variation Options")}
                                 </span>
                               </div>
                               <button 
                                 type="button" 
                                 onClick={() => {
-                                  if(window.confirm("Are you sure you want to remove this variation?")) {
+                                  if(window.confirm(isAr ? "هل أنت متأكد من إزالة هذا الخيار المتنوع؟" : "Are you sure you want to remove this variation?")) {
                                     setFormData(prev => ({...prev, variations: prev.variations.filter((_, idx) => idx !== i)}));
                                   }
                                 }}
                                 className="text-[12px] text-rose-600 hover:underline"
                               >
-                                Remove
+                                {l("Remove")}
                               </button>
                             </div>
                             <div className="p-4 bg-white space-y-6">
                               {/* Row 1: Image, SKU, Enabled, Manage Stock */}
                               <div className="flex items-start gap-6">
                                 <div className="space-y-1 text-center">
-                                  <label className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider block">Image</label>
+                                  <label className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider block">{l("Image")}</label>
                                   <div 
                                     onClick={() => document.getElementById(`var-img-${i}`).click()}
                                     className="w-20 h-20 bg-zinc-50 border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center rounded-lg cursor-pointer hover:border-[#0073aa] hover:bg-[#f0f8ff] transition-all group relative overflow-hidden"
@@ -1551,7 +1759,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                     ) : (
                                       <>
                                         <ImageIcon size={20} className="text-zinc-300 group-hover:text-[#0073aa]" />
-                                        <span className="text-[9px] text-zinc-400 font-bold mt-1 group-hover:text-[#0073aa]">UPLOAD</span>
+                                        <span className="text-[9px] text-zinc-400 font-bold mt-1 group-hover:text-[#0073aa]">{l("UPLOAD")}</span>
                                       </>
                                     )}
                                     <input 
@@ -1566,7 +1774,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
 
                                 <div className="flex-1 grid grid-cols-2 gap-4">
                                   <div className="space-y-2">
-                                    <label className="text-[12px] text-zinc-600 font-bold">SKU</label>
+                                    <label className="text-[12px] text-zinc-600 font-bold">{l("SKU")}</label>
                                     <input 
                                       value={v.sku || ""}
                                       onChange={(e) => {
@@ -1588,7 +1796,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                           newVars[i].status = e.target.checked ? 'publish' : 'private';
                                           setFormData(prev => ({ ...prev, variations: newVars }));
                                         }}
-                                      /> Enabled
+                                      /> {l("Enabled")}
                                     </label>
                                     <label className="flex items-center gap-2 text-[12px] text-zinc-600 cursor-pointer font-medium">
                                       <input 
@@ -1600,7 +1808,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                           newVars[i].manage_stock = e.target.checked;
                                           setFormData(prev => ({ ...prev, variations: newVars }));
                                         }}
-                                      /> Manage stock?
+                                      /> {l("Manage stock?")}
                                     </label>
                                   </div>
                                 </div>
@@ -1609,7 +1817,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                               {/* Row 2: Prices and Stock */}
                               <div className="grid grid-cols-4 gap-4 pb-4 border-b border-zinc-100">
                                 <div className="space-y-2">
-                                  <label className="text-[12px] text-zinc-600 font-bold">Regular price (JOD) <span className="text-rose-500">*</span></label>
+                                  <label className="text-[12px] text-zinc-600 font-bold">{l("Regular price (JOD)")} <span className="text-rose-500">*</span></label>
                                   <input 
                                     type="number"
                                     step="0.01"
@@ -1623,7 +1831,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <label className="text-[12px] text-zinc-600 font-bold">Sale price (JOD)</label>
+                                  <label className="text-[12px] text-zinc-600 font-bold">{l("Sale price (JOD)")}</label>
                                   <input 
                                     type="number"
                                     step="0.01"
@@ -1637,7 +1845,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <label className="text-[12px] text-zinc-600 font-bold">Stock status</label>
+                                  <label className="text-[12px] text-zinc-600 font-bold">{l("Stock status")}</label>
                                   <select 
                                     value={v.stock_status || "instock"}
                                     onChange={(e) => {
@@ -1647,13 +1855,13 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                     }}
                                     className="w-full h-9 px-3 border border-zinc-300 rounded text-[13px] outline-none focus:border-[#0073aa]"
                                   >
-                                    <option value="instock">In stock</option>
-                                    <option value="outofstock">Out of stock</option>
-                                    <option value="onbackorder">On backorder</option>
+                                    <option value="instock">{l("In stock")}</option>
+                                    <option value="outofstock">{l("Out of stock")}</option>
+                                    <option value="onbackorder">{l("On backorder")}</option>
                                   </select>
                                 </div>
                                 <div className="space-y-2">
-                                  <label className="text-[12px] text-zinc-600 font-bold">Stock qty</label>
+                                  <label className="text-[12px] text-zinc-600 font-bold">{l("Stock qty")}</label>
                                   <input 
                                     type="number"
                                     disabled={!v.manage_stock}
@@ -1673,7 +1881,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                 <div className="space-y-4">
                                   <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                      <label className="text-[12px] text-zinc-600 font-bold flex items-center gap-1">Allow backorders? <HelpCircle size={14} className="text-zinc-300" /></label>
+                                      <label className="text-[12px] text-zinc-600 font-bold flex items-center gap-1">{l("Allow backorders?")} <HelpCircle size={14} className="text-zinc-300" /></label>
                                       <select 
                                         value={v.backorders || "no"}
                                         onChange={(e) => {
@@ -1683,16 +1891,16 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                         }}
                                         className="w-full h-9 px-3 border border-zinc-300 rounded text-[13px] outline-none focus:border-[#0073aa]"
                                       >
-                                        <option value="no">Do not allow</option>
-                                        <option value="notify">Allow, but notify customer</option>
-                                        <option value="yes">Allow</option>
+                                        <option value="no">{l("Do not allow")}</option>
+                                        <option value="notify">{l("Allow, but notify customer")}</option>
+                                        <option value="yes">{l("Allow")}</option>
                                       </select>
                                     </div>
                                     <div className="space-y-2">
-                                      <label className="text-[12px] text-zinc-600 font-bold flex items-center gap-1">Low stock threshold <HelpCircle size={14} className="text-zinc-300" /></label>
+                                      <label className="text-[12px] text-zinc-600 font-bold flex items-center gap-1">{l("Low stock threshold")} <HelpCircle size={14} className="text-zinc-300" /></label>
                                       <input 
                                         type="number"
-                                        placeholder="Store-wide threshold (2)"
+                                        placeholder={l("Store-wide threshold (2)")}
                                         value={v.low_stock_amount || ""}
                                         onChange={(e) => {
                                           const newVars = [...formData.variations];
@@ -1704,7 +1912,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                     </div>
                                   </div>
                                   <div className="space-y-2">
-                                    <label className="text-[12px] text-zinc-600 font-bold flex items-center gap-1">Shipping class <HelpCircle size={14} className="text-zinc-300" /></label>
+                                    <label className="text-[12px] text-zinc-600 font-bold flex items-center gap-1">{l("Shipping class")} <HelpCircle size={14} className="text-zinc-300" /></label>
                                     <select 
                                       value={v.shipping_class || ""}
                                       onChange={(e) => {
@@ -1714,9 +1922,9 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                       }}
                                       className="w-full h-9 px-3 border border-zinc-300 rounded text-[13px] outline-none focus:border-[#0073aa]"
                                     >
-                                      <option value="">Same as parent</option>
-                                      <option value="standard">Standard Shipping</option>
-                                      <option value="heavy">Heavy Items</option>
+                                      <option value="">{l("Same as parent")}</option>
+                                      <option value="standard">{l("Standard Shipping")}</option>
+                                      <option value="heavy">{l("Heavy Items")}</option>
                                     </select>
                                   </div>
                                 </div>
@@ -1724,7 +1932,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                 <div className="space-y-4">
                                   <div className="grid grid-cols-4 gap-2">
                                     <div className="col-span-1 space-y-2">
-                                      <label className="text-[12px] text-zinc-600 font-bold">Weight (kg)</label>
+                                      <label className="text-[12px] text-zinc-600 font-bold">{l("Weight (kg)")}</label>
                                       <input 
                                         type="number"
                                         step="0.01"
@@ -1738,10 +1946,10 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                       />
                                     </div>
                                     <div className="col-span-3 space-y-2">
-                                      <label className="text-[12px] text-zinc-600 font-bold">Dimensions (L×W×H) (cm)</label>
+                                      <label className="text-[12px] text-zinc-600 font-bold">{l("Dimensions (L×W×H) (cm)")}</label>
                                       <div className="flex gap-2">
                                         <input 
-                                          placeholder="Length"
+                                          placeholder={l("Length")}
                                           value={v.dimensions?.length || ""}
                                           onChange={(e) => {
                                             const newVars = [...formData.variations];
@@ -1751,7 +1959,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                           className="flex-1 h-9 px-3 border border-zinc-300 rounded text-[13px] outline-none focus:border-[#0073aa]"
                                         />
                                         <input 
-                                          placeholder="Width"
+                                          placeholder={l("Width")}
                                           value={v.dimensions?.width || ""}
                                           onChange={(e) => {
                                             const newVars = [...formData.variations];
@@ -1761,7 +1969,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                           className="flex-1 h-9 px-3 border border-zinc-300 rounded text-[13px] outline-none focus:border-[#0073aa]"
                                         />
                                         <input 
-                                          placeholder="Height"
+                                          placeholder={l("Height")}
                                           value={v.dimensions?.height || ""}
                                           onChange={(e) => {
                                             const newVars = [...formData.variations];
@@ -1774,7 +1982,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                                     </div>
                                   </div>
                                   <div className="space-y-2">
-                                    <label className="text-[12px] text-zinc-600 font-bold">Description</label>
+                                    <label className="text-[12px] text-zinc-600 font-bold">{l("Description")}</label>
                                     <textarea 
                                       rows={2}
                                       value={v.description || ""}
@@ -1805,20 +2013,20 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
           <div className="flex items-center gap-2 text-zinc-500">
             {loading && <Loader2 size={16} className="animate-spin" />}
             <span className="text-[12px] font-medium">
-              {loading ? "Creating product..." : "All changes are saved locally."}
+              {loading ? (productToEdit ? l("Updating product...") : (isAr ? "جاري إنشاء المنتج..." : "Creating product...")) : l("All changes are saved locally.")}
             </span>
           </div>
           <div className="flex items-center gap-3">
             {success && (
               <span className="text-[13px] text-emerald-600 font-medium flex items-center gap-1 animate-in fade-in slide-in-from-start-2">
-                <Check size={16} /> Product updated successfully!
+                <Check size={16} /> {isAr ? "تم تحديث المنتج بنجاح!" : "Product updated successfully!"}
               </span>
             )}
             <button 
               onClick={onClose}
               className="h-10 px-6 bg-white border border-zinc-300 rounded-lg text-[13px] font-bold hover:bg-zinc-50 transition-all shadow-sm"
             >
-              Cancel
+              {l("Cancel")}
             </button>
             <button 
               form="product-form"
@@ -1831,10 +2039,10 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               {loading && <Loader2 size={16} className="animate-spin" />}
               {success ? (
                 <>
-                  <Check size={16} /> {productToEdit ? "Updated" : "Published"}
+                  <Check size={16} /> {productToEdit ? (isAr ? "محدث" : "Updated") : (isAr ? "منشور" : "Published")}
                 </>
               ) : (
-                productToEdit ? "Update Product" : "Publish Product"
+                productToEdit ? l("Save Product") : l("Publish Product")
               )}
             </button>
           </div>

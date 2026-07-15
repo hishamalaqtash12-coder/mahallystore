@@ -24,10 +24,10 @@ export default function NewProduct() {
   const router = useRouter();
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && email !== "motasem.udeh@gmail.com") {
       router.replace("/admin/inventory");
     }
-  }, [isAdmin, router]);
+  }, [isAdmin, email, router]);
 
   const [isAiImproving, setIsAiImproving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
