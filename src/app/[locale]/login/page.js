@@ -258,8 +258,7 @@ function LoginContent() {
 
     setStep("success");
     setTimeout(() => {
-      router.replace(redirectTo);
-      setTimeout(() => window.location.reload(), 100);
+      window.location.replace(redirectTo);
     }, 1500);
   };
 
@@ -354,8 +353,7 @@ function LoginContent() {
 
       setStep("success");
       setTimeout(() => {
-        router.replace(redirectTo);
-        setTimeout(() => window.location.reload(), 100);
+        window.location.replace(redirectTo);
       }, 1500);
     } catch (err) {
       console.warn("Login validation failed:", err.message);
@@ -510,24 +508,15 @@ function LoginContent() {
                   {t("agreeTerms")} <Link href="/conditions" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">{t("termsLink")}</Link>
                 </p>
 
-                <div className="border-t border-zinc-100 pt-3 space-y-2">
+                <div className="border-t border-zinc-100 pt-3">
+                  {/* Forgot password link */}
                   <button
                     type="button"
-                    onClick={() => setStep(step === "phone" ? "email" : "phone")}
+                    onClick={enterForgotPassword}
                     className="cursor-pointer text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline flex items-center gap-1"
                   >
-                    {step === "phone" ? t("loginWithEmail") : t("loginWithPhone")}
+                    <KeyRound size={13} /> {t("forgotPassword")}
                   </button>
-                  {/* Forgot password link — only on phone step */}
-                  {step === "phone" && (
-                    <button
-                      type="button"
-                      onClick={enterForgotPassword}
-                      className="cursor-pointer text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline flex items-center gap-1"
-                    >
-                      <KeyRound size={13} /> {t("forgotPassword")}
-                    </button>
-                  )}
                 </div>
               </div>
             </form>

@@ -12,25 +12,56 @@ const WP_ADMIN_APP_PASS = process.env.WP_ADMIN_APP_PASS;
  *   - wp_insert_user
  * ...ensuring the user appears in wp-admin Users list AND Dokan's Pending list.
  */
-async function createWordPressUser(userData) {
+async function createWordPressUser(userData, role) {
   const credentials = Buffer.from(`${WP_ADMIN_USER}:${WP_ADMIN_APP_PASS}`).toString("base64");
 
-  const res = await fetch(`${WP_URL}/wp-json/wp/v2/users`, {
+  try {
+    const res = await fetch(`${WP_URL}/wp-json/wp/v2/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${credentials}`,
+      },
+      body: JSON.stringify(userData),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      return data;
+    }
+    console.warn("WordPress REST API user creation failed, trying WooCommerce fallback...", data.message);
+  } catch (err) {
+    console.warn("WordPress REST API user creation threw error, trying WooCommerce fallback...", err.message);
+  }
+
+  // Fallback to WooCommerce REST API using Consumer Key and Secret
+  const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
+  
+  const wcPayload = {
+    email: userData.email,
+    first_name: userData.first_name,
+    last_name: userData.last_name,
+    username: userData.username,
+    password: userData.password,
+    role: role === "vendor" ? "seller" : "customer",
+  };
+
+  const wcRes = await fetch(`${WP_URL}/wp-json/wc/v3/customers`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${credentials}`,
+      Authorization: `Basic ${wcAuth}`,
     },
-    body: JSON.stringify(userData),
+    body: JSON.stringify(wcPayload),
   });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || `WordPress API error: ${res.status}`);
+  const wcData = await wcRes.json();
+  if (!wcRes.ok) {
+    throw new Error(wcData.message || `WooCommerce API fallback error: ${wcRes.status}`);
   }
 
-  return data;
+  return wcData;
 }
 
 /**
@@ -41,7 +72,6 @@ async function createWordPressUser(userData) {
 async function updateWordPressUserMeta(userId, metaKey, metaValue) {
   const credentials = Buffer.from(`${WP_ADMIN_USER}:${WP_ADMIN_APP_PASS}`).toString("base64");
 
-  // WordPress REST API allows updating meta via the users/{id} endpoint
   const res = await fetch(`${WP_URL}/wp-json/wp/v2/users/${userId}`, {
     method: "POST",
     headers: {
@@ -58,6 +88,15 @@ async function updateWordPressUserMeta(userId, metaKey, metaValue) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     console.warn(`Failed to update meta ${metaKey} for user ${userId}:`, err.message);
+
+    // Fallback: update via WooCommerce REST API using Consumer Key/Secret
+    try {
+      await updateViaWooCommerceApi(userId, {
+        meta_data: [{ key: metaKey, value: metaValue }]
+      });
+    } catch (e) {
+      console.warn(`Fallback update for meta ${metaKey} via WC API failed:`, e.message);
+    }
   }
 }
 
@@ -67,7 +106,7 @@ async function updateWordPressUserMeta(userId, metaKey, metaValue) {
 async function updateViaWooCommerceApi(userId, payload) {
   const credentials = Buffer.from(`${WP_ADMIN_USER}:${WP_ADMIN_APP_PASS}`).toString("base64");
 
-  const res = await fetch(
+  let res = await fetch(
     `${WP_URL}/wp-json/wc/v3/customers/${userId}`,
     {
       method: "PUT",
@@ -79,9 +118,27 @@ async function updateViaWooCommerceApi(userId, payload) {
     }
   );
 
+  if (res.ok) {
+    return await res.json();
+  }
+
+  // Fallback to WooCommerce Consumer Key/Secret
+  const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
+  res = await fetch(
+    `${WP_URL}/wp-json/wc/v3/customers/${userId}`,
+    {
+      method: "PUT",
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Basic ${wcAuth}`
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
   const data = await res.json();
   if (!res.ok) {
-    console.warn(`WooCommerce update for user ${userId} failed:`, data.message);
+    console.warn(`WooCommerce update fallback for user ${userId} failed:`, data.message);
   }
   return data;
 }
@@ -95,10 +152,7 @@ export async function POST(request) {
     }
 
     if (!WP_ADMIN_USER || !WP_ADMIN_APP_PASS) {
-      return NextResponse.json(
-        { error: "Server configuration error: WordPress admin credentials are not set." },
-        { status: 500 }
-      );
+      console.warn("WordPress admin credentials not set. Falling back to WooCommerce API keys.");
     }
 
     const nameParts = name.trim().split(" ");
@@ -116,7 +170,7 @@ export async function POST(request) {
     // This fires wp_insert_user + all associated WordPress hooks.
     // ─────────────────────────────────────────────────────────────────
     const wpUserPayload = {
-      username: email.split("@")[0] + "_" + Date.now().toString().slice(-4),
+      username: email.split("@")[0].replace(/[^a-zA-Z0-9._-]/g, "_") + "_" + Date.now().toString().slice(-4),
       email,
       password,
       first_name: firstName,
@@ -130,7 +184,7 @@ export async function POST(request) {
       },
     };
 
-    const newUser = await createWordPressUser(wpUserPayload);
+    const newUser = await createWordPressUser(wpUserPayload, role);
     const userId = newUser.id;
 
     // ─────────────────────────────────────────────────────────────────

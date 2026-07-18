@@ -195,9 +195,12 @@ export default async function ContactPage() {
               <MessageSquare size={32} className="mb-4 mx-auto text-zinc-300" />
               <h3 className="text-lg font-bold mb-2">{t.chatTitle}</h3>
               <p className="text-sm text-zinc-300 mb-6 leading-relaxed">{t.chatDesc}</p>
-              <button className="h-10 px-6 bg-white text-zinc-900 hover:bg-zinc-100 rounded-full text-sm font-bold shadow-sm w-full transition-colors">
+              <Link
+                href="/messages?to=admin"
+                className="h-10 px-6 bg-white text-zinc-900 hover:bg-zinc-100 rounded-full text-sm font-bold shadow-sm w-full transition-colors flex items-center justify-center"
+              >
                 {t.chatBtn}
-              </button>
+              </Link>
             </div>
           </div>
 

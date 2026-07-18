@@ -42,6 +42,7 @@ export default async function RootLayout({ children, params }) {
       lang={locale}
       dir={dir}
       className={`${inter.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans bg-white text-zinc-900 selection:bg-brand selection:text-white overflow-x-hidden">
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-FJBEEZDZL6" strategy="afterInteractive" />

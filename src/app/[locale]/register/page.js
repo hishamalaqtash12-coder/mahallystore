@@ -155,9 +155,21 @@ function RegisterContent() {
         return;
       }
 
-      setStep("verify_method");
-    } catch {
-      setError("Failed to verify availability. Please try again.");
+      // Send SMS verification code directly
+      const otpRes = await fetch("/api/auth/phone-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, action: "send" })
+      });
+      const otpData = await otpRes.json();
+      if (otpRes.ok) {
+        setStep("phone_otp");
+        setCountdown(60);
+      } else {
+        throw new Error(otpData.error || "Failed to send code.");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to verify availability or send verification code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -267,8 +279,7 @@ function RegisterContent() {
           localStorage.setItem("mahally_user", JSON.stringify({ email, phone }));
           setStep("success");
           setTimeout(() => {
-            router.replace(redirectTo);
-            setTimeout(() => window.location.reload(), 100);
+            window.location.replace(redirectTo);
           }, 1500);
         }
       } else {
@@ -332,8 +343,7 @@ function RegisterContent() {
           localStorage.setItem("mahally_user", JSON.stringify({ email: email || phoneEmail, phone }));
           setStep("success");
           setTimeout(() => {
-            router.replace(redirectTo);
-            setTimeout(() => window.location.reload(), 100);
+            window.location.replace(redirectTo);
           }, 1500);
         }
       } else {

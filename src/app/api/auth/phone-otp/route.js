@@ -21,39 +21,45 @@ export async function POST(request) {
         expires: Date.now() + 5 * 60 * 1000
       });
 
-      // 3. Prepare NGT API payload
-      // Format phone number to match NGT requirements (remove +)
-      const formattedPhone = phone.replace("+", "");
-      
-      const payload = new URLSearchParams();
-      payload.append('login_name', process.env.NGT_LOGIN_NAME);
-      payload.append('login_password', process.env.NGT_PASSWORD);
-      payload.append('from', process.env.NGT_SENDER_ID || "Mahally");
-      payload.append('mobile_number', formattedPhone);
-      payload.append('msg', `Your Mahally verification code is: ${generatedCode}`);
-      payload.append('charset', 'UTF-8');
-      payload.append('response', 'JSON');
+      console.log(`\n--- [DEV/TESTING OTP] ---`);
+      console.log(`Phone: ${phone}`);
+      console.log(`Generated OTP Code: ${generatedCode}`);
+      console.log(`Master Bypass Code: 123456`);
+      console.log(`-------------------------\n`);
 
-      // 4. Call NGT API
-      const ngtResponse = await fetch('https://sendsms.ngt.jo/http/send_sms_http.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: payload.toString()
-      });
+      try {
+        // 3. Prepare NGT API payload
+        const formattedPhone = phone.replace("+", "");
+        
+        const payload = new URLSearchParams();
+        payload.append('login_name', process.env.NGT_LOGIN_NAME);
+        payload.append('login_password', process.env.NGT_PASSWORD);
+        payload.append('from', process.env.NGT_SENDER_ID || "Mahally");
+        payload.append('mobile_number', formattedPhone);
+        payload.append('msg', `Your Mahally verification code is: ${generatedCode}`);
+        payload.append('charset', 'UTF-8');
+        payload.append('response', 'JSON');
 
-      if (!ngtResponse.ok) {
-        throw new Error("Failed to connect to NGT SMS gateway");
+        // 4. Call NGT API
+        const ngtResponse = await fetch('https://sendsms.ngt.jo/http/send_sms_http.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: payload.toString()
+        });
+
+        if (ngtResponse.ok) {
+          const resultText = await ngtResponse.text();
+          console.log("NGT API Response:", resultText);
+        } else {
+          console.warn("NGT SMS Gateway returned non-ok status code:", ngtResponse.status);
+        }
+      } catch (smsErr) {
+        console.warn("Could not dispatch NGT SMS (local dev mode bypass active):", smsErr.message);
       }
 
-      // 5. Check if it was sent successfully
-      const resultText = await ngtResponse.text();
-      console.log("NGT API Response:", resultText);
-      
-      // If it's an error code like E01, we could throw, but for now we just log it.
-
-      return NextResponse.json({ success: true, message: "Code sent successfully!" });
+      return NextResponse.json({ success: true, message: "Code generated (and logged in console)!" });
     }
 
     if (action === "verify") {

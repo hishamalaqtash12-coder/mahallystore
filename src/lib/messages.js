@@ -4,10 +4,18 @@ let cachedAdminId = null;
 let lastFetchTime = 0;
 
 /**
- * Dynamically resolves the active user ID with the 'administrator' role in WooCommerce.
- * Uses a 5-minute memory cache to ensure high API speed and avoid repeated network calls.
+ * Dynamically resolves the designated support admin ID.
+ * Priority:
+ *   1. SUPPORT_ADMIN_ID env variable (explicit, recommended for multi-admin setups)
+ *   2. First WooCommerce user with role=administrator (fallback)
+ * Uses a 5-minute memory cache to avoid repeated API calls.
  */
 export async function getAdminId() {
+  // 1. If a specific support admin is designated in .env, use it directly
+  if (process.env.SUPPORT_ADMIN_ID) {
+    return parseInt(process.env.SUPPORT_ADMIN_ID, 10);
+  }
+
   const now = Date.now();
   if (cachedAdminId && (now - lastFetchTime < 300000)) {
     return cachedAdminId;
@@ -22,7 +30,7 @@ export async function getAdminId() {
   } catch (err) {
     console.error("getAdminId fetch error:", err.message);
   }
-  return 1; // Fallback to 1 if no administrator is returned or query fails
+  return 1; // Fallback
 }
 
 /**

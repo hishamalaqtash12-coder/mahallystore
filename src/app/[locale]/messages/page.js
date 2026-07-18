@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -42,6 +42,9 @@ import { Suspense } from "react";
 
 function MessagesContent() {
   const searchParams = useSearchParams();
+  const params = useParams();
+  const locale = params?.locale || "ar";
+  const isAr = locale === "ar";
   const router = useRouter();
   const { user, wooId, loading: authLoading, messagingEnabled, isAdmin } = useAuth();
 
@@ -666,8 +669,25 @@ function MessagesContent() {
                   {messages.map((msg, index) => {
                     const isMe = String(msg.senderId) === String(wooId);
                     const isSelected = selectedMessageId === msg.id;
+
+                    // Determine sender name label
+                    let senderLabel = "";
+                    if (isMe) {
+                      senderLabel = isAdmin 
+                        ? (isAr ? "الدعم الفني (أنت)" : "Technical Support (You)") 
+                        : (isAr ? "أنت" : "You");
+                    } else {
+                      const isSenderAdmin = msg.senderId === 1 || String(msg.senderId) === "admin" || vendor?.role === "admin";
+                      senderLabel = isSenderAdmin
+                        ? (isAr ? "الدعم الفني" : "Technical Support")
+                        : (vendor?.storeName || (isAr ? "العميل" : "Customer"));
+                    }
+
                     return (
                       <div key={msg.id || `msg-${index}`} className={`flex flex-col ${isMe ? "items-end" : "items-start"} group relative`}>
+                        <span className="text-[10px] text-zinc-400 mb-1 px-1 font-semibold select-none">
+                          {senderLabel}
+                        </span>
                         <div
                           onClick={() => setSelectedMessageId(isSelected ? null : msg.id)}
                           className={`message-bubble-wrapper max-w-[75%] lg:max-w-[65%] px-4 py-2.5 rounded-lg text-[13px] leading-relaxed border relative transition-all ${isSelected ? "ring-2 ring-[#be374f] ring-offset-1" : ""

@@ -881,13 +881,45 @@ export const wcApi = {
       return { data: order };
     }
     if (endpoint === 'customers') {
-      const data = await getCustomers(options);
-      return { data };
+      // Use direct WC REST API for full meta_data access (GraphQL omits custom meta)
+      try {
+        const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+        const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
+        const params = new URLSearchParams();
+        if (options.role)     params.append('role',     options.role);
+        if (options.per_page) params.append('per_page', options.per_page);
+        if (options.email)    params.append('email',    options.email);
+        if (options.search)   params.append('search',   options.search);
+        if (options.include)  params.append('include',  options.include);
+        if (options.orderby)  params.append('orderby',  options.orderby);
+        if (options.order)    params.append('order',    options.order);
+        if (options.page)     params.append('page',     options.page);
+        if (options.offset)   params.append('offset',   options.offset);
+        const res = await fetch(`${WP_URL}/wp-json/wc/v3/customers?${params.toString()}`, {
+          headers: { Authorization: `Basic ${wcAuth}` }
+        });
+        const data = await res.json();
+        return { data: Array.isArray(data) ? data : [] };
+      } catch (e) {
+        console.error('wcApi.get customers error:', e.message);
+        return { data: [] };
+      }
     }
     if (endpoint.startsWith('customers/')) {
-      const id = endpoint.split('/')[1];
-      const customer = await getCustomer(id);
-      return { data: customer };
+      // Use direct WC REST API for full meta_data access (includes mahally_chats etc.)
+      try {
+        const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+        const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
+        const id = endpoint.split('/')[1];
+        const res = await fetch(`${WP_URL}/wp-json/wc/v3/customers/${id}`, {
+          headers: { Authorization: `Basic ${wcAuth}` }
+        });
+        const data = await res.json();
+        return { data };
+      } catch (e) {
+        console.error(`wcApi.get customers/${endpoint.split('/')[1]} error:`, e.message);
+        return { data: null };
+      }
     }
     return { data: [] };
   },
@@ -938,15 +970,25 @@ export const wcApi = {
       return { data: result?.updateOrder?.order || null };
     }
     if (endpoint.startsWith('customers/')) {
-      const id = endpoint.split('/')[1];
-      const input = {
-        id: parseInt(id, 10),
-        firstName: data.first_name || data.firstName,
-        lastName: data.last_name || data.lastName,
-        metaData: data.meta_data || data.metaData,
-      };
-      const result = await fetchGraphQL(UPDATE_CUSTOMER, { input }, getAuthHeaders());
-      return { data: result?.updateCustomer?.customer || null };
+      // Use direct WC REST API for reliable meta_data persistence (GraphQL+AppPassword is broken)
+      try {
+        const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+        const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
+        const id = endpoint.split('/')[1];
+        const res = await fetch(`${WP_URL}/wp-json/wc/v3/customers/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Basic ${wcAuth}` },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (!res.ok) {
+          console.warn(`wcApi.put customers/${id} failed:`, result.message);
+        }
+        return { data: result };
+      } catch (e) {
+        console.error(`wcApi.put customers/ error:`, e.message);
+        return { data: null };
+      }
     }
     return { data: {} };
   }
