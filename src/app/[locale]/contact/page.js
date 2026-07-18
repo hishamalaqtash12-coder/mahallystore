@@ -1,6 +1,7 @@
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getLocale } from "next-intl/server";
+import ContactForm from "@/components/ContactForm";
 
 export const metadata = {
   title: "Contact Us - Mahally",
@@ -80,49 +81,7 @@ export default async function ContactPage() {
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <h2 className="text-xl font-bold text-zinc-900 mb-6">{t.formTitle}</h2>
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-zinc-800">{t.labelName}</label>
-                  <input
-                    type="text"
-                    className="w-full h-11 bg-white border border-zinc-300 rounded-md px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
-                    placeholder={t.placeholderName}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-zinc-800">{t.labelEmail}</label>
-                  <input
-                    type="email"
-                    className="w-full h-11 bg-white border border-zinc-300 rounded-md px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
-                    placeholder={t.placeholderEmail}
-                    dir="ltr"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-800">{t.labelSubject}</label>
-                <input
-                  type="text"
-                  className="w-full h-11 bg-white border border-zinc-300 rounded-md px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all"
-                  placeholder={t.placeholderSubject}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-800">{t.labelMessage}</label>
-                <textarea
-                  className="w-full h-32 bg-white border border-zinc-300 rounded-md p-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all resize-none"
-                  placeholder={t.placeholderMessage}
-                />
-              </div>
-              <button
-                type="submit"
-                className="h-11 bg-brand hover:bg-brand-dark text-white w-full md:w-auto px-8 rounded-full font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
-              >
-                <Send size={16} />
-                {t.sendBtn}
-              </button>
-            </form>
+            <ContactForm isAr={isAr} t={t} />
           </div>
 
           {/* Contact Info Cards */}
