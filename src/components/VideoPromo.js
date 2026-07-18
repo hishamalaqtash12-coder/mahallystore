@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Play, X, Settings, ArrowRight, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 
 export default function VideoPromo({
@@ -14,13 +14,27 @@ export default function VideoPromo({
   description,
 }) {
   const t = useTranslations("VideoPromo");
+  const locale = useLocale();
   const { isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Translate default Arabic database titles if viewing in English
+  const getLocalizedText = (text, defaultKey) => {
+    if (locale === 'en') {
+      if (text === "دعم المنتجات الأردنية المحلية" || defaultKey === "defaultTitle") {
+        return "Supporting Jordanian Local Products";
+      }
+      if (text === "انضم إلى آلاف المتسوقين الذين يدعمون التجار المحليين في جميع أنحاء المملكة." || defaultKey === "defaultDesc") {
+        return "Join thousands of shoppers supporting local merchants across the Kingdom.";
+      }
+    }
+    return text || t(defaultKey);
+  };
+
   const finalVideoUrl = videoUrl || "https://www.youtube.com/embed/XHOmBV4js_E";
   const finalThumbnail = thumbnail || "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop";
-  const finalTitle = title || t("defaultTitle");
-  const finalDescription = description || t("defaultDesc");
+  const finalTitle = getLocalizedText(title, "defaultTitle");
+  const finalDescription = getLocalizedText(description, "defaultDesc");
 
   const getEmbedUrl = (url) => {
     if (url.includes("embed")) return `${url}?autoplay=1`;
@@ -122,7 +136,11 @@ export default function VideoPromo({
                   className="flex-1 inline-flex justify-center items-center gap-1.5 sm:gap-2 border border-zinc-300 hover:border-zinc-400 text-zinc-800 px-2 sm:px-6 py-3 rounded-full text-[13px] sm:text-base font-medium transition-all whitespace-nowrap"
                 >
                   {t("exploreProducts")}
-                  <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  {locale === "ar" ? (
+                    <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  ) : (
+                    <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  )}
                 </Link>
               </div>
             </div>

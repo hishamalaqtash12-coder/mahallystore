@@ -19,12 +19,17 @@ const ALL_EMOJIS = ["😊", "😂", "❤️", "👍", "🙏", "🔥", "✨", "�
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function getStatusLabel(status) {
-  const map = {
+function getStatusLabel(status, isAr = true) {
+  const map = isAr ? {
     completed: "تم التوصيل", processing: "قيد المعالجة", "on-hold": "في الانتظار",
     pending: "في انتظار الدفع", "pending payment": "في انتظار الدفع",
     cancelled: "ملغي", refunded: "مُسترد",
     shipped: "تم الشحن", "in-transit": "في الطريق",
+  } : {
+    completed: "Delivered", processing: "Processing", "on-hold": "On Hold",
+    pending: "Pending Payment", "pending payment": "Pending Payment",
+    cancelled: "Cancelled", refunded: "Refunded",
+    shipped: "Shipped", "in-transit": "In Transit",
   };
   return map[status] || status.charAt(0).toUpperCase() + status.slice(1);
 }
@@ -456,13 +461,13 @@ function MessagesContent() {
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-[18px] font-semibold text-zinc-900 flex items-center gap-2">
               <MessageCircle size={18} className="text-[#be374f]" />
-              الرسائل
+              {isAr ? "الرسائل" : "Messages"}
             </h1>
             <div className="flex gap-1.5">
               <button
                 onClick={async () => { setRefreshingConvs(true); await fetchData(); setRefreshingConvs(false); }}
                 className={`w-8 h-8 border border-zinc-200 rounded-md flex items-center justify-center text-zinc-500 hover:border-[#be374f] hover:text-[#be374f] transition-all ${refreshingConvs ? "animate-spin text-[#be374f]" : ""}`}
-                title="تحديث المحادثات"
+                title={isAr ? "تحديث المحادثات" : "Refresh conversations"}
               >
                 <RefreshCw size={14} />
               </button>
@@ -478,7 +483,7 @@ function MessagesContent() {
             <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <input
               type="text"
-              placeholder="ابحث في المحادثات…"
+              placeholder={isAr ? "ابحث في المحادثات…" : "Search conversations…"}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full h-[31px] pe-9 ps-3 bg-zinc-50 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-[#be374f] transition-all"
@@ -494,7 +499,7 @@ function MessagesContent() {
               }`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${showUnreadOnly ? "bg-[#be374f] animate-pulse" : "bg-zinc-300"}`} />
-              غير المقروءة فقط
+              {isAr ? "غير المقروءة فقط" : "Unread only"}
             </button>
           </div>
         </div>
@@ -519,8 +524,8 @@ function MessagesContent() {
               </div>
               <div className="flex-1 min-w-0 flex items-center justify-between">
                 <div>
-                  <p className={`text-[13px] font-medium ${(vendorId === "admin" || String(vendorId) === "1") ? "text-[#be374f]" : "text-zinc-900"}`}>دعم Mahally</p>
-                  <p className="text-[12px] text-zinc-500 truncate mt-0.5">مدير النظام</p>
+                  <p className={`text-[13px] font-medium ${(vendorId === "admin" || String(vendorId) === "1") ? "text-[#be374f]" : "text-zinc-900"}`}>{isAr ? "دعم Mahally" : "Mahally Support"}</p>
+                  <p className="text-[12px] text-zinc-500 truncate mt-0.5">{isAr ? "مدير النظام" : "System Admin"}</p>
                 </div>
                 {adminUnreadCount > 0 && (
                   <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 me-2">
@@ -532,7 +537,7 @@ function MessagesContent() {
           )}
 
           {conversations.length > 0 && (
-            <p className="text-[11px] text-zinc-400 font-medium uppercase tracking-wide px-3 pt-3 pb-1">المحادثات الأخيرة</p>
+            <p className="text-[11px] text-zinc-400 font-medium uppercase tracking-wide px-3 pt-3 pb-1">{isAr ? "المحادثات الأخيرة" : "Recent Conversations"}</p>
           )}
 
           {/* Merged list ensures active vendor is always shown */}
@@ -543,7 +548,7 @@ function MessagesContent() {
                 id: vendor.id,
                 name: vendor.storeName,
                 logo: vendor.storeLogo,
-                lastMessage: "متصل",
+                lastMessage: isAr ? "متصل" : "Connected",
                 time: "Now",
                 lastTimestamp: Date.now()
               });
@@ -615,7 +620,7 @@ function MessagesContent() {
         {isChatLoading && vendorId && (
           <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-[60] flex flex-col items-center justify-center transition-all duration-300">
             <div className="w-8 h-8 border-4 border-zinc-200 border-t-[#be374f] rounded-full animate-spin mb-3"></div>
-            <p className="text-[13px] font-medium text-zinc-600">جارٍ تحميل المحادثة...</p>
+            <p className="text-[13px] font-medium text-zinc-600">{isAr ? "جارٍ تحميل المحادثة..." : "Loading conversation..."}</p>
           </div>
         )}
 
@@ -637,12 +642,12 @@ function MessagesContent() {
                 </div>
                 <div>
                   <h2 className="text-[15px] font-semibold text-zinc-900 flex items-center gap-1.5">
-                    {vendor?.storeName || "المحادثة"}
+                    {vendor?.storeName || (isAr ? "المحادثة" : "Conversation")}
                     {vendor?.isVerified && <BadgeCheck size={14} className="text-[#be374f]" />}
                   </h2>
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                    <p className="text-[11px] text-emerald-600">نشط الآن</p>
+                    <p className="text-[11px] text-emerald-600">{isAr ? "نشط الآن" : "Active now"}</p>
                   </div>
                 </div>
               </div>
@@ -650,7 +655,7 @@ function MessagesContent() {
                 <button
                   onClick={async () => { setRefreshingMsgs(true); await fetchMessages(vendorId); setRefreshingMsgs(false); }}
                   className={`w-8 h-8 border border-zinc-200 rounded-md flex items-center justify-center text-zinc-500 hover:text-[#be374f] transition-all ${refreshingMsgs ? "animate-spin" : ""}`}
-                  title="تحديث الرسائل"
+                  title={isAr ? "تحديث الرسائل" : "Refresh messages"}
                 >
                   <RefreshCw size={15} />
                 </button>
@@ -707,7 +712,7 @@ function MessagesContent() {
                             <div className="mt-2 rounded-md overflow-hidden border border-white/20">
                               {msg.mediaType === "image"
                                 ? <img src={msg.mediaUrl} alt="media" className="max-w-full h-auto" />
-                                : <div className="flex items-center gap-2 p-2.5 text-[12px]"><File size={14} /><span>عرض المستند</span></div>
+                                : <div className="flex items-center gap-2 p-2.5 text-[12px]"><File size={14} /><span>{isAr ? "عرض المستند" : "View Document"}</span></div>
                               }
                             </div>
                           )}
@@ -736,14 +741,14 @@ function MessagesContent() {
                           {/* Action Dock */}
                           {!msg.isDeleted && (
                             <div className={`absolute -top-9 ${isMe ? "start-0" : "end-0"} flex gap-1 bg-white border border-zinc-200 p-1 shadow-md rounded-md z-50 transition-all ${isSelected ? "opacity-100 visible" : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"}`}>
-                              <button onClick={(e) => { e.stopPropagation(); setReplyTo(msg); setSelectedMessageId(null); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-[#be374f] rounded transition-all" title="الرد">
+                              <button onClick={(e) => { e.stopPropagation(); setReplyTo(msg); setSelectedMessageId(null); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-[#be374f] rounded transition-all" title={isAr ? "الرد" : "Reply"}>
                                 <Reply size={13} />
                               </button>
-                              <button onClick={(e) => { e.stopPropagation(); setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-[#be374f] rounded transition-all" title="تفاعل">
+                              <button onClick={(e) => { e.stopPropagation(); setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-[#be374f] rounded transition-all" title={isAr ? "تفاعل" : "React"}>
                                 <Smile size={13} />
                               </button>
                               {isMe && (
-                                <button onClick={(e) => { e.stopPropagation(); handleDelete(msg.id); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-rose-500 rounded transition-all" title="حذف">
+                                <button onClick={(e) => { e.stopPropagation(); handleDelete(msg.id); }} className="w-7 h-7 hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-rose-500 rounded transition-all" title={isAr ? "حذف" : "Delete"}>
                                   <Trash2 size={13} />
                                 </button>
                               )}
@@ -769,7 +774,7 @@ function MessagesContent() {
               {replyTo && (
                 <div className="flex items-center justify-between px-3 py-2 bg-zinc-50 border border-b-0 border-zinc-200 rounded-t-md">
                   <span className="text-[12px] text-zinc-500 flex items-center gap-1.5">
-                    <Reply size={12} /> الرد على: <span className="text-zinc-700 truncate max-w-xs">{replyTo.text}</span>
+                    <Reply size={12} /> {isAr ? "الرد على:" : "Replying to:"} <span className="text-zinc-700 truncate max-w-xs">{replyTo.text}</span>
                   </span>
                   <button onClick={() => setReplyTo(null)} className="text-zinc-400 hover:text-rose-500"><X size={14} /></button>
                 </div>
@@ -822,7 +827,7 @@ function MessagesContent() {
                       }
                     }
                   }}
-                  placeholder="اكتب رسالة..."
+                  placeholder={isAr ? "اكتب رسالة..." : "Write a message..."}
                   className="flex-1 bg-transparent border-none py-1.5 px-1 text-[13px] outline-none resize-none text-zinc-800 placeholder:text-zinc-400 custom-scrollbar"
                 />
 
@@ -831,7 +836,7 @@ function MessagesContent() {
                   disabled={sending}
                   className="h-[34px] px-4 bg-brand hover:bg-brand-dark border-brand rounded-md text-[13px] font-medium shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5 shrink-0"
                 >
-                  {sending ? <Loader2 size={14} className="animate-spin" /> : <><Send size={14} /> إرسال</>}
+                  {sending ? <Loader2 size={14} className="animate-spin" /> : <><Send size={14} /> {isAr ? "إرسال" : "Send"}</>}
                 </button>
               </div>
               
@@ -843,7 +848,7 @@ function MessagesContent() {
                     onChange={e => toggleEnterToSend(e.target.checked)} 
                     className="rounded border-zinc-300 w-3 h-3 text-[#be374f] focus:ring-[#be374f]" 
                   />
-                  اضغط Enter للإرسال
+                  {isAr ? "اضغط Enter للإرسال" : "Press Enter to send"}
                 </label>
               </div>
             </div>
@@ -852,15 +857,15 @@ function MessagesContent() {
           /* Empty State */
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
             <MessageCircle size={40} className="text-zinc-300 mb-4" />
-            <h2 className="text-[22px] font-semibold text-zinc-900 mb-2">الرسائل</h2>
+            <h2 className="text-[22px] font-semibold text-zinc-900 mb-2">{isAr ? "الرسائل" : "Messages"}</h2>
             <p className="text-zinc-500 text-[14px] max-w-xs mb-6 leading-relaxed">
-              تواصل بأمان مع البائعين الموثوقين حول طلباتك واستفساراتك.
+              {isAr ? "تواصل بأمان مع البائعين الموثوقين حول طلباتك واستفساراتك." : "Safely communicate with trusted sellers about your orders and inquiries."}
             </p>
             <button
               onClick={() => setShowNewChat(true)}
               className="h-[34px] px-6 bg-brand hover:bg-brand-dark border-brand rounded-md text-[13px] font-medium shadow-sm transition-all"
             >
-              ابحث عن جهة اتصال
+              {isAr ? "ابحث عن جهة اتصال" : "Find a contact"}
             </button>
           </div>
         )}
@@ -872,7 +877,7 @@ function MessagesContent() {
           {/* Tabs */}
           <div className={`flex border-b border-zinc-200 h-[56px] items-end px-4 shrink-0`}>
             {isAdminAccount ? (
-              <div className="pb-2 text-[13px] font-medium text-zinc-900">معلومات الدعم</div>
+              <div className="pb-2 text-[13px] font-medium text-zinc-900">{isAr ? "معلومات الدعم" : "Support Info"}</div>
             ) : (
               ["info", "products", "orders"].map(tab => (
                 <button
@@ -880,7 +885,7 @@ function MessagesContent() {
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-2.5 text-[13px] font-medium capitalize border-b-2 transition-colors ${activeTab === tab ? "border-[#be374f] text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-800"} ${tab === "products" && (vendor?.role === "customer" || vendorProducts.length === 0) ? "hidden" : ""}`}
                 >
-                  {tab === "info" ? "معلومات" : tab === "products" ? "المنتجات" : "الطلبات"}
+                  {tab === "info" ? (isAr ? "معلومات" : "Info") : tab === "products" ? (isAr ? "المنتجات" : "Products") : (isAr ? "الطلبات" : "Orders")}
                 </button>
               ))
             )}
@@ -893,13 +898,13 @@ function MessagesContent() {
                   <div className="w-16 h-16 bg-zinc-900 rounded-lg flex items-center justify-center mx-auto mb-3 border border-zinc-800">
                     <ShieldAlert size={28} className="text-[#be374f]" />
                   </div>
-                  <h3 className="text-[15px] font-semibold text-zinc-900">دعم Mahally</h3>
+                  <h3 className="text-[15px] font-semibold text-zinc-900">{isAr ? "دعم Mahally" : "Mahally Support"}</h3>
                   <span className="inline-flex items-center gap-1 mt-1.5 bg-[#fde7ee] text-[#be374f] text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-[#b2d8dc]">
-                    <BadgeCheck size={11} /> مسؤول موثوق
+                    <BadgeCheck size={11} /> {isAr ? "مسؤول موثوق" : "Verified Admin"}
                   </span>
                 </div>
                 <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md">
-                  <p className="text-[12px] text-zinc-500 text-center leading-relaxed">معالجة النزاعات في الطلبات والمشكلات التقنية وإعداد التجار في المنصة.</p>
+                  <p className="text-[12px] text-zinc-500 text-center leading-relaxed">{isAr ? "معالجة النزاعات في الطلبات والمشكلات التقنية وإعداد التجار في المنصة." : "Handles order disputes, technical issues, and merchant onboarding on the platform."}</p>
                 </div>
               </div>
             ) : (
@@ -919,18 +924,18 @@ function MessagesContent() {
                         </div>
                         <h2 className="text-[15px] font-semibold text-zinc-900">{vendor?.storeName}</h2>
                         <span className={`inline-flex items-center gap-1 mt-1.5 text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${vendor?.role === "customer" ? "bg-zinc-100 text-zinc-600 border-zinc-200" : "bg-[#fde7ee] text-[#be374f] border-[#b2d8dc]"}`}>
-                          <BadgeCheck size={11} /> {vendor?.role === "customer" ? "مشتري موثوق" : "متجر رسمي"}
+                          <BadgeCheck size={11} /> {vendor?.role === "customer" ? (isAr ? "مشتري موثوق" : "Verified Buyer") : (isAr ? "متجر رسمي" : "Official Store")}
                         </span>
                       </div>
 
                       <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md space-y-2">
                         <div className="flex justify-between text-[12px]">
-                          <span className="text-zinc-500">عضو منذ</span>
+                          <span className="text-zinc-500">{isAr ? "عضو منذ" : "Member since"}</span>
                           <span className="text-zinc-700 font-medium">{vendor?.dateCreated ? new Date(vendor.dateCreated).getFullYear() : "2024"}</span>
                         </div>
                         {vendor?.role === "customer" && (
                           <div className="flex justify-between text-[12px]">
-                            <span className="text-zinc-500">إجمالي الطلبات</span>
+                            <span className="text-zinc-500">{isAr ? "إجمالي الطلبات" : "Total Orders"}</span>
                             <span className="text-[#be374f] font-medium">{customerOrders.length}</span>
                           </div>
                         )}
@@ -942,13 +947,13 @@ function MessagesContent() {
                             onClick={() => window.open(`https://wa.me/${vendor?.phone || "962770000000"}`, "_blank")}
                             className="w-full h-[31px] bg-zinc-50 border border-zinc-300 rounded-md text-[12px] font-medium text-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-100 transition-all"
                           >
-                            واتساب
+                            WhatsApp
                           </button>
                           <button
                             onClick={() => window.open("https://t.me/mahally", "_blank")}
                             className="w-full h-[31px] bg-zinc-50 border border-zinc-300 rounded-md text-[12px] font-medium text-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-100 transition-all"
                           >
-                            تيليجرام
+                            Telegram
                           </button>
                         </div>
                       )}
@@ -974,10 +979,10 @@ function MessagesContent() {
                           </div>
                         </div>
                         <button
-                          onClick={() => handleSend(`استفسار عن: ${p.name}`, { type: "product", id: p.id, name: p.name, price: p.price, image: p.images?.[0]?.src })}
+                          onClick={() => handleSend(isAr ? `استفسار عن: ${p.name}` : `Inquiry about: ${p.name}`, { type: "product", id: p.id, name: p.name, price: p.price, image: p.images?.[0]?.src })}
                           className="w-full h-[26px] bg-brand hover:bg-brand-dark border-brand rounded-md text-[11px] font-medium transition-all"
                         >
-                          إرفاق بطاقة المنتج
+                          {isAr ? "إرفاق بطاقة المنتج" : "Attach Product Card"}
                         </button>
                       </div>
                     ))}
@@ -995,9 +1000,9 @@ function MessagesContent() {
                       return (
                         <div key={order.id || `order-${index}`} className="border border-zinc-200 rounded-md overflow-hidden">
                           <div className="bg-zinc-50 border-b border-zinc-200 px-3 py-2 flex items-center justify-between">
-                            <p className="text-[12px] font-medium text-zinc-700">طلب رقم #{order.id}</p>
+                            <p className="text-[12px] font-medium text-zinc-700">{isAr ? `طلب رقم #${order.id}` : `Order #${order.id}`}</p>
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${colors.badge}`}>
-                              {getStatusLabel(order.status)}
+                              {getStatusLabel(order.status, isAr)}
                             </span>
                           </div>
                           <div className="p-3 space-y-2">
@@ -1006,10 +1011,10 @@ function MessagesContent() {
                               <span className="text-[12px] text-zinc-600">د.أ {parseFloat(order.total || 0).toFixed(2)}</span>
                             </div>
                             <button
-                              onClick={() => handleSend(`طلب تحديث حول الطلب #${order.id}`, { type: "order", id: order.id, status: order.status, total: order.total })}
+                              onClick={() => handleSend(isAr ? `طلب تحديث حول الطلب #${order.id}` : `Request update for Order #${order.id}`, { type: "order", id: order.id, status: order.status, total: order.total })}
                               className="w-full h-[28px] bg-brand hover:bg-brand-dark border-brand rounded-md text-[11px] font-medium transition-all"
                             >
-                              اطلب تحديث هذا الطلب
+                              {isAr ? "اطلب تحديث هذا الطلب" : "Request order update"}
                             </button>
                           </div>
                         </div>
@@ -1031,7 +1036,7 @@ function MessagesContent() {
           <div className="relative w-full max-w-sm bg-white rounded-lg overflow-hidden shadow-2xl border border-zinc-200">
             <div className="p-5 border-b border-zinc-200">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[18px] font-semibold text-zinc-900">محادثة جديدة</h2>
+                <h2 className="text-[18px] font-semibold text-zinc-900">{isAr ? "محادثة جديدة" : "New Conversation"}</h2>
                 <button onClick={() => setShowNewChat(false)} className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-700 border border-zinc-200 rounded-md">
                   <X size={16} />
                 </button>
@@ -1040,7 +1045,7 @@ function MessagesContent() {
                 <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
                 <input
                   type="text"
-                  placeholder="ابحث عن البائعين…"
+                  placeholder={isAr ? "ابحث عن البائعين…" : "Search sellers…"}
                   value={vendorSearch}
                   onChange={e => setVendorSearch(e.target.value)}
                   className="w-full h-[34px] pe-9 ps-4 bg-zinc-50 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-[#be374f] transition-all"
@@ -1068,7 +1073,7 @@ function MessagesContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-medium text-zinc-900 group-hover:text-[#be374f] transition-colors">{v.storeName}</p>
-                        <p className="text-[11px] text-zinc-400 mt-0.5">{v.role === "admin" ? "دعم النظام" : "تاجر رسمي"}</p>
+                        <p className="text-[11px] text-zinc-400 mt-0.5">{v.role === "admin" ? (isAr ? "دعم النظام" : "System Support") : (isAr ? "تاجر رسمي" : "Official Seller")}</p>
                       </div>
                       <ChevronRight size={14} className="text-zinc-300 group-hover:text-[#be374f] transition-all group-hover:translate-x-0.5" />
                     </div>

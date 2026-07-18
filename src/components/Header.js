@@ -310,7 +310,7 @@ export default function Header() {
             <span className="text-zinc-500 text-[12px] leading-none me-5">{t("deliveryTo")}</span>
             <div className="flex items-center gap-1 leading-none mt-1 text-zinc-900">
               <MapPin size={15} className="text-zinc-900" />
-              <span className="text-[14px] font-bold">{GOVERNORATES_MAP_AR[governorate] || governorate}</span>
+              <span className="text-[14px] font-bold">{locale === 'ar' ? (GOVERNORATES_MAP_AR[governorate] || governorate) : governorate}</span>
             </div>
           </div>
 
@@ -660,7 +660,7 @@ export default function Header() {
                 >
                   <MapPin size={18} className="text-zinc-500" />
                   <div className="flex flex-col">
-                    <span className="text-[14px] text-zinc-900 font-medium">{t('deliveryToGov')} {GOVERNORATES_MAP_AR[governorate] || governorate}</span>
+                    <span className="text-[14px] text-zinc-900 font-medium">{t('deliveryToGov')} {locale === 'ar' ? (GOVERNORATES_MAP_AR[governorate] || governorate) : governorate}</span>
                     <span className="text-[12px] text-brand hover:underline">{t('updateLocation')}</span>
                   </div>
                 </button>
@@ -776,7 +776,7 @@ export default function Header() {
                     onClick={() => { updateGovernorate(gov); setShowLocationModal(false); }}
                     className={`px-4 py-2 text-[14px] rounded-md border transition-all text-start ${governorate === gov ? 'bg-brand-light border-brand text-brand-dark font-bold' : 'border-zinc-200 hover:border-brand hover:bg-brand-light/20'}`}
                   >
-                    {GOVERNORATES_MAP_AR[gov] || gov}
+                    {locale === 'ar' ? (GOVERNORATES_MAP_AR[gov] || gov) : gov}
                   </button>
                 ))}
               </div>

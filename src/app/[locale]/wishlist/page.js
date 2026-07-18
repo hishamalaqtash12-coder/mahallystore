@@ -7,11 +7,14 @@ import { Link } from "@/i18n/routing";
 import { Heart, Search, Store, Trash2, ChevronRight, ArrowRight, Package, X } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { getProductMerchant } from "@/lib/product-utils";
+import { useParams } from "next/navigation";
 
 export default function WishlistPage() {
   const { wishlist, clearWishlist } = useWishlist();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVendor, setSelectedVendor] = useState("all");
+  const params = useParams();
+  const isAr = (params?.locale || "ar") === "ar";
 
   // --- Derived: Filter logic ---
   const uniqueVendors = useMemo(() => {
@@ -40,10 +43,14 @@ export default function WishlistPage() {
           <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <Heart size={36} className="text-rose-300" />
           </div>
-          <h1 className="text-2xl font-bold text-zinc-900 mb-2">قائمة المفضلة فارغة</h1>
-          <p className="text-zinc-500 mb-8 text-sm">احفظ المنتجات التي تعجبك لتتبعها هنا.</p>
+          <h1 className="text-2xl font-bold text-zinc-900 mb-2">
+            {isAr ? "قائمة المفضلة فارغة" : "Your Wishlist is Empty"}
+          </h1>
+          <p className="text-zinc-500 mb-8 text-sm">
+            {isAr ? "احفظ المنتجات التي تعجبك لتتبعها هنا." : "Save products you love to keep track of them here."}
+          </p>
           <Link href="/browse" className="inline-flex items-center gap-2 h-12 px-8 bg-brand hover:bg-brand-dark rounded-full text-sm font-bold text-white transition-all">
-            ابدأ التسوق <ArrowRight size={16} />
+            {isAr ? "ابدأ التسوق" : "Start Shopping"} <ArrowRight size={16} />
           </Link>
         </div>
       </div>
@@ -58,12 +65,12 @@ export default function WishlistPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 text-xs text-zinc-400 mb-2">
-              <Link href="/" className="hover:text-zinc-900">الرئيسية</Link>
+              <Link href="/" className="hover:text-zinc-900">{isAr ? "الرئيسية" : "Home"}</Link>
               <ChevronRight size={10} />
-              <span className="text-zinc-900 font-medium">المفضلة</span>
+              <span className="text-zinc-900 font-medium">{isAr ? "المفضلة" : "Wishlist"}</span>
             </div>
             <h1 className="text-[32px] font-black text-zinc-900 flex items-center gap-3">
-              قوائمك <span className="text-zinc-300 font-medium text-[20px]">({wishlist.length})</span>
+              {isAr ? "قوائمك" : "Your Lists"} <span className="text-zinc-300 font-medium text-[20px]">({wishlist.length})</span>
             </h1>
           </div>
 
@@ -73,7 +80,7 @@ export default function WishlistPage() {
               <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-brand transition-colors" size={14} />
               <input 
                 type="text"
-                placeholder="ابحث عن المنتجات..."
+                placeholder={isAr ? "ابحث عن المنتجات..." : "Search products..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-10 pe-10 ps-10 bg-white border border-zinc-200 rounded-xl text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none w-full md:w-64 transition-all"
@@ -97,7 +104,7 @@ export default function WishlistPage() {
                   onChange={(e) => setSelectedVendor(e.target.value)}
                   className="text-sm bg-transparent outline-none cursor-pointer font-semibold text-zinc-700 ps-2"
                 >
-                  <option value="all">جميع المتاجر</option>
+                  <option value="all">{isAr ? "جميع المتاجر" : "All Stores"}</option>
                   {uniqueVendors.map(v => (
                     <option key={v.id} value={v.id}>{v.name}</option>
                   ))}
@@ -109,7 +116,7 @@ export default function WishlistPage() {
               onClick={clearWishlist}
               className="h-10 px-4 flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-rose-500 transition-colors"
             >
-              <Trash2 size={16} /> مسح القائمة
+              <Trash2 size={16} /> {isAr ? "مسح القائمة" : "Clear List"}
             </button>
           </div>
         </div>
@@ -126,13 +133,13 @@ export default function WishlistPage() {
         ) : (
           <div className="py-32 bg-white rounded-[32px] border border-zinc-100 text-center shadow-sm">
             <Package size={48} className="mx-auto text-zinc-100 mb-4" />
-            <p className="text-zinc-400 font-semibold text-lg">لا توجد نتائج</p>
-            <p className="text-zinc-300 text-sm">جرّب تعديل الفلاتر أو مصطلح البحث</p>
+            <p className="text-zinc-400 font-semibold text-lg">{isAr ? "لا توجد نتائج" : "No results found"}</p>
+            <p className="text-zinc-300 text-sm">{isAr ? "جرّب تعديل الفلاتر أو مصطلح البحث" : "Try adjusting your filters or search term"}</p>
             <button 
               onClick={() => { setSearchQuery(""); setSelectedVendor("all"); }}
               className="mt-6 text-brand font-bold text-sm hover:underline"
             >
-              إعادة ضبط الفلاتر
+              {isAr ? "إعادة ضبط الفلاتر" : "Reset Filters"}
             </button>
           </div>
         )}
