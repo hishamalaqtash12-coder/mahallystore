@@ -222,14 +222,14 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
 
   if (!isBrowse && !isFeaturedPage) {
     return (
-      <div className="w-full max-w-[1200px] mx-auto px-4 lg:px-8 select-none">
-        <div className="flex items-center justify-between mb-4 px-2">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-3xl font-extrabold text-black tracking-tight">{t("title")}</h2>
-            <div className="h-1.5 w-20 bg-brand rounded-full"></div>
+      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 select-none">
+        <div className="flex flex-row items-end justify-between gap-3 mb-6 px-1 border-b border-zinc-100 pb-4">
+          <div className="flex flex-col gap-1 min-w-0">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-zinc-900 tracking-tight leading-tight truncate">{t("title")}</h2>
           </div>
-          <Link href="/browse" className="text-sm font-bold text-zinc-500 hover:text-black transition-colors flex items-center gap-1 cursor-pointer">
-            {t("viewAll")} <ChevronRight size={16} className="rtl:-scale-x-100" />
+          <Link href="/browse" className="text-xs sm:text-sm font-extrabold text-zinc-700 hover:text-brand transition-colors bg-zinc-100 hover:bg-brand/10 px-3.5 sm:px-4 py-2 rounded-full border border-zinc-200/80 whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer">
+            <span>{t("viewAll")}</span>
+            <ChevronLeft size={16} className="rtl:rotate-0 rotate-180 text-zinc-600" />
           </Link>
         </div>
         {products.length === 0 ? (

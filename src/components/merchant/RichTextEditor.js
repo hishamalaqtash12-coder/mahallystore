@@ -170,9 +170,9 @@ export default function RichTextEditor({
         : "w-full"
     }`}>
       {/* Header Controls & Tabs */}
-      <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2 flex-wrap gap-2 select-none">
-        <div className="flex items-center gap-3">
-          <span className="text-[13px] font-bold text-zinc-700">{label}</span>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-zinc-200 bg-zinc-50 px-3 sm:px-4 py-2.5 gap-2 select-none">
+        <div className="flex items-center justify-between sm:justify-start gap-2.5">
+          <span className="text-xs sm:text-[13px] font-bold text-zinc-700">{label}</span>
           
           {/* Add Media Button */}
           {isVisualMode && (
@@ -180,7 +180,7 @@ export default function RichTextEditor({
               type="button"
               onClick={handleAddMediaClick}
               disabled={uploadingMedia}
-              className="flex items-center gap-1 px-3 py-1 bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 rounded-md text-[11px] font-bold transition-all shadow-sm disabled:opacity-60"
+              className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 rounded-md text-[11px] font-bold transition-all shadow-xs disabled:opacity-60 shrink-0"
             >
               {uploadingMedia ? (
                 <Loader2 size={12} className="animate-spin text-zinc-500" />
@@ -202,14 +202,14 @@ export default function RichTextEditor({
         </div>
 
         {/* Action Controls & AI */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
           {/* Enhance with AI */}
           {onEnhanceAi && (
             <button 
               type="button"
               onClick={onEnhanceAi}
               disabled={enhancingAi}
-              className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full text-[11px] font-bold transition-all disabled:opacity-50 shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full text-[11px] font-bold transition-all disabled:opacity-50 shadow-xs shrink-0"
             >
               {enhancingAi ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
               Enhance with AI
@@ -217,11 +217,11 @@ export default function RichTextEditor({
           )}
 
           {/* Visual/Code Mode Toggle */}
-          <div className="flex items-center border border-zinc-200 rounded-md bg-white p-0.5 shadow-sm">
+          <div className="flex items-center border border-zinc-200 rounded-md bg-white p-0.5 shadow-xs shrink-0">
             <button
               type="button"
               onClick={() => setIsVisualMode(true)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
                 isVisualMode 
                   ? "bg-zinc-100 text-zinc-800" 
                   : "text-zinc-500 hover:text-zinc-800"
@@ -233,13 +233,12 @@ export default function RichTextEditor({
             <button
               type="button"
               onClick={() => {
-                // If switching from visual to code, capture visual HTML first
                 if (editorRef.current && isVisualMode) {
                   onChange(editorRef.current.innerHTML);
                 }
                 setIsVisualMode(false);
               }}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
                 !isVisualMode 
                   ? "bg-zinc-100 text-zinc-800" 
                   : "text-zinc-500 hover:text-zinc-800"
@@ -254,7 +253,7 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1 hover:bg-zinc-200 border border-zinc-200 bg-white rounded-md text-zinc-600 shadow-sm transition-colors"
+            className="p-1 hover:bg-zinc-200 border border-zinc-200 bg-white rounded-md text-zinc-600 shadow-xs transition-colors shrink-0 ms-auto sm:ms-0"
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Mode"}
           >
             {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
@@ -262,14 +261,14 @@ export default function RichTextEditor({
         </div>
       </div>
 
-      {/* Formatting Toolbar (Only in Visual Mode) */}
+      {/* Formatting Toolbar (Only in Visual Mode - Horizontal Scrollable on Mobile) */}
       {isVisualMode && (
-        <div className="flex items-center gap-1 p-2 border-b border-zinc-200 bg-zinc-50/50 flex-wrap select-none">
+        <div className="flex items-center gap-1 p-1.5 border-b border-zinc-200 bg-zinc-50/50 overflow-x-auto no-scrollbar select-none shrink-0">
           {/* Format Block Select */}
           <select 
             onChange={handleFormatBlock}
             defaultValue="div"
-            className="h-8 px-2 bg-white border border-zinc-200 rounded text-[11px] font-bold outline-none text-zinc-700 ms-2 shadow-sm focus:border-zinc-300"
+            className="h-7 px-2 bg-white border border-zinc-200 rounded text-[11px] font-bold outline-none text-zinc-700 shadow-xs focus:border-zinc-300 shrink-0"
           >
             <option value="div">Paragraph</option>
             <option value="h1">Heading 1</option>
@@ -279,13 +278,13 @@ export default function RichTextEditor({
           </select>
 
           {/* Divider */}
-          <div className="h-4 w-px bg-zinc-200 mx-1" />
+          <div className="h-4 w-px bg-zinc-200 mx-0.5 shrink-0" />
 
           {/* Formatting Buttons */}
           <button
             type="button"
             onClick={() => execCommand("bold")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Bold"
           >
             <Bold size={14} />
@@ -293,7 +292,7 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => execCommand("italic")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Italic"
           >
             <Italic size={14} />
@@ -301,20 +300,20 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => execCommand("underline")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Underline"
           >
             <Underline size={14} />
           </button>
 
           {/* Divider */}
-          <div className="h-4 w-px bg-zinc-200 mx-1" />
+          <div className="h-4 w-px bg-zinc-200 mx-0.5 shrink-0" />
 
           {/* List Buttons */}
           <button
             type="button"
             onClick={() => execCommand("insertUnorderedList")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Bullet List"
           >
             <List size={14} />
@@ -322,20 +321,20 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => execCommand("insertOrderedList")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Numbered List"
           >
             <ListOrdered size={14} />
           </button>
 
           {/* Divider */}
-          <div className="h-4 w-px bg-zinc-200 mx-1" />
+          <div className="h-4 w-px bg-zinc-200 mx-0.5 shrink-0" />
 
           {/* Alignment Buttons */}
           <button
             type="button"
             onClick={() => execCommand("justifyLeft")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Align Left"
           >
             <AlignLeft size={14} />
@@ -343,7 +342,7 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => execCommand("justifyCenter")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Align Center"
           >
             <AlignCenter size={14} />
@@ -351,7 +350,7 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => execCommand("justifyRight")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Align Right"
           >
             <AlignRight size={14} />
@@ -359,20 +358,20 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => execCommand("justifyFull")}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Justify"
           >
             <AlignJustify size={14} />
           </button>
 
           {/* Divider */}
-          <div className="h-4 w-px bg-zinc-200 mx-1" />
+          <div className="h-4 w-px bg-zinc-200 mx-0.5 shrink-0" />
 
           {/* Link Button */}
           <button
             type="button"
             onClick={addLink}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0"
             title="Insert Link"
           >
             <LinkIcon size={14} />
@@ -382,7 +381,7 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={clearFormatting}
-            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all me-auto"
+            className="p-1.5 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded text-zinc-700 transition-all shrink-0 me-auto"
             title="Clear Formatting"
           >
             <RemoveFormatting size={14} />

@@ -141,23 +141,23 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-white group border border-zinc-200 hover:border-zinc-300 transition-all rounded-md p-2 shadow-sm hover:shadow-md min-w-0">
+    <div className="relative flex flex-col h-full bg-white group border border-zinc-200/80 hover:border-brand/40 transition-all duration-300 rounded-2xl p-2.5 shadow-xs hover:shadow-xl hover:-translate-y-1 min-w-0">
       {/* IMAGE */}
-      <div className="relative aspect-square bg-[#F7F7F7] rounded-md overflow-hidden flex items-center justify-center p-2 mb-2">
+      <div className="relative aspect-square bg-[#F8F9FA] rounded-xl overflow-hidden flex items-center justify-center p-3 mb-2.5 group/img">
         <Link href={`/product/${product.slug}`} className="block h-full w-full relative">
           <Image
             src={imageUrl}
             alt={product.name}
             fill
-            className={`object-contain transition-opacity ${outOfStock ? "opacity-50" : ""}`}
+            className={`object-contain transition-transform duration-500 group-hover/img:scale-105 ${outOfStock ? "opacity-50" : ""}`}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
           />
         </Link>
 
         {/* Out of Stock overlay */}
         {outOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="bg-zinc-800/80 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/10 backdrop-blur-xs">
+            <span className="bg-zinc-900/90 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
               {t("outOfStock")}
             </span>
           </div>
@@ -165,12 +165,12 @@ export default function ProductCard({ product }) {
 
         {/* Badges (only when in stock) */}
         {!outOfStock && isBestSeller && (
-          <div className="absolute top-0 end-0 bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md shadow-sm z-10">
+          <div className="absolute top-2.5 end-2.5 bg-zinc-900 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md z-10 uppercase tracking-wider">
             {t("bestSeller")}
           </div>
         )}
         {!outOfStock && onSale && !isBestSeller && (
-          <div className={`absolute top-0 end-0 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md shadow-sm z-10 flex items-center gap-1 ${isLimitedOffer ? "bg-gradient-to-r from-brand to-brand-dark" : "bg-brand"}`}>
+          <div className={`absolute top-2.5 end-2.5 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md z-10 flex items-center gap-1 ${isLimitedOffer ? "bg-gradient-to-r from-rose-600 to-amber-500" : "bg-rose-600"}`}>
             {isLimitedOffer && <Zap size={10} className="fill-white animate-bounce" />}
             {isLimitedOffer ? t("limitedTimeOffer") : t("savePercent", {percent: ((1 - price / regularPrice) * 100).toFixed(0)})}
           </div>
@@ -180,10 +180,10 @@ export default function ProductCard({ product }) {
         {!outOfStock && (
           <button
             onClick={(e) => { e.preventDefault(); setIsQuickLookOpen(true); }}
-            className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none"
+            className="absolute inset-0 bg-black/10 opacity-0 group-hover/img:opacity-100 transition-all duration-300 flex items-center justify-center pointer-events-none"
           >
-            <div className="bg-white/90 px-4 py-2 rounded-full shadow-lg pointer-events-auto">
-              <span className="text-xs font-bold text-zinc-900 flex items-center gap-2"><Eye size={14} /> {t("quickLook")}</span>
+            <div className="bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-lg pointer-events-auto hover:scale-105 active:scale-95 transition-all">
+              <span className="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><Eye size={14} className="text-brand" /> {t("quickLook")}</span>
             </div>
           </button>
         )}
@@ -191,11 +191,11 @@ export default function ProductCard({ product }) {
         {/* Wishlist */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product); }}
-          className="absolute top-2 start-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all z-20 group/wishlist"
+          className="absolute top-2.5 start-2.5 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-sm hover:bg-white hover:shadow-md transition-all z-20 group/wishlist active:scale-90"
         >
           <Heart
-            size={16}
-            className={`transition-colors ${alreadyInWishlist ? "fill-rose-500 text-rose-500" : "text-zinc-400 group-hover/wishlist:text-rose-400"}`}
+            size={15}
+            className={`transition-colors ${alreadyInWishlist ? "fill-rose-500 text-rose-500" : "text-zinc-400 group-hover/wishlist:text-rose-500"}`}
           />
         </button>
       </div>
@@ -203,29 +203,21 @@ export default function ProductCard({ product }) {
       {/* INFO */}
       <div className="px-1 flex flex-col flex-1 gap-1 min-w-0">
         {product.meta_data?.find(m => m.key === "_mahally_ad_status")?.value === "active" && (
-          <span className="text-[11px] text-zinc-500 mb-[-2px]">{t("sponsoredAd")}</span>
+          <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-[-2px]">{t("sponsoredAd")}</span>
         )}
 
         <div className="relative group/title">
           <Link href={`/product/${product.slug}`}>
-            <h3 className="text-[14px] leading-tight font-medium text-zinc-900 group-hover:text-brand line-clamp-2">
+            <h3 className="text-xs sm:text-sm leading-snug font-bold text-zinc-900 group-hover:text-brand transition-colors line-clamp-2">
               {product.name}
             </h3>
           </Link>
-          <div className="absolute end-0 top-full mt-1 w-[200%] sm:w-64 bg-white border border-zinc-200 shadow-xl p-2.5 rounded-md text-[12px] text-zinc-800 opacity-0 invisible group-hover/title:opacity-100 group-hover/title:visible transition-all z-[60] pointer-events-none font-medium">
-            {product.name}
-          </div>
         </div>
 
         {plainDescription && (
-          <div className="relative group/desc w-full">
-            <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5 leading-snug cursor-default">
-              {plainDescription}
-            </p>
-            <div className="absolute end-0 top-full mt-1 w-[200%] sm:w-64 bg-white border border-zinc-200 shadow-xl p-2.5 rounded-md text-[11px] text-zinc-600 opacity-0 invisible group-hover/desc:opacity-100 group-hover/desc:visible transition-all z-[60] pointer-events-none leading-relaxed">
-              {plainDescription}
-            </div>
-          </div>
+          <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5 leading-snug">
+            {plainDescription}
+          </p>
         )}
 
         {/* Merchant Badge */}
@@ -233,51 +225,47 @@ export default function ProductCard({ product }) {
           {merchantName ? (
             <Link
               href={merchantLink}
-              className="inline-flex items-center gap-1 border border-zinc-200 bg-zinc-50 text-zinc-600 text-[10px] font-bold px-1.5 py-0.5 rounded-sm truncate max-w-full hover:border-brand hover:text-brand transition-all"
+              className="inline-flex items-center gap-1 border border-zinc-200/80 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 text-[10px] font-bold px-2 py-0.5 rounded-full truncate max-w-full hover:border-brand/40 hover:text-brand transition-all"
             >
               <span>{t("soldBy", {name: merchantName})}</span>
               {isVerifiedMerchant && <BadgeCheck size={12} className="text-blue-500 shrink-0" />}
             </Link>
           ) : (
-            <span className="inline-flex items-center gap-1 border border-zinc-100 bg-zinc-50 text-zinc-400 text-[10px] px-1.5 py-0.5 rounded-sm">
+            <span className="inline-flex items-center gap-1 border border-zinc-100 bg-zinc-50 text-zinc-400 text-[10px] font-semibold px-2 py-0.5 rounded-full">
               {t("officialMahally")}
             </span>
           )}
         </div>
 
         {/* Rating */}
-        <div className="flex items-center gap-1">
-          <div className="flex gap-0">
+        <div className="flex items-center gap-1 mt-0.5">
+          <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} size={14} className={`${i < Math.round(avgRating) ? "text-[#FFA41C] fill-[#FFA41C]" : "text-zinc-200 fill-zinc-200"}`} />
+              <Star key={i} size={12} className={`${i < Math.round(avgRating) ? "text-amber-400 fill-amber-400" : "text-zinc-200 fill-zinc-200"}`} />
             ))}
           </div>
-          <span className="text-[12px] text-brand hover:text-brand-dark cursor-pointer">{ratingCount.toLocaleString()}</span>
+          <span className="text-[11px] font-bold text-zinc-400">({ratingCount.toLocaleString()})</span>
         </div>
 
-        {boughtLastMonth && !outOfStock && (
-          <p className="text-[12px] text-zinc-600">{t("boughtLastMonth", {count: boughtLastMonth})}</p>
-        )}
-
-        <div className="mt-1">
+        <div className="mt-2">
           {outOfStock ? (
             <div className="flex items-center gap-1.5 text-rose-600">
               <AlertCircle size={13} />
-              <span className="text-[13px] font-semibold">{t("outOfStock")}</span>
+              <span className="text-xs font-bold">{t("outOfStock")}</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              {onSale && <span className="text-brand text-[20px] font-light">-{Math.round((1 - price / regularPrice) * 100)}%</span>}
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              {onSale && <span className="text-rose-600 text-sm font-black">-{Math.round((1 - price / regularPrice) * 100)}%</span>}
               <div className="flex items-start text-zinc-900">
-                {product.type === "variable" && <span className="text-[12px] mt-1 font-normal text-zinc-600 ms-1">{t("from")}</span>}
-                <span className="text-2xl font-medium tracking-tight leading-none">{whole}</span>
-                <span className="text-[12px] font-medium leading-none mt-1 ms-0.5">{decimal}</span>
-                <span className="text-[12px] mt-1 font-medium ms-1">{t("jod")}</span>
+                {product.type === "variable" && <span className="text-[11px] mt-0.5 font-medium text-zinc-500 me-1">{t("from")}</span>}
+                <span className="text-xl sm:text-2xl font-black tracking-tight leading-none text-zinc-900">{whole}</span>
+                <span className="text-xs font-bold leading-none mt-0.5 ms-0.5 text-zinc-700">.{decimal}</span>
+                <span className="text-xs font-bold mt-0.5 ms-1 text-zinc-500">{t("jod")}</span>
               </div>
             </div>
           )}
           {onSale && !outOfStock && (
-            <p className="text-[12px] text-zinc-500 mt-0.5">
+            <p className="text-[11px] text-zinc-400 line-through mt-0.5 font-medium">
               {t("originalPrice", {price: regularPrice.toFixed(2)})}
             </p>
           )}
@@ -294,7 +282,7 @@ export default function ProductCard({ product }) {
           if (outOfStock) {
             return (
               <div
-                className="absolute bottom-3 end-3 w-[42px] h-8 rounded-full bg-white text-zinc-300 border border-zinc-200 flex items-center justify-center cursor-not-allowed shadow-sm"
+                className="absolute bottom-3 end-3 w-9 h-9 rounded-full bg-zinc-100 text-zinc-400 flex items-center justify-center cursor-not-allowed"
                 title={t("outOfStock")}
               >
                 <AlertCircle size={16} />
@@ -306,10 +294,10 @@ export default function ProductCard({ product }) {
             return (
               <Link
                 href="/merchant/dashboard/products"
-                className="absolute bottom-3 end-3 w-[42px] h-8 rounded-full bg-white text-zinc-900 border border-zinc-900 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-colors shadow-sm"
+                className="absolute bottom-3 end-3 w-9 h-9 rounded-full bg-white text-zinc-900 border border-zinc-300 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-all shadow-sm active:scale-90"
                 title={t("manageProduct")}
               >
-                <Settings size={16} />
+                <Settings size={15} />
               </Link>
             );
           }
@@ -317,10 +305,10 @@ export default function ProductCard({ product }) {
           if (isVendor) {
             return (
               <div
-                className="absolute bottom-3 end-3 w-[42px] h-8 rounded-full bg-white text-zinc-300 border border-zinc-200 flex items-center justify-center cursor-not-allowed shadow-sm"
+                className="absolute bottom-3 end-3 w-9 h-9 rounded-full bg-zinc-100 text-zinc-300 flex items-center justify-center cursor-not-allowed"
                 title={t("purchaseDisabled")}
               >
-                <ShoppingCart size={16} />
+                <ShoppingCart size={15} />
               </div>
             );
           }
@@ -328,15 +316,12 @@ export default function ProductCard({ product }) {
           return (
             <button
               onClick={handleCartToggle}
-              className={`absolute bottom-3 end-3 w-[42px] h-8 rounded-full flex items-center justify-center transition-all shadow-sm hover:scale-105 active:scale-95
-                ${alreadyInCart ? "bg-brand text-white border border-brand hover:bg-brand-dark" : "bg-white text-brand border border-brand hover:bg-brand-light/30"}`}
+              className={`absolute bottom-3 end-3 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md hover:scale-110 active:scale-90
+                ${alreadyInCart ? "bg-brand text-white border border-brand hover:bg-brand-dark" : "bg-zinc-900 text-white hover:bg-brand"}`}
               title={alreadyInCart ? t("removeFromCart") : t("addToCart")}
             >
               {alreadyInCart ? <Check size={16} /> : (
-                 <div className="relative flex items-center justify-center">
-                   <ShoppingCart size={16} strokeWidth={2.5} />
-                   <span className="absolute -top-0.5 -start-1.5 text-[10px] font-black leading-none">+</span>
-                 </div>
+                 <ShoppingCart size={15} strokeWidth={2.2} />
               )}
             </button>
           );

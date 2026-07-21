@@ -784,65 +784,74 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
   }, []);
 
   return (
-    <div className="fixed top-0 end-0 w-full h-full z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-5xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" dir={isAr ? "rtl" : "ltr"}>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden">
+      <div className="bg-white w-full max-w-5xl h-[95vh] sm:max-h-[90vh] rounded-2xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" dir={isAr ? "rtl" : "ltr"}>
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
-          <div>
-            <h2 className="text-[18px] font-bold text-zinc-900">{productToEdit ? l("Edit Product") : l("Add New Product")}</h2>
-            <p className="text-[12px] text-zinc-500 font-medium">{l("Complete all sections to publish your product.")}</p>
-          </div>
-          <div className="flex items-center gap-6 ms-12">
-            <div className="flex items-center gap-2">
-              <input 
-                type="checkbox"
-                id="virtual"
-                name="virtual"
-                checked={formData.virtual}
-                onChange={handleInputChange}
-                className="w-4 h-4 accent-[#be374f]"
-              />
-              <label htmlFor="virtual" className="text-[13px] font-medium text-zinc-700 cursor-pointer">{l("Virtual")}</label>
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-50 gap-2 shrink-0">
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <div>
+              <h2 className="text-base sm:text-[18px] font-bold text-zinc-900 leading-snug">{productToEdit ? l("Edit Product") : l("Add New Product")}</h2>
+              <p className="text-xs text-zinc-500 font-medium hidden sm:block">{l("Complete all sections to publish your product.")}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <input 
-                type="checkbox"
-                id="downloadable"
-                name="downloadable"
-                checked={formData.downloadable}
-                onChange={handleInputChange}
-                className="w-4 h-4 accent-[#be374f]"
-              />
-              <label htmlFor="downloadable" className="text-[13px] font-medium text-zinc-700 cursor-pointer">{l("Downloadable")}</label>
-            </div>
+            <button onClick={onClose} className="p-1.5 sm:p-2 hover:bg-zinc-200 rounded-full transition-colors sm:hidden">
+              <X size={20} className="text-zinc-500" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-zinc-200 rounded-full transition-colors">
-            <X size={20} className="text-zinc-500" />
-          </button>
+
+          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-200/60">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <input 
+                  type="checkbox"
+                  id="virtual"
+                  name="virtual"
+                  checked={formData.virtual}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 accent-[#be374f]"
+                />
+                <label htmlFor="virtual" className="text-xs sm:text-[13px] font-bold text-zinc-700 cursor-pointer">{l("Virtual")}</label>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <input 
+                  type="checkbox"
+                  id="downloadable"
+                  name="downloadable"
+                  checked={formData.downloadable}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 accent-[#be374f]"
+                />
+                <label htmlFor="downloadable" className="text-xs sm:text-[13px] font-bold text-zinc-700 cursor-pointer">{l("Downloadable")}</label>
+              </div>
+            </div>
+
+            <button onClick={onClose} className="p-2 hover:bg-zinc-200 rounded-full transition-colors hidden sm:block">
+              <X size={20} className="text-zinc-500" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 flex overflow-hidden">
-          {/* Sidebar Tabs */}
-          <div className="w-64 border-r border-zinc-100 bg-zinc-50 p-4 space-y-1 overflow-y-auto">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+          {/* Responsive Tabs (Horizontal Scroll on Mobile, Vertical Sidebar on Desktop) */}
+          <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-zinc-200 bg-zinc-50 p-2 md:p-4 flex md:flex-col overflow-x-auto md:overflow-y-auto no-scrollbar shrink-0 gap-1.5 md:gap-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[13px] font-bold transition-all ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-[13px] font-bold transition-all whitespace-nowrap shrink-0 ${
                   activeTab === tab.id 
                     ? "bg-[#febd69] text-zinc-900 shadow-sm" 
-                    : "text-zinc-500 hover:bg-zinc-100"
+                    : "text-zinc-600 hover:bg-zinc-100 bg-white md:bg-transparent border md:border-0 border-zinc-200"
                 }`}
               >
-                <tab.icon size={18} />
-                {tab.label}
-                {activeTab === tab.id && <ChevronRight size={14} className="me-auto" />}
+                <tab.icon size={16} className="shrink-0" />
+                <span>{tab.label}</span>
+                {activeTab === tab.id && <ChevronRight size={14} className="hidden md:block me-auto rtl:rotate-180" />}
               </button>
             ))}
           </div>
 
-          {/* Content Area */}
-          <div className="flex-1 overflow-y-auto p-8 bg-white">
+          {/* Form Content Area */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-white min-w-0">
             {error && (
               <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-lg space-y-2 text-rose-700 text-[13px] font-medium">
                 <div className="flex items-center gap-3">
@@ -857,7 +866,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               </div>
             )}
 
-            <form id="product-form" onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
+            <form id="product-form" onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 w-full max-w-2xl">
               {activeTab === "general" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -2009,22 +2018,22 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
         </div>
 
         {/* Footer Actions */}
-        <div className="px-8 py-4 border-t border-zinc-200 flex items-center justify-between bg-zinc-50">
-          <div className="flex items-center gap-2 text-zinc-500">
+        <div className="px-4 sm:px-8 py-3 sm:py-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between bg-zinc-50 gap-3 shrink-0">
+          <div className="flex items-center gap-2 text-zinc-500 w-full sm:w-auto justify-center sm:justify-start">
             {loading && <Loader2 size={16} className="animate-spin" />}
-            <span className="text-[12px] font-medium">
+            <span className="text-xs font-medium">
               {loading ? (productToEdit ? l("Updating product...") : (isAr ? "جاري إنشاء المنتج..." : "Creating product...")) : l("All changes are saved locally.")}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
             {success && (
-              <span className="text-[13px] text-emerald-600 font-medium flex items-center gap-1 animate-in fade-in slide-in-from-start-2">
+              <span className="text-xs sm:text-[13px] text-emerald-600 font-medium flex items-center gap-1 animate-in fade-in me-auto sm:me-0">
                 <Check size={16} /> {isAr ? "تم تحديث المنتج بنجاح!" : "Product updated successfully!"}
               </span>
             )}
             <button 
               onClick={onClose}
-              className="h-10 px-6 bg-white border border-zinc-300 rounded-lg text-[13px] font-bold hover:bg-zinc-50 transition-all shadow-sm"
+              className="flex-1 sm:flex-none h-10 px-4 sm:px-6 bg-white border border-zinc-300 rounded-lg text-xs sm:text-[13px] font-bold hover:bg-zinc-50 transition-all shadow-sm"
             >
               {l("Cancel")}
             </button>
@@ -2032,7 +2041,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               form="product-form"
               type="submit"
               disabled={loading || success}
-              className={`h-10 px-8 rounded-lg text-[13px] font-bold text-white transition-all shadow-sm flex items-center gap-2 ${
+              className={`flex-1 sm:flex-none h-10 px-6 sm:px-8 rounded-lg text-xs sm:text-[13px] font-bold text-white transition-all shadow-sm flex items-center justify-center gap-2 ${
                 success ? "bg-emerald-600" : "bg-zinc-900 hover:bg-zinc-800"
               }`}
             >

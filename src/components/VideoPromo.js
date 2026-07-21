@@ -57,18 +57,22 @@ export default function VideoPromo({
 
   return (
     <>
-      <section className="w-full bg-white border-zinc-100">
-        <div className="max-w-[1200px] mx-auto px-4 lg:px-8">
+      <section className="w-full bg-gradient-to-b from-white to-zinc-50/50 py-4">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* Header - Consistent with other sections */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-3xl font-extrabold text-black tracking-tight flex items-center gap-3">
-                <Play size={28} className="text-brand" />
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 border-b border-zinc-100 pb-4">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-brand/10 text-brand border border-brand/20 text-xs font-black uppercase tracking-wider">
+                <Play size={12} className="fill-brand text-brand" />
+                <span>{locale === "ar" ? "قصتنا ورؤيتنا" : "Our Story & Vision"}</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 tracking-tight">
                 {t("title")}
               </h2>
-              <div className="h-1.5 w-20 bg-brand rounded-full"></div>
-              <p className="text-[13px] text-zinc-500 font-medium mt-1">
+
+              <p className="text-xs sm:text-sm text-zinc-500 font-semibold max-w-xl">
                 {t("subtitle")}
               </p>
             </div>
@@ -76,7 +80,7 @@ export default function VideoPromo({
             {isAdmin && (
               <Link
                 href="/admin/settings"
-                className="group flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-700 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 transition-all"
+                className="group flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-700 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 transition-all shrink-0"
               >
                 <Settings size={14} className="transition-transform group-hover:rotate-90" />
                 {t("editVideo")}
@@ -85,7 +89,7 @@ export default function VideoPromo({
           </div>
 
           {/* Video Promo Card */}
-          <div className="group relative overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm hover:shadow-xl transition-all duration-500">
+          <div className="group relative overflow-hidden rounded-3xl border border-zinc-200/80 bg-white shadow-md hover:shadow-2xl transition-all duration-500">
             <button
               onClick={() => setIsOpen(true)}
               className="relative w-full aspect-video overflow-hidden"
@@ -99,47 +103,63 @@ export default function VideoPromo({
               />
 
               {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/30 transition-all duration-300" />
 
-              {/* Big Play Button */}
+              {/* Glowing Pulse Play Button */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-black shadow-2xl transition-all duration-300 group-hover:scale-110">
-                  <Play fill="currentColor" size={36} className="me-1" />
+                <div className="relative flex items-center justify-center">
+                  <div className="absolute w-24 h-24 rounded-full bg-brand/40 animate-ping" />
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-zinc-900 shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:bg-brand group-hover:text-white">
+                    <Play fill="currentColor" size={32} className="ms-1" />
+                  </div>
                 </div>
               </div>
 
               {/* Title Overlay */}
-              <div className="absolute bottom-0 end-0 start-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-8 md:p-12">
-                <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight tracking-tight max-w-2xl">
+              <div className="absolute bottom-0 end-0 start-0 p-6 md:p-10 text-start">
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight tracking-tight max-w-2xl drop-shadow-md">
                   {finalTitle}
                 </h3>
               </div>
             </button>
 
             {/* Bottom Content Area */}
-            <div className="p-8 md:p-10">
-              <p className="text-[15px] leading-relaxed text-zinc-600 md:text-base">
+            <div className="p-6 md:p-8">
+              <p className="text-sm sm:text-base leading-relaxed text-zinc-600 font-medium">
                 {finalDescription}
               </p>
 
-              <div className="mt-8 flex flex-row w-full gap-2 sm:gap-4">
+              {/* Trust Badges Bar */}
+              <div className="mt-6 flex flex-wrap items-center gap-3 pt-6 border-t border-zinc-100 text-xs font-bold text-zinc-700">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 border border-zinc-200">
+                  🇯🇴 {locale === "ar" ? "منتجات أردنية محليّة 100%" : "100% Local Products"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 border border-zinc-200">
+                  🚚 {locale === "ar" ? "توصيل سريع لكل المحافظات" : "Fast Delivery Across Jordan"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 border border-zinc-200">
+                  ⭐ {locale === "ar" ? "آلاف التجار والعملاء السعداء" : "Thousands of Happy Buyers"}
+                </span>
+              </div>
+
+              <div className="mt-6 flex flex-col sm:flex-row w-full gap-3">
                 <button
                   onClick={() => setIsOpen(true)}
-                  className="flex-1 inline-flex justify-center items-center gap-1.5 sm:gap-2 bg-brand hover:bg-brand/90 text-white px-2 sm:px-6 py-3 rounded-full text-[13px] sm:text-base font-medium transition-all active:scale-95 whitespace-nowrap"
+                  className="flex-1 inline-flex justify-center items-center gap-2 bg-brand hover:bg-brand-dark text-white px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all shadow-md active:scale-95 whitespace-nowrap"
                 >
-                  <Play size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <Play size={16} className="fill-white" />
                   {t("watchVideo")}
                 </button>
 
                 <Link
                   href="/browse"
-                  className="flex-1 inline-flex justify-center items-center gap-1.5 sm:gap-2 border border-zinc-300 hover:border-zinc-400 text-zinc-800 px-2 sm:px-6 py-3 rounded-full text-[13px] sm:text-base font-medium transition-all whitespace-nowrap"
+                  className="flex-1 inline-flex justify-center items-center gap-2 border border-zinc-300 hover:border-zinc-400 bg-white hover:bg-zinc-50 text-zinc-900 px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all shadow-xs whitespace-nowrap"
                 >
                   {t("exploreProducts")}
                   {locale === "ar" ? (
-                    <ArrowLeft size={16} className="sm:w-[18px] sm:h-[18px]" />
+                    <ArrowLeft size={16} />
                   ) : (
-                    <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
+                    <ArrowRight size={16} />
                   )}
                 </Link>
               </div>

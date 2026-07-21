@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "@/i18n/routing";
@@ -22,6 +23,25 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen && typeof document !== "undefined") {
+      document.body.style.overflow = "hidden";
+    } else if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.overflow = "";
+      }
+    };
+  }, [isOpen]);
 
   // Sync with global cart state
   const cartItem = useMemo(() => cart.find(item => item.id === product?.id), [cart, product?.id]);
@@ -137,11 +157,11 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
   const deliveryDates = useMemo(() => {
     const start = new Date(); start.setDate(start.getDate() + 2);
     const end = new Date(); end.setDate(end.getDate() + 5);
-    const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fmt = (d) => d.toLocaleDateString(locale === "ar" ? "ar-JO" : "en-US", { month: "short", day: "numeric" });
     return `${fmt(start)} - ${fmt(end)}`;
-  }, []);
+  }, [locale]);
 
-  if (!isOpen || !product) return null;
+  if (!isOpen || !product || !mounted) return null;
 
   const outOfStock = isProductOutOfStock(matchedVariation || product);
   const regularPrice = parseFloat(matchedVariation?.regular_price || matchedVariation?.price || product.regular_price || product.price || 0);
@@ -154,39 +174,48 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
 
 
 
-  return (
-    <div className="fixed inset-0 z-[150] flex items-end md:items-center justify-center p-0 md:p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-end md:items-center justify-center p-0 md:p-4 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 transition-opacity animate-in fade-in duration-300"
+        className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity animate-in fade-in duration-300 z-[99999]"
         onClick={onClose}
       />
 
       {/* Modal Content */}
-      <div className="relative bg-white w-full max-w-[900px] shadow-2xl flex flex-col md:flex-row animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-200 rounded-t-3xl md:rounded-2xl max-h-[92vh] md:max-h-[85vh] overflow-y-auto md:overflow-hidden">
+      <div className="relative bg-white w-full max-w-[900px] shadow-2xl flex flex-col md:flex-row animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-200 rounded-t-3xl md:rounded-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto md:overflow-hidden z-[100000] border-t md:border border-zinc-200">
         
-        {/* Mobile Pull Handle */}
-        <div className="w-full flex justify-center pt-3 pb-2 md:hidden bg-white sticky top-0 z-40">
-          <div className="w-12 h-1.5 bg-zinc-300 rounded-full" />
+        {/* Mobile Pull Handle & Close Header */}
+        <div className="w-full flex items-center justify-between px-4 py-2.5 md:hidden bg-white sticky top-0 z-50 border-b border-zinc-100 shrink-0">
+          <div className="w-10 h-1 bg-zinc-300 rounded-full mx-auto absolute inset-x-0 top-2.5" />
+          <div />
+          <button
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 rounded-full text-zinc-700 transition-all shadow-xs ms-auto"
+            aria-label="Close modal"
+          >
+            <X size={16} />
+          </button>
         </div>
 
-        {/* Close Button */}
+        {/* Desktop Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 start-3 z-50 w-8 h-8 flex items-center justify-center bg-white border border-zinc-200 hover:bg-zinc-100 rounded-full text-zinc-600 transition-all shadow-sm"
+          className="hidden md:flex absolute top-4 end-4 z-50 w-9 h-9 items-center justify-center bg-white/90 border border-zinc-200 hover:bg-white rounded-full text-zinc-700 transition-all shadow-md active:scale-95"
+          aria-label="Close modal"
         >
           <X size={18} />
         </button>
 
         {loading ? (
-          <div className="w-full flex items-center justify-center p-20 min-h-[400px]">
+          <div className="w-full flex items-center justify-center p-20 min-h-[350px]">
             <div className="w-10 h-10 border-4 border-zinc-200 border-t-brand rounded-full animate-spin" />
           </div>
         ) : (
           <>
             {/* LEFT: Image Gallery */}
-            <div className="w-full md:w-[45%] p-4 sm:p-6 pt-2 md:pt-6 flex flex-col bg-white border-b md:border-b-0 md:border-l border-zinc-200 shrink-0 md:overflow-y-auto no-scrollbar">
-              <div className="relative aspect-[4/3] md:aspect-square mb-4 md:mb-6 flex items-center justify-center bg-white rounded-lg overflow-hidden border border-zinc-100 shadow-sm">
+            <div className="w-full md:w-[45%] p-4 sm:p-6 pt-3 md:pt-6 flex flex-col bg-white border-b md:border-b-0 md:border-l border-zinc-200 shrink-0 md:overflow-y-auto no-scrollbar">
+              <div className="relative aspect-square max-h-[240px] sm:max-h-[280px] md:max-h-none mb-3 md:mb-6 flex items-center justify-center bg-zinc-50/50 rounded-xl overflow-hidden border border-zinc-100 shadow-xs mx-auto w-full">
                 <Image
                   src={displayImages[selectedImage]?.src || displayImages[0]?.src || "https://placehold.co/600"}
                   alt={product.name}
@@ -197,7 +226,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
               </div>
 
               {/* Thumbnails Row */}
-              <div className="flex gap-2 overflow-x-auto no-scrollbar justify-center pb-2 md:pb-0">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar justify-center pb-1 md:pb-0">
                 {displayImages.map((img, i) => (
                   <button
                     key={i}
@@ -408,6 +437,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

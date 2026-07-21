@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useLocation } from "@/context/LocationContext";
 import { JORDAN_GOVERNORATES, GOVERNORATES_MAP_AR } from "@/lib/constants";
-import { isProductOutOfStock } from "@/lib/product-utils";
+import { isProductOutOfStock, getCategoryName } from "@/lib/product-utils";
 
 const decodeHtml = (html) => {
   if (!html) return '';
@@ -325,7 +325,7 @@ export default function Header() {
                 >
                   <option value="All">{t("categories")}</option>
                   {categories.map(c => (
-                    <option key={c.id} value={c.slug}>{decodeHtml(c.name)}</option>
+                    <option key={c.id} value={c.slug}>{decodeHtml(getCategoryName(c, locale))}</option>
                   ))}
                 </select>
                 <div className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-zinc-500">
@@ -623,7 +623,7 @@ export default function Header() {
                   {(isExpanded ? categories : categories.slice(0, 8)).map(cat => (
                     <li key={cat.id}>
                       <Link href={`/browse?cat=${cat.slug}`} onClick={() => setIsSidebarOpen(false)} className="px-6 py-3 flex justify-between items-center hover:bg-zinc-100 transition-colors group">
-                        {cat.name} <ChevronRight size={16} className="text-zinc-400 group-hover:text-zinc-900" />
+                        {decodeHtml(getCategoryName(cat, locale))} <ChevronRight size={16} className="text-zinc-400 group-hover:text-zinc-900" />
                       </Link>
                     </li>
                   ))}

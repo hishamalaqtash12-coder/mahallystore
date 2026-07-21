@@ -110,15 +110,20 @@ const mapProduct = (node) => {
 
 const mapCategory = (node) => {
   if (!node) return null;
+  const meta_data = (node.metaData || []).map(m => ({ key: m.key, value: m.value }));
+  const name_en = meta_data.find(m => m.key === 'name_en' || m.key === 'en_name' || m.key === 'name_english')?.value || null;
+
   return {
     id: node.databaseId,
     ID: node.databaseId,
     name: node.name,
+    name_en,
     slug: node.slug,
     description: node.description,
     count: node.count,
     image: node.image ? { src: node.image.sourceUrl, alt: node.image.altText } : null,
-    parent: node.parent?.node?.databaseId || 0
+    parent: node.parent?.node?.databaseId || 0,
+    meta_data
   };
 };
 
@@ -324,20 +329,61 @@ export async function getCategories(options = {}, retries = 3) {
   const perPage = options.per_page ? parseInt(options.per_page, 10) : 100;
   const now = Date.now();
   
-  if (WC_CATEGORIES_CACHE.data && (now - WC_CATEGORIES_CACHE.timestamp < CATEGORIES_CACHE_TTL)) {
+  if (WC_CATEGORIES_CACHE.data && WC_CATEGORIES_CACHE.data.length > 0 && (now - WC_CATEGORIES_CACHE.timestamp < CATEGORIES_CACHE_TTL)) {
     return WC_CATEGORIES_CACHE.data;
   }
 
   try {
-    const data = await fetchGraphQL(GET_CATEGORIES, { first: perPage });
-    const categories = (data?.productCategories?.nodes || []).map(mapCategory);
+    const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+    const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
     
-    WC_CATEGORIES_CACHE.data = categories;
-    WC_CATEGORIES_CACHE.timestamp = now;
-    return categories;
+    const res = await fetch(`${WP_URL}/wp-json/wc/v3/products/categories?per_page=${perPage}`, {
+      headers: { Authorization: `Basic ${wcAuth}` },
+      cache: 'no-store'
+    });
+    
+    if (!res.ok) {
+      throw new Error(`REST API returned status ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      const categories = data.map(cat => ({
+        id: cat.id,
+        ID: cat.id,
+        name: cat.name,
+        name_en: cat.meta_data?.find(m => m.key === 'name_en' || m.key === 'en_name' || m.key === 'name_english')?.value || null,
+        slug: cat.slug,
+        description: cat.description,
+        count: cat.count,
+        image: cat.image ? { src: cat.image.src, alt: cat.image.name || '' } : null,
+        parent: cat.parent || 0,
+        meta_data: cat.meta_data || []
+      }));
+
+      if (categories.length > 0) {
+        WC_CATEGORIES_CACHE.data = categories;
+        WC_CATEGORIES_CACHE.timestamp = now;
+      }
+      return categories;
+    }
+    
+    throw new Error("Invalid format returned by WooCommerce category REST API");
   } catch (error) {
-    console.error("GraphQL error fetching categories:", error);
-    return [];
+    console.error("WooCommerce category REST API failed, falling back to GraphQL:", error);
+    try {
+      const data = await fetchGraphQL(GET_CATEGORIES, { first: perPage });
+      const categories = (data?.productCategories?.nodes || []).map(mapCategory);
+      
+      if (categories.length > 0) {
+        WC_CATEGORIES_CACHE.data = categories;
+        WC_CATEGORIES_CACHE.timestamp = now;
+      }
+      return categories;
+    } catch (gqlError) {
+      console.error("GraphQL fallback category fetching failed:", gqlError);
+      return [];
+    }
   }
 }
 

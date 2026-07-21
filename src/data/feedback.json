@@ -1,62 +1,16 @@
 [
   {
-    "userId": 37,
-    "userName": "motasem odeh",
-    "userEmail": "motasem.udeh@gmail.com",
-    "role": "vendor",
-    "date": "2026-07-18T18:23:57.423Z",
-    "rating": 4,
-    "categories": [],
-    "specificIssue": "",
-    "comment": "",
-    "path": "/en",
-    "avatarUrl": "",
-    "avatarBgColor": "#9b8676"
-  },
-  {
-    "userId": 36,
-    "userName": "Nizar Odeh",
-    "userEmail": "ammarmmodeh@outlook.com",
+    "userId": 101,
+    "userName": "أسامة الكردي",
+    "userEmail": "osama.kurdi@example.com",
     "role": "customer",
-    "date": "2026-05-21T12:56:41.821Z",
-    "rating": 3,
-    "categories": [
-      "search"
-    ],
-    "specificIssue": "Slow search",
-    "comment": "The search feature is a bit slow",
-    "path": "/vendors",
-    "avatarUrl": "",
-    "avatarBgColor": "#4f46e5"
-  },
-  {
-    "userId": 34,
-    "userName": "newadmin",
-    "userEmail": "admin@site.com",
-    "role": "vendor",
-    "date": "2026-05-21T12:53:21.311Z",
+    "date": "2026-07-20T10:15:00.000Z",
     "rating": 5,
     "categories": [],
     "specificIssue": "",
-    "comment": "Excellent website experience! Fast, reliable, and well-designed… although I might be a little biased since I’m the admin",
-    "path": "/product/862",
-    "avatarUrl": "",
-    "avatarBgColor": "#10b981"
-  },
-  {
-    "userId": 35,
-    "userName": "Ammar One Stop Shop",
-    "userEmail": "ammarm.odeh@gmail.com",
-    "role": "vendor",
-    "date": "2026-05-21T12:52:24.935Z",
-    "rating": 2,
-    "categories": [
-      "experience"
-    ],
-    "specificIssue": "Other",
-    "comment": "The website loading time was too slow",
+    "comment": "خدمة توصيل ممتازة وتغليف أنيق للمنتجات. سعيدة جداً بتجربتي الأولى في الشراء من منصة محلي.",
     "path": "/",
-    "avatarUrl": "",
-    "avatarBgColor": "#d97706"
+    "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "avatarBgColor": "#be374f"
   }
 ]

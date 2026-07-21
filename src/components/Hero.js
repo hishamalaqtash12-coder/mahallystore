@@ -2,10 +2,15 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { getCategoryName, getCategorySlug } from "@/lib/product-utils";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Layers,
+  FolderTree,
+  ArrowUpRight,
   Zap,
   Clock,
   Flame
@@ -175,135 +180,289 @@ const MerchantCarousel = memo(({ activeVendors }) => {
 
 const CategoryCarousel = memo(({ categories }) => {
   const t = useTranslations("Hero");
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [activeParentId, setActiveParentId] = useState(null);
 
-  // Filter out duplicates and Uncategorized
-  const uniqueCategories = useMemo(() => {
+  // Separate parent and child categories
+  const { parentCategories, childCategoriesMap } = useMemo(() => {
+    const parents = [];
+    const childrenMap = new Map();
     const seen = new Set();
-    return (categories || []).filter(cat => {
-      if (cat.name.toLowerCase() === 'uncategorized') return false;
-      if (seen.has(cat.id)) return false;
+
+    (categories || []).forEach(cat => {
+      if (!cat || !cat.name || cat.name.toLowerCase() === 'uncategorized') return;
+      if (seen.has(cat.id)) return;
       seen.add(cat.id);
-      return true;
+
+      const parentId = cat.parent ? Number(cat.parent) : 0;
+      if (parentId === 0) {
+        parents.push(cat);
+      } else {
+        if (!childrenMap.has(parentId)) childrenMap.set(parentId, []);
+        childrenMap.get(parentId).push(cat);
+      }
     });
+
+    return { parentCategories: parents, childCategoriesMap: childrenMap };
   }, [categories]);
 
+  // Set default active parent category when loaded
+  useEffect(() => {
+    if (parentCategories.length > 0 && !activeParentId) {
+      setActiveParentId(parentCategories[0].id);
+    }
+  }, [parentCategories, activeParentId]);
+
+  const activeParent = useMemo(() => {
+    return parentCategories.find(p => p.id === activeParentId) || parentCategories[0] || null;
+  }, [parentCategories, activeParentId]);
+
+  const activeChildren = useMemo(() => {
+    if (!activeParent) return [];
+    return childCategoriesMap.get(activeParent.id) || [];
+  }, [activeParent, childCategoriesMap]);
+
+  const [canScrollStart, setCanScrollStart] = useState(false);
+  const [canScrollEnd, setCanScrollEnd] = useState(true);
 
   const checkScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       const maxScroll = scrollWidth - clientWidth;
+      const isRtl = document.documentElement.dir === 'rtl' || isAr;
 
-      if (scrollLeft <= 0 && document.documentElement.dir === 'rtl') {
-        // Chrome/Firefox RTL: scrollLeft goes from 0 (right/start) to -maxScroll (left/end)
-        setCanScrollRight(scrollLeft < -10); // Prev (Right)
-        setCanScrollLeft(Math.abs(scrollLeft) < maxScroll - 10); // Next (Left)
+      if (maxScroll <= 5) {
+        setCanScrollStart(false);
+        setCanScrollEnd(false);
+        return;
+      }
+
+      if (isRtl) {
+        const scrolledAmount = Math.abs(scrollLeft);
+        setCanScrollStart(scrolledAmount > 10);
+        setCanScrollEnd(scrolledAmount < maxScroll - 10);
       } else {
-        // Fallback or LTR
-        setCanScrollLeft(scrollLeft > 10);
-        setCanScrollRight(scrollLeft < maxScroll - 10);
+        setCanScrollStart(scrollLeft > 10);
+        setCanScrollEnd(scrollLeft < maxScroll - 10);
       }
     }
   };
 
   useEffect(() => {
-    // Re-check after categories load and DOM renders
     const timer = setTimeout(checkScroll, 100);
     window.addEventListener('resize', checkScroll);
     return () => {
       clearTimeout(timer);
       window.removeEventListener('resize', checkScroll);
     };
-  }, [uniqueCategories]);
+  }, [parentCategories]);
 
-  const scroll = (direction) => {
+  const scrollForward = () => {
     if (scrollRef.current) {
-      const scrollAmount = 400;
-      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
-      setTimeout(checkScroll, 500);
+      const isRtl = document.documentElement.dir === 'rtl' || isAr;
+      const amount = 340;
+      scrollRef.current.scrollBy({ left: isRtl ? -amount : amount, behavior: 'smooth' });
+      setTimeout(checkScroll, 350);
     }
   };
 
+  const scrollBack = () => {
+    if (scrollRef.current) {
+      const isRtl = document.documentElement.dir === 'rtl' || isAr;
+      const amount = 340;
+      scrollRef.current.scrollBy({ left: isRtl ? amount : -amount, behavior: 'smooth' });
+      setTimeout(checkScroll, 350);
+    }
+  };
+
+  if (parentCategories.length === 0) return null;
+
   return (
-    <div className="relative z-40 group/carousel">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-extrabold text-black tracking-tight">{t("exploreCategories")}</h2>
-          <div className="h-1.5 w-20 bg-brand rounded-full"></div>
+    <div className="relative z-40 bg-white rounded-3xl p-4 md:p-6 border border-zinc-100 shadow-sm transition-all duration-300">
+      
+      {/* ─── Header Section ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="p-2 rounded-xl bg-brand/10 text-brand">
+              <FolderTree size={20} />
+            </span>
+            <span className="text-sm font-black uppercase tracking-wider text-brand">
+              {isAr ? "تشكيلاتنا المميزة" : "Featured Collections"}
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
+            {t("exploreCategories")}
+          </h2>
         </div>
-        <Link href="/browse" className="text-sm font-bold text-zinc-500 hover:text-black transition-colors flex items-center gap-1">
-          {t("viewAll")} <ChevronLeft size={16} />
+
+        <Link
+          href="/browse"
+          className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-brand transition-colors bg-zinc-100/80 hover:bg-brand/10 px-5 py-2.5 rounded-full border border-zinc-200/80 w-fit"
+        >
+          {t("viewAll")} <ChevronLeft size={18} className="rtl:rotate-0 rotate-180" />
         </Link>
       </div>
 
-      <div className="relative px-2">
-        {/* Persistent Navigation Buttons */}
+      {/* ─── Parent Categories Scroll Container ─── */}
+      <div className="relative group/carousel">
+        {/* Scroll Forward Button (Physically on the LEFT in RTL, RIGHT in LTR) */}
         <button
-          onClick={() => scroll('left')}
-          className={`flex absolute start-0 md:-start-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          aria-label="Scroll Left"
+          onClick={scrollForward}
+          className={`flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-zinc-200 text-zinc-800 rounded-full items-center justify-center z-30 transition-all shadow-md hover:scale-110 active:scale-95 ${!canScrollEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          aria-label={isAr ? "تمرير لليسار" : "Scroll Next"}
         >
-          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
+          {isAr ? <ChevronLeft className="w-6 h-6" /> : <ChevronRight className="w-6 h-6" />}
         </button>
 
+        {/* Scroll Back Button (Physically on the RIGHT in RTL, LEFT in LTR) */}
         <button
-          onClick={() => scroll('right')}
-          className={`flex absolute end-0 md:-end-6 top-1/3 md:top-1/2 -translate-y-1/2 w-8 h-8 md:w-12 md:h-12 bg-white border border-zinc-200 text-black rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          aria-label="Scroll Right"
+          onClick={scrollBack}
+          className={`flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-zinc-200 text-zinc-800 rounded-full items-center justify-center z-30 transition-all shadow-md hover:scale-110 active:scale-95 ${!canScrollStart ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          aria-label={isAr ? "تمرير لليمين" : "Scroll Previous"}
         >
-          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
+          {isAr ? <ChevronRight className="w-6 h-6" /> : <ChevronLeft className="w-6 h-6" />}
         </button>
 
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex items-start gap-3 md:gap-4 overflow-x-auto no-scrollbar scroll-smooth relative snap-x snap-mandatory pb-4 pt-1"
+          className="flex items-center gap-3.5 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-4 pt-1 px-1"
         >
-          {uniqueCategories.map((cat, i) => (
-            <Link
-              key={i}
-              href={`/category/${cat.slug}`}
-              className="flex flex-col items-center gap-2 md:gap-4 shrink-0 group/cat snap-start w-[100px] md:w-auto"
-            >
-              {/* Circular Category Icon */}
-              <div className="w-[80px] h-[80px] md:w-[120px] md:h-[120px] rounded-full bg-white border border-zinc-100 shadow-sm flex items-center justify-center overflow-hidden transition-all duration-500 group-hover/cat:shadow-xl group-hover/cat:scale-110 group-hover/cat:border-brand/30 relative">
-                <div className="absolute inset-0 bg-gradient-to-tr from-brand/5 to-transparent opacity-0 group-hover/cat:opacity-100 transition-opacity"></div>
-                <div className="w-full h-full relative z-10 transition-transform duration-500">
-                  <Image
-                    src={cat.image?.src || `https://placehold.co/200x200?text=${encodeURIComponent(cat.name[0])}`}
-                    alt={decodeEntities(cat.name)}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover/cat:scale-110"
-                  />
+          {parentCategories.map((parentCat) => {
+            const parentName = getCategoryName(parentCat, locale);
+            const isSelected = activeParentId === parentCat.id;
+            const children = childCategoriesMap.get(parentCat.id) || [];
+            const childrenCount = children.length;
+
+            return (
+              <div
+                key={parentCat.id}
+                onClick={() => setActiveParentId(parentCat.id)}
+                className={`snap-start shrink-0 cursor-pointer group/card transition-all duration-300 rounded-2xl border p-4 min-w-[220px] max-w-[260px] md:min-w-[240px] ${
+                  isSelected
+                    ? "bg-zinc-900 text-white border-zinc-900 shadow-xl shadow-zinc-900/10 scale-[1.02]"
+                    : "bg-zinc-50/90 hover:bg-white text-zinc-800 border-zinc-200 hover:border-brand/50 hover:shadow-lg"
+                }`}
+              >
+                <div className="flex items-center gap-3.5">
+                  {/* Category Image Avatar */}
+                  <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden shrink-0 border transition-transform duration-300 group-hover/card:scale-105 ${isSelected ? 'border-zinc-700' : 'border-zinc-200 bg-white'}`}>
+                    <Image
+                      src={parentCat.image?.src || `https://placehold.co/100x100?text=${encodeURIComponent(parentName[0] || (isAr ? 'قسم' : 'Category'))}`}
+                      alt={decodeEntities(parentName)}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className={`text-sm md:text-base font-black truncate leading-snug transition-colors ${isSelected ? 'text-white' : 'text-zinc-900 group-hover/card:text-brand'}`}>
+                      {decodeEntities(parentName)}
+                    </span>
+
+                    <div className="flex items-center gap-2 mt-1.5">
+                      {childrenCount > 0 && (
+                        <span className={`text-xs font-black px-2.5 py-0.5 rounded-full ${isSelected ? 'bg-zinc-800 text-brand-light border border-zinc-700' : 'bg-brand/10 text-brand'}`}>
+                          {childrenCount} {isAr ? "قسم فرعي" : "sub"}
+                        </span>
+                      )}
+                      {typeof parentCat.count !== 'undefined' && parentCat.count > 0 && (
+                        <span className={`text-xs font-medium ${isSelected ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                          {parentCat.count} {isAr ? "منتج" : "products"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Category Details */}
-              <div className="flex flex-col items-center gap-1 w-full px-1 md:px-2 mt-1">
-                <span className="text-[12px] md:text-[15px] font-bold text-zinc-800 text-center group-hover/cat:text-brand transition-colors line-clamp-2 md:line-clamp-1 max-w-[140px] leading-tight">
-                  {decodeEntities(cat.name)}
-                </span>
-
-                {cat.description && (
-                  <span className="text-[11px] text-zinc-500 text-center line-clamp-1 max-w-[140px] leading-snug mt-0.5" title={decodeEntities(cat.description)}>
-                    {decodeEntities(cat.description.replace(/<[^>]+>/g, ''))}
-                  </span>
+                {/* Subcategory mini badges preview inside parent card */}
+                {childrenCount > 0 && (
+                  <div className="mt-3.5 pt-3 border-t border-dashed border-zinc-200/40 flex items-center justify-between text-xs">
+                    <span className={`flex items-center gap-1.5 font-bold ${isSelected ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                      <Layers size={14} className={isSelected ? 'text-brand' : 'text-zinc-400'} />
+                      {isAr ? "عرض الفئات الفرعية" : "Explore subcategories"}
+                    </span>
+                    <ChevronDown size={16} className={`transition-transform duration-300 ${isSelected ? 'rotate-180 text-brand' : 'text-zinc-400'}`} />
+                  </div>
                 )}
-
-                {typeof cat.count !== 'undefined' && (
-                  <span className={`text-[10px] font-bold tracking-widest ${cat.count === 0 ? 'text-red-500' : 'text-zinc-400'}`}>
-                    ({cat.count}) {t("product")}
-                  </span>
-                )}
-
-                <div className="h-0.5 w-0 bg-brand group-hover/cat:w-12 mt-1 transition-all duration-300 rounded-full"></div>
               </div>
-            </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
+
+      {/* ─── Active Parent Category & Child Categories Sub-Panel ─── */}
+      {activeParent && (
+        <div className="mt-5 pt-6 border-t border-zinc-100 animate-in fade-in duration-300">
+          
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse"></span>
+              <h3 className="text-base md:text-lg font-black text-zinc-900">
+                {isAr ? "الأقسام الفرعية لـ" : "Subcategories for"} <span className="text-brand font-black">{decodeEntities(getCategoryName(activeParent, locale))}</span>
+              </h3>
+            </div>
+
+            <Link
+              href={`/category/${getCategorySlug(activeParent, locale)}`}
+              className="text-xs md:text-sm font-black text-brand hover:text-brand-dark flex items-center gap-1.5 hover:underline"
+            >
+              {isAr ? "تصفح القسم الرئيسي كاملاً" : "View Entire Parent Category"} <ArrowUpRight size={16} />
+            </Link>
+          </div>
+
+          {/* Child Category Pills Grid / Flex */}
+          {activeChildren.length > 0 ? (
+            <div className="flex flex-wrap gap-2.5 md:gap-3">
+              {/* Parent Direct Link Chip */}
+              <Link
+                href={`/category/${getCategorySlug(activeParent, locale)}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs md:text-sm font-bold transition-all shadow-sm"
+              >
+                <span>{isAr ? "الكل في" : "All in"} {decodeEntities(getCategoryName(activeParent, locale))}</span>
+                <ArrowUpRight size={14} />
+              </Link>
+
+              {activeChildren.map((childCat) => {
+                const childName = getCategoryName(childCat, locale);
+                const childSlug = getCategorySlug(childCat, locale);
+                return (
+                  <Link
+                    key={childCat.id}
+                    href={`/category/${childSlug}`}
+                    className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-50 hover:bg-white border border-zinc-200 hover:border-brand/60 hover:shadow-md text-zinc-800 hover:text-brand text-xs md:text-sm font-bold transition-all group/child"
+                  >
+                    {childCat.image?.src && (
+                      <span className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 bg-zinc-200">
+                        <Image src={childCat.image.src} alt={childName} fill className="object-cover" />
+                      </span>
+                    )}
+                    <span>{decodeEntities(childName)}</span>
+                    {typeof childCat.count !== 'undefined' && (
+                      <span className="text-xs font-semibold text-zinc-400 group-hover/child:text-brand/80">
+                        ({childCat.count})
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-5 bg-zinc-50 rounded-2xl text-center text-xs md:text-sm font-semibold text-zinc-500 flex items-center justify-center gap-2">
+              <span>{isAr ? "لا توجد أقسام فرعية مفردة لهذا القسم." : "No separate subcategories for this section."}</span>
+              <Link href={`/category/${activeParent.slug}`} className="text-brand font-bold hover:underline">
+                {isAr ? "تصفح جميع منتجات القسم" : "Browse all section products"}
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 });

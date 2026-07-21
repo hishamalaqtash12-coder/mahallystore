@@ -1,4 +1,5 @@
 import { getProducts, getCategories } from "@/lib/woocommerce";
+import { getCategorySlug } from "@/lib/product-utils";
 import CategoryPageClient from "./CategoryPageClient";
 
 export const dynamic = 'force-dynamic';
@@ -6,7 +7,12 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const categories = await getCategories({ hide_empty: false, per_page: 100 });
-  const category = categories.find(c => c.slug === slug);
+  const decodedSlug = decodeURIComponent(slug).toLowerCase();
+  const category = categories.find(c => {
+    const origSlug = decodeURIComponent(c.slug || '').toLowerCase();
+    const enSlug = getCategorySlug(c, 'en');
+    return origSlug === decodedSlug || enSlug === decodedSlug;
+  });
   const name = category?.name?.replace(/&amp;/g, '&') || slug;
   return {
     title: `${name} | Mahally Marketplace`,
@@ -27,7 +33,12 @@ export default async function CategoryPage({ params }) {
 
   try {
     categories = await getCategories({ hide_empty: false, per_page: 100 });
-    category = categories.find(c => c.slug === slug);
+    const decodedSlug = decodeURIComponent(slug).toLowerCase();
+    category = categories.find(c => {
+      const origSlug = decodeURIComponent(c.slug || '').toLowerCase();
+      const enSlug = getCategorySlug(c, 'en');
+      return origSlug === decodedSlug || enSlug === decodedSlug;
+    });
 
     if (category) {
       const result = await getProducts({

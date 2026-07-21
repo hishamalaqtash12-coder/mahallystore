@@ -4,7 +4,8 @@ import { useState, useMemo } from "react";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "@/i18n/routing";
 import { Star, ChevronDown, ChevronUp, X, ChevronLeft, ShoppingCart, Check } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { getCategoryName } from "@/lib/product-utils";
 
 // ─── Filter Section Header ──────────────────────────────────────
 function SectionTitle({ title }) {
@@ -81,6 +82,8 @@ export default function SidebarFilter({ categories = [], products = [], filters,
     return categories.find(c => c.id === Number(filters.category) || c.slug === filters.category);
   }, [filters.category, categories]);
 
+  const locale = useLocale();
+
   // Handle department section tree structure
   const departmentSection = useMemo(() => {
     const updateCat = (id) => onFiltersChange({ ...filters, category: id });
@@ -96,7 +99,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                   <button
                     onClick={() => updateCat(cat.id)}
                     className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-start w-full truncate cursor-pointer"
-                    dangerouslySetInnerHTML={{ __html: cat.name }}
+                    dangerouslySetInnerHTML={{ __html: getCategoryName(cat, locale) }}
                   />
                 </li>
               ))}
@@ -128,14 +131,14 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                 <button
                   onClick={() => updateCat(parentCategory.id)}
                   className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-start cursor-pointer"
-                  dangerouslySetInnerHTML={{ __html: `&gt; ${parentCategory.name}` }}
+                  dangerouslySetInnerHTML={{ __html: `&gt; ${getCategoryName(parentCategory, locale)}` }}
                 />
               </li>
             )}
             <li className={`${parentCategory ? 'ps-5' : 'ps-3'}`}>
               <span
                 className="text-[13px] font-bold text-[#0F1111]"
-                dangerouslySetInnerHTML={{ __html: activeCategory.name }}
+                dangerouslySetInnerHTML={{ __html: getCategoryName(activeCategory, locale) }}
               />
             </li>
             {children.map(child => (
@@ -143,7 +146,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                 <button
                   onClick={() => updateCat(child.id)}
                   className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-start w-full truncate cursor-pointer"
-                  dangerouslySetInnerHTML={{ __html: child.name }}
+                  dangerouslySetInnerHTML={{ __html: getCategoryName(child, locale) }}
                 />
               </li>
             ))}
@@ -151,7 +154,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
         </div>
       </div>
     );
-  }, [activeCategory, categories, filters, onFiltersChange]);
+  }, [activeCategory, categories, filters, onFiltersChange, locale]);
 
   const allTags = useMemo(() => {
     const tagMap = new Map();
