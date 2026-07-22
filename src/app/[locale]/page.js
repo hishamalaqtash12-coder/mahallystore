@@ -67,30 +67,33 @@ export default async function Home() {
     totalPages = productsResult?.totalPages || 1;
     categories = categoriesResult || [];
 
-    // Filter approved vendors and featured selection
+    // Filter approved vendors and featured selection (bulletproof null-safe)
     const approvedVendors = (allVendors || []).filter(v => {
-      const meta = Object.fromEntries((v.meta_data || []).map(m => [m.key, m.value]));
+      if (!v) return false;
+      const metaArray = Array.isArray(v.meta_data) ? v.meta_data : [];
+      const meta = Object.fromEntries(metaArray.filter(m => m && m.key).map(m => [m.key, m.value]));
       return meta.dokan_enable_selling === "yes";
     });
 
     if (featuredIds.length > 0) {
-      vendors = approvedVendors.filter(v => featuredIds.includes(v.id));
+      vendors = approvedVendors.filter(v => v && featuredIds.includes(v.id));
     } else {
       vendors = approvedVendors;
     }
 
     // Map customer avatars to feedback reviews
-    if (customersResult && customersResult.length > 0) {
+    if (Array.isArray(customersResult) && customersResult.length > 0) {
       const customerMap = {};
       customersResult.forEach(c => {
-        const meta = c.meta_data || [];
-        const avatarUrl = meta.find(m => m.key === "mahally_avatar_url")?.value || meta.find(m => m.key === "mahally_store_logo")?.value || c.avatar_url || null;
-        const avatarBgColor = meta.find(m => m.key === "mahally_avatar_bg_color")?.value || "#9b8676";
+        if (!c) return;
+        const meta = Array.isArray(c.meta_data) ? c.meta_data : [];
+        const avatarUrl = meta.find(m => m && m.key === "mahally_avatar_url")?.value || meta.find(m => m && m.key === "mahally_store_logo")?.value || c.avatar_url || null;
+        const avatarBgColor = meta.find(m => m && m.key === "mahally_avatar_bg_color")?.value || "#9b8676";
         customerMap[c.id] = { avatarUrl, avatarBgColor };
       });
 
-      feedback = feedback.map(f => {
-        if (f.userId && customerMap[f.userId]) {
+      feedback = (feedback || []).map(f => {
+        if (f && f.userId && customerMap[f.userId]) {
           return {
             ...f,
             avatarUrl: customerMap[f.userId].avatarUrl || f.avatarUrl || "",
