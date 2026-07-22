@@ -57,9 +57,9 @@ export default async function Home() {
   // 3. Fetch all remote APIs in parallel to prevent sequential blockages
   try {
     const [productsResult, categoriesResult, allVendors, customersResult] = await Promise.all([
-      getProducts({ per_page: 40, status: 'publish' }, true),
-      getCategories({ hide_empty: false, per_page: 100 }),
-      getVendors({ per_page: 100 }),
+      getProducts({ per_page: 40, status: 'publish' }, true).catch(() => ({ data: [], totalPages: 1 })),
+      getCategories({ hide_empty: false, per_page: 100 }).catch(() => []),
+      getVendors({ per_page: 100 }).catch(() => []),
       userIds.length > 0 ? getCustomersByIds(userIds).catch(() => []) : Promise.resolve([])
     ]);
 

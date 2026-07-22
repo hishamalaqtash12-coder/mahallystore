@@ -1,8 +1,19 @@
 export async function fetchGraphQL(query, variables = {}, customHeaders = {}) {
-  const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL;
+  let WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || process.env.WORDPRESS_GRAPHQL_URL;
+
+  if (!WP_URL && process.env.NEXT_PUBLIC_WORDPRESS_URL) {
+    const baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL.replace(/\/$/, "");
+    WP_URL = `${baseUrl}/graphql`;
+  }
+
+  if (!WP_URL && process.env.WORDPRESS_URL) {
+    const baseUrl = process.env.WORDPRESS_URL.replace(/\/$/, "");
+    WP_URL = `${baseUrl}/graphql`;
+  }
 
   if (!WP_URL) {
-    throw new Error("NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL is not defined");
+    console.warn("GraphQL URL is not configured in environment variables.");
+    return null;
   }
 
   try {
@@ -16,20 +27,24 @@ export async function fetchGraphQL(query, variables = {}, customHeaders = {}) {
         query,
         variables,
       }),
-      // Using Next.js caching behaviour
-      next: { revalidate: 60 } // Revalidate every 60 seconds
+      next: { revalidate: 60 }
     });
+
+    if (!res.ok) {
+      console.warn(`GraphQL fetch failed with HTTP status ${res.status}`);
+      return null;
+    }
 
     const json = await res.json();
     
     if (json.errors) {
       console.error("GraphQL Errors:", json.errors);
-      throw new Error("Failed to fetch GraphQL API");
+      return json.data || null;
     }
 
     return json.data;
   } catch (error) {
-    console.error(error);
-    throw new Error("Network error fetching GraphQL API");
+    console.error("GraphQL API error:", error.message);
+    return null;
   }
 }
