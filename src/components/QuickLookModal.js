@@ -9,12 +9,13 @@ import { X, ChevronRight, Star, Truck, ShieldCheck, RotateCcw, Plus, Minus, Tras
 import { useCart } from "@/context/CartContext";
 import { isProductOutOfStock, getProductMerchant } from "@/lib/product-utils";
 import { useAuth } from "@/context/AuthContext";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import ProductCountdown from "./ProductCountdown";
 import ShippingInfoDisplay from "./ShippingInfoDisplay";
 
 export default function QuickLookModal({ product: initialProduct, isOpen, onClose }) {
   const t = useTranslations("QuickLook");
+  const locale = useLocale();
   const router = useRouter();
   const { user, wooId, isVendor } = useAuth();
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
