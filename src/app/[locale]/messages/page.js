@@ -225,7 +225,7 @@ function MessagesContent() {
     if (data) {
       const list = data.vendors || [];
       if (!vendorSearch) {
-        list.unshift({ id: "admin", storeName: "دعم Mahally الرسمي", role: "admin", isVerified: true });
+        list.unshift({ id: "admin", storeName: "Mahally Support", role: "admin", isVerified: true });
       }
       setAllVendors(list);
     }
@@ -266,7 +266,7 @@ function MessagesContent() {
       setIsChatLoading(true);
       await fetchMessages(vendorId);
       if (vendorId === "admin" || String(vendorId) === "1") {
-        setVendor({ id: 1, storeName: "دعم Mahally", role: "admin", isVerified: true });
+        setVendor({ id: 1, storeName: "Mahally Support", role: "admin", isVerified: true });
       } else {
         try {
           // 1. Try Vendor API
@@ -280,11 +280,12 @@ function MessagesContent() {
             // 2. Try Customer API if Vendor fails
             const cData = await safeFetchJson(`/api/customers?id=${vendorId}`);
             if (cData?.id) {
+              const isPartnerAdmin = cData.id === 1 || String(cData.id) === "admin" || (Array.isArray(cData.roles) && cData.roles.includes("administrator")) || cData.role === "admin";
               const cObj = {
                 id: cData.id,
-                storeName: `${cData.first_name} ${cData.last_name}`.trim() || cData.username,
-                storeLogo: cData.avatar_url,
-                role: "customer",
+                storeName: isPartnerAdmin ? "Mahally Support" : (`${cData.first_name} ${cData.last_name}`.trim() || cData.username),
+                storeLogo: isPartnerAdmin ? null : cData.avatar_url,
+                role: isPartnerAdmin ? "admin" : "customer",
                 email: cData.email,
                 phone: cData.billing?.phone || "",
                 isVerified: true,
@@ -398,6 +399,7 @@ function MessagesContent() {
           fromId: wooId, toId: vendorId, text: tempMsg.text,
           mediaUrl: tempMsg.mediaUrl, mediaType: tempMsg.mediaType,
           customMeta: tempMsg.customMeta, replyTo: tempMsg.replyTo,
+          locale: locale || "ar"
         }),
       });
       // Short delay to ensure backend committed
@@ -524,8 +526,8 @@ function MessagesContent() {
               </div>
               <div className="flex-1 min-w-0 flex items-center justify-between">
                 <div>
-                  <p className={`text-[13px] font-medium ${(vendorId === "admin" || String(vendorId) === "1") ? "text-[#be374f]" : "text-zinc-900"}`}>{isAr ? "دعم Mahally" : "Mahally Support"}</p>
-                  <p className="text-[12px] text-zinc-500 truncate mt-0.5">{isAr ? "مدير النظام" : "System Admin"}</p>
+                  <p className={`text-[13px] font-medium ${(vendorId === "admin" || String(vendorId) === "1") ? "text-[#be374f]" : "text-zinc-900"}`}>Mahally Support</p>
+                  <p className="text-[12px] text-zinc-500 truncate mt-0.5">{isAr ? "فريق الدعم الفني" : "Customer Support"}</p>
                 </div>
                 {adminUnreadCount > 0 && (
                   <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 me-2">
@@ -642,7 +644,7 @@ function MessagesContent() {
                 </div>
                 <div>
                   <h2 className="text-[15px] font-semibold text-zinc-900 flex items-center gap-1.5">
-                    {vendor?.storeName || (isAr ? "المحادثة" : "Conversation")}
+                    {isAdminAccount ? "Mahally Support" : (vendor?.storeName || (isAr ? "المحادثة" : "Conversation"))}
                     {vendor?.isVerified && <BadgeCheck size={14} className="text-[#be374f]" />}
                   </h2>
                   <div className="flex items-center gap-1.5">
@@ -679,12 +681,12 @@ function MessagesContent() {
                     let senderLabel = "";
                     if (isMe) {
                       senderLabel = isAdmin 
-                        ? (isAr ? "الدعم الفني (أنت)" : "Technical Support (You)") 
+                        ? (isAr ? "Mahally Support (أنت)" : "Mahally Support (You)") 
                         : (isAr ? "أنت" : "You");
                     } else {
                       const isSenderAdmin = msg.senderId === 1 || String(msg.senderId) === "admin" || vendor?.role === "admin";
                       senderLabel = isSenderAdmin
-                        ? (isAr ? "الدعم الفني" : "Technical Support")
+                        ? "Mahally Support"
                         : (vendor?.storeName || (isAr ? "العميل" : "Customer"));
                     }
 
@@ -898,9 +900,9 @@ function MessagesContent() {
                   <div className="w-16 h-16 bg-zinc-900 rounded-lg flex items-center justify-center mx-auto mb-3 border border-zinc-800">
                     <ShieldAlert size={28} className="text-[#be374f]" />
                   </div>
-                  <h3 className="text-[15px] font-semibold text-zinc-900">{isAr ? "دعم Mahally" : "Mahally Support"}</h3>
+                  <h3 className="text-[15px] font-semibold text-zinc-900">Mahally Support</h3>
                   <span className="inline-flex items-center gap-1 mt-1.5 bg-[#fde7ee] text-[#be374f] text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-[#b2d8dc]">
-                    <BadgeCheck size={11} /> {isAr ? "مسؤول موثوق" : "Verified Admin"}
+                    <BadgeCheck size={11} /> {isAr ? "فريق الدعم الرسمي" : "Verified Support Team"}
                   </span>
                 </div>
                 <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md">

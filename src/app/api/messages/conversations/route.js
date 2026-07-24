@@ -141,7 +141,7 @@ export async function GET(request) {
           }
         });
 
-        const isSystemAdmin = c.id === adminId;
+        const isSystemAdmin = c.id === adminId || c.id === 1 || String(c.id) === "admin" || cMeta.mahally_role === "admin" || (Array.isArray(c.roles) && c.roles.includes("administrator"));
         const displayName = isSystemAdmin 
           ? "Mahally Support" 
           : (cMeta.mahally_store_name || `${c.first_name} ${c.last_name}`.trim() || c.username);
