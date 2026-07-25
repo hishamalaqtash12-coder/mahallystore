@@ -44,18 +44,21 @@ export const NotificationService = {
       if (transporter) {
         try {
           const userEmail = metadata.email;
+          if (userEmail) {
             const smtpUser = process.env.SMTP_USER || "info@mahallystore.com";
+            const emailBody = metadata.html || `<div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+              <h2 style="color: #be374f;">${title}</h2>
+              <p style="color: #333; line-height: 1.6;">${message}</p>
+              ${metadata.actionUrl ? `<a href="${metadata.actionUrl}" style="display: inline-block; padding: 10px 20px; background: #be374f; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px;">View Details</a>` : ''}
+              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="font-size: 12px; color: #999;">This is an automated notification from Mahally. Please do not reply to this email.</p>
+            </div>`;
+
             await transporter.sendMail({
               from: `"Mahally" <${smtpUser}>`,
               to: userEmail,
               subject: title,
-              html: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-                <h2 style="color: #007185;">${title}</h2>
-                <p style="color: #333; line-height: 1.6;">${message}</p>
-                ${metadata.actionUrl ? `<a href="${metadata.actionUrl}" style="display: inline-block; padding: 10px 20px; background: #FFD814; color: #000; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px;">View Details</a>` : ''}
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-                <p style="font-size: 12px; color: #999;">This is an automated notification from Mahally. Please do not reply to this email.</p>
-              </div>`,
+              html: emailBody,
             });
             results.push({ channel: 'email', status: 'success' });
           }
