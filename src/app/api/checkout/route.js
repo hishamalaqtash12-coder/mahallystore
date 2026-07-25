@@ -191,7 +191,7 @@ export async function POST(request) {
       }
     }
 
-    // Fetch vendor email and send Vendor Notification
+    // Fetch vendor email with robust multi-source lookup
     let vendorEmail = items[0]?.store?.email 
       || items[0]?.vendor_email 
       || items[0]?.vendorEmail 
@@ -200,19 +200,40 @@ export async function POST(request) {
       || null;
 
     if (!vendorEmail && primaryVendorId) {
+      // Source 1: Dokan REST API
       try {
-        const vRes = await api.get(`customers/${primaryVendorId}`);
-        vendorEmail = vRes.data?.email || vRes.data?.billing?.email || null;
-      } catch (vErr) {
+        const dokanRes = await fetch(`${WP_URL}/wp-json/dokan/v1/stores/${primaryVendorId}`, {
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${WC_KEY}:${WC_SECRET}`).toString("base64")}`
+          }
+        });
+        if (dokanRes.ok) {
+          const dokanData = await dokanRes.json();
+          vendorEmail = dokanData?.email || dokanData?.payment?.paypal?.email || null;
+        }
+      } catch (dErr) {}
+
+      // Source 2: WooCommerce Customers REST API
+      if (!vendorEmail) {
         try {
-          const wpUserRes = await fetch(`${WP_URL}/wp-json/wp/v2/users/${primaryVendorId}`);
+          const vRes = await api.get(`customers/${primaryVendorId}`);
+          vendorEmail = vRes.data?.email || vRes.data?.billing?.email || null;
+        } catch (vErr) {}
+      }
+
+      // Source 3: WordPress Users REST API
+      if (!vendorEmail) {
+        try {
+          const wpUserRes = await fetch(`${WP_URL}/wp-json/wp/v2/users/${primaryVendorId}`, {
+            headers: {
+              Authorization: `Basic ${Buffer.from(`${WC_KEY}:${WC_SECRET}`).toString("base64")}`
+            }
+          });
           if (wpUserRes.ok) {
             const wpUserData = await wpUserRes.json();
             vendorEmail = wpUserData?.user_email || wpUserData?.email || null;
           }
-        } catch (wpErr) {
-          console.warn("Could not fetch vendor email:", wpErr.message);
-        }
+        } catch (wpErr) {}
       }
     }
 
@@ -228,9 +249,10 @@ export async function POST(request) {
       </tr>
     `).join("");
 
-    // Target vendor email or fallback to main store email
-    const targetVendorEmail = vendorEmail || "info@mahallystore.com";
+    const adminEmailTarget = "info@mahallystore.com";
+    const hasDistinctVendorEmail = vendorEmail && vendorEmail.toLowerCase() !== adminEmailTarget.toLowerCase() && vendorEmail.toLowerCase() !== customer.email.toLowerCase();
 
+    // --- EMAIL 2: VENDOR NOTIFICATION ---
     try {
       const vendorOrderHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; background: #ffffff;">
@@ -282,10 +304,10 @@ export async function POST(request) {
         senderId: "1",
         title: `🛍️ New Order Received #${createdOrderId} — Mahally`,
         message: `You received a new order #${createdOrderId} from ${customer.firstName} ${customer.lastName}!`,
-        channel: ['internal', 'email'],
+        channel: hasDistinctVendorEmail ? ['internal', 'email'] : ['internal'],
         type: 'new_order_merchant',
         metadata: {
-          email: targetVendorEmail,
+          email: vendorEmail || adminEmailTarget,
           orderId: createdOrderId,
           actionUrl: "https://mahallystore.com/merchant/dashboard/orders",
           html: vendorOrderHtml
@@ -295,8 +317,7 @@ export async function POST(request) {
       console.warn("Failed to dispatch vendor order email:", vErr.message);
     }
 
-    // Dispatch Admin Notification (Target: info@mahallystore.com)
-    const adminEmailTarget = "info@mahallystore.com";
+    // --- EMAIL 3: ADMINISTRATOR NOTIFICATION (info@mahallystore.com) ---
     try {
       const adminOrderHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; background: #ffffff;">
@@ -316,7 +337,7 @@ export async function POST(request) {
               Customer: ${customer.firstName} ${customer.lastName} (${customer.email})<br />
               City: ${customer.city}<br />
               Merchant ID: ${primaryVendorId || 'N/A'}<br />
-              Vendor Email: ${targetVendorEmail}
+              Vendor Email: ${vendorEmail || 'Not Specified'}
             </p>
           </div>
 
