@@ -1,10 +1,9 @@
 "use client";
 
-import { Star, ChevronRight, ChevronLeft, MessageSquare, Quote, CheckCircle2, ShieldCheck } from "lucide-react";
+import { User, Star, ChevronRight, ChevronLeft, MessageSquare, Quote, CheckCircle2, ShieldCheck } from "lucide-react";
 import { memo, useMemo, useRef, useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import FeedbackModal from "./FeedbackModal";
-import UserAvatar from "./UserAvatar";
 
 const CURATED_REVIEWS = [
   {
@@ -23,9 +22,7 @@ const CURATED_REVIEWS = [
     },
     rating: 5,
     verified: true,
-    date: "2026-07-20",
-    avatarBgColor: "#be374f",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+    date: "2026-07-20"
   },
   {
     id: "curated-2",
@@ -43,9 +40,7 @@ const CURATED_REVIEWS = [
     },
     rating: 5,
     verified: true,
-    date: "2026-07-19",
-    avatarBgColor: "#059669",
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80"
+    date: "2026-07-19"
   },
   {
     id: "curated-3",
@@ -63,9 +58,7 @@ const CURATED_REVIEWS = [
     },
     rating: 5,
     verified: true,
-    date: "2026-07-18",
-    avatarBgColor: "#d97706",
-    avatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80"
+    date: "2026-07-18"
   },
   {
     id: "curated-4",
@@ -83,9 +76,7 @@ const CURATED_REVIEWS = [
     },
     rating: 5,
     verified: true,
-    date: "2026-07-20",
-    avatarBgColor: "#be374f",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
+    date: "2026-07-20"
   }
 ];
 
@@ -108,9 +99,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
       comment: r.comment[locale] || r.comment.en || r.comment.ar,
       rating: r.rating,
       verified: r.verified,
-      date: r.date,
-      avatarUrl: r.avatarUrl,
-      avatarBgColor: r.avatarBgColor
+      date: r.date
     }));
 
     // Filter user submitted reviews
@@ -136,9 +125,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
           comment: commentText,
           rating: f.rating || 5,
           verified: true,
-          date: f.date || new Date().toISOString(),
-          avatarUrl: f.avatarUrl,
-          avatarBgColor: f.avatarBgColor || "#9b8676"
+          date: f.date || new Date().toISOString()
         };
       });
 
@@ -294,16 +281,13 @@ const Testimonials = memo(({ feedbacks = [] }) => {
                   "{f.comment}"
                 </p>
 
-                {/* Customer Profile Footer */}
+                {/* Customer Profile Footer with User Icon Placeholder */}
                 <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 relative z-10">
                   <div className="relative">
-                    <UserAvatar
-                      customerName={f.userName}
-                      avatarUrl={f.avatarUrl}
-                      avatarBgColor={f.avatarBgColor || "#be374f"}
-                      className="w-11 h-11 rounded-full border-2 border-white shadow-sm shrink-0 text-white font-bold"
-                    />
-                    <ShieldCheck size={14} className="absolute -bottom-1 -end-1 text-emerald-600 bg-white rounded-full" />
+                    <div className="w-11 h-11 rounded-full bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-zinc-500 shrink-0 shadow-xs">
+                      <User size={20} className="text-zinc-500" />
+                    </div>
+                    <ShieldCheck size={14} className="absolute -bottom-1 -end-1 text-emerald-600 bg-white rounded-full shadow-xs" />
                   </div>
                   <div>
                     <h4 className="font-extrabold text-xs sm:text-sm text-zinc-900 leading-snug">{f.userName}</h4>
