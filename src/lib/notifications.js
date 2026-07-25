@@ -44,9 +44,9 @@ export const NotificationService = {
       if (transporter) {
         try {
           const userEmail = metadata.email;
-          if (userEmail) {
+            const smtpUser = process.env.SMTP_USER || "info@mahallystore.com";
             await transporter.sendMail({
-              from: `"Mahally Marketplace" <${process.env.SMTP_USER}>`,
+              from: `"Mahally" <${smtpUser}>`,
               to: userEmail,
               subject: title,
               html: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">

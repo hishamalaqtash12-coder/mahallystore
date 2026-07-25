@@ -45,8 +45,9 @@ export async function POST(request) {
           },
         });
 
+        const smtpUser = process.env.SMTP_USER || "info@mahallystore.com";
         await transporter.sendMail({
-          from: `"Mahally.jo" <${process.env.SMTP_USER}>`,
+          from: `"Mahally" <${smtpUser}>`,
           to: email,
           subject: "Your Mahally Verification Code",
           html: `
