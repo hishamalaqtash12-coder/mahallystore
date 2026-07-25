@@ -192,13 +192,27 @@ export async function POST(request) {
     }
 
     // Fetch vendor email and send Vendor Notification
-    let vendorEmail = null;
-    if (primaryVendorId) {
+    let vendorEmail = items[0]?.store?.email 
+      || items[0]?.vendor_email 
+      || items[0]?.vendorEmail 
+      || items[0]?.meta_data?.find(m => m.key === "merchant_email")?.value 
+      || items[0]?.meta_data?.find(m => m.key === "_vendor_email")?.value 
+      || null;
+
+    if (!vendorEmail && primaryVendorId) {
       try {
         const vRes = await api.get(`customers/${primaryVendorId}`);
         vendorEmail = vRes.data?.email || vRes.data?.billing?.email || null;
       } catch (vErr) {
-        console.warn("Could not fetch vendor email:", vErr.message);
+        try {
+          const wpUserRes = await fetch(`${WP_URL}/wp-json/wp/v2/users/${primaryVendorId}`);
+          if (wpUserRes.ok) {
+            const wpUserData = await wpUserRes.json();
+            vendorEmail = wpUserData?.user_email || wpUserData?.email || null;
+          }
+        } catch (wpErr) {
+          console.warn("Could not fetch vendor email:", wpErr.message);
+        }
       }
     }
 
@@ -214,122 +228,122 @@ export async function POST(request) {
       </tr>
     `).join("");
 
-    if (vendorEmail || primaryVendorId) {
-      try {
-        const vendorOrderHtml = `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; background: #ffffff;">
-            <div style="text-align: center; margin-bottom: 24px;">
-              <h1 style="color: #be374f; font-size: 28px; font-weight: 900; margin: 0;">Mahally</h1>
-              <p style="color: #059669; font-size: 13px; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">New Merchant Order Alert</p>
-            </div>
+    // Target vendor email or fallback to main store email
+    const targetVendorEmail = vendorEmail || "info@mahallystore.com";
 
-            <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
-              <p style="color: #065f46; font-size: 16px; font-weight: 800; margin: 0;">🛍️ You received a new order! #${createdOrderId}</p>
-              <p style="color: #047857; font-size: 13px; margin-top: 4px; margin-bottom: 0;">Customer: <strong>${customer.firstName} ${customer.lastName}</strong> (${customer.phone || customer.email})</p>
-            </div>
-
-            <h3 style="color: #18181b; font-size: 14px; font-weight: 700; margin-bottom: 12px; border-bottom: 2px solid #18181b; padding-bottom: 8px;">Ordered Items</h3>
-            
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-              <thead>
-                <tr style="border-bottom: 1px solid #e4e4e7; text-align: left; color: #a1a1aa; font-size: 11px; text-transform: uppercase;">
-                  <th style="padding-bottom: 8px;">Item</th>
-                  <th style="padding-bottom: 8px; text-align: center;">Qty</th>
-                  <th style="padding-bottom: 8px; text-align: right;">Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${vendorItemsHtml}
-              </tbody>
-            </table>
-
-            <div style="background: #fafafa; border: 1px solid #f4f4f5; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-              <p style="color: #18181b; font-size: 13px; font-weight: 700; margin: 0 0 6px 0;">Customer Shipping Info:</p>
-              <p style="color: #52525b; font-size: 13px; margin: 0; line-height: 1.5;">
-                Name: ${customer.firstName} ${customer.lastName}<br />
-                Address: ${customer.address}, ${customer.city}<br />
-                Phone: ${customer.phone}<br />
-                Payment: Cash on Delivery (COD)
-              </p>
-            </div>
-
-            <div style="text-align: center;">
-              <a href="https://mahallystore.com/merchant/dashboard/orders" style="display: inline-block; background: #059669; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 28px; border-radius: 12px;">
-                Manage Order in Merchant Dashboard &rarr;
-              </a>
-            </div>
+    try {
+      const vendorOrderHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; background: #ffffff;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #be374f; font-size: 28px; font-weight: 900; margin: 0;">Mahally</h1>
+            <p style="color: #059669; font-size: 13px; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">New Merchant Order Alert</p>
           </div>
-        `;
 
-        await NotificationService.notify({
-          userId: String(primaryVendorId || "1"),
-          senderId: "1",
-          title: `🛍️ New Order Received #${createdOrderId} — Mahally`,
-          message: `You received a new order #${createdOrderId} from ${customer.firstName} ${customer.lastName}!`,
-          channel: vendorEmail ? ['internal', 'email'] : ['internal'],
-          type: 'new_order_merchant',
-          metadata: {
-            email: vendorEmail,
-            orderId: createdOrderId,
-            actionUrl: "https://mahallystore.com/merchant/dashboard/orders",
-            html: vendorOrderHtml
-          }
-        }).catch(err => console.warn("Vendor notification warning:", err.message));
-      } catch (vErr) {
-        console.warn("Failed to dispatch vendor order email:", vErr.message);
-      }
+          <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+            <p style="color: #065f46; font-size: 16px; font-weight: 800; margin: 0;">🛍️ You received a new order! #${createdOrderId}</p>
+            <p style="color: #047857; font-size: 13px; margin-top: 4px; margin-bottom: 0;">Customer: <strong>${customer.firstName} ${customer.lastName}</strong> (${customer.phone || customer.email})</p>
+          </div>
+
+          <h3 style="color: #18181b; font-size: 14px; font-weight: 700; margin-bottom: 12px; border-bottom: 2px solid #18181b; padding-bottom: 8px;">Ordered Items</h3>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+              <tr style="border-bottom: 1px solid #e4e4e7; text-align: left; color: #a1a1aa; font-size: 11px; text-transform: uppercase;">
+                <th style="padding-bottom: 8px;">Item</th>
+                <th style="padding-bottom: 8px; text-align: center;">Qty</th>
+                <th style="padding-bottom: 8px; text-align: right;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${vendorItemsHtml}
+            </tbody>
+          </table>
+
+          <div style="background: #fafafa; border: 1px solid #f4f4f5; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+            <p style="color: #18181b; font-size: 13px; font-weight: 700; margin: 0 0 6px 0;">Customer Shipping Info:</p>
+            <p style="color: #52525b; font-size: 13px; margin: 0; line-height: 1.5;">
+              Name: ${customer.firstName} ${customer.lastName}<br />
+              Address: ${customer.address}, ${customer.city}<br />
+              Phone: ${customer.phone}<br />
+              Payment: Cash on Delivery (COD)
+            </p>
+          </div>
+
+          <div style="text-align: center;">
+            <a href="https://mahallystore.com/merchant/dashboard/orders" style="display: inline-block; background: #059669; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 28px; border-radius: 12px;">
+              Manage Order in Merchant Dashboard &rarr;
+            </a>
+          </div>
+        </div>
+      `;
+
+      await NotificationService.notify({
+        userId: String(primaryVendorId || "1"),
+        senderId: "1",
+        title: `🛍️ New Order Received #${createdOrderId} — Mahally`,
+        message: `You received a new order #${createdOrderId} from ${customer.firstName} ${customer.lastName}!`,
+        channel: ['internal', 'email'],
+        type: 'new_order_merchant',
+        metadata: {
+          email: targetVendorEmail,
+          orderId: createdOrderId,
+          actionUrl: "https://mahallystore.com/merchant/dashboard/orders",
+          html: vendorOrderHtml
+        }
+      }).catch(err => console.warn("Vendor notification warning:", err.message));
+    } catch (vErr) {
+      console.warn("Failed to dispatch vendor order email:", vErr.message);
     }
 
-    // Dispatch Admin Notification
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || "info@mahallystore.com";
-    if (adminEmail) {
-      try {
-        const adminOrderHtml = `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; background: #ffffff;">
-            <div style="text-align: center; margin-bottom: 24px;">
-              <h1 style="color: #be374f; font-size: 28px; font-weight: 900; margin: 0;">Mahally Admin</h1>
-              <p style="color: #71717a; font-size: 12px; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">Platform Order Alert</p>
-            </div>
-
-            <div style="background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
-              <p style="color: #18181b; font-size: 16px; font-weight: 800; margin: 0;">🔔 New Order Placed: #${createdOrderId}</p>
-              <p style="color: #71717a; font-size: 13px; margin-top: 4px; margin-bottom: 0;">Total: <strong>JOD ${orderTotalCalculated.toFixed(2)}</strong> (COD)</p>
-            </div>
-
-            <div style="background: #fafafa; border: 1px solid #f4f4f5; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-              <p style="color: #18181b; font-size: 13px; font-weight: 700; margin: 0 0 6px 0;">Summary Details:</p>
-              <p style="color: #52525b; font-size: 13px; margin: 0; line-height: 1.5;">
-                Customer: ${customer.firstName} ${customer.lastName} (${customer.email})<br />
-                City: ${customer.city}<br />
-                Merchant ID: ${primaryVendorId || 'N/A'}
-              </p>
-            </div>
-
-            <div style="text-align: center;">
-              <a href="https://mahallystore.com/admin/orders" style="display: inline-block; background: #18181b; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 28px; border-radius: 12px;">
-                View Admin Orders &rarr;
-              </a>
-            </div>
+    // Dispatch Admin Notification (Target: info@mahallystore.com)
+    const adminEmailTarget = "info@mahallystore.com";
+    try {
+      const adminOrderHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; background: #ffffff;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #be374f; font-size: 28px; font-weight: 900; margin: 0;">Mahally Admin</h1>
+            <p style="color: #71717a; font-size: 12px; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">Platform Order Alert</p>
           </div>
-        `;
 
-        await NotificationService.notify({
-          userId: "1",
-          senderId: "1",
-          title: `🔔 New Order Placed #${createdOrderId} — Mahally Admin`,
-          message: `New order #${createdOrderId} placed by ${customer.firstName} ${customer.lastName} (Total: JOD ${orderTotalCalculated.toFixed(2)})`,
-          channel: ['email'],
-          type: 'new_order_admin',
-          metadata: {
-            email: adminEmail,
-            orderId: createdOrderId,
-            actionUrl: "https://mahallystore.com/admin/orders",
-            html: adminOrderHtml
-          }
-        }).catch(err => console.warn("Admin notification warning:", err.message));
-      } catch (aErr) {
-        console.warn("Failed to dispatch admin order email:", aErr.message);
-      }
+          <div style="background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+            <p style="color: #18181b; font-size: 16px; font-weight: 800; margin: 0;">🔔 New Order Placed: #${createdOrderId}</p>
+            <p style="color: #71717a; font-size: 13px; margin-top: 4px; margin-bottom: 0;">Total: <strong>JOD ${orderTotalCalculated.toFixed(2)}</strong> (COD)</p>
+          </div>
+
+          <div style="background: #fafafa; border: 1px solid #f4f4f5; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+            <p style="color: #18181b; font-size: 13px; font-weight: 700; margin: 0 0 6px 0;">Summary Details:</p>
+            <p style="color: #52525b; font-size: 13px; margin: 0; line-height: 1.5;">
+              Customer: ${customer.firstName} ${customer.lastName} (${customer.email})<br />
+              City: ${customer.city}<br />
+              Merchant ID: ${primaryVendorId || 'N/A'}<br />
+              Vendor Email: ${targetVendorEmail}
+            </p>
+          </div>
+
+          <div style="text-align: center;">
+            <a href="https://mahallystore.com/admin/orders" style="display: inline-block; background: #18181b; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 28px; border-radius: 12px;">
+              View Admin Orders &rarr;
+            </a>
+          </div>
+        </div>
+      `;
+
+      await NotificationService.notify({
+        userId: "1",
+        senderId: "1",
+        title: `🔔 New Order Placed #${createdOrderId} — Mahally Admin`,
+        message: `New order #${createdOrderId} placed by ${customer.firstName} ${customer.lastName} (Total: JOD ${orderTotalCalculated.toFixed(2)})`,
+        channel: ['email'],
+        type: 'new_order_admin',
+        metadata: {
+          email: adminEmailTarget,
+          orderId: createdOrderId,
+          actionUrl: "https://mahallystore.com/admin/orders",
+          html: adminOrderHtml
+        }
+      }).catch(err => console.warn("Admin notification warning:", err.message));
+    } catch (aErr) {
+      console.warn("Failed to dispatch admin order email:", aErr.message);
     }
     
     return NextResponse.json({ success: true, orderId: createdOrderId });

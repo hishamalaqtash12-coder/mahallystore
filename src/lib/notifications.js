@@ -2,14 +2,19 @@ import nodemailer from 'nodemailer';
 import { persistMessage } from './messages';
 
 const createTransporter = () => {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return null;
+  const user = process.env.SMTP_USER || "info@mahallystore.com";
+  const pass = process.env.SMTP_PASS;
+  if (!pass) {
+    console.warn("[NotificationService] Warning: SMTP_PASS is missing in environment variables.");
+    return null;
+  }
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.hostinger.com",
     port: parseInt(process.env.SMTP_PORT || "465"),
     secure: process.env.SMTP_PORT === "465" || !process.env.SMTP_PORT,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: user,
+      pass: pass,
     },
   });
 };
