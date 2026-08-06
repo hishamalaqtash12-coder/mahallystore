@@ -6,6 +6,7 @@
 import { getProducts, getCategories } from "@/lib/woocommerce";
 import { NextResponse } from "next/server";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 
 export const dynamic = 'force-dynamic';
 // Stability Stamp: 2026-05-13T12:30 - Cache Purge
@@ -18,7 +19,10 @@ const api = new WooCommerceRestApi({
 });
 
 // Server-side in-memory cache for catalog and category product lists
-const apiCache = new Map();
+if (!globalThis.apiProductsCache) {
+  globalThis.apiProductsCache = new Map();
+}
+const apiCache = globalThis.apiProductsCache;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
 function getCachedData(key) {
@@ -165,6 +169,7 @@ export async function GET(request) {
   const featured   = searchParams.get("featured");
   const noMerchant = searchParams.get("noMerchant") === "true";
   const includeRestricted = searchParams.get("includeRestricted") === "true";
+  const madeInJordanOnly = searchParams.get("madeInJordan") === "true";
 
   // Only cache category catalog queries (no search query, no vendor specific lookup, no custom ID includes)
   const shouldCache = cat && !vendorId && !include && !q && !includeRestricted && featured === null;
@@ -271,7 +276,12 @@ export async function GET(request) {
       console.warn("Parallel enrichment failed:", err.message);
     }
 
-    const responseData = { products: enrichedData, totalPages, total: vendorId ? finalData.length : total };
+    let filteredData = enrichedData;
+    if (madeInJordanOnly) {
+      filteredData = enrichedData.filter((product) => isMadeInJordanProduct(product));
+    }
+
+    const responseData = { products: filteredData, totalPages, total: vendorId ? finalData.length : total };
 
     if (shouldCache) {
       setCachedData(cacheKey, responseData);

@@ -18,8 +18,11 @@ import {
   AlertCircle
 } from "lucide-react";
 import Loader from "@/components/Loader";
+import { useLocale } from "next-intl";
 
 export default function MerchantReviewsPage() {
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const { wooId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
@@ -111,7 +114,7 @@ export default function MerchantReviewsPage() {
 
   if (loading && reviews.length === 0) return (
     <div className="h-[400px] flex items-center justify-center">
-        <Loader size="lg" text="Fetching reviews" />
+        <Loader size="lg" text={isAr ? "جارٍ جلب التقييمات" : "Fetching reviews"} />
     </div>
   );
 
@@ -119,15 +122,15 @@ export default function MerchantReviewsPage() {
     <div className="space-y-8 pb-12 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">Customer Reviews</h1>
-          <p className="text-[13px] text-zinc-500 font-medium">Manage and respond to feedback from your buyers</p>
+          <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">{isAr ? 'تقييمات العملاء' : 'Customer Reviews'}</h1>
+          <p className="text-[13px] text-zinc-500 font-medium">{isAr ? 'ادِر وردّ على آراء عملائك' : 'Manage and respond to feedback from your buyers'}</p>
         </div>
         <div className="flex items-center gap-3">
            <div className="relative">
               <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
               <input 
                 type="text" 
-                placeholder="Search reviews..." 
+                placeholder={isAr ? "ابحث في التقييمات..." : "Search reviews..."} 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
@@ -138,12 +141,12 @@ export default function MerchantReviewsPage() {
              onChange={(e) => setRatingFilter(e.target.value)}
              className="h-[36px] px-4 bg-white border border-zinc-300 rounded-md text-[13px] outline-none shadow-sm cursor-pointer"
            >
-              <option value="all">All Ratings</option>
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
+              <option value="all">{isAr ? 'كل التقييمات' : 'All Ratings'}</option>
+              <option value="5">{isAr ? '5 نجوم' : '5 Stars'}</option>
+              <option value="4">{isAr ? '4 نجوم' : '4 Stars'}</option>
+              <option value="3">{isAr ? '3 نجوم' : '3 Stars'}</option>
+              <option value="2">{isAr ? '2 نجمتان' : '2 Stars'}</option>
+              <option value="1">{isAr ? '1 نجمة' : '1 Star'}</option>
            </select>
         </div>
       </div>
@@ -162,7 +165,7 @@ export default function MerchantReviewsPage() {
                           <p className="text-[14px] font-bold text-zinc-900 truncate">{review.reviewer}</p>
                           <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-bold">
                              <CheckCircle2 size={10} />
-                             Verified Buyer
+                             {isAr ? "مشتري موثوق" : "Verified Buyer"}
                           </div>
                        </div>
                     </div>
@@ -178,7 +181,7 @@ export default function MerchantReviewsPage() {
                            className="flex items-center gap-2 text-[11px] text-[#be374f] font-bold hover:text-[#8f2d4a] transition-colors"
                         >
                            <ExternalLink size={12} />
-                           Product: {review.product_name || `#${review.product_id}`}
+                           {isAr ? "المنتج:" : "Product:"} {review.product_name || `#${review.product_id}`}
                         </a>
                     </div>
                  </div>
@@ -210,7 +213,7 @@ export default function MerchantReviewsPage() {
                          className={`flex items-center gap-2 text-[12px] font-bold transition-colors ${replyingTo === review.id ? 'text-zinc-500' : 'text-[#be374f] hover:text-[#8f2d4a]'}`}
                        >
                           <Reply size={14} />
-                          {replyingTo === review.id ? 'Cancel Reply' : 'Reply to Customer'}
+                           {replyingTo === review.id ? (isAr ? 'إلغاء الرد' : 'Cancel Reply') : (isAr ? 'الرد على العميل' : 'Reply to Customer')}
                        </button>
                        <button 
                          onClick={() => handleDelete(review.id)}
@@ -218,7 +221,7 @@ export default function MerchantReviewsPage() {
                          className="flex items-center gap-2 text-[12px] font-bold text-rose-600 hover:text-rose-800 transition-colors disabled:opacity-50"
                        >
                           <Trash2 size={14} />
-                          Delete
+                          {isAr ? "حذف" : "Delete"}
                        </button>
                     </div>
 
@@ -226,11 +229,11 @@ export default function MerchantReviewsPage() {
                       <div className="mt-4 p-5 bg-zinc-50 rounded-xl border border-zinc-200 animate-in slide-in-from-top-2 duration-200 shadow-inner">
                          <form onSubmit={(e) => handleReply(e, review.id)} className="space-y-4">
                             <div className="relative">
-                               <textarea 
+                                  <textarea 
                                  rows={4} 
                                  value={replyText}
                                  onChange={(e) => setReplyText(e.target.value)}
-                                 placeholder="Type your response to this customer..."
+                                 placeholder={isAr ? 'اكتب ردك لهذا العميل...' : 'Type your response to this customer...'}
                                  className="w-full p-4 bg-white border border-zinc-300 rounded-xl text-[14px] outline-none focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] shadow-sm resize-none transition-all"
                                  required
                                  autoFocus
@@ -239,16 +242,16 @@ export default function MerchantReviewsPage() {
                             </div>
                             <div className="flex items-center justify-between">
                                <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-                                  <AlertCircle size={14} />
-                                  <span>Responses are public and visible to all customers.</span>
-                               </div>
+                                <AlertCircle size={14} />
+                                <span>{isAr ? 'الردود عامة ومرئية لجميع العملاء.' : 'Responses are public and visible to all customers.'}</span>
+                              </div>
                                <div className="flex justify-end gap-3">
-                                  <button 
-                                    type="button"
-                                    onClick={() => setReplyingTo(null)}
-                                    className="px-4 py-2 text-[12px] font-bold text-zinc-500 hover:text-zinc-800 transition-colors"
+                                    <button 
+                                   type="button"
+                                   onClick={() => setReplyingTo(null)}
+                                   className="px-4 py-2 text-[12px] font-bold text-zinc-500 hover:text-zinc-800 transition-colors"
                                   >
-                                     Cancel
+                                    {isAr ? 'إلغاء' : 'Cancel'}
                                   </button>
                                   <button 
                                     type="submit"
@@ -256,7 +259,7 @@ export default function MerchantReviewsPage() {
                                     className="h-[36px] px-6 bg-zinc-900 text-white rounded-lg text-[12px] font-bold hover:bg-zinc-800 shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
                                   >
                                      {submittingReply ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                                     Post Reply
+                                     {isAr ? 'نشر الرد' : 'Post Reply'}
                                   </button>
                                </div>
                             </div>
@@ -272,8 +275,8 @@ export default function MerchantReviewsPage() {
                  <MessageSquare size={32} />
               </div>
               <div className="space-y-1">
-                 <h3 className="text-[16px] font-bold text-zinc-900">No reviews found</h3>
-                 <p className="text-[13px] text-zinc-500 font-medium">Reviews from your customers will appear here.</p>
+                 <h3 className="text-[16px] font-bold text-zinc-900">{isAr ? 'لا توجد تقييمات' : 'No reviews found'}</h3>
+                 <p className="text-[13px] text-zinc-500 font-medium">{isAr ? 'ستظهر تقييمات عملائك هنا.' : 'Reviews from your customers will appear here.'}</p>
               </div>
            </div>
          )}

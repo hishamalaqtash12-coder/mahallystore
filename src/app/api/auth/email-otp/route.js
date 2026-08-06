@@ -28,7 +28,6 @@ export async function POST(request) {
       console.log(`\n--- [DEV/TESTING OTP] ---`);
       console.log(`Email: ${email}`);
       console.log(`Generated OTP Code: ${generatedCode}`);
-      console.log(`Master Bypass Code: 123456`);
       console.log(`-------------------------\n`);
 
       try {
@@ -70,6 +69,12 @@ export async function POST(request) {
 
     if (action === "verify") {
       const stored = otpStore.get(email);
+      const isDev = process.env.NODE_ENV !== "production";
+
+      if (isDev && code === "123456") {
+        console.log("[DEV/TESTING OTP] Static bypass code used for email verification.");
+        return NextResponse.json({ success: true });
+      }
 
       if (!stored) {
         return NextResponse.json({ error: "No code sent to this email or code expired." }, { status: 400 });
@@ -80,7 +85,7 @@ export async function POST(request) {
         return NextResponse.json({ error: "Code expired. Please request a new one." }, { status: 400 });
       }
 
-      if (stored.code !== code && code !== "123456") {
+      if (stored.code !== code) {
         return NextResponse.json({ error: "Invalid verification code." }, { status: 400 });
       }
 

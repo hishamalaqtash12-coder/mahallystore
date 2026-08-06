@@ -4,14 +4,17 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import ProductCard from "./ProductCard";
 import SidebarFilter from "./SidebarFilter";
 import Loader from "./Loader";
-import { ChevronDown, Loader2, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, Loader2, SlidersHorizontal, X, ChevronLeft, ChevronRight, Compass } from "lucide-react";
+import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 
 export default function ProductGrid({ initialProducts, totalPages: initialTotalPages = 1 }) {
   const t = useTranslations("ProductGrid");
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const isBrowse = pathname === "/browse";
@@ -19,6 +22,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
   const cat = searchParams.get("cat");
   const q = searchParams.get("q");
   const onDiscount = searchParams.get("onDiscount") === "true";
+  const madeInJordanOnly = searchParams.get("madeInJordan") === "true";
 
   const [products, setProducts] = useState(initialProducts);
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +50,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
     minDiscount: null,
     tags: [],
     merchant: null,
+    madeInJordan: madeInJordanOnly,
     searchQuery: q || "",
   });
 
@@ -75,6 +80,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
     if (cat) params.set("cat", cat);
     if (q) params.set("q", q);
     if (onDiscount) params.set("onDiscount", "true");
+    if (madeInJordanOnly) params.set("madeInJordan", "true");
     if (isFeaturedPage) params.set("featured", "true");
 
     fetch(`/api/products?${params.toString()}`)
@@ -113,6 +119,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
       if (cat) params.set("cat", cat);
       if (q) params.set("q", q);
       if (onDiscount) params.set("onDiscount", "true");
+      if (madeInJordanOnly) params.set("madeInJordan", "true");
       if (isFeaturedPage) params.set("featured", "true");
       const res = await fetch(`/api/products?${params.toString()}`);
       if (!res.ok) throw new Error(`API returned ${res.status}`);
@@ -182,6 +189,8 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
         const pTags = (p.tags || []).map(t => t.name);
         if (!filters.tags.every(t => pTags.includes(t))) return false;
       }
+      // Made in Jordan
+      if (filters.madeInJordan && !isMadeInJordanProduct(p)) return false;
       // Merchant
       if (filters.merchant) {
         const merchantMeta = p.meta_data?.find(m => m.key === "merchant_name")?.value ||
@@ -217,19 +226,25 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
     filters.inStockOnly,
     (filters.tags || []).length > 0,
     filters.priceRange !== null,
-    filters.merchant !== null,
-  ].filter(Boolean).length;
+    filters.merchant !== null,    filters.madeInJordan,  ].filter(Boolean).length;
 
   if (!isBrowse && !isFeaturedPage) {
     return (
-      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 select-none">
-        <div className="flex flex-row items-end justify-between gap-3 mb-6 px-1 border-b border-zinc-100 pb-4">
-          <div className="flex flex-col gap-1 min-w-0">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-zinc-900 tracking-tight leading-tight truncate">{t("title")}</h2>
+      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 border-b border-zinc-100 pb-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/20 text-xs font-black uppercase tracking-wider">
+              <Compass size={13} className="text-blue-600" />
+              <span>{isAr ? "اكتشف منتجاتنا" : "Explore Products"}</span>
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 tracking-tight">
+              {t("title")}
+            </h2>
           </div>
-          <Link href="/browse" className="text-xs sm:text-sm font-extrabold text-zinc-700 hover:text-brand transition-colors bg-zinc-100 hover:bg-brand/10 px-3.5 sm:px-4 py-2 rounded-full border border-zinc-200/80 whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer">
+          <Link href="/browse" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-zinc-700 hover:text-brand transition-colors bg-zinc-100 hover:bg-brand/10 px-4 py-2 rounded-full border border-zinc-200/80 w-fit">
             <span>{t("viewAll")}</span>
-            <ChevronLeft size={16} className="rtl:rotate-0 rotate-180 text-zinc-600" />
+            <ChevronLeft size={16} className="rtl:rotate-0 rotate-180" />
           </Link>
         </div>
         {products.length === 0 ? (

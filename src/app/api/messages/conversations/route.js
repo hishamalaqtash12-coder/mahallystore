@@ -41,6 +41,37 @@ export async function GET(request) {
     // 2. Collect IDs of people the user has chatted with
     const chatMeta = meta.mahally_chats ? (typeof meta.mahally_chats === 'string' ? JSON.parse(meta.mahally_chats) : meta.mahally_chats) : {};
     
+    // Sync read timestamps with backend
+    let serverReadTimes = {};
+    if (meta.mahally_read_timestamps) {
+      serverReadTimes = typeof meta.mahally_read_timestamps === 'string' ? JSON.parse(meta.mahally_read_timestamps) : meta.mahally_read_timestamps;
+    }
+    
+    let needsReadTimeUpdate = false;
+    Object.keys(serverReadTimes).forEach(k => {
+      if (!readTimes[k] || serverReadTimes[k] > readTimes[k]) {
+        readTimes[k] = serverReadTimes[k];
+      }
+    });
+    Object.keys(readTimes).forEach(k => {
+      if (!serverReadTimes[k] || readTimes[k] > serverReadTimes[k]) {
+        serverReadTimes[k] = readTimes[k];
+        needsReadTimeUpdate = true;
+      }
+    });
+
+    if (needsReadTimeUpdate) {
+      try {
+        const metaPayload = [
+          { key: "mahally_read_timestamps", value: JSON.stringify(serverReadTimes) }
+        ];
+        // non-blocking background update
+        wcApi.put(`customers/${targetUserId}`, { meta_data: metaPayload }).catch(() => {});
+      } catch (err) {
+        console.warn("Background read times sync failed:", err.message);
+      }
+    }
+    
     // MIGRATION: Migrate disjoint "admin" string key or legacy ID "1" to the dynamic active adminId key
     let hasAdminKey = false;
     const adminKeyStr = String(adminId);
@@ -112,13 +143,13 @@ export async function GET(request) {
       // Calculate admin unread count even if there are no other partners
       let adminUnreadCount = 0;
       const adminHistory = chatMeta["admin"] || chatMeta[adminKeyStr] || [];
-      const adminLastRead = readTimes["admin"] || readTimes[adminKeyStr] || 0;
+      const adminLastRead = readTimes["admin"] || readTimes[adminKeyStr] || readTimes["1"] || 0;
       adminHistory.forEach(msg => {
         if (String(msg.senderId) !== String(targetUserId) && msg.timestamp > adminLastRead) {
           adminUnreadCount++;
         }
       });
-      return NextResponse.json({ conversations: [], adminUnreadCount });
+      return NextResponse.json({ conversations: [], adminUnreadCount, syncedReadTimes: readTimes });
     }
 
     // Batch fetch partners (split into chunks if > 100)
@@ -141,13 +172,13 @@ export async function GET(request) {
           }
         });
 
-        const isSystemAdmin = c.id === adminId || c.id === 1 || String(c.id) === "admin" || cMeta.mahally_role === "admin" || (Array.isArray(c.roles) && c.roles.includes("administrator"));
+        const isSystemAdmin = String(c.id) === String(adminId) || String(c.id) === "admin";
         const displayName = isSystemAdmin 
           ? "Mahally Support" 
           : (cMeta.mahally_store_name || `${c.first_name} ${c.last_name}`.trim() || c.username);
 
         return {
-          id: c.id,
+          id: isSystemAdmin ? "admin" : c.id,
           name: displayName,
           logo: isSystemAdmin ? null : (cMeta.mahally_avatar_url || cMeta.mahally_store_logo || null),
           lastMessage: lastMsg ? lastMsg.text : "No messages yet",
@@ -169,14 +200,18 @@ export async function GET(request) {
     // Calculate admin unread count
     let adminUnreadCount = 0;
     const adminHistory = chatMeta["admin"] || chatMeta[adminKeyStr] || [];
-    const adminLastRead = readTimes["admin"] || readTimes[adminKeyStr] || 0;
+    const adminLastRead = readTimes["admin"] || readTimes[adminKeyStr] || readTimes["1"] || 0;
     adminHistory.forEach(msg => {
       if (String(msg.senderId) !== String(targetUserId) && msg.timestamp > adminLastRead) {
         adminUnreadCount++;
       }
     });
 
-    return NextResponse.json({ conversations, adminUnreadCount });
+    return NextResponse.json({ 
+      conversations, 
+      adminUnreadCount,
+      isDesignatedAdmin: String(targetUserId) === String(adminId)
+    });
   } catch (error) {
     console.error("Conversations API error:", error.message);
     return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 });

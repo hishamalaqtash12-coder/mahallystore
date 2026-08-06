@@ -14,8 +14,10 @@ import {
   Loader2,
   AlertCircle
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function WhatsAppBroadcaster() {
+  const t = useTranslations("AdminWhatsApp");
   // Campaign Form States
   const [recipientType, setRecipientType] = useState("all");
   const [message, setMessage] = useState("");
@@ -36,8 +38,21 @@ export default function WhatsAppBroadcaster() {
     try {
       setLoadingHistory(true);
       const res = await fetch("/api/admin/whatsapp/dispatch");
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Failed to fetch /api/admin/whatsapp/dispatch:", res.status, text);
+        return;
+      }
+
+      if (!contentType.includes("application/json")) {
+        const text = await res.text().catch(() => "");
+        console.error("Unexpected non-JSON response from /api/admin/whatsapp/dispatch:", text);
+        return;
+      }
+
       const data = await res.json();
-      if (data.success) {
+      if (data && data.success) {
         setHistory(data.history || []);
       }
     } catch (e) {
@@ -100,9 +115,24 @@ export default function WhatsAppBroadcaster() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ recipientType, message, customNumbers })
       });
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        setError(`Server error: ${res.status}`);
+        console.error("Dispatch failed:", res.status, text);
+        return;
+      }
+
+      if (!contentType.includes("application/json")) {
+        const text = await res.text().catch(() => "");
+        setError("Unexpected server response");
+        console.error("Unexpected non-JSON response from dispatch:", text);
+        return;
+      }
+
       const data = await res.json();
 
-      if (data.success) {
+      if (data && data.success) {
         setDispatchedInfo({
           count: data.dispatchedCount,
           campaign: data.campaign
@@ -127,22 +157,18 @@ export default function WhatsAppBroadcaster() {
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl flex items-center gap-2">
             <MessageSquare className="text-emerald-600" />
-            WhatsApp Broadcast
+            {t("pageTitle")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Dispatch announcements, marketing deals, or news updates directly to verified customer WhatsApp numbers.
-          </p>
+          <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
         </div>
       </div>
 
       {/* Feature Under Development Notice */}
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3.5 shadow-sm">
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3.5 shadow-sm">
         <AlertCircle className="text-amber-600 shrink-0 mt-0.5" size={20} />
         <div>
-          <h3 className="text-sm font-bold text-amber-800">Feature Under Development</h3>
-          <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-            Please note: The physical WhatsApp Gateway is currently under construction and has not been fully implemented. Outbound marketing campaigns require registering an official Meta WhatsApp Business Cloud API account and linking your credentials under General Settings.
-          </p>
+          <h3 className="text-sm font-bold text-amber-800">{t("featureUnderDevelopmentTitle")}</h3>
+          <p className="text-xs text-amber-700 mt-1 leading-relaxed">{t("featureUnderDevelopmentDesc")}</p>
         </div>
       </div>
 
@@ -152,18 +178,18 @@ export default function WhatsAppBroadcaster() {
           <form onSubmit={handleDispatch} className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-5">
             <h2 className="font-semibold text-zinc-900 text-[16px] flex items-center gap-2">
               <Smartphone size={18} className="text-zinc-500" />
-              Campaign Composer
+              {t("campaignComposer")}
             </h2>
 
             {/* Recipient Selector */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Recipients</label>
+              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t("recipientsLabel")}</label>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
-                  { id: "all", label: "All Users", icon: Users },
-                  { id: "vendors", label: "Merchants", icon: Users },
-                  { id: "customers", label: "Customers", icon: Users },
-                  { id: "specific", label: "Custom Phone", icon: Smartphone },
+                  { id: "all", label: t("allUsers"), icon: Users },
+                  { id: "vendors", label: t("merchants"), icon: Users },
+                  { id: "customers", label: t("customers"), icon: Users },
+                  { id: "specific", label: t("customPhone"), icon: Smartphone },
                 ].map((type) => (
                   <div
                     key={type.id}
@@ -182,12 +208,12 @@ export default function WhatsAppBroadcaster() {
             </div>
 
             {/* Custom Numbers list */}
-            {recipientType === "specific" && (
+                {recipientType === "specific" && (
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Phone Numbers</label>
+                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t("phoneNumbersPlaceholder")}</label>
                 <input
                   type="text"
-                  placeholder="e.g. +962791234567, +962788888888 (comma separated)"
+                  placeholder={t("phoneNumbersPlaceholder")}
                   value={customNumbers}
                   onChange={(e) => setCustomNumbers(e.target.value)}
                   className="w-full h-10 px-3 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-emerald-500 transition-all font-sans"

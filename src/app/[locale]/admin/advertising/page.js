@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { Megaphone, CheckCircle2, XCircle, Clock, Search, Filter } from "lucide-react";
 
 export default function AdminAdvertisingPage() {
+  const t = useTranslations("AdminAdvertising");
   const { user, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -61,7 +63,7 @@ export default function AdminAdvertisingPage() {
   };
 
   const handleAction = async (orderId, action) => {
-    if (!window.confirm(`Are you sure you want to ${action} this campaign?`)) return;
+    if (!window.confirm(t("confirmCampaignAction", { action: t(action === "approve" ? "approve" : "reject") }))) return;
     
     setActioningId(orderId);
     try {
@@ -73,10 +75,10 @@ export default function AdminAdvertisingPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       
-      alert(`Campaign ${action}d successfully!`);
+      alert(t("campaignActionSuccess", { action: t(action === "approve" ? "approve" : "reject") }));
       fetchData(); // Refresh list
     } catch (err) {
-      alert(`Failed to ${action} campaign: ` + err.message);
+      alert(t("campaignActionFail", { action: t(action === "approve" ? "approve" : "reject"), message: err.message }));
     } finally {
       setActioningId(null);
     }
@@ -85,10 +87,10 @@ export default function AdminAdvertisingPage() {
   const handleManualPromote = async (e) => {
     e.preventDefault();
     if (!manualTargetId) {
-      alert("Please enter a valid Product ID or Store ID.");
+      alert(t("invalidTargetMessage"));
       return;
     }
-    if (!window.confirm(`Are you sure you want to manually promote ${manualType} #${manualTargetId}?`)) return;
+    if (!window.confirm(t("confirmManualPromotion", { type: t(manualType === 'product' ? 'productLabel' : 'storeLabel'), id: manualTargetId }))) return;
 
     setManualSubmitting(true);
     try {
@@ -105,17 +107,17 @@ export default function AdminAdvertisingPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      alert(`${manualType === 'product' ? 'Product' : 'Store'} successfully promoted!`);
+      alert(t("manualPromotionSuccess", { type: t(manualType === 'product' ? 'productLabel' : 'storeLabel') }));
       setManualTargetId("");
     } catch (err) {
-      alert(`Failed to manually promote: ` + err.message);
+      alert(t("manualPromotionFail", { message: err.message }));
     } finally {
       setManualSubmitting(false);
     }
   };
 
   const handleRevoke = async (type, targetId) => {
-    if (!window.confirm(`Are you sure you want to revoke this ${type} ad? It will be removed immediately.`)) return;
+    if (!window.confirm(t("confirmRevokeAd", { type: t(type === 'product' ? 'productLabel' : 'storeLabel') }))) return;
 
     setActioningId(`revoke-${targetId}`);
     try {
@@ -127,10 +129,10 @@ export default function AdminAdvertisingPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      alert(`${type === 'product' ? 'Product' : 'Store'} ad revoked successfully.`);
+      alert(t("adRevokedSuccess", { type: t(type === 'product' ? 'productLabel' : 'storeLabel') }));
       fetchData();
     } catch (err) {
-      alert(`Failed to revoke ad: ` + err.message);
+      alert(t("revokeFailed", { message: err.message }));
     } finally {
       setActioningId(null);
     }
@@ -145,11 +147,15 @@ export default function AdminAdvertisingPage() {
   }
 
   const getStatusBadge = (status) => {
-    if (status === "completed") return <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-bold">Active</span>;
-    if (status === "processing") return <span className="px-2.5 py-1 bg-blue-100 text-blue-700 border border-blue-200 rounded-full text-[11px] font-bold">Ready for Approval</span>;
-    if (status === "pending" || status === "on-hold") return <span className="px-2.5 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[11px] font-bold">Awaiting Payment</span>;
-    return <span className="px-2.5 py-1 bg-rose-100 text-rose-700 border border-rose-200 rounded-full text-[11px] font-bold">Rejected / Expired</span>;
+    if (status === "completed") return <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-bold">{t("statusActive")}</span>;
+    if (status === "processing") return <span className="px-2.5 py-1 bg-blue-100 text-blue-700 border border-blue-200 rounded-full text-[11px] font-bold">{t("statusReadyForApproval")}</span>;
+    if (status === "pending" || status === "on-hold") return <span className="px-2.5 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-[11px] font-bold">{t("statusAwaitingPayment")}</span>;
+    return <span className="px-2.5 py-1 bg-rose-100 text-rose-700 border border-rose-200 rounded-full text-[11px] font-bold">{t("statusRejectedExpired")}</span>;
   };
+
+  const getAdTypeLabel = (type) => type === 'product' ? t('productLabel') : t('storeLabel');
+  const formatAdDuration = (daysLeft) =>
+    daysLeft <= 0 ? t('durationLifetime') : t('durationDays', { count: daysLeft });
 
   return (
     <div className="flex-1 p-8 bg-zinc-50 min-h-screen">
@@ -160,38 +166,38 @@ export default function AdminAdvertisingPage() {
           <div>
             <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
               <Megaphone size={24} className="text-[#be374f]" />
-              Advertising Review Center
+              {t("pageTitle")}
             </h1>
-            <p className="text-[13px] text-zinc-500 mt-1">Review paid advertising requests and activate them on the homepage.</p>
+            <p className="text-[13px] text-zinc-500 mt-1">{t("pageSubtitle")}</p>
           </div>
         </div>
 
         {/* Manual Promotion Tool */}
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden p-6">
-           <h2 className="text-[16px] font-bold text-zinc-900 mb-4 border-b border-zinc-100 pb-3">Admin Overide: Manual Promotion</h2>
+           <h2 className="text-[16px] font-bold text-zinc-900 mb-4 border-b border-zinc-100 pb-3">{t("manualPromotionHeading")}</h2>
            <form onSubmit={handleManualPromote} className="flex flex-col md:flex-row items-end gap-4">
               <div className="space-y-1 w-full md:w-auto flex-1">
-                 <label className="text-[12px] font-bold text-zinc-600">Promotion Type</label>
+                 <label className="text-[12px] font-bold text-zinc-600">{t("promotionTypeLabel")}</label>
                  <select 
                     value={manualType} 
                     onChange={e => setManualType(e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-zinc-300 text-[13px] outline-none focus:border-[#be374f]"
                  >
-                    <option value="product">Product</option>
-                    <option value="store">Store / Vendor</option>
+                    <option value="product">{t("productLabel")}</option>
+                    <option value="store">{t("storeLabel")}</option>
                  </select>
               </div>
               <div className="space-y-1 w-full md:w-auto flex-1">
-                 <label className="text-[12px] font-bold text-zinc-600">Select Target</label>
+                 <label className="text-[12px] font-bold text-zinc-600">{t("selectTargetLabel")}</label>
                  {manualType === "product" ? (
                    <select 
                       value={manualTargetId} 
                       onChange={e => setManualTargetId(e.target.value)}
                       className="w-full h-10 px-3 rounded-lg border border-zinc-300 text-[13px] outline-none focus:border-[#be374f]"
                    >
-                      <option value="">-- Select Product --</option>
+                      <option value="">{t("selectProductPlaceholder")}</option>
                       {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} (ID: {p.id})</option>
+                        <option key={p.id} value={p.id}>{p.name} ({t("idLabel", { id: p.id })})</option>
                       ))}
                    </select>
                  ) : (
@@ -200,25 +206,25 @@ export default function AdminAdvertisingPage() {
                       onChange={e => setManualTargetId(e.target.value)}
                       className="w-full h-10 px-3 rounded-lg border border-zinc-300 text-[13px] outline-none focus:border-[#be374f]"
                    >
-                      <option value="">-- Select Store --</option>
+                      <option value="">{t("selectStorePlaceholder")}</option>
                        {vendors.map(v => {
-                         const name = v.storeName || v.name || `Store #${v.id}`;
-                         return <option key={v.id} value={v.id}>{name} (ID: {v.id})</option>;
+                         const name = v.storeName || v.name || `${t("storeLabel")} #${v.id}`;
+                         return <option key={v.id} value={v.id}>{name} ({t("idLabel", { id: v.id })})</option>;
                        })}
                    </select>
                  )}
               </div>
               <div className="space-y-1 w-full md:w-auto flex-1">
-                 <label className="text-[12px] font-bold text-zinc-600">Duration</label>
+                 <label className="text-[12px] font-bold text-zinc-600">{t("durationLabel")}</label>
                  <select 
                     value={manualDuration} 
                     onChange={e => setManualDuration(e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-zinc-300 text-[13px] outline-none focus:border-[#be374f]"
                  >
-                    <option value="7">7 Days</option>
-                    <option value="14">14 Days</option>
-                    <option value="30">30 Days</option>
-                    <option value="0">Lifetime (No Expiry)</option>
+                    <option value="7">{t("duration7")}</option>
+                    <option value="14">{t("duration14")}</option>
+                    <option value="30">{t("duration30")}</option>
+                    <option value="0">{t("durationLifetime")}</option>
                  </select>
               </div>
               <button 
@@ -226,31 +232,31 @@ export default function AdminAdvertisingPage() {
                  disabled={manualSubmitting}
                  className="h-10 px-6 bg-brand hover:bg-brand-dark text-white font-bold rounded-lg shadow-sm text-[13px] transition-all disabled:opacity-50 whitespace-nowrap"
               >
-                 {manualSubmitting ? "Promoting..." : "Force Promote"}
+                 {manualSubmitting ? t("promoting") : t("forcePromote")}
               </button>
            </form>
-           <p className="text-[11px] text-zinc-400 mt-3 italic">* This bypasses the invoicing system entirely and activates the ad immediately.</p>
+           <p className="text-[11px] text-zinc-400 mt-3 italic">{t("manualPromotionDisclaimer")}</p>
         </div>
 
         {/* Active Ads List */}
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden mb-8">
           <div className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between bg-[#fbfbfb]">
-            <h2 className="text-[16px] font-bold text-zinc-900">Active Promotions on Homepage</h2>
+            <h2 className="text-[16px] font-bold text-zinc-900">{t("activePromotionsTitle")}</h2>
           </div>
           
           {activeAds.length === 0 ? (
             <div className="p-8 text-center flex flex-col items-center">
-              <p className="text-[14px] font-bold text-zinc-700">No Active Ads</p>
+              <p className="text-[14px] font-bold text-zinc-700">{t("noActiveAds")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-end border-collapse">
                 <thead>
                   <tr className="bg-white border-b border-zinc-200">
-                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Type</th>
-                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Name / ID</th>
-                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Expires In</th>
-                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-start">Action</th>
+                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnType")}</th>
+                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnNameId")}</th>
+                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnExpiresIn")}</th>
+                     <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-start">{t("columnAction")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
@@ -262,18 +268,18 @@ export default function AdminAdvertisingPage() {
                        <tr key={`${ad.type}-${ad.id}-${idx}`} className="hover:bg-zinc-50 transition-colors">
                          <td className="px-6 py-4">
                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold capitalize ${ad.type === 'product' ? 'bg-[#fde7ee] text-[#be374f]' : 'bg-[#fde7ee] text-[#be374f]'}`}>
-                             {ad.type}
+                             {getAdTypeLabel(ad.type)}
                            </span>
                          </td>
                          <td className="px-6 py-4">
                            <p className="text-[13px] font-bold text-zinc-900">{ad.name}</p>
-                           <p className="text-[11px] text-zinc-500">ID: {ad.id}</p>
+                           <p className="text-[11px] text-zinc-500">{t("idLabel", { id: ad.id })}</p>
                          </td>
                          <td className="px-6 py-4">
                            {isLifetime ? (
-                             <span className="text-[13px] font-bold text-emerald-600">Lifetime</span>
+                             <span className="text-[13px] font-bold text-emerald-600">{t('durationLifetime')}</span>
                            ) : (
-                             <span className="text-[13px] font-bold text-zinc-700">{daysLeft} Days</span>
+                             <span className="text-[13px] font-bold text-zinc-700">{formatAdDuration(daysLeft)}</span>
                            )}
                          </td>
                          <td className="px-6 py-4 text-start">
@@ -282,7 +288,7 @@ export default function AdminAdvertisingPage() {
                              disabled={actioningId === `revoke-${ad.id}`}
                              className="px-3 py-1.5 border border-rose-200 text-rose-600 hover:bg-rose-50 text-[12px] font-bold rounded shadow-sm disabled:opacity-50"
                            >
-                             {actioningId === `revoke-${ad.id}` ? "..." : "Revoke"}
+                             {actioningId === `revoke-${ad.id}` ? t("processingAction") : t("revokeButton")}
                            </button>
                          </td>
                        </tr>
@@ -297,44 +303,42 @@ export default function AdminAdvertisingPage() {
         {/* List */}
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between bg-[#fbfbfb]">
-            <h2 className="text-[16px] font-bold text-zinc-900">Campaign Queue</h2>
-          </div>
-          
+            <h2 className="text-[16px] font-bold text-zinc-900">{t("campaignQueueTitle")}</h2>
           {requests.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center">
               <CheckCircle2 size={40} className="text-zinc-200 mb-4" />
-              <p className="text-[15px] font-bold text-zinc-700 mb-1">Queue is empty</p>
-              <p className="text-[13px] text-zinc-500 max-w-sm">There are no advertising requests to review at this time.</p>
+              <p className="text-[15px] font-bold text-zinc-700 mb-1">{t("queueEmptyTitle")}</p>
+              <p className="text-[13px] text-zinc-500 max-w-sm">{t("queueEmptyDesc")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-end border-collapse">
                 <thead>
                   <tr className="bg-white border-b border-zinc-200">
-                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Invoice / Date</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Merchant</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Type / Duration</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Cost</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-start">Action</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnInvoiceDate")}</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnMerchant")}</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnTypeDuration")}</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnCost")}</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{t("columnStatus")}</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-wider text-start">{t("columnAction")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
                   {requests.map((req) => (
                     <tr key={req.id} className="hover:bg-zinc-50 transition-colors group">
                       <td className="px-6 py-4">
-                        <p className="text-[13px] font-bold text-[#be374f]">#{req.id}</p>
+                        <p className="text-[13px] font-bold text-[#be374f]">{t("hashId", { id: req.id })}</p>
                         <p className="text-[11px] text-zinc-500 mt-0.5">{new Date(req.date).toLocaleDateString()}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-[13px] font-bold text-zinc-900">{req.customerName || `Vendor #${req.vendorId}`}</p>
+                        <p className="text-[13px] font-bold text-zinc-900">{req.customerName || t("vendorLabelWithId", { id: req.vendorId })}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-[13px] font-bold text-zinc-900 capitalize">{req.type}</p>
-                        <p className="text-[11px] text-zinc-500 mt-0.5">{req.duration} Days</p>
+                        <p className="text-[13px] font-bold text-zinc-900 capitalize">{getAdTypeLabel(req.type)}</p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5">{formatAdDuration(req.duration)}</p>
                       </td>
                       <td className="px-6 py-4 text-[13px] font-bold text-[#be374f]">
-                        JOD {parseFloat(req.total).toFixed(2)}
+                        {t("currencyCode")} {parseFloat(req.total).toFixed(2)}
                       </td>
                       <td className="px-6 py-4">
                         {getStatusBadge(req.status)}
@@ -347,18 +351,18 @@ export default function AdminAdvertisingPage() {
                               disabled={actioningId === req.id}
                               className="px-4 py-1.5 bg-[#be374f] hover:bg-[#8f2d4a] text-white text-[12px] font-bold rounded shadow-sm disabled:opacity-50"
                             >
-                              {actioningId === req.id ? "..." : "Approve"}
+                              {actioningId === req.id ? t("processingAction") : t("approve")}
                             </button>
                             <button
                               onClick={() => handleAction(req.id, "reject")}
                               disabled={actioningId === req.id}
                               className="px-4 py-1.5 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-[12px] font-bold rounded shadow-sm disabled:opacity-50"
                             >
-                              Reject
+                              {t("reject")}
                             </button>
                           </div>
                         ) : (
-                          <span className="text-[11px] text-zinc-400 italic">No actions available</span>
+                          <span className="text-[11px] text-zinc-400 italic">{t("noActionsAvailable")}</span>
                         )}
                       </td>
                     </tr>
@@ -370,6 +374,7 @@ export default function AdminAdvertisingPage() {
         </div>
 
       </div>
+    </div>
     </div>
   );
 }

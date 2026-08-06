@@ -17,16 +17,18 @@ export async function POST(request) {
     // Persist in log first
     const announcement = await createAnnouncement({ title, content, sendChat: true, sendWhatsApp: false, dokanNotice: false });
     const announcementId = announcement.id;
+    // Load vendor list (Dokan stores) for broadcast
+    const allVendors = await dokanApi.getStores({ per_page: 100 }).catch(() => []);
 
-    const adminId = "admin"; 
+    const adminId = "admin";
     const results = {
-      totalVendors: allVendors.length,
+      totalVendors: Array.isArray(allVendors) ? allVendors.length : 0,
       chatsSent: 0,
       whatsAppTriggered: 0
     };
 
     // 3. Sequential Broadcast (Note: For large numbers, this should be a background job)
-    for (const vendor of allVendors) {
+    for (const vendor of Array.isArray(allVendors) ? allVendors : []) {
       const vendorId = vendor.id;
 
       // Local Messaging System (Forced to true for now)

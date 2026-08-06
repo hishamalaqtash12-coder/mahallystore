@@ -41,6 +41,7 @@ const translations = {
       name: "Name",
       sku: "SKU",
       brand: "Brand",
+      tags: "Tags",
       stock: "Stock",
       price: "Price",
       categories: "Categories",
@@ -104,6 +105,7 @@ const translations = {
       name: "الاسم",
       sku: "رمز المنتج (SKU)",
       brand: "العلامة التجارية",
+      tags: "الوسوم",
       stock: "المخزون",
       price: "السعر",
       categories: "الأقسام",
@@ -535,6 +537,7 @@ export default function MerchantProductsPage() {
                 <th className="px-6 py-4 text-end">{t.table.stock}</th>
                 <th className="px-6 py-4 text-end">{t.table.price}</th>
                 <th className="px-6 py-4 text-end">{t.table.categories}</th>
+                <th className="px-6 py-4 text-end">{t.table.tags}</th>
                 <th className="px-6 py-4 text-end">{t.table.commission}</th>
                 <th className="px-6 py-4 text-end">{t.table.author}</th>
                 <th className="px-6 py-4 text-center">{t.table.featured}</th>
@@ -625,6 +628,14 @@ export default function MerchantProductsPage() {
                         </span>
                       ))}
                     </div>
+                  </td>
+                  <td className="px-6 py-5 max-w-[140px]">
+                    <p className="text-[11px] text-zinc-400 leading-snug text-end truncate" title={product.tags?.map(t => t.name).join(', ')}>
+                      {product.tags?.length > 0
+                        ? product.tags.map(t => t.name).join(', ')
+                        : <span className="text-zinc-300">—</span>
+                      }
+                    </p>
                   </td>
                   <td className="px-6 py-5 text-[13px] font-bold text-zinc-900">
                     {(() => {

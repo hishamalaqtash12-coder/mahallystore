@@ -28,10 +28,10 @@ export async function GET(request) {
 
     const chats = typeof chatMeta.value === 'string' ? JSON.parse(chatMeta.value) : chatMeta.value;
     
-    // Migration logic to merge disjoint "admin" key to "1" key
+    // Migration logic to merge disjoint "admin" key to adminId key
     let hasAdminKey = false;
     if (chats["admin"]) {
-      chats["1"] = [...(chats["1"] || []), ...chats["admin"]];
+      chats[String(adminId)] = [...(chats[String(adminId)] || []), ...chats["admin"]];
       delete chats["admin"];
       hasAdminKey = true;
     }

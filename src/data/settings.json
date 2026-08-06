@@ -1,5 +1,5 @@
 {
-  "promoVideoUrl": "https://www.youtube.com/watch?v=D9p6FU9rJ7Q",
+  "promoVideoUrl": "https://youtu.be/09hrU7eHnz0",
   "promoVideoThumbnail": "",
   "promoVideoTitle": "دعم المنتجات الأردنية المحلية",
   "promoVideoDescription": "انضم إلى آلاف المتسوقين الذين يدعمون التجار المحليين في جميع أنحاء المملكة.",
@@ -7,9 +7,11 @@
   "whatsappEnabled": true,
   "advertisingEnabled": false,
   "reportingEnabled": false,
-  "supportEmail": "ammarm.odeh@gmail.com",
+  "supportEmail": "support@mahally.jo",
+  "supportUserId": 36,
+  "supportUserName": "Ammar Odeh",
   "socialFacebook": "https://www.facebook.com/mahallystore/",
   "socialInstagram": "https://www.instagram.com/mahallystore",
-  "socialYoutube": "https://www.youtube.com/@mahallystore",
+  "socialTwitter": "",
   "socialTikTok": "https://vt.tiktok.com/ZSCSmC4xw/"
 }

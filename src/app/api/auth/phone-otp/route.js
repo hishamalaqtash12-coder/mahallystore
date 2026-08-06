@@ -24,12 +24,18 @@ export async function POST(request) {
       console.log(`\n--- [DEV/TESTING OTP] ---`);
       console.log(`Phone: ${phone}`);
       console.log(`Generated OTP Code: ${generatedCode}`);
-      console.log(`Master Bypass Code: 123456`);
       console.log(`-------------------------\n`);
 
       try {
-        // 3. Prepare NGT API payload
-        const formattedPhone = phone.replace("+", "");
+        // 3. Normalize phone number for NGT SMS Gateway (Jordan format 9627XXXXXXXX)
+        let formattedPhone = phone.trim().replace(/[\s\-\+\(\)]/g, "");
+        if (formattedPhone.startsWith("07")) {
+          formattedPhone = "962" + formattedPhone.substring(1);
+        } else if (formattedPhone.startsWith("7")) {
+          formattedPhone = "962" + formattedPhone;
+        }
+
+        console.log(`Sending SMS via NGT to: ${formattedPhone}`);
         
         const payload = new URLSearchParams();
         payload.append('login_name', process.env.NGT_LOGIN_NAME);
@@ -56,7 +62,7 @@ export async function POST(request) {
           console.warn("NGT SMS Gateway returned non-ok status code:", ngtResponse.status);
         }
       } catch (smsErr) {
-        console.warn("Could not dispatch NGT SMS (local dev mode bypass active):", smsErr.message);
+        console.warn("Could not dispatch NGT SMS:", smsErr.message);
       }
 
       return NextResponse.json({ success: true, message: "Code generated (and logged in console)!" });
@@ -64,6 +70,12 @@ export async function POST(request) {
 
     if (action === "verify") {
       const stored = otpStore.get(phone);
+      const isDev = process.env.NODE_ENV !== "production";
+
+      if (isDev && code === "123456") {
+        console.log("[DEV/TESTING OTP] Static bypass code used for phone verification.");
+        return NextResponse.json({ success: true });
+      }
 
       if (!stored) {
         return NextResponse.json({ error: "No code sent to this phone number." }, { status: 400 });
@@ -74,7 +86,7 @@ export async function POST(request) {
         return NextResponse.json({ error: "Code expired. Please request a new one." }, { status: 400 });
       }
 
-      if (stored.code !== code && code !== "123456") {
+      if (stored.code !== code) {
         return NextResponse.json({ error: "Invalid verification code." }, { status: 400 });
       }
 

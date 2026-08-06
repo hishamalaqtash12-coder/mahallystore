@@ -16,8 +16,10 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import AdminSearch from "@/components/admin/AdminSearch";
+import { useTranslations } from "next-intl";
 
 export default function AdminInventoryPage() {
+  const t = useTranslations("AdminInventory");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -56,10 +58,8 @@ export default function AdminInventoryPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Inventory</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Manage product stock and pricing across the marketplace
-          </p>
+          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
+          <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -74,9 +74,9 @@ export default function AdminInventoryPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Total Products", value: products.length, icon: Layers },
+          { label: t("totalProducts"), value: products.length, icon: Layers },
           {
-            label: "Low Stock",
+            label: t("lowStock"),
             value: products.filter((p) => {
               const qty = p.stock_quantity ?? p.stockQuantity ?? 0;
               return qty > 0 && qty <= 5;
@@ -85,7 +85,7 @@ export default function AdminInventoryPage() {
             warn: true,
           },
           {
-            label: "Out of Stock",
+            label: t("outOfStock"),
             value: products.filter((p) => {
               const qty = p.stock_quantity ?? p.stockQuantity ?? 0;
               return qty === 0;
@@ -114,7 +114,7 @@ export default function AdminInventoryPage() {
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
         <AdminSearch
-          placeholder="Search by product name or SKU..."
+          placeholder={t("searchPlaceholder")}
           value={search}
           onChange={setSearch}
           className="flex-1"
@@ -142,22 +142,22 @@ export default function AdminInventoryPage() {
           <thead>
             <tr className="border-b border-zinc-200 bg-zinc-50">
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                Product
+                {t("product")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                SKU
+                {t("sku")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                Brand
+                {t("brand")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                Price
+                {t("price")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-center">
-                Stock
+                {t("stock")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-start">
-                Actions
+                {t("actions")}
               </th>
             </tr>
           </thead>
@@ -167,7 +167,7 @@ export default function AdminInventoryPage() {
                 <td colSpan="6" className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
-                    <p className="text-sm text-zinc-500">Loading inventory...</p>
+                    <p className="text-sm text-zinc-500">{t("loadingInventory")}</p>
                   </div>
                 </td>
               </tr>
@@ -257,9 +257,9 @@ export default function AdminInventoryPage() {
                     <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center">
                       <Package size={18} className="text-zinc-400" />
                     </div>
-                    <p className="text-sm text-zinc-500">No products found</p>
+                    <p className="text-sm text-zinc-500">{t("noProductsFound")}</p>
                     {search && (
-                      <p className="text-xs text-zinc-400">Try adjusting your search terms</p>
+                      <p className="text-xs text-zinc-400">{t("tryAdjustSearch")}</p>
                     )}
                   </div>
                 </td>
@@ -272,7 +272,7 @@ export default function AdminInventoryPage() {
         {!loading && filteredProducts.length > 0 && (
           <div className="px-6 py-3 border-t border-zinc-100 bg-zinc-50 flex items-center justify-between">
             <p className="text-xs text-zinc-500">
-              Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+              {t("showingProducts", { count: filteredProducts.length })}
             </p>
             <div className="flex items-center gap-1">
               <button

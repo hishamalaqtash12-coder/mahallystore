@@ -126,9 +126,8 @@ function HelpContent() {
   return (
     <div className="min-h-screen bg-white font-sans text-zinc-800 text-xs">
 
-      {/* 1. Header & Search Area */}
       <div className="bg-zinc-50 border-b border-zinc-200">
-        <div className="max-w-[1000px] mx-auto px-4 py-8">
+        <div className="max-w-[1400px] mx-auto px-4 py-8">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-1.5 text-zinc-500 mb-6 text-[11px]">
             <Link href="/" className="hover:underline">{t("breadcrumbs.home")}</Link>
@@ -202,7 +201,7 @@ function HelpContent() {
       </div>
 
       {/* 2. Main Layout Grid */}
-      <div className="max-w-[1000px] mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+      <div className="max-w-[1400px] mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
 
         {/* Sidebar Nav */}
         <aside className="w-full md:w-[240px] shrink-0 space-y-6">

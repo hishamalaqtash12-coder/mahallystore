@@ -1,22 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
-import {
-  RotateCcw,
-  Search,
-  Filter,
-  DollarSign,
-  Clock,
-  CheckCircle,
-  XCircle,
-  ChevronRight,
-  Info
-} from "lucide-react";
+import { RotateCcw, Search, Info } from "lucide-react";
 import Loader from "@/components/Loader";
 
 export default function RefundsPage() {
-  const { user, wooId } = useAuth();
+  const locale = useLocale();
+  const isAr = locale === "ar";
+  const t = (en, ar) => (isAr ? ar : en);
+  const { wooId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refunds, setRefunds] = useState([]);
   const [search, setSearch] = useState("");
@@ -28,7 +22,7 @@ export default function RefundsPage() {
         const data = await res.json();
         setRefunds(Array.isArray(data) ? data : []);
       } catch (e) {
-        console.error("Failed to fetch refunds");
+        console.error("Failed to fetch refunds", e);
       } finally {
         setLoading(false);
       }
@@ -38,18 +32,25 @@ export default function RefundsPage() {
     else setLoading(false);
   }, [wooId]);
 
-  if (loading) return (
-    <div className="h-[400px] flex items-center justify-center">
-      <Loader size="lg" text="Loading refund requests" />
-    </div>
-  );
+  const filteredRefunds = refunds.filter((r) => {
+    const q = `${r.id ?? ""} ${r.order_id ?? ""} ${r.reason ?? ""}`.toLowerCase();
+    return q.includes(search.toLowerCase());
+  });
+
+  if (loading) {
+    return (
+      <div className="h-[400px] flex items-center justify-center">
+        <Loader size="lg" text={t("Loading refund requests", "جارٍ تحميل طلبات الاسترجاع")} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">Refund Requests</h1>
-          <p className="text-[13px] text-zinc-500 font-medium">Manage and process customer refund requests for your orders</p>
+          <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">{t("Refund Requests", "طلبات الاسترجاع")}</h1>
+          <p className="text-[13px] text-zinc-500 font-medium">{t("Manage and process customer refund requests for your orders", "قم بإدارة ومعالجة طلبات الاسترجاع الخاصة بعملائك")}</p>
         </div>
       </div>
 
@@ -60,17 +61,17 @@ export default function RefundsPage() {
               <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
               <input
                 type="text"
-                placeholder="Search order ID or reason..."
+                placeholder={t("Search order ID or reason...", "ابحث برقم الطلب أو السبب...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
               />
             </div>
             <select className="h-[36px] px-4 bg-white border border-zinc-300 rounded-md text-[13px] outline-none shadow-sm cursor-pointer">
-              <option>All Statuses</option>
-              <option>Pending</option>
-              <option>Completed</option>
-              <option>Rejected</option>
+              <option>{t("All Statuses", "جميع الحالات")}</option>
+              <option>{t("Pending", "قيد الانتظار")}</option>
+              <option>{t("Completed", "مكتمل")}</option>
+              <option>{t("Rejected", "مرفوض")}</option>
             </select>
           </div>
         </div>
@@ -79,16 +80,16 @@ export default function RefundsPage() {
           <table className="w-full text-end">
             <thead>
               <tr className="bg-zinc-100/50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
-                <th className="px-6 py-4">Request Details</th>
-                <th className="px-6 py-4 text-center">Amount</th>
-                <th className="px-6 py-4">Reason</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-start">Actions</th>
+                <th className="px-6 py-4">{t("Request Details", "تفاصيل الطلب")}</th>
+                <th className="px-6 py-4 text-center">{t("Amount", "المبلغ")}</th>
+                <th className="px-6 py-4">{t("Reason", "السبب")}</th>
+                <th className="px-6 py-4 text-center">{t("Status", "الحالة")}</th>
+                <th className="px-6 py-4 text-start">{t("Actions", "الإجراءات")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
-              {refunds.length > 0 ? (
-                refunds.map((r) => (
+              {filteredRefunds.length > 0 ? (
+                filteredRefunds.map((r) => (
                   <tr key={r.id} className="hover:bg-zinc-50 transition-colors group">
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
@@ -101,27 +102,27 @@ export default function RefundsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-center text-[14px] font-bold text-zinc-900">
-                      JOD {r.amount.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-5 text-[13px] text-zinc-600 max-w-[300px] truncate font-medium">
-                      {r.reason}
-                    </td>
+                    <td className="px-6 py-5 text-center text-[14px] font-bold text-zinc-900">JOD {Number(r.amount || 0).toFixed(2)}</td>
+                    <td className="px-6 py-5 text-[13px] text-zinc-600 max-w-[300px] truncate font-medium">{r.reason}</td>
                     <td className="px-6 py-5 text-center">
-                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${r.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                          r.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'
-                        }`}>
+                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                        r.status === "pending"
+                          ? "bg-amber-50 text-amber-700 border-amber-100"
+                          : r.status === "completed"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                            : "bg-rose-50 text-rose-700 border-rose-100"
+                      }`}>
                         {r.status}
                       </span>
                     </td>
                     <td className="px-6 py-5 text-start">
-                      <button className="text-[13px] text-[#be374f] font-bold hover:underline">View Details</button>
+                      <button className="text-[13px] text-[#be374f] font-bold hover:underline">{t("View Details", "عرض التفاصيل")}</button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-20 text-center text-zinc-400 italic">No refund requests found.</td>
+                  <td colSpan="5" className="px-6 py-20 text-center text-zinc-400 italic">{t("No refund requests found.", "لا توجد طلبات استرجاع.")}</td>
                 </tr>
               )}
             </tbody>
@@ -134,9 +135,9 @@ export default function RefundsPage() {
           <Info className="text-amber-600" size={18} />
         </div>
         <div className="space-y-1">
-          <h4 className="text-[14px] font-bold text-amber-900">Refund Policy</h4>
+          <h4 className="text-[14px] font-bold text-amber-900">{t("Refund Policy", "سياسة الاسترجاع")}</h4>
           <p className="text-[13px] text-amber-700 leading-relaxed">
-            Vendors are responsible for reviewing refund requests within 48 hours. Please ensure you communicate with the customer through the messaging system before finalizing a refund.
+            {t("Vendors are responsible for reviewing refund requests within 48 hours. Please ensure you communicate with the customer through the messaging system before finalizing a refund.", "يتحمل البائعون مسؤولية مراجعة طلبات الاسترجاع خلال 48 ساعة. يرجى التأكد من التواصل مع العميل عبر نظام الرسائل قبل إتمام الاسترجاع.")}
           </p>
         </div>
       </div>

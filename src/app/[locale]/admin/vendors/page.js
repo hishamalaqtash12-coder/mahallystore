@@ -19,17 +19,20 @@ import {
   ToggleLeft,
   ToggleRight,
   Users,
+  Search,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import AdminSearch from "@/components/admin/AdminSearch";
+import { useTranslations } from "next-intl";
 
 const STATUS_MAP = {
-  pending: { label: "Pending", color: "bg-amber-50 text-amber-700" },
-  approved: { label: "Approved", color: "bg-emerald-50 text-emerald-700" },
-  rejected: { label: "Rejected", color: "bg-red-50 text-red-700" },
+  pending: { color: "bg-amber-50 text-amber-700" },
+  approved: { color: "bg-emerald-50 text-emerald-700" },
+  rejected: { color: "bg-red-50 text-red-700" },
 };
 
 export default function AdminVendorsPage() {
+  const t = useTranslations("AdminVendors");
   const searchParams = useSearchParams();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -232,10 +235,8 @@ export default function AdminVendorsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Vendors</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Verify, manage, and curate vendor visibility
-          </p>
+          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
+          <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
         </div>
         <button
           onClick={() => { fetchVendors(); fetchFeatured(); }}
@@ -243,7 +244,7 @@ export default function AdminVendorsPage() {
           className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-50"
         >
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          Refresh
+          {t("refresh")}
         </button>
       </div>
 
@@ -258,7 +259,7 @@ export default function AdminVendorsPage() {
           }`}
         >
           <Store size={15} />
-          All Vendors
+          {t("vendorsTab")}
         </button>
         <button
           onClick={() => setActiveTab("carousel")}
@@ -269,7 +270,7 @@ export default function AdminVendorsPage() {
           }`}
         >
           <LayoutGrid size={15} />
-          Homepage Carousel
+          {t("carouselTab")}
           {featuredIds.length > 0 && (
             <span className="bg-brand text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
               {featuredIds.length}
@@ -284,10 +285,10 @@ export default function AdminVendorsPage() {
           {/* Stats Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { key: "all", label: "All Vendors", icon: Store },
-              { key: "pending", label: "Pending", icon: Clock },
-              { key: "approved", label: "Approved", icon: ShieldCheck },
-              { key: "rejected", label: "Rejected", icon: XCircle },
+              { key: "all", label: t("allVendors"), icon: Store },
+              { key: "pending", label: t("pending"), icon: Clock },
+              { key: "approved", label: t("approved"), icon: ShieldCheck },
+              { key: "rejected", label: t("rejected"), icon: XCircle },
             ].map((s) => (
               <button
                 key={s.key}
@@ -324,7 +325,7 @@ export default function AdminVendorsPage() {
 
           {/* Search */}
           <AdminSearch
-            placeholder="Search vendors by name, store, or email..."
+            placeholder={t("searchPlaceholder")}
             value={query}
             onChange={setQuery}
           />
@@ -332,14 +333,14 @@ export default function AdminVendorsPage() {
           {/* Bulk Actions Bar */}
           {!loading && filtered.length > 0 && (
             <div className="flex flex-wrap items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm text-zinc-600 me-auto">
+                <div className="flex items-center gap-2 text-sm text-zinc-600 me-auto">
                 <Users size={15} className="text-zinc-400" />
                 <span>
-                  <strong className="text-zinc-900">{filtered.length}</strong> vendor{filtered.length !== 1 ? "s" : ""} shown
+                  <strong className="text-zinc-900">{filtered.length}</strong> {t("vendorsShown", {count: filtered.length})}
                 </span>
               </div>
               <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider hidden sm:block">Bulk:</span>
-              <button
+                <button
                 onClick={() => handleBulkAction("approve")}
                 disabled={bulkLoading !== null || filtered.every((v) => v.status === "approved")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -349,7 +350,7 @@ export default function AdminVendorsPage() {
                 ) : (
                   <ToggleRight size={14} />
                 )}
-                Activate All
+                {t("bulkApprove")}
               </button>
               <button
                 onClick={() => handleBulkAction("reject")}
@@ -361,7 +362,7 @@ export default function AdminVendorsPage() {
                 ) : (
                   <ToggleLeft size={14} />
                 )}
-                Deactivate All
+                {t("bulkReject")}
               </button>
             </div>
           )}
@@ -370,20 +371,20 @@ export default function AdminVendorsPage() {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
-              <p className="text-sm text-zinc-500">Loading vendors...</p>
+              <p className="text-sm text-zinc-500">{t("loadingVendors")}</p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-dashed border-zinc-200 bg-white">
               <div className="h-12 w-12 rounded-full bg-zinc-100 flex items-center justify-center mb-3">
                 <Store size={20} className="text-zinc-400" />
               </div>
-              <p className="text-sm font-medium text-zinc-900">No vendors found</p>
-              <p className="text-xs text-zinc-500 mt-1">Try adjusting your filters</p>
+              <p className="text-sm font-medium text-zinc-900">{t("noVendorsFound")}</p>
+              <p className="text-xs text-zinc-500 mt-1">{t("tryAdjustFilters")}</p>
               <button
                 onClick={() => { setFilter("all"); setQuery(""); }}
                 className="mt-4 px-4 py-2 rounded-lg bg-zinc-900 text-white text-xs font-medium hover:bg-zinc-800 transition-colors"
               >
-                Clear filters
+                {t("clearFilters")}
               </button>
             </div>
           ) : (
@@ -407,12 +408,12 @@ export default function AdminVendorsPage() {
                         <p className="text-sm font-semibold text-zinc-900">
                           {v.storeName || v.name}
                         </p>
-                        <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${st.color}`}>
-                          {st.label}
-                        </span>
+                                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${st.color}`}>
+                                  {t(v.status)}
+                                </span>
                         {featuredIds.includes(v.id) && (
                           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-brand/10 text-brand border border-brand/20">
-                            ★ In Carousel
+                            ★ {t("inCarousel")}
                           </span>
                         )}
                         <select
@@ -448,10 +449,10 @@ export default function AdminVendorsPage() {
                         </p>
                       )}
                       <p className="text-xs text-zinc-400">
-                        Applied:{" "}
+                        {t("appliedLabel")} {" "}
                         {v.dateCreated
                           ? new Date(v.dateCreated).toLocaleDateString()
-                          : "Unknown"}
+                          : t("unknownLabel")}
                       </p>
                     </div>
 
@@ -468,7 +469,7 @@ export default function AdminVendorsPage() {
                           ) : (
                             <CheckCircle size={12} />
                           )}
-                          Approve
+                          {t("approve")}
                         </button>
                       )}
                       {v.status !== "rejected" && (
@@ -482,7 +483,7 @@ export default function AdminVendorsPage() {
                           ) : (
                             <XCircle size={12} />
                           )}
-                          Reject
+                          {t("reject")}
                         </button>
                       )}
                       {v.status === "approved" && v.storeSlug && (
@@ -491,7 +492,7 @@ export default function AdminVendorsPage() {
                           target="_blank"
                           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors"
                         >
-                          View Store <ArrowRight size={12} />
+                          {t("viewStore")} <ArrowRight size={12} />
                         </Link>
                       )}
                     </div>

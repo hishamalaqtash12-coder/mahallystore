@@ -99,11 +99,12 @@ export async function GET(req) {
     const ordersRes = await wcApi.get("orders", { customer: vendorId, per_page: 50 });
     
     const campaigns = (ordersRes.data || []).filter(order => 
-      order.meta_data.some(m => m.key === "_mahally_is_ad_invoice" && m.value === "yes")
+      (order.meta_data || []).some(m => m.key === "_mahally_is_ad_invoice" && m.value === "yes")
     ).map(order => {
-      const type = order.meta_data.find(m => m.key === "_mahally_ad_type")?.value;
-      const target = order.meta_data.find(m => m.key === "_mahally_ad_target")?.value;
-      const duration = order.meta_data.find(m => m.key === "_mahally_ad_duration")?.value;
+      const meta = order.meta_data || [];
+      const type = meta.find(m => m.key === "_mahally_ad_type")?.value;
+      const target = meta.find(m => m.key === "_mahally_ad_target")?.value;
+      const duration = meta.find(m => m.key === "_mahally_ad_duration")?.value;
 
       let status = "Unknown";
       if (order.status === "pending" || order.status === "on-hold") status = "Pending Payment";

@@ -11,6 +11,7 @@ import QuickLookModal from "./QuickLookModal";
 import { useAuth } from "@/context/AuthContext";
 
 import { isProductOutOfStock, getProductMerchant } from "@/lib/product-utils";
+import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 import { useEffect, useRef } from "react";
 
 function CountdownTimer({ expiryDate, discountAmount, product }) {
@@ -120,6 +121,7 @@ export default function ProductCard({ product }) {
   const { name: merchantName, id: merchantId, slug: merchantSlug } = getProductMerchant(product);
   const merchantLink = merchantSlug || merchantId ? `/vendor/${merchantSlug || merchantId}` : "/vendors";
   const isVerifiedMerchant = !!merchantId;
+  const isJordanian = isMadeInJordanProduct(product);
 
   const descriptionText = product.short_description || product.description || "";
   const plainDescription = descriptionText.replace(/<[^>]+>/g, "").trim();
@@ -156,8 +158,8 @@ export default function ProductCard({ product }) {
 
         {/* Out of Stock overlay */}
         {outOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/10 backdrop-blur-xs">
-            <span className="bg-zinc-900/90 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/5 backdrop-blur-[2px] z-20">
+            <span className="bg-rose-600/95 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
               {t("outOfStock")}
             </span>
           </div>
@@ -173,6 +175,11 @@ export default function ProductCard({ product }) {
           <div className={`absolute top-2.5 end-2.5 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md z-10 flex items-center gap-1 ${isLimitedOffer ? "bg-gradient-to-r from-rose-600 to-amber-500" : "bg-rose-600"}`}>
             {isLimitedOffer && <Zap size={10} className="fill-white animate-bounce" />}
             {isLimitedOffer ? t("limitedTimeOffer") : t("savePercent", {percent: ((1 - price / regularPrice) * 100).toFixed(0)})}
+          </div>
+        )}
+        {!outOfStock && isJordanian && (
+          <div className="absolute top-2.5 start-2.5 bg-emerald-600/95 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md z-10 uppercase tracking-wider">
+            {locale === "ar" ? "صُنع في الأردن" : "Made in Jordan"}
           </div>
         )}
 

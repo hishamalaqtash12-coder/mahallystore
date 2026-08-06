@@ -44,6 +44,7 @@ export async function GET(request) {
     let totalProductCount = 0;
     let recentReviews = [];
     let completedOrders = [];
+    let filteredOrders = [];  // declared here so the response builder at the bottom can access it
     let manualTotalRevenue = 0;
     let manualTotalSales = 0;
     let manualActiveOrders = 0;
@@ -74,7 +75,7 @@ export async function GET(request) {
              String(metaVendorId) === String(wooId);
     });
 
-    const filteredOrders = (Array.isArray(allOrders) ? allOrders : []).filter(order => {
+    filteredOrders = (Array.isArray(allOrders) ? allOrders : []).filter(order => {
       const orderVendorId = order.meta_data?.find(m => m.key === '_dokan_vendor_id' || m.key === 'mahally_owner_id' || m.key === '_vendor_id' || m.key === 'merchant_id')?.value;
       if (String(orderVendorId) === String(wooId)) return true;
 
@@ -103,7 +104,7 @@ export async function GET(request) {
           recentReviews = dokanReviews.slice(0, 10);
       }
     } catch (drErr) {
-      console.warn("Dokan reviews API failed, falling back to WC API:", drErr.message);
+      // Dokan /reviews endpoint not available — silently fall back to WC API below
     }
 
     // 3c. Fallback/Supplement: Fetch recent reviews via WC API and filter by product ownership
@@ -186,7 +187,7 @@ export async function GET(request) {
         restrictionReason: vendorMeta.restrictionReason || '',
         hasSocials: vendorMeta.hasSocials || false
       },
-      recentOrders: allOrders.slice(0, 10).map(o => ({
+      recentOrders: filteredOrders.slice(0, 10).map(o => ({
         id: o.id,
         date_created: o.date_created,
         billing: o.billing,

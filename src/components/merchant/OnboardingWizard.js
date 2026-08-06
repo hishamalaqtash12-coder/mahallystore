@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
 import { CheckCircle2, Circle, ChevronRight, Upload, Package, Link as LinkIcon } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
 export default function OnboardingWizard({ stats, user }) {
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const [isDismissed, setIsDismissed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -26,29 +29,29 @@ export default function OnboardingWizard({ stats, user }) {
   const steps = [
     {
       id: "identity",
-      title: "Verify Identity",
-      description: "Upload your business document to get verified.",
+      title: isAr ? "تأكيد الهوية" : "Verify Identity",
+      description: isAr ? "حمّل مستند نشاطك التجاري لتأكيد هويتك." : "Upload your business document to get verified.",
       icon: Upload,
       completed: hasIdentity,
-      actionText: "Completed",
+      actionText: isAr ? "مكتمل" : "Completed",
       href: "#",
     },
     {
       id: "product",
-      title: "Add First Product",
-      description: "List at least one product to start selling.",
+      title: isAr ? "أضف أول منتج" : "Add First Product",
+      description: isAr ? "أضف منتجًا واحدًا على الأقل للبدء بالبيع." : "List at least one product to start selling.",
       icon: Package,
       completed: hasProduct,
-      actionText: "Add Product",
+      actionText: isAr ? "أضف منتج" : "Add Product",
       href: "/merchant/dashboard/products",
     },
     {
       id: "social",
-      title: "Add Social Links",
-      description: "Connect your social media in settings.",
+      title: isAr ? "أضف روابط التواصل" : "Add Social Links",
+      description: isAr ? "اربط حساباتك الاجتماعية في الإعدادات." : "Connect your social media in settings.",
       icon: LinkIcon,
       completed: hasSocials,
-      actionText: "Go to Settings",
+      actionText: isAr ? "اذهب إلى الإعدادات" : "Go to Settings",
       href: "/merchant/dashboard/settings",
     }
   ];
@@ -69,16 +72,20 @@ export default function OnboardingWizard({ stats, user }) {
       <div className="flex justify-between items-start mb-6">
         <div>
           <h2 className="text-[20px] font-bold text-zinc-900 tracking-tight flex items-center gap-2">
-            Store Setup Wizard
+            {isAr ? "معالج إعداد المتجر" : "Store Setup Wizard"}
             <span className="px-2 py-0.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full uppercase tracking-wider">
-              Required
+              {isAr ? "مطلوب" : "Required"}
             </span>
           </h2>
-          <p className="text-[13px] text-zinc-600 mt-1">Complete these steps to publish your store and start selling.</p>
+          <p className="text-[13px] text-zinc-600 mt-1">
+            {isAr ? "أكمل هذه الخطوات لنشر متجرك والبدء بالبيع." : "Complete these steps to publish your store and start selling."}
+          </p>
         </div>
         <div className="text-start">
           <div className="text-[24px] font-bold text-[#be374f] leading-none">{progressPercent}%</div>
-          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Completed</p>
+          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+            {isAr ? "اكتمل" : "Completed"}
+          </p>
         </div>
       </div>
 

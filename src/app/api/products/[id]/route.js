@@ -1,4 +1,4 @@
-import { getProduct, getProductVariations } from "@/lib/woocommerce";
+import { getProductVariations } from "@/lib/woocommerce";
 import { NextResponse } from "next/server";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
@@ -48,7 +48,19 @@ export async function GET(request, { params }) {
   const { id } = await params;
 
   try {
-    const product = await getProduct(id);
+    // Use WC REST API with admin keys — GraphQL (getProduct) does NOT return
+    // regularPrice / salePrice for pending/draft products (WPGraphQL only exposes published).
+    let product;
+    if (/^\d+$/.test(id)) {
+      // Numeric ID — fetch directly
+      const res = await api.get(`products/${id}`);
+      product = res.data;
+    } else {
+      // Slug — use query param
+      const res = await api.get("products", { slug: id, per_page: 1, status: "any" });
+      product = Array.isArray(res.data) ? res.data[0] : null;
+    }
+
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -56,7 +68,12 @@ export async function GET(request, { params }) {
     // Fetch variations for variable products
     let variations = [];
     if (product.type === "variable") {
-      variations = await getProductVariations(id);
+      try {
+        const varRes = await api.get(`products/${product.id}/variations`, { per_page: 100 });
+        variations = Array.isArray(varRes.data) ? varRes.data : [];
+      } catch {
+        variations = [];
+      }
     }
 
     // Enrich with Dokan store name and Live Rating in parallel
