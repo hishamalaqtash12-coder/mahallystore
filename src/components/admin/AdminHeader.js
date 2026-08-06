@@ -1,9 +1,10 @@
 "use client";
 
-import { Search, ChevronDown, Settings, LogOut, RefreshCw, User, Sparkles, Navigation, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { Search, ChevronDown, Settings, LogOut, RefreshCw, User, Navigation, Globe } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
+import { useLocale, useTranslations } from "next-intl";
 
 const ADMIN_PAGES = [
   { title: "Admin Dashboard", description: "View store stats, charts, and seller list", path: "/admin", category: "Navigation" },
@@ -21,7 +22,12 @@ export default function AdminHeader() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, customerName, logout } = useAuth();
+  const pathname = usePathname();
   const router = useRouter();
+  const locale = useLocale();
+  const isAr = locale === "ar";
+  const t = useTranslations("AdminShell");
+  const accountMenuRef = useRef(null);
 
   const initials = customerName
     ? customerName[0].toUpperCase()
@@ -31,30 +37,38 @@ export default function AdminHeader() {
 
   const displayName = customerName || user?.displayName || "Admin";
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white border-b border-zinc-200 px-4 lg:px-6 flex items-center justify-between">
-      {/* Search */}
-      <div className="relative w-full max-w-sm hidden sm:block">
-        <Search
-          size={15}
-          className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400"
-        />
+    <header className="sticky top-0 z-30 h-[60px] bg-white border-b border-zinc-200 px-4 lg:px-6 flex items-center justify-between shadow-sm">
+      <div className="relative w-full max-w-[420px] hidden sm:block">
+        <div className="absolute inset-y-0 end-3 flex items-center pointer-events-none text-zinc-400">
+          <Search size={14} />
+        </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search dashboard, settings, reports..."
-          className="w-full h-9 bg-zinc-50 border border-zinc-200 rounded-lg pe-9 ps-4 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 focus:bg-white transition-colors"
+          placeholder={t("searchPlaceholder")}
+          className="w-full h-[37px] bg-white border border-zinc-300 rounded-lg pe-9 ps-3 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#be374f] focus:bg-zinc-50 transition-colors shadow-inner"
         />
         {searchQuery.trim().length > 0 && (
           <div className="absolute end-0 start-0 mt-2 bg-white border border-zinc-200 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-zinc-100 max-h-[380px] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
             <div className="px-3 py-2 bg-zinc-50 flex items-center justify-between text-[11px] font-bold text-zinc-400">
-              <span>SEARCH RESULTS</span>
-              <span>ESC TO CLOSE</span>
+              <span>{t("searchResults")}</span>
+              <span>{t("closeHint")}</span>
             </div>
             <div className="py-1">
               {(() => {
-                const results = ADMIN_PAGES.filter(p =>
+                const results = ADMIN_PAGES.filter((p) =>
                   p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   p.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -63,7 +77,7 @@ export default function AdminHeader() {
                 if (results.length === 0) {
                   return (
                     <div className="px-4 py-6 text-center text-xs text-zinc-400">
-                      No matching sections or settings found.
+                      {t("noMatches")}
                     </div>
                   );
                 }
@@ -95,30 +109,40 @@ export default function AdminHeader() {
         )}
       </div>
 
-      {/* Right Actions */}
-      <div className="flex items-center gap-2 me-auto">
-
-        {/* Refresh */}
+      <div className="flex items-center gap-2 ms-auto">
         <button
           onClick={() => window.location.reload()}
           className="h-9 w-9 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
-          title="Refresh page"
+          title={t("refreshTitle")}
         >
           <RefreshCw size={15} />
         </button>
+        <button
+          onClick={() => router.push("/admin/settings")}
+          className="h-9 w-9 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+          title={t("settings")}
+        >
+          <Settings size={15} />
+        </button>
+        <button
+          onClick={() => router.replace(pathname, { locale: isAr ? "en" : "ar" })}
+          className="h-9 w-9 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+          title={isAr ? "Switch to English" : "التبديل إلى العربية"}
+        >
+          <Globe size={15} />
+        </button>
 
-        {/* User Menu */}
         <div className="relative">
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-zinc-50 transition-colors"
+            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 hover:bg-zinc-50 transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-semibold">
               {initials}
             </div>
             <div className="hidden lg:block text-end">
-              <p className="text-sm font-medium text-zinc-900 leading-tight">{displayName}</p>
-              <p className="text-xs text-zinc-400">Administrator</p>
+              <p className="text-sm font-semibold text-zinc-900 leading-tight">{displayName}</p>
+              <p className="text-xs text-zinc-400">{t("adminRole")}</p>
             </div>
             <ChevronDown
               size={14}
@@ -129,7 +153,7 @@ export default function AdminHeader() {
           {isUserMenuOpen && (
             <div className="absolute start-0 mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg py-1.5 z-50">
               <div className="px-4 py-2.5 border-b border-zinc-100 mb-1">
-                <p className="text-xs font-medium text-zinc-400">Signed in as</p>
+                <p className="text-xs font-medium text-zinc-400">{t("signedInAs")}</p>
                 <p className="text-sm font-medium text-zinc-900 truncate mt-0.5">{user?.email}</p>
               </div>
               <button
@@ -137,7 +161,7 @@ export default function AdminHeader() {
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 transition-colors"
               >
                 <Settings size={15} className="text-zinc-400" />
-                Settings
+                {t("settings")}
               </button>
               <div className="h-px bg-zinc-100 my-1 mx-2" />
               <button
@@ -145,7 +169,7 @@ export default function AdminHeader() {
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <LogOut size={15} className="cursor-pointer text-red-400" />
-                Sign Out
+                {t("signOut")}
               </button>
             </div>
           )}

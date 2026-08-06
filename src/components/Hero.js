@@ -31,23 +31,31 @@ const decodeEntities = (text) => {
 
 const MerchantCarousel = memo(({ activeVendors }) => {
   const t = useTranslations("Hero");
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const scrollRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollStart, setCanScrollStart] = useState(false);
+  const [canScrollEnd, setCanScrollEnd] = useState(true);
 
   const checkScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       const maxScroll = scrollWidth - clientWidth;
+      const isRtl = document.documentElement.dir === 'rtl' || isAr;
 
-      if (scrollLeft <= 0 && document.documentElement.dir === 'rtl') {
-        // Chrome/Firefox RTL: scrollLeft goes from 0 (right/start) to -maxScroll (left/end)
-        setCanScrollRight(scrollLeft < -10); // Prev (Right)
-        setCanScrollLeft(Math.abs(scrollLeft) < maxScroll - 10); // Next (Left)
+      if (maxScroll <= 5) {
+        setCanScrollStart(false);
+        setCanScrollEnd(false);
+        return;
+      }
+
+      if (isRtl) {
+        const scrolledAmount = Math.abs(scrollLeft);
+        setCanScrollStart(scrolledAmount > 10);
+        setCanScrollEnd(scrolledAmount < maxScroll - 10);
       } else {
-        // Fallback or LTR
-        setCanScrollLeft(scrollLeft > 10);
-        setCanScrollRight(scrollLeft < maxScroll - 10);
+        setCanScrollStart(scrollLeft > 10);
+        setCanScrollEnd(scrollLeft < maxScroll - 10);
       }
     }
   };
@@ -62,10 +70,20 @@ const MerchantCarousel = memo(({ activeVendors }) => {
     };
   }, [activeVendors]);
 
-  const scroll = (direction) => {
+  const scrollForward = () => {
     if (scrollRef.current) {
+      const isRtl = document.documentElement.dir === 'rtl' || isAr;
       const scrollAmount = 400;
-      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+      scrollRef.current.scrollBy({ left: isRtl ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+      setTimeout(checkScroll, 500);
+    }
+  };
+
+  const scrollBack = () => {
+    if (scrollRef.current) {
+      const isRtl = document.documentElement.dir === 'rtl' || isAr;
+      const scrollAmount = 400;
+      scrollRef.current.scrollBy({ left: isRtl ? scrollAmount : -scrollAmount, behavior: 'smooth' });
       setTimeout(checkScroll, 500);
     }
   };
@@ -109,21 +127,24 @@ const MerchantCarousel = memo(({ activeVendors }) => {
       </div>
 
       <div className="relative z-10">
-        {/* Scroll Buttons */}
+        {/* Scroll Forward / Next Button (Physically on the LEFT in RTL, RIGHT in LTR) */}
         <button
-          onClick={() => scroll('left')}
-          disabled={!canScrollLeft}
-          className={`hidden md:flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollLeft ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          onClick={scrollForward}
+          disabled={!canScrollEnd}
+          className={`hidden md:flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          aria-label={isAr ? "تمرير لليسار" : "Scroll Next"}
         >
-          <ChevronLeft size={24} className="rtl:rotate-180" />
+          {isAr ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
         </button>
 
+        {/* Scroll Back / Prev Button (Physically on the RIGHT in RTL, LEFT in LTR) */}
         <button
-          onClick={() => scroll('right')}
-          disabled={!canScrollRight}
-          className={`hidden md:flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollRight ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          onClick={scrollBack}
+          disabled={!canScrollStart}
+          className={`hidden md:flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollStart ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          aria-label={isAr ? "تمرير لليمين" : "Scroll Previous"}
         >
-          <ChevronRight size={24} className="rtl:rotate-180" />
+          {isAr ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
         </button>
 
         <div
@@ -135,7 +156,7 @@ const MerchantCarousel = memo(({ activeVendors }) => {
           <Link href="/vendors" className="flex flex-col p-5 bg-[#FFDB00] shrink-0 w-[160px] h-[200px] group/first hover:bg-[#E5C500] transition-all rounded-xl shadow-lg border border-black/10">
             <h3 className="text-[16px] font-bold text-black mt-2 underline group-hover:no-underline leading-tight">{t("viewAllMerchants")}</h3>
             <div className="mt-auto w-8 h-8 bg-black rounded-full flex items-center justify-center text-white shadow-sm">
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} className="rtl:rotate-0 rotate-180" />
             </div>
           </Link>
 
@@ -156,13 +177,13 @@ const MerchantCarousel = memo(({ activeVendors }) => {
                     <Image src={vendor.logo} alt={vendor.name || "Vendor"} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-black text-white font-bold text-2xl">
-                      {vendor.name[0]}
+                      {(vendor.name && vendor.name[0]) || "S"}
                     </div>
                   )}
                 </div>
                 <span className="text-[13px] font-bold text-zinc-900 mb-0.5 text-center w-full truncate px-1">{vendor.name}</span>
                 <span className="text-[11px] font-bold text-brand group-hover/v:text-brand-dark group-hover/v:underline mt-1 flex items-center gap-1">
-                  {t("shopNow")} <ChevronLeft size={12} />
+                  {t("shopNow")} <ChevronLeft size={12} className="rtl:rotate-0 rotate-180" />
                 </span>
               </div>
             </Link>
@@ -279,7 +300,16 @@ const CategoryCarousel = memo(({ categories }) => {
     }
   };
 
-  if (parentCategories.length === 0) return null;
+  if (parentCategories.length === 0) {
+    return (
+      <div className="relative z-40 bg-white rounded-3xl p-8 border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center">
+        <FolderTree size={40} className="text-zinc-200 mb-4" />
+        <p className="text-zinc-500 font-medium">
+          {isAr ? "لا توجد أقسام حالياً." : "No categories found."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative z-40 bg-white rounded-3xl p-4 md:p-6 border border-zinc-100 shadow-sm transition-all duration-300">
@@ -674,18 +704,36 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const activeVendors = useMemo(() => {
-    return (vendors || []).map(v => {
-      const meta = Object.fromEntries((v.meta_data || []).map(m => [m.key, m.value]));
+    const list = (vendors || []).map(v => {
+      if (!v) return null;
+      const meta = Object.fromEntries((v.meta_data || []).map(m => [m && m.key, m && m.value]));
+      const fullName = `${v.first_name || ''} ${v.last_name || ''}`.trim();
+      const rawName = (meta.dokan_profile_settings && meta.dokan_profile_settings.store_name) ||
+        meta.store_name || meta.mahally_store_name || meta.dokan_store_name ||
+        v.store_name || (v.store && v.store.name) ||
+        (fullName && fullName !== "undefined undefined" ? fullName : null) ||
+        v.username || (typeof v.name === 'string' && v.name !== 'Store' ? v.name : null);
+
       return {
         id: v.id,
-        name: (meta.dokan_profile_settings && meta.dokan_profile_settings.store_name) || meta.store_name || meta.mahally_store_name || meta.dokan_store_name || v.store_name || (v.store && v.store.name) || `${v.first_name} ${v.last_name}`.trim() || "Store",
-        slug: v.store_slug || (v.store && v.store.slug) || meta.mahally_store_slug || v.id,
+        name: rawName || t("generalMerchant"),
+        storeSlug: v.storeSlug || v.store_slug || (v.store && v.store.slug) || meta.mahally_store_slug || v.id,
         description: v.store_description || meta.mahally_store_description || "",
         category: meta.mahally_store_category || t("generalMerchant"),
-        logo: v.gravatar || (v.store && v.store.gravatar) || meta.mahally_avatar_url || meta.mahally_store_logo || null,
+        logo: meta.mahally_store_logo || v.avatar_url || v.gravatar || (v.store && v.store.gravatar) || meta.mahally_avatar_url || null,
         showInCarousel: meta.mahally_show_in_carousel
       };
-    }).filter(v => v.showInCarousel !== 'no');
+    }).filter(v => v && v.showInCarousel !== 'no');
+
+    if (list.length > 0) return list;
+
+    // Fallback merchants if backend returns empty or is not connected
+    return [
+      { id: "v1", name: "محلي ستور الرسمي", storeSlug: "mahally-official", category: "متجر رسمي", logo: "https://images.unsplash.com/photo-1556742049-0a670fc8078a?q=80&w=200&auto=format&fit=crop" },
+      { id: "v2", name: "حرف وجلديات أردنية", storeSlug: "jordanian-crafts", category: "حرف يدوية", logo: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?q=80&w=200&auto=format&fit=crop" },
+      { id: "v3", name: "أزياء وتراث عمان", storeSlug: "amman-fashion", category: "أزياء وموضة", logo: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=200&auto=format&fit=crop" },
+      { id: "v4", name: "إلكترونيات ومستلزمات", storeSlug: "jordan-tech", category: "إلكترونيات", logo: "https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=200&auto=format&fit=crop" }
+    ];
   }, [vendors, t]);
 
   // Mock Amazon-style banners (representing gaming, fashion, home etc)

@@ -1,9 +1,10 @@
 "use client";
 
-import { Search, Menu, ChevronDown, User, Settings, LogOut, RefreshCw, Navigation } from "lucide-react";
-import { useState } from "react";
+import { Search, Menu, ChevronDown, User, Settings, LogOut, RefreshCw, Navigation, Globe } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
+import { useLocale } from "next-intl";
 
 const MERCHANT_PAGES = [
   { title: "Merchant Dashboard Home", description: "Overview of store analytics and sales status", path: "/merchant/dashboard", category: "Overview" },
@@ -22,7 +23,21 @@ export default function DashboardHeader() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, customerName, logout } = useAuth();
+  const locale = useLocale();
+  const isAr = locale === "ar";
+  const pathname = usePathname();
   const router = useRouter();
+  const accountMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleReload = () => {
     window.dispatchEvent(new CustomEvent('refresh-dashboard'));
@@ -39,14 +54,14 @@ export default function DashboardHeader() {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search products, orders, coupons, settings..."
+          placeholder={isAr ? "ابحث عن منتجات، طلبات، كوبونات، إعدادات..." : "Search products, orders, coupons, settings..."}
           className="w-full h-[31px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] focus:border-[#be374f] transition-all outline-none shadow-inner"
         />
         {searchQuery.trim().length > 0 && (
           <div className="absolute end-0 start-0 mt-2 bg-white border border-zinc-200 rounded-lg shadow-xl z-50 overflow-hidden divide-y divide-zinc-100 max-h-[350px] overflow-y-auto animate-in slide-in-from-top-1 duration-150">
             <div className="px-3 py-1.5 bg-zinc-50 flex items-center justify-between text-[10px] font-bold text-zinc-400">
-              <span>SEARCH RESULTS</span>
-              <span>ESC TO CLOSE</span>
+              <span>{isAr ? 'نتائج البحث' : 'SEARCH RESULTS'}</span>
+              <span>{isAr ? 'ESC للإغلاق' : 'ESC TO CLOSE'}</span>
             </div>
             <div className="py-1">
               {(() => {
@@ -98,7 +113,7 @@ export default function DashboardHeader() {
 
           <button
             onClick={handleReload}
-            title="Reload Data"
+            title={isAr ? "إعادة تحميل البيانات" : "Reload Data"}
             className="p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600"
           >
             <RefreshCw size={18} />
@@ -106,11 +121,19 @@ export default function DashboardHeader() {
           <button onClick={() => router.push('/merchant/dashboard/settings')} className="p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600">
             <Settings size={18} />
           </button>
+          <button
+            onClick={() => router.replace(pathname, { locale: isAr ? 'en' : 'ar' })}
+            title={isAr ? 'تغيير اللغة' : 'Switch language'}
+            className="p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600"
+          >
+            <Globe size={18} />
+            <span className="sr-only">{isAr ? 'EN' : 'AR'}</span>
+          </button>
         </div>
 
         <div className="w-px h-6 bg-zinc-200 mx-2" />
 
-        <div className="relative">
+        <div className="relative" ref={accountMenuRef}>
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             className="flex items-center gap-2 px-3 h-[36px] rounded-md hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-200"
@@ -120,7 +143,7 @@ export default function DashboardHeader() {
             </div>
             <div className="flex flex-col items-start">
               <span className="text-[13px] font-bold text-zinc-700 leading-tight">{customerName || user?.displayName || (user?.phoneNumber ? "Merchant" : "User")}</span>
-              <span className="text-[10px] text-zinc-400 font-medium">Verified Vendor</span>
+              <span className="text-[10px] text-zinc-400 font-medium">{isAr ? 'حساب البائع' : 'Seller Account'}</span>
             </div>
             <ChevronDown size={12} className={`text-zinc-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
           </button>

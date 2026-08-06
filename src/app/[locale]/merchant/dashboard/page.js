@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "@/i18n/routing";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import RevenueChart from "@/components/merchant/RevenueChart";
 import OnboardingWizard from "@/components/merchant/OnboardingWizard";
 import { useAuth } from "@/context/AuthContext";
+import { useLocale } from "next-intl";
 import {
   TrendingUp,
   Users,
@@ -31,18 +32,22 @@ export default function MerchantDashboard() {
   const [orderSearch, setOrderSearch] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [chartDays, setChartDays] = useState(7);
+  const chartDaysRef = useRef(7);
+  const locale = useLocale();
+  const isAr = locale === "ar";
+  const t = (en, ar) => (isAr ? ar : en);
   const { user, isApprovedVendor, loading: authLoading, wooId, backendError } = useAuth();
 
-  const fetchData = (days = chartDays) => {
+  const fetchData = useCallback((days) => {
+    const d = days ?? chartDaysRef.current;
     if (!wooId) return;
-
-    fetch(`/api/merchant/stats?wooId=${wooId}&days=${days}&t=${Date.now()}`)
+    fetch(`/api/merchant/stats?wooId=${wooId}&days=${d}&t=${Date.now()}`)
       .then(res => res.json())
       .then(d => {
         setData(d);
         setLoading(false);
       });
-  };
+  }, [wooId]);
 
   const handleExportReport = () => {
     if (!data) return;
@@ -115,25 +120,21 @@ export default function MerchantDashboard() {
 
   useEffect(() => {
     if (authLoading) return;
-
-    // If there's a backend error, don't redirect yet, let the UI handle it
     if (backendError) return;
-
     if (!user || !isApprovedVendor) {
       router.replace("/account");
       return;
     }
-
     fetchData();
-
-    // Listen for global refresh event from Header
     const handleRefresh = () => {
       setLoading(true);
-      fetchData(chartDays);
+      fetchData();
     };
     window.addEventListener('refresh-dashboard', handleRefresh);
     return () => window.removeEventListener('refresh-dashboard', handleRefresh);
-  }, [user, authLoading, chartDays]);
+  // chartDays intentionally excluded — use chartDaysRef instead to avoid triple-fetch
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading, fetchData]);
 
   // Remove redundant backendError declaration
 
@@ -141,29 +142,29 @@ export default function MerchantDashboard() {
     if (backendError) {
       return (
         <div className="h-[400px] flex flex-col items-center justify-center p-8 text-center bg-white border border-zinc-200 rounded-md shadow-sm">
-          <h2 className="text-xl font-bold text-zinc-900 mb-2">Sync Connection Error</h2>
+          <h2 className="text-xl font-bold text-zinc-900 mb-2">{t("Sync Connection Error", "خطأ في اتصال المزامنة")}</h2>
           <p className="text-zinc-500 mb-6 max-w-sm">{backendError.message}</p>
           <button
             onClick={() => window.location.reload()}
             className="h-10 px-8 bg-brand hover:bg-brand-dark text-white rounded-md font-bold transition-all shadow-md"
           >
-            Retry Sync
+            {t("Retry Sync", "إعادة المحاولة")}
           </button>
         </div>
       );
     }
     return (
       <div className="h-[400px] flex items-center justify-center">
-        <Loader size="lg" text="Syncing Marketplace Data" />
+        <Loader size="lg" text={t("Syncing Marketplace Data", "جاري مزامنة بيانات السوق")} />
       </div>
     );
   }
 
   const stats = [
-    { title: "Total Revenue (Completed)", value: `JOD ${data.stats.totalRevenue}`, icon: TrendingUp, delta: data.stats.revenueDelta, isUp: !data.stats.revenueDelta.startsWith('-'), tooltip: "Only includes earnings from delivered orders" },
-    { title: "Active Orders", value: data.stats.activeOrders, icon: ShoppingCart, delta: data.stats.ordersDelta, isUp: data.stats.ordersDelta.startsWith('+'), tooltip: "Orders currently processing or on-hold (excludes canceled)" },
-    { title: "Total Products", value: data.stats.totalProducts, icon: Package, delta: "0%", isUp: true },
-    { title: "Average Rating", value: data.stats.averageRating, icon: Star, delta: data.stats.ratingDelta, isUp: data.stats.ratingDelta.startsWith('+') },
+    { title: t("Total Revenue (Completed)", "إجمالي الإيرادات (المكتملة)"), value: `JOD ${data.stats.totalRevenue}`, icon: TrendingUp, delta: data.stats.revenueDelta, isUp: !data.stats.revenueDelta.startsWith('-'), tooltip: t("Only includes earnings from delivered orders", "يتضمن فقط الإيرادات من الطلبات المسلمة") },
+    { title: t("Active Orders", "الطلبات النشطة"), value: data.stats.activeOrders, icon: ShoppingCart, delta: data.stats.ordersDelta, isUp: data.stats.ordersDelta.startsWith('+'), tooltip: t("Orders currently processing or on-hold (excludes canceled)", "الطلبات قيد المعالجة أو الانتظار (لا تشمل الملغاة)") },
+    { title: t("Total Products", "إجمالي المنتجات"), value: data.stats.totalProducts, icon: Package, delta: "0%", isUp: true },
+    { title: t("Average Rating", "متوسط التقييم"), value: data.stats.averageRating, icon: Star, delta: data.stats.ratingDelta, isUp: data.stats.ratingDelta.startsWith('+') },
   ];
 
   const filteredOrders = (data.recentOrders || []).filter(order => {
@@ -178,10 +179,10 @@ export default function MerchantDashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">Dashboard Overview</h1>
+          <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">{t("Dashboard Overview", "نظرة عامة على اللوحة")}</h1>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[12px] text-zinc-500 font-medium">Real-time stats synced with WordPress</p>
+            <p className="text-[12px] text-zinc-500 font-medium">{t("Real-time stats synced with WordPress", "إحصائيات محدثة مباشرة من ووردبريس")}</p>
           </div>
         </div>
       </div>
@@ -190,15 +191,15 @@ export default function MerchantDashboard() {
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-4 items-start shadow-sm">
           <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-amber-800 font-bold text-sm">Store Restricted from Public View</h3>
-            <p className="text-amber-700 text-xs mt-1">Your store is currently hidden from the homepage and main browsing areas by the administrator. Customers can still access your products via direct links.</p>
+            <h3 className="text-amber-800 font-bold text-sm">{t("Store Restricted from Public View", "المتجر محجوب من العرض العام")}</h3>
+            <p className="text-amber-700 text-xs mt-1">{t("Your store is currently hidden from the homepage and main browsing areas by the administrator. Customers can still access your products via direct links.", "متجرك مخفي حالياً من الصفحة الرئيسية ومناطق التصفح الرئيسية بواسطة المسؤول. يمكن للعملاء الوصول إلى منتجاتك عبر الروابط المباشرة.")}</p>
             {data.stats.restrictionReason && (
               <div className="mt-2 bg-white/60 p-2 rounded text-xs text-amber-900 border border-amber-200/50">
-                <span className="font-bold">Reason:</span> {data.stats.restrictionReason}
+                <span className="font-bold">{t("Reason:", "السبب:")}</span> {data.stats.restrictionReason}
               </div>
             )}
             <button className="mt-3 bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm hover:bg-amber-600 transition-colors">
-              Contact Support to Resolve
+              {t("Contact Support to Resolve", "اتصل بالدعم لحل المشكلة")}
             </button>
           </div>
         </div>
@@ -237,6 +238,7 @@ export default function MerchantDashboard() {
                 data={data.chartData}
                 days={chartDays}
                 onRangeChange={(val) => {
+                  chartDaysRef.current = val;
                   setChartDays(val);
                   setLoading(true);
                   fetchData(val);
@@ -248,7 +250,7 @@ export default function MerchantDashboard() {
             <div className="lg:col-span-4 bg-white border border-zinc-200 p-6 rounded-md shadow-sm flex flex-col">
               <h4 className="text-[16px] font-bold text-zinc-900 mb-6 flex items-center gap-2">
                 <Star size={18} className="text-amber-400 fill-amber-400" />
-                Recent Customer Feedback
+                {t("Recent Customer Feedback", "آراء العملاء الأخيرة")}
               </h4>
 
               <div className="space-y-5 flex-1">
@@ -268,7 +270,7 @@ export default function MerchantDashboard() {
                         ))}
                       </div>
                       <p className="text-[12px] text-zinc-900 font-bold mb-1 line-clamp-1 italic text-zinc-500">
-                        Ref: {review.product_name}
+                        {t("Ref:", "المرجع:")} {review.product_name}
                       </p>
                       <p className="text-[12px] text-zinc-600 line-clamp-2 leading-relaxed" dangerouslySetInnerHTML={{ __html: review.review }} />
                     </div>
@@ -276,7 +278,7 @@ export default function MerchantDashboard() {
                 )) : (
                   <div className="flex flex-col items-center justify-center py-10 opacity-40">
                     <Search size={32} className="mb-2" />
-                    <p className="text-[13px] font-medium">No reviews found</p>
+                    <p className="text-[13px] font-medium">{t("No reviews found", "لا توجد تقييمات")}</p>
                   </div>
                 )}
               </div>
@@ -285,20 +287,20 @@ export default function MerchantDashboard() {
                 onClick={() => router.push("/merchant/dashboard/reviews")}
                 className="w-full mt-6 h-[36px] bg-[#f7f8fa] hover:bg-zinc-100 border border-zinc-300 rounded-md text-[13px] font-bold text-zinc-700 transition-all shadow-sm"
               >
-                Manage All Feedback
+                {t("Manage All Feedback", "إدارة جميع الملاحظات")}
               </button>
             </div>
           </div>
 
           <div className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
             <div className="p-6 border-b border-zinc-100 flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-zinc-50/50">
-              <h4 className="text-[16px] font-bold text-zinc-900">Recent Transactions</h4>
+              <h4 className="text-[16px] font-bold text-zinc-900">{t("Recent Transactions", "المعاملات الأخيرة")}</h4>
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
                   <input
                     type="text"
-                    placeholder="Filter orders..."
+                    placeholder={t("Filter orders...", "تصفية الطلبات...")}
                     value={orderSearch}
                     onChange={(e) => setOrderSearch(e.target.value)}
                     className="h-[34px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
@@ -310,7 +312,7 @@ export default function MerchantDashboard() {
                   className="h-[34px] px-4 bg-zinc-900 text-white rounded-md text-[12px] font-bold hover:bg-zinc-800 transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
                 >
                   {downloading ? <RefreshCw size={14} className="animate-spin" /> : null}
-                  Export Report
+                  {t("Export Report", "تصدير التقرير")}
                 </button>
               </div>
             </div>
@@ -318,17 +320,17 @@ export default function MerchantDashboard() {
               <table className="w-full text-end">
                 <thead className="bg-zinc-100/50 border-b border-zinc-200">
                   <tr className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                    <th className="px-6 py-4">Order ID</th>
-                    <th className="px-6 py-4">Buyer</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4">{t("Order ID", "رقم الطلب")}</th>
+                    <th className="px-6 py-4">{t("Buyer", "المشتري")}</th>
+                    <th className="px-6 py-4">{t("Amount", "المبلغ")}</th>
+                    <th className="px-6 py-4 text-center">{t("Status", "الحالة")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
                   {filteredOrders.length > 0 ? filteredOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-zinc-50 transition-colors cursor-pointer group">
                       <td className="px-6 py-4">
-                        <span className="text-[13px] font-bold text-[#be374f] group-hover:text-[#8f2d4a]">#ORD-{order.id}</span>
+                        <span className="text-[13px] font-bold text-[#be374f] group-hover:text-[#8f2d4a]">#{order.id}</span>
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-[13px] font-bold text-zinc-900">{order.billing.first_name} {order.billing.last_name}</p>
@@ -336,21 +338,21 @@ export default function MerchantDashboard() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-[13px] font-bold text-zinc-900 tracking-tight">JOD {parseFloat(order.total).toFixed(2)}</p>
-                        <p className="text-[11px] text-zinc-400">{order.line_items.length} items</p>
+                        <p className="text-[11px] text-zinc-400">{order.line_items.length} {t("items", "عنصر")}</p>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${order.status === 'processing' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                             order.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                               'bg-zinc-50 text-zinc-500 border-zinc-200'
                           }`}>
-                          {order.status}
+                          {order.status === 'processing' ? t('Processing', 'قيد المعالجة') : order.status === 'completed' ? t('Completed', 'مكتمل') : order.status === 'cancelled' ? t('Cancelled', 'ملغى') : order.status === 'pending' ? t('Pending', 'قيد الانتظار') : order.status}
                         </span>
                       </td>
                     </tr>
                   )) : (
                     <tr>
                       <td colSpan="4" className="px-6 py-20 text-center text-[14px] text-zinc-400 italic">
-                        No matching transactions found
+                        {t("No matching transactions found", "لم يتم العثور على معاملات مطابقة")}
                       </td>
                     </tr>
                   )}

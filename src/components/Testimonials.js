@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Star, ChevronRight, ChevronLeft, MessageSquare, Quote, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Star, ChevronRight, ChevronLeft, MessageSquare, Quote, CheckCircle2, ShieldCheck } from "lucide-react";
 import { memo, useMemo, useRef, useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import FeedbackModal from "./FeedbackModal";
@@ -125,7 +125,9 @@ const Testimonials = memo(({ feedbacks = [] }) => {
           comment: commentText,
           rating: f.rating || 5,
           verified: true,
-          date: f.date || new Date().toISOString()
+          date: f.date || new Date().toISOString(),
+          avatarUrl: f.avatarUrl || null,
+          role: f.role || "customer"
         };
       });
 
@@ -255,25 +257,16 @@ const Testimonials = memo(({ feedbacks = [] }) => {
                 {/* Background Quote Accent */}
                 <Quote size={56} className="absolute end-4 top-4 text-zinc-100 group-hover/card:text-brand/10 transition-colors pointer-events-none" />
 
-                {/* Rating & Verified Badge */}
-                <div className="flex items-center justify-between gap-2 mb-4 relative z-10">
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map(s => (
-                      <Star
-                        key={s}
-                        size={16}
-                        className={s <= (f.rating || 5) ? "fill-amber-400 text-amber-400" : "text-zinc-200"}
-                      />
-                    ))}
-                    <span className="text-xs font-black text-zinc-900 ms-1">5.0</span>
-                  </div>
-
-                  {f.verified && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                      <CheckCircle2 size={12} className="text-emerald-600" />
-                      {isAr ? "مشتري موثق" : "Verified Buyer"}
-                    </span>
-                  )}
+                {/* Rating */}
+                <div className="flex items-center gap-1 mb-4 relative z-10">
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <Star
+                      key={s}
+                      size={16}
+                      className={s <= (f.rating || 5) ? "fill-amber-400 text-amber-400" : "text-zinc-200"}
+                    />
+                  ))}
+                  <span className="text-xs font-black text-zinc-900 ms-1">{(f.rating || 5).toFixed(1)}</span>
                 </div>
 
                 {/* Comment Text */}
@@ -284,16 +277,39 @@ const Testimonials = memo(({ feedbacks = [] }) => {
                 {/* Customer Profile Footer with User Icon Placeholder */}
                 <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 relative z-10">
                   <div className="relative">
-                    <div className="w-11 h-11 rounded-full bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-zinc-500 shrink-0 shadow-xs">
-                      <User size={20} className="text-zinc-500" />
-                    </div>
+                    {(() => {
+                      if (f.avatarUrl) {
+                        return (
+                          <div className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md shrink-0">
+                            <img src={f.avatarUrl} alt={f.userName} className="w-full h-full object-cover" />
+                          </div>
+                        );
+                      }
+                      const colors = [
+                        "bg-amber-500", "bg-red-500", "bg-violet-500", "bg-emerald-500",
+                        "bg-sky-500", "bg-pink-500", "bg-orange-500", "bg-teal-500"
+                      ];
+                      const colorClass = colors[i % colors.length];
+                      const initial = (f.userName || "?")[0].toUpperCase();
+                      return (
+                        <div className={`w-11 h-11 rounded-full ${colorClass} border-2 border-white flex items-center justify-center text-white font-black text-base shrink-0 shadow-md`}>
+                          {initial}
+                        </div>
+                      );
+                    })()}
                     <ShieldCheck size={14} className="absolute -bottom-1 -end-1 text-emerald-600 bg-white rounded-full shadow-xs" />
                   </div>
                   <div>
                     <h4 className="font-extrabold text-xs sm:text-sm text-zinc-900 leading-snug">{f.userName}</h4>
-                    <p className="text-[11px] font-bold text-zinc-400 flex items-center gap-1 mt-0.5">
+                    <div className="text-[11px] font-bold text-zinc-400 flex items-center gap-2 mt-1">
                       <span>{f.location || (isAr ? "الأردن" : "Jordan")}</span>
-                    </p>
+                      {f.verified && (
+                        <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm border border-emerald-200">
+                          <CheckCircle2 size={10} className="text-emerald-600" />
+                          {f.role === 'seller' || f.role === 'vendor' ? (isAr ? "بائع موثق" : "Verified Merchant") : (isAr ? "مشتري موثق" : "Verified Buyer")}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

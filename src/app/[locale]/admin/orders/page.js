@@ -13,8 +13,10 @@ import {
   Package,
 } from "lucide-react";
 import AdminSearch from "@/components/admin/AdminSearch";
+import { useTranslations } from "next-intl";
 
 export default function AdminOrdersPage() {
+  const t = useTranslations("AdminOrders");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -60,15 +62,13 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Orders</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Global order management and fulfillment tracking
-          </p>
+          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
+          <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <button className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
             <Download size={15} />
-            Export
+            {t("export")}
           </button>
           <button
             onClick={() => window.location.reload()}
@@ -82,7 +82,7 @@ export default function AdminOrdersPage() {
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
         <AdminSearch
-          placeholder="Search by order ID or customer..."
+          placeholder={t("searchPlaceholder")}
           value={search}
           onChange={setSearch}
           className="flex-1"
@@ -110,22 +110,22 @@ export default function AdminOrdersPage() {
           <thead>
             <tr className="border-b border-zinc-200 bg-zinc-50">
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                Order ID
+                {t("orderId")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                Customer
+                {t("customer")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                Date
+                {t("date")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                Total
+                {t("total")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-center">
-                Status
+                {t("status")}
               </th>
               <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-start">
-                Actions
+                {t("actions")}
               </th>
             </tr>
           </thead>
@@ -135,7 +135,7 @@ export default function AdminOrdersPage() {
                 <td colSpan="6" className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
-                    <p className="text-sm text-zinc-500">Loading orders...</p>
+                    <p className="text-sm text-zinc-500">{t("loadingOrders")}</p>
                   </div>
                 </td>
               </tr>
@@ -160,7 +160,7 @@ export default function AdminOrdersPage() {
                     <p className="text-sm font-medium text-zinc-900">{o.total}</p>
                     <div className="flex items-center gap-1 mt-0.5 text-zinc-400">
                       <Package size={10} />
-                      <p className="text-xs">{o.items} items</p>
+                      <p className="text-xs">{t("itemsLabel", { count: o.items })}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">
@@ -182,7 +182,7 @@ export default function AdminOrdersPage() {
                     <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center">
                       <ShoppingCart size={18} className="text-zinc-400" />
                     </div>
-                    <p className="text-sm text-zinc-500">No orders found</p>
+                    <p className="text-sm text-zinc-500">{t("noOrdersFound")}</p>
                   </div>
                 </td>
               </tr>
@@ -193,7 +193,7 @@ export default function AdminOrdersPage() {
         {!loading && filteredOrders.length > 0 && (
           <div className="px-6 py-3 border-t border-zinc-100 bg-zinc-50 flex items-center justify-between">
             <p className="text-xs text-zinc-500">
-              Showing {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+              {t("showingOrders", { count: filteredOrders.length, suffix: filteredOrders.length !== 1 ? "s" : "" })}
             </p>
             <div className="flex items-center gap-1">
               <button disabled className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-400 disabled:opacity-40">

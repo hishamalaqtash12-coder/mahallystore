@@ -34,6 +34,21 @@ if (!globalThis.WC_VENDORS_CACHE) {
 const WC_VENDORS_CACHE = globalThis.WC_VENDORS_CACHE;
 const VENDORS_CACHE_TTL = 300000; // 5 minutes cache
 
+export function clearProductsCache() {
+  if (globalThis.WC_PRODUCTS_GRAPHQL_CACHE) {
+    Object.keys(globalThis.WC_PRODUCTS_GRAPHQL_CACHE).forEach(key => {
+      delete globalThis.WC_PRODUCTS_GRAPHQL_CACHE[key];
+    });
+  }
+  if (globalThis.apiProductsCache) {
+    globalThis.apiProductsCache.clear();
+  }
+}
+
+export function clearVendorsCache() {
+  globalThis.WC_VENDORS_CACHE = {};
+}
+
 // Simple in-memory cache for categories list
 if (!globalThis.WC_CATEGORIES_CACHE) {
   globalThis.WC_CATEGORIES_CACHE = {
@@ -479,18 +494,25 @@ export async function getVendors({ page = 1, per_page = 40, includeRestricted = 
       }
 
       let storeSlug = "";
-      const rawStoreName = dokan.store_name || meta.mahally_store_name;
-      if (rawStoreName) {
-        storeSlug = rawStoreName
-          .toLowerCase()
-          .trim()
-          .replace(/[\s_]+/g, '-')
-          .replace(/[^\u0600-\u06FFa-z0-9\-]/g, '')
-          .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '');
-      }
-      if (!storeSlug) {
-        storeSlug = c.username || String(c.id);
+      // First, use the stored mahally_store_slug if it exists (already has ID suffix from registration)
+      if (meta.mahally_store_slug) {
+        storeSlug = meta.mahally_store_slug;
+      } else {
+        // Fall back to generating a slug from the store name + user ID for uniqueness
+        const rawStoreName = dokan.store_name || meta.mahally_store_name;
+        if (rawStoreName) {
+          const baseSlug = rawStoreName
+            .toLowerCase()
+            .trim()
+            .replace(/[\s_]+/g, '-')
+            .replace(/[^\u0600-\u06FFa-z0-9\-]/g, '')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+          storeSlug = baseSlug ? `${baseSlug}-${c.id}` : String(c.id);
+        }
+        if (!storeSlug) {
+          storeSlug = c.username || String(c.id);
+        }
       }
 
       return {

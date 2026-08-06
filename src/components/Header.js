@@ -48,6 +48,7 @@ import {
   MessageSquare,
   ShieldCheck,
   Settings,
+  FolderTree,
   Check,
   PlusCircle,
   BarChart3,
@@ -73,11 +74,12 @@ export default function Header() {
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isMobileAccountMenuOpen, setIsMobileAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [categories, setCategories] = useState([]);
   const [activeMegaCategory, setActiveMegaCategory] = useState(null);
@@ -147,31 +149,85 @@ export default function Header() {
     const fetchUnread = async () => {
       if (!wooId || !messagingEnabled) return;
       try {
-        const res = await fetch(`/api/messages/conversations?userId=${wooId}`);
+        // Build readTimestamps from localStorage (same format as the conversations page)
+        const readTimes = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(`mahally_read_${wooId}_`)) {
+            const partnerId = key.replace(`mahally_read_${wooId}_`, "");
+            readTimes[partnerId] = Number(localStorage.getItem(key)) || 0;
+          }
+        }
+        const encoded = encodeURIComponent(JSON.stringify(readTimes));
+        const res = await fetch(`/api/messages/conversations?userId=${wooId}&readTimestamps=${encoded}`);
         if (res.ok) {
           const data = await res.json();
-          let count = 0;
+          // Sum unread from regular conversations + admin thread
+          let count = (data.adminUnreadCount || 0);
           if (data.conversations) {
             data.conversations.forEach(conv => {
-              const readStamp = localStorage.getItem(`mahally_read_${wooId}_${conv.id}`);
-              if (!readStamp || conv.lastTimestamp > Number(readStamp)) {
-                if (conv.lastTimestamp > 0) count++;
+              // Skip the admin thread here, as it's already counted in adminUnreadCount
+              if (conv.role !== "admin" && String(conv.id) !== "1" && String(conv.id) !== "admin") {
+                if (conv.unreadCount && conv.unreadCount > 0) count += conv.unreadCount;
               }
             });
           }
-          setUnreadMessages(count);
+          setUnreadMessages(count > 0 ? count : 0);
+
+          // Restore any read timestamps from the server that this browser is missing
+          // (fixes messages appearing unread after logout/login on this or another device)
+          if (data.syncedReadTimes) {
+            Object.entries(data.syncedReadTimes).forEach(([partnerId, ts]) => {
+              const lsKey = `mahally_read_${wooId}_${partnerId}`;
+              const existing = Number(localStorage.getItem(lsKey)) || 0;
+              if (ts > existing) {
+                localStorage.setItem(lsKey, ts);
+              }
+            });
+          }
         }
       } catch (e) { }
     };
 
     if (wooId && messagingEnabled) {
       fetchUnread();
+      // Re-check immediately whenever localStorage read-stamps change
+      // (the messages page fires a custom event when it marks a chat as read)
+      const onReadStamp = (e) => {
+        if (e && e.detail && typeof e.detail.subtract === "number") {
+          setUnreadMessages(prev => Math.max(0, prev - e.detail.subtract));
+        }
+        fetchUnread();
+      };
+      window.addEventListener("mahally_read_updated", onReadStamp);
+
+      const handleClickOutside = (e) => {
+        if (searchRef.current && !searchRef.current.contains(e.target)) {
+          setShowSuggestions(false);
+          setIsCategoryOpen(false);
+        }
+        if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
+          setIsAccountMenuOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        window.removeEventListener("recently_viewed_updated", loadRecentViews);
+        window.removeEventListener("mahally_read_updated", onReadStamp);
+        if (categoryHoverTimeoutRef.current) {
+          clearTimeout(categoryHoverTimeoutRef.current);
+        }
+      };
     }
 
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowSuggestions(false);
         setIsCategoryOpen(false);
+      }
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
+        setIsAccountMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -182,6 +238,7 @@ export default function Header() {
         clearTimeout(categoryHoverTimeoutRef.current);
       }
     };
+
   }, [wooId, messagingEnabled]);
 
   // Fetch real-time products under active category for hover menu Recommended & PC fallback
@@ -316,23 +373,21 @@ export default function Header() {
 
           <div ref={searchRef} className="order-last lg:order-3 w-full lg:w-auto lg:flex-1 flex flex-col relative lg:me-2 group z-[100]">
             <form onSubmit={handleSearch} className={`flex h-10 w-full rounded-md transition-shadow relative bg-white border border-zinc-300 ${showSuggestions ? 'ring-[3px] ring-brand/30 border-brand' : ''}`}>
-              <div className="relative shrink-0 h-full flex items-center bg-[#f3f3f3] hover:bg-[#dadada] transition-colors border-l border-zinc-300 rounded-s-md w-[75px] sm:w-[110px]">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="h-full w-full bg-transparent text-[#555] text-[11px] sm:text-[12px] pe-5 ps-2 sm:pe-6 sm:ps-3 outline-none cursor-pointer font-bold text-zinc-700 appearance-none text-start"
-                  aria-label={t('categoriesMenu')}
+              <input type="text" placeholder={t("searchPlaceholder")} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }} onFocus={() => { setShowSuggestions(true); setIsCategoryOpen(false); }} className="flex-1 px-3 sm:px-4 pe-10 text-zinc-900 outline-none h-full text-[14px] sm:text-[15px] bg-transparent w-0 min-w-0 rounded-s-md" />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                  }}
+                  className="absolute end-[50px] top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 flex items-center justify-center"
+                  aria-label="Clear search"
                 >
-                  <option value="All">{t("categories")}</option>
-                  {categories.map(c => (
-                    <option key={c.id} value={c.slug}>{decodeHtml(getCategoryName(c, locale))}</option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-zinc-500">
-                  <ChevronDown size={14} />
-                </div>
-              </div>
-              <input type="text" placeholder={t("searchPlaceholder")} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }} onFocus={() => { setShowSuggestions(true); setIsCategoryOpen(false); }} className="flex-1 px-3 sm:px-4 text-zinc-900 outline-none h-full text-[14px] sm:text-[15px] bg-white w-0 min-w-0" />
+                  <X size={16} />
+                </button>
+              )}
               <button type="submit" className="bg-brand hover:bg-brand-dark w-[45px] flex items-center justify-center text-white transition-colors shrink-0 rounded-e-md">
                 {isSearching ? <div className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" /> : <Search size={24} />}
               </button>
@@ -355,7 +410,7 @@ export default function Header() {
 
           <div className="order-2 lg:order-4 me-auto lg:me-0 relative flex items-center gap-1 sm:gap-2 lg:gap-4">
             <div
-              className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-900/40 border-blue-500/50 ring-1 ring-blue-500/30' : (isVendor ? 'bg-brand-light/40 border-brand-light/30 ring-1 ring-brand-light/20' : '')}`}
+              className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-200/50' : (isVendor ? 'bg-brand-light/40 border-brand-light/30 ring-1 ring-brand-light/20' : '')}`}
               onMouseEnter={() => { if (user && window.innerWidth >= 640) setIsAccountMenuOpen(true); }}
               onMouseLeave={() => setIsAccountMenuOpen(false)}
               onClick={() => {
@@ -372,15 +427,15 @@ export default function Header() {
                 </div>
               ) : (
                 <>
-                  <span className={`text-[10px] sm:text-[12px] leading-none hidden sm:flex items-center gap-1 ${isAdmin ? 'text-blue-400 font-bold' : (isApprovedVendor ? 'text-brand font-bold' : 'text-zinc-500')}`}>
+                  <span className={`text-[10px] sm:text-[12px] leading-none hidden sm:flex items-center gap-1 ${isAdmin ? 'text-blue-700 font-bold' : (isApprovedVendor ? 'text-brand font-bold' : 'text-zinc-500')}`}>
                     {isAdmin && <ShieldCheck size={12} />}
                     <span>
                       {isAdmin ? `${t('adminBoard')} (${customerName || t('admin')})` : (isApprovedVendor ? `${t('vendorPortal')} (${customerName || t('merchant')})` : (user ? `${t('welcomePrefix')} ${customerName || user.displayName || t('customer')}` : t('login')))}
                     </span>
                   </span>
                   <div className="hidden sm:flex items-center gap-1 leading-none mt-1 text-zinc-900">
-                    <span className={`text-[14px] font-bold ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : '')}`}>{isVendor ? t('dashboard') : t('ordersAndAccount')}</span>
-                    {user && <ChevronDown size={12} className={`mt-1 ${isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : 'text-zinc-500')}`} />}
+                    <span className={`text-[14px] font-bold ${isAdmin ? 'text-blue-800' : (isApprovedVendor ? 'text-brand' : '')}`}>{isVendor ? t('dashboard') : t('ordersAndAccount')}</span>
+                    {user && <ChevronDown size={12} className={`mt-1 ${isAdmin ? 'text-blue-800' : (isApprovedVendor ? 'text-brand' : 'text-zinc-500')}`} />}
                   </div>
                   <div className="sm:hidden flex items-center justify-center text-zinc-900 p-0.5">
                     <UserCircle size={24} className={isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : 'text-zinc-900')} />
@@ -619,29 +674,39 @@ export default function Header() {
               </div>
               <div className="py-4 border-b border-zinc-200">
                 <h4 className="px-6 text-[18px] font-bold text-zinc-900 mb-2">{t('shopByCategory')}</h4>
-                <ul className="text-[14px]">
-                  {(isExpanded ? categories : categories.slice(0, 8)).map(cat => (
-                    <li key={cat.id}>
-                      <Link href={`/browse?cat=${cat.slug}`} onClick={() => setIsSidebarOpen(false)} className="px-6 py-3 flex justify-between items-center hover:bg-zinc-100 transition-colors group">
-                        {decodeHtml(getCategoryName(cat, locale))} <ChevronRight size={16} className="text-zinc-400 group-hover:text-zinc-900" />
-                      </Link>
-                    </li>
-                  ))}
-                  {categories.length > 8 && (
-                    <li>
-                      <button
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="px-6 py-3 w-full text-end flex items-center gap-2 text-zinc-600 hover:text-zinc-900 font-bold transition-colors"
-                      >
-                        {isExpanded ? (
-                          <>{t('viewLess')} <ChevronDown size={14} className="rotate-180" /></>
-                        ) : (
-                          <>{t('viewAllMenu')} <ChevronDown size={14} /></>
-                        )}
-                      </button>
-                    </li>
-                  )}
-                </ul>
+                {categories && categories.length > 0 ? (
+                  <ul className="text-[14px]">
+                    {(isExpanded ? categories : categories.slice(0, 8)).map(cat => (
+                      <li key={cat.id}>
+                        <Link href={`/browse?cat=${cat.slug}`} onClick={() => setIsSidebarOpen(false)} className="px-6 py-3 flex justify-between items-center hover:bg-zinc-100 transition-colors group">
+                          {decodeHtml(getCategoryName(cat, locale))} <ChevronRight size={16} className="text-zinc-400 group-hover:text-zinc-900" />
+                        </Link>
+                      </li>
+                    ))}
+                    {categories.length > 8 && (
+                      <li>
+                        <button
+                          onClick={() => setIsExpanded(!isExpanded)}
+                          className="px-6 py-3 w-full text-end flex items-center gap-2 text-zinc-600 hover:text-zinc-900 font-bold transition-colors"
+                        >
+                          {isExpanded ? (
+                            <>{t('viewLess')} <ChevronDown size={14} className="rotate-180" /></>
+                          ) : (
+                            <>{t('viewAllMenu')} <ChevronDown size={14} /></>
+                          )}
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                ) : (
+                  <div className="px-6 py-5 mx-6 bg-zinc-50 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center gap-2 mb-2">
+                    <FolderTree size={28} className="text-zinc-400" />
+                    <p className="text-[13px] text-zinc-500 font-medium">{locale === 'ar' ? "لا توجد أقسام حالياً." : "No categories found."}</p>
+                    <Link href="/browse" onClick={() => setIsSidebarOpen(false)} className="mt-1 text-xs font-bold text-brand hover:underline">
+                      {locale === 'ar' ? "تصفح جميع المنتجات" : "Browse All Products"}
+                    </Link>
+                  </div>
+                )}
               </div>
               {isVendor && (
                 <div className="py-4 border-b border-zinc-200">

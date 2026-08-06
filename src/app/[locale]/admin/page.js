@@ -12,12 +12,12 @@ import {
   Users,
   CheckCircle,
   XCircle,
-  Clock,
   Mail,
   Phone,
   ArrowRight,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import AIInsightsCard from "@/components/admin/AIInsightsCard";
 
 export default function AdminDashboard() {
@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast] = useState(null);
+  const t = useTranslations("AdminDashboard");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -51,7 +52,11 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    fetchData();
+    const load = () => {
+      fetchData();
+    };
+
+    load();
   }, []);
 
   const handleAction = async (vendorId, action) => {
@@ -68,16 +73,15 @@ export default function AdminDashboard() {
           prev.map((v) => (v.id === vendorId ? { ...v, status: data.status } : v))
         );
         showToast(
-          action === "approve" ? "Vendor approved successfully!" : "Vendor application rejected.",
+          action === "approve" ? t("toastApproved") : t("toastRejected"),
           action === "approve" ? "success" : "error"
         );
-        // Refresh stats
         const statsRes = await fetch("/api/admin/stats");
         const statsData = await statsRes.json();
         setStats(statsData);
       }
     } catch (e) {
-      showToast("Action failed. Please try again.", "error");
+      showToast(t("toastFailed"), "error");
     } finally {
       setActionLoading(null);
     }
@@ -87,14 +91,14 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-3">
         <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
-        <p className="text-sm text-zinc-500">Loading dashboard...</p>
+        <p className="text-sm text-zinc-500">{t("loading")}</p>
       </div>
     );
   }
 
   const statCards = [
     {
-      label: "Total Revenue",
+      label: t("totalRevenue"),
       value: stats?.totalRevenue ? `JOD ${parseFloat(stats.totalRevenue).toLocaleString()}` : "JOD 0",
       icon: TrendingUp,
       trend: "+14.2%",
@@ -102,7 +106,7 @@ export default function AdminDashboard() {
       href: "/admin/reports",
     },
     {
-      label: "Active Vendors",
+      label: t("activeVendors"),
       value: stats?.totalVendors ?? 0,
       icon: Store,
       trend: "+5%",
@@ -111,19 +115,17 @@ export default function AdminDashboard() {
     },
   ];
 
-  // Filter down to pending or recently modified applications
-  const pendingApplications = recentVendors.filter(v => v.status === "pending");
-  const otherApplications = recentVendors.filter(v => v.status !== "pending").slice(0, 3);
+  const pendingApplications = recentVendors.filter((v) => v.status === "pending");
+  const otherApplications = recentVendors.filter((v) => v.status !== "pending").slice(0, 3);
   const displayQueue = [...pendingApplications, ...otherApplications];
 
   return (
     <div className="space-y-6 sm:space-y-8 relative">
-      {/* Toast */}
       {toast && (
         <div
           className={`fixed top-6 start-6 z-[100] px-5 py-3 rounded-xl text-sm font-medium shadow-lg animate-in slide-in-from-start-4 duration-300 ${
             toast.type === "success"
-              ? "bg-emerald-600 text-white animate-[bounce_0.5s_ease-in-out_1]"
+              ? "bg-emerald-600 text-white"
               : "bg-red-600 text-white"
           }`}
         >
@@ -131,41 +133,39 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Dashboard</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Overview of your Mahally marketplace
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/announcements"
-            className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors"
-          >
-            <Plus size={15} />
-            New Broadcast
-          </Link>
-          <button
-            onClick={fetchData}
-            className="h-9 w-9 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-500 hover:bg-zinc-50 transition-colors"
-          >
-            <RefreshCw size={15} />
-          </button>
+      <div className="rounded-[28px] border border-zinc-200 bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#be374f] p-6 sm:p-8 text-white shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em]">
+              Mahally Admin
+            </div>
+            <h1 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">{t("heroTitle")}</h1>
+            <p className="mt-2 text-sm text-zinc-300 sm:text-base">{t("heroSubtitle")}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/announcements"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-100 transition-colors"
+            >
+              <Plus size={15} />
+              {t("newBroadcast")}
+            </Link>
+            <button
+              onClick={fetchData}
+              className="h-10 w-10 rounded-xl border border-white/15 bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+              <RefreshCw size={15} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* AI Insights Card */}
-      <AIInsightsCard />
-
-      {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2">
         {statCards.map((s, idx) => (
           <Link
             key={idx}
             href={s.href}
-            className="rounded-xl border border-zinc-200 bg-white p-6 cursor-pointer hover:border-zinc-300 hover:bg-zinc-50 transition-colors shadow-sm"
+            className="rounded-2xl border border-zinc-200 bg-white p-6 cursor-pointer hover:border-zinc-300 hover:bg-zinc-50 transition-colors shadow-sm"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -175,29 +175,28 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
-                <s.icon className="h-5 w-5 text-zinc-600" />
+                <s.icon className="h-5 w-5 text-[#be374f]" />
               </div>
             </div>
             <div className={`mt-3 flex items-center gap-1 text-xs font-medium ${s.up ? "text-emerald-600" : "text-red-600"}`}>
               {s.up ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
-              {s.trend} from last month
+              {s.trend} {t("fromLastMonth")}
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Vendor Applications Queue - Takes Full Width */}
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-3xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
           <div className="flex items-center gap-2">
-            <Users size={16} className="text-zinc-400" />
-            <h2 className="font-semibold text-zinc-900">Vendor Applications & Queue</h2>
+            <Users size={16} className="text-[#be374f]" />
+            <h2 className="font-semibold text-zinc-900">{t("queueTitle")}</h2>
           </div>
           <Link
             href="/admin/vendors"
             className="text-xs font-medium text-zinc-500 hover:text-zinc-700 transition-colors flex items-center gap-1"
           >
-            View all applications <ArrowRight size={12} />
+            {t("viewAllApplications")} <ArrowRight size={12} />
           </Link>
         </div>
         <div className="p-6">
@@ -208,9 +207,9 @@ export default function AdminDashboard() {
                 return (
                   <div
                     key={v.id}
-                    className="flex flex-col lg:flex-row lg:items-center gap-5 p-4 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-zinc-50 hover:border-zinc-200 transition-all"
+                    className="flex flex-col lg:flex-row lg:items-center gap-5 p-4 rounded-2xl border border-zinc-100 bg-zinc-50/70 hover:bg-zinc-50 hover:border-zinc-200 transition-all"
                   >
-                    <div className="h-10 w-10 rounded-lg bg-white border border-zinc-200 flex items-center justify-center text-sm font-semibold text-zinc-500 shrink-0">
+                    <div className="h-10 w-10 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-sm font-semibold text-zinc-500 shrink-0">
                       {v.storeName?.[0]?.toUpperCase() || v.name?.[0]?.toUpperCase() || "?"}
                     </div>
                     <div className="flex-1 min-w-0 space-y-1.5">
@@ -256,7 +255,7 @@ export default function AdminDashboard() {
                           ) : (
                             <CheckCircle size={12} />
                           )}
-                          Approve
+                          {t("approve")}
                         </button>
                       )}
                       {v.status !== "rejected" && (
@@ -270,7 +269,7 @@ export default function AdminDashboard() {
                           ) : (
                             <XCircle size={12} />
                           )}
-                          Reject
+                          {t("reject")}
                         </button>
                       )}
                     </div>
@@ -283,8 +282,8 @@ export default function AdminDashboard() {
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-50 border border-zinc-200 text-zinc-400">
                 <Store size={18} />
               </div>
-              <p className="text-sm font-semibold text-zinc-900">Queue is completely empty</p>
-              <p className="text-xs text-zinc-500 mt-0.5">No recent registrations to moderate.</p>
+              <p className="text-sm font-semibold text-zinc-900">{t("queueEmptyTitle")}</p>
+              <p className="text-xs text-zinc-500 mt-0.5">{t("queueEmptyDesc")}</p>
             </div>
           )}
         </div>

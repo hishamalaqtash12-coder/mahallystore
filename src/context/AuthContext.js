@@ -100,7 +100,7 @@ export function AuthProvider({ children }) {
       setUser(null);
       setLoading(false);
     }
-  }, [router]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- router causes spurious re-runs on every navigation (new reference), triggering loading flicker
 
   const syncWithBackend = async (parsedUser) => {
     try {

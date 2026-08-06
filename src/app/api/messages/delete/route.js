@@ -1,5 +1,6 @@
 import { wcApi } from "@/lib/woocommerce";
 import { NextResponse } from "next/server";
+import { getAdminId } from "@/lib/messages";
 
 /** DELETE /api/messages/delete — Remove or hide a message from history for BOTH sides */
 export async function DELETE(request) {
@@ -14,7 +15,8 @@ export async function DELETE(request) {
 
     // Function to delete from one user's meta
     const deleteFromUser = async (uId, partnerId) => {
-      const targetId = uId === "admin" ? 1 : uId;
+      const adminId = await getAdminId();
+      const targetId = uId === "admin" ? adminId : uId;
       if (isNaN(targetId)) return;
       
       try {

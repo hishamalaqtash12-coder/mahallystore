@@ -12,6 +12,7 @@ import {
   Save
 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 const getMetaValue = (meta_data, key) => {
   return meta_data?.find(m => m.key === key)?.value || "";
@@ -139,6 +140,7 @@ const ControlRow = ({ item, type, updatingId, onUpdate }) => {
 };
 
 export default function VisibilityControlPage() {
+  const t = useTranslations("AdminVisibility");
   const [activeTab, setActiveTab] = useState('vendors');
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -204,10 +206,10 @@ export default function VisibilityControlPage() {
           setProducts(prev => prev.map(p => p.id === id ? { ...p, meta_data: resData.data.meta_data } : p));
         }
       } else {
-        alert("Failed to update visibility");
+        alert(t("failedUpdateVisibility"));
       }
     } catch (e) {
-      alert("Error updating visibility");
+      alert(t("failedUpdateVisibility"));
     } finally {
       setUpdatingId(null);
     }
@@ -227,8 +229,8 @@ export default function VisibilityControlPage() {
   return (
     <div className="max-w-5xl mx-auto pb-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">Visibility Controls</h1>
-        <p className="text-sm text-zinc-600">Restrict vendors or products from appearing on the main homepage and browse pages. Restricted items can still be accessed via direct links.</p>
+        <h1 className="text-2xl font-bold text-zinc-900 mb-2">{t("pageTitle")}</h1>
+        <p className="text-sm text-zinc-600">{t("pageSubtitle")}</p>
       </div>
 
       {/* Tabs & Search */}
@@ -238,20 +240,20 @@ export default function VisibilityControlPage() {
             onClick={() => setActiveTab('vendors')}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'vendors' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-600 hover:bg-zinc-50'}`}
           >
-            <Store size={16} /> Vendors
+            <Store size={16} /> {t("vendorsTab")}
           </button>
           <button
             onClick={() => setActiveTab('products')}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'products' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-600 hover:bg-zinc-50'}`}
           >
-            <Package size={16} /> Products
+            <Package size={16} /> {t("productsTab")}
           </button>
         </div>
 
         <div className="relative w-full sm:w-72">
           <input
             type="text"
-            placeholder={`Search ${activeTab}...`}
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-10 pe-10 ps-4 rounded-lg border border-zinc-200 text-sm focus:border-brand outline-none shadow-sm transition-all"
@@ -264,7 +266,7 @@ export default function VisibilityControlPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-zinc-200">
           <Loader2 className="w-8 h-8 animate-spin text-brand mb-4" />
-          <p className="text-sm text-zinc-500 font-medium">Loading data...</p>
+          <p className="text-sm text-zinc-500 font-medium">{t("loadingData")}</p>
         </div>
       ) : (
         <div>
@@ -272,7 +274,7 @@ export default function VisibilityControlPage() {
             <>
               {filteredVendors.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-xl border border-zinc-200">
-                  <p className="text-zinc-500">No vendors found.</p>
+                  <p className="text-zinc-500">{t("noItemsFound")}</p>
                 </div>
               ) : (
                 filteredVendors.map(vendor => <ControlRow key={vendor.id} item={vendor} type="vendor" updatingId={updatingId} onUpdate={handleUpdate} />)
@@ -284,7 +286,7 @@ export default function VisibilityControlPage() {
             <>
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-xl border border-zinc-200">
-                  <p className="text-zinc-500">No products found.</p>
+                  <p className="text-zinc-500">{t("noItemsFound")}</p>
                 </div>
               ) : (
                 filteredProducts.map(product => <ControlRow key={product.id} item={product} type="product" updatingId={updatingId} onUpdate={handleUpdate} />)

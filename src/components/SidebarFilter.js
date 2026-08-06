@@ -6,6 +6,7 @@ import { usePathname } from "@/i18n/routing";
 import { Star, ChevronDown, ChevronUp, X, ChevronLeft, ShoppingCart, Check } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { getCategoryName } from "@/lib/product-utils";
+import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 
 // ─── Filter Section Header ──────────────────────────────────────
 function SectionTitle({ title }) {
@@ -98,9 +99,14 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                 <li key={cat.id}>
                   <button
                     onClick={() => updateCat(cat.id)}
-                    className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-start w-full truncate cursor-pointer"
-                    dangerouslySetInnerHTML={{ __html: getCategoryName(cat, locale) }}
-                  />
+                    className="flex items-center justify-between w-full group cursor-pointer"
+                  >
+                    <span 
+                      className="text-[13px] font-normal text-[#0F1111] group-hover:text-[#9b2c41] transition-colors text-start truncate pe-2"
+                      dangerouslySetInnerHTML={{ __html: getCategoryName(cat, locale) }} 
+                    />
+                    <span className="text-[#565959] text-[11px] shrink-0 font-normal group-hover:text-[#9b2c41]">({cat.count || 0})</span>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -136,18 +142,26 @@ export default function SidebarFilter({ categories = [], products = [], filters,
               </li>
             )}
             <li className={`${parentCategory ? 'ps-5' : 'ps-3'}`}>
-              <span
-                className="text-[13px] font-bold text-[#0F1111]"
-                dangerouslySetInnerHTML={{ __html: getCategoryName(activeCategory, locale) }}
-              />
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-[13px] font-bold text-[#0F1111] truncate pe-2"
+                  dangerouslySetInnerHTML={{ __html: getCategoryName(activeCategory, locale) }}
+                />
+                <span className="text-[#565959] text-[11px] shrink-0 font-normal">({activeCategory.count || 0})</span>
+              </div>
             </li>
             {children.map(child => (
               <li key={child.id} className={`${parentCategory ? 'ps-8' : 'ps-6'}`}>
-                <button
-                  onClick={() => updateCat(child.id)}
-                  className="text-[13px] font-normal text-[#0F1111] hover:text-[#9b2c41] transition-colors text-start w-full truncate cursor-pointer"
-                  dangerouslySetInnerHTML={{ __html: getCategoryName(child, locale) }}
-                />
+                  <button
+                    onClick={() => updateCat(child.id)}
+                    className="flex items-center justify-between w-full group cursor-pointer"
+                  >
+                    <span
+                      className="text-[13px] font-normal text-[#0F1111] group-hover:text-[#9b2c41] transition-colors text-start truncate pe-2"
+                      dangerouslySetInnerHTML={{ __html: getCategoryName(child, locale) }}
+                    />
+                    <span className="text-[#565959] text-[11px] shrink-0 font-normal group-hover:text-[#9b2c41]">({child.count || 0})</span>
+                  </button>
               </li>
             ))}
           </ul>
@@ -197,6 +211,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
     minDiscount: null,
     tags: [],
     merchant: null,
+    madeInJordan: false,
     colors: [],
     searchQuery: filters.searchQuery || "",
   });
@@ -279,6 +294,17 @@ export default function SidebarFilter({ categories = [], products = [], filters,
           )}
         </div>
       )}
+
+      {/* ── Made in Jordan ── */}
+      <div className="mb-4">
+        <SectionTitle title={locale === "ar" ? "المنتجات الأردنية" : "Made in Jordan"} />
+        <AmazonCheckbox
+          label={locale === "ar" ? "عرض المنتجات المصنوعة في الأردن" : "Show products made in Jordan"}
+          count={products.filter(p => isMadeInJordanProduct(p)).length}
+          checked={Boolean(filters.madeInJordan)}
+          onChange={() => update("madeInJordan", !filters.madeInJordan)}
+        />
+      </div>
 
       {/* ── Seller ── */}
       {allMerchants.length > 0 && (() => {

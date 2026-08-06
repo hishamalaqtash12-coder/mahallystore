@@ -10,9 +10,17 @@ import RegistrationPopup from "./RegistrationPopup";
 export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
 
+  // Normalize pathname by stripping leading locale segment if present (e.g., /en/...)
+  let normalized = pathname || "/";
+  const maybeLocale = normalized.split('/')[1];
+  if (maybeLocale === 'en' || maybeLocale === 'ar') {
+    normalized = '/' + normalized.split('/').slice(2).join('/');
+    if (normalized === '/') normalized = '/';
+  }
+
   // Check if we are in the merchant dashboard, admin dashboard, or auth pages
-  const isDashboard = pathname?.startsWith("/merchant/dashboard") || pathname?.startsWith("/admin");
-  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isDashboard = normalized.startsWith("/merchant/dashboard") || normalized.startsWith("/admin");
+  const isAuthPage = normalized === "/login" || normalized === "/register";
 
   if (isDashboard || isAuthPage) {
     return (

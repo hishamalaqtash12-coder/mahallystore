@@ -113,7 +113,7 @@ export async function POST(request) {
         role: role,
         vendorStatus: (meta.dokan_enable_selling === "yes" || found.role === 'administrator') ? "approved" : (meta.mahally_vendor_status || "pending"),
         dokanEnabled: meta.dokan_enable_selling === "yes" || found.role === 'administrator',
-        storeSlug: meta.dokan_profile_settings?.store_name?.toLowerCase().replace(/\s+/g, '-') || meta.mahally_store_slug || ""
+        storeSlug: meta.mahally_store_slug || meta.dokan_profile_settings?.store_name?.toLowerCase().replace(/\s+/g, '-') || ""
       },
     });
   } catch (error) {

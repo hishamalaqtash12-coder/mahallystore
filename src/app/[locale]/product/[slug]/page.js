@@ -12,6 +12,7 @@ import RecentlyViewedTracker from "@/components/RecentlyViewedTracker";
 import ProductReviews from "@/components/ProductReviews";
 import ShippingInfoDisplay from "@/components/ShippingInfoDisplay";
 import ProductCountdown from "@/components/ProductCountdown";
+import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -109,6 +110,7 @@ export default async function ProductPage({ params }) {
 
   const regularPrice = parseFloat(product.regular_price || 0);
   const salePrice = parseFloat(product.price || 0);
+  const isJordanian = isMadeInJordanProduct(product);
   const discount = regularPrice > salePrice ? Math.round(((regularPrice - salePrice) / regularPrice) * 100) : 0;
   const soldCount = product.total_sales || 0;
   const ratingCount = reviews.length > 0 ? reviews.length : (product.rating_count || 0);
@@ -223,7 +225,15 @@ export default async function ProductPage({ params }) {
           <div className="flex flex-col bg-white p-6 rounded-xl border border-zinc-200 lg:bg-transparent lg:p-0 lg:border-none">
             {/* Title & Ratings */}
             <div className="mb-3 border-b border-zinc-200 pb-3">
-              <h1 className="text-[20px] sm:text-[24px] font-medium text-[#0F1111] leading-tight mb-1">{product.name}</h1>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h1 className="text-[20px] sm:text-[24px] font-medium text-[#0F1111] leading-tight">{product.name}</h1>
+                {isJordanian && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-700">
+                    <span>🇯🇴</span>
+                    <span>{locale === "ar" ? "صُنع في الأردن" : "Made in Jordan"}</span>
+                  </span>
+                )}
+              </div>
               {(() => {
                 const { name: storeName, id: storeId, slug: storeSlug } = getProductMerchant(product);
                 return (

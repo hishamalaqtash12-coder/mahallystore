@@ -22,7 +22,7 @@ export const metadata = {
   title: "Mahally | Local Marketplace",
   description: "Shop the best local stores and brands on Mahally.",
   icons: {
-    icon: "/icon.webp",
+    icon: "/mahally-logo.webp",
   },
   verification: {
     google: "dIJDnbFaVe_P_hFTKBPlRHwaCuj7GQHpKafanYPA7JU",
@@ -30,11 +30,20 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children, params }) {
-  const { locale } = await params;
+  // params may be a Promise in this runtime; await it before accessing properties
+  const resolvedParams = await params;
+  const localeFromParams = resolvedParams?.locale;
+  const locale = localeFromParams || routing.defaultLocale;
   if (!routing.locales.includes(locale)) {
     notFound();
   }
-  const messages = await getMessages();
+  let messages;
+  try {
+    messages = await getMessages(locale);
+  } catch (err) {
+    console.warn('getMessages(locale) failed, falling back to default getMessages():', err);
+    messages = await getMessages();
+  }
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (

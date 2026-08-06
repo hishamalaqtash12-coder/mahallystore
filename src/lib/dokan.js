@@ -86,7 +86,9 @@ class DokanApi {
 
   // Products
   async getProducts(vendorId) {
-    return this.fetch(`products?vendor_id=${vendorId}&per_page=100&status=any`);
+    // Standard /products ignores vendor_id when using admin credentials, 
+    // so we must use the store-specific endpoint to get only this vendor's products.
+    return this.fetch(`stores/${vendorId}/products?per_page=100&status=any`);
   }
 
   // Reviews

@@ -101,7 +101,7 @@ export async function GET(request, { params }) {
       id: v.id,
       name: `${v.first_name} ${v.last_name}`.trim(),
       storeName: dokanStore.store_name || dokanSettings.store_name || meta.mahally_store_name || v.first_name,
-      storeSlug: dokanSettings.store_name?.toLowerCase().replace(/\s+/g, '-') || meta.mahally_store_slug || slug,
+      storeSlug: meta.mahally_store_slug || dokanSettings.store_name?.toLowerCase().replace(/\s+/g, '-') || slug,
       storeDescription: dokanStore.store_description || dokanSettings.store_description || meta.mahally_store_description || "",
       storeCategory: meta.mahally_store_category || "",
       // Use Dokan store API for resolved image URLs (banner/gravatar come as full URLs from this endpoint)

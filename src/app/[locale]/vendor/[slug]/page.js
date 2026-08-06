@@ -441,7 +441,7 @@ export default function VendorProfilePage() {
               { id: 'products', label: t("tabProducts"), icon: null },
               { id: 'about', label: t("tabAbout"), icon: null },
               { id: 'reviews', label: t("tabReviews"), icon: null },
-              { id: 'followers', label: '{t("tabFollowers")}', icon: null },
+              { id: 'followers', label: t("tabFollowers"), icon: null },
             ].map((tab) => (
               <button
                 key={tab.id}

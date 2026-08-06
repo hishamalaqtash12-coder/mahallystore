@@ -159,7 +159,8 @@ export async function POST(request) {
     const firstName = nameParts[0];
     const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
 
-    const storeSlug = (storeData.storeName || name)
+    // Generate base slug from store name — ID will be appended after user creation
+    const baseSlug = (storeData.storeName || name)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
@@ -186,6 +187,8 @@ export async function POST(request) {
 
     const newUser = await createWordPressUser(wpUserPayload, role);
     const userId = newUser.id;
+    // Append userId to slug to guarantee uniqueness across stores with identical names
+    const storeSlug = baseSlug ? `${baseSlug}-${userId}` : String(userId);
 
     // ─────────────────────────────────────────────────────────────────
     // STEP 2: Set all Dokan & Mahally-specific meta via WooCommerce API

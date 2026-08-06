@@ -24,8 +24,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AdminSearch from "@/components/admin/AdminSearch";
+import { useTranslations } from "next-intl";
 
 export default function AdminAnnouncementsPage() {
+  const t = useTranslations("AdminAnnouncements");
   const { user, isAdmin } = useAuth();
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,19 @@ export default function AdminAnnouncementsPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/announcements");
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Failed to fetch /api/admin/announcements:", res.status, text);
+        return;
+      }
+
+      if (!contentType.includes("application/json")) {
+        const text = await res.text().catch(() => "");
+        console.error("Unexpected non-JSON response from /api/admin/announcements:", text);
+        return;
+      }
+
       const data = await res.json();
       if (Array.isArray(data)) {
         setAnnouncements(data);
@@ -73,16 +88,30 @@ export default function AdminAnnouncementsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content })
       });
+        const contentType = res.headers.get("content-type") || "";
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          setStatus({ type: 'error', message: `Server error: ${res.status}` });
+          console.error("Broadcast failed:", res.status, text);
+          return;
+        }
 
-      const data = await res.json();
-      if (data.success) {
-        setStatus({ type: 'success', message: `Broadcasted successfully to ${data.details.totalVendors} vendors!` });
-        setTitle("");
-        setContent("");
-        fetchAnnouncements();
-      } else {
-        setStatus({ type: 'error', message: data.error || "Failed to send broadcast" });
-      }
+        if (!contentType.includes("application/json")) {
+          const text = await res.text().catch(() => "");
+          setStatus({ type: 'error', message: "Unexpected server response" });
+          console.error("Unexpected non-JSON response from broadcast:", text);
+          return;
+        }
+
+        const data = await res.json();
+        if (data && data.success) {
+          setStatus({ type: 'success', message: `Broadcasted successfully to ${data.details.totalVendors} vendors!` });
+          setTitle("");
+          setContent("");
+          fetchAnnouncements();
+        } else {
+          setStatus({ type: 'error', message: data.error || "Failed to send broadcast" });
+        }
     } catch (err) {
       setStatus({ type: 'error', message: "Connection error. Please try again." });
     } finally {
@@ -152,11 +181,9 @@ export default function AdminAnnouncementsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-200 pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Announcements</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Manage official platform communication and track broadcast history
-          </p>
-        </div>
+            <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
+            <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
+          </div>
         <div className="flex items-center gap-2">
           <button
             onClick={fetchAnnouncements}
@@ -175,7 +202,7 @@ export default function AdminAnnouncementsPage() {
           <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm sticky top-24">
             <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-wider mb-6 flex items-center gap-2">
               <Plus size={16} className="text-[#800000]" />
-              Compose Broadcast
+              {t("composeBroadcast")}
             </h2>
 
             <form onSubmit={handleBroadcast} className="space-y-5">
@@ -189,24 +216,24 @@ export default function AdminAnnouncementsPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Announcement Title</label>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{t("announcementTitleLabel")}</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. System Maintenance Update"
+                    placeholder={t("announcementPlaceholder")}
                     className="w-full h-10 px-4 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#800000] focus:border-[#800000] transition-all"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Detailed Message</label>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{t("detailedMessageLabel")}</label>
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     rows={8}
-                    placeholder="Type your message here..."
+                    placeholder={t("detailedMessagePlaceholder")}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#800000] focus:border-[#800000] transition-all resize-none"
                     required
                   />
@@ -217,8 +244,8 @@ export default function AdminAnnouncementsPage() {
                 <div className="flex items-start gap-3">
                   <MessageSquare size={18} className="text-blue-600 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-[13px] font-bold text-blue-900 mb-0.5">Local Chat Only</h4>
-                    <p className="text-[11px] text-blue-700 leading-relaxed">This broadcast will be sent directly to all merchants via the official Mahally Support chat.</p>
+                    <h4 className="text-[13px] font-bold text-blue-900 mb-0.5">{t("broadcastInfoTitle")}</h4>
+                    <p className="text-[11px] text-blue-700 leading-relaxed">{t("broadcastInfoDesc")}</p>
                   </div>
                 </div>
               </div>
@@ -229,7 +256,7 @@ export default function AdminAnnouncementsPage() {
                 className="w-full h-11 bg-zinc-900 text-white rounded-lg text-sm font-bold hover:bg-black transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {sending ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
-                {sending ? "Processing..." : "Dispatch Broadcast"}
+                {sending ? t("fetchingHistory") : t("dispatchBroadcast")}
               </button>
             </form>
           </div>

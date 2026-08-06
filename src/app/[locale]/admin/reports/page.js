@@ -16,8 +16,10 @@ import {
   ArrowUpRight,
   Loader2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function AdminReportsPage() {
+  const t = useTranslations("AdminReports");
   const [period, setPeriod] = useState("30d");
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function AdminReportsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-3">
         <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
-        <p className="text-sm text-zinc-500">Loading analytics...</p>
+        <p className="text-sm text-zinc-500">{t("loadingAnalytics")}</p>
       </div>
     );
   }
@@ -86,17 +88,15 @@ export default function AdminReportsPage() {
     return (
       <div className="space-y-6 sm:space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">AI Reports</h1>
-          <p className="mt-1 text-sm text-zinc-500">Analytics and performance insights</p>
+          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
+          <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
         </div>
         <div className="flex flex-col items-center justify-center py-24 px-4 text-center border-2 border-dashed border-zinc-200 rounded-2xl bg-white shadow-sm">
           <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center border border-zinc-100 shadow-sm mb-4">
             <Sparkles className="w-8 h-8 text-violet-500" />
           </div>
-          <h2 className="text-xl font-bold text-zinc-900 mb-2">Under Implementation</h2>
-          <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
-            The AI-driven analytics, sales forecasting, and deep marketplace intelligence reports are currently in development. Please check back later.
-          </p>
+          <h2 className="text-xl font-bold text-zinc-900 mb-2">{t("underImplementationTitle")}</h2>
+          <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">{t("underImplementationDesc")}</p>
         </div>
       </div>
     );
@@ -107,15 +107,13 @@ export default function AdminReportsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Reports</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Analytics and performance insights
-          </p>
-        </div>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-fit">
-          <Download size={15} />
-          Export Report
-        </button>
+            <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
+            <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
+          </div>
+          <button className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-fit">
+            <Download size={15} />
+            {t("exportReport")}
+          </button>
       </div>
 
       {/* Period Selector */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import { 
@@ -14,6 +15,8 @@ import {
 import Loader from "@/components/Loader";
 
 export default function MerchantSettings() {
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const { wooId, refreshAuth } = useAuth();
   
   const [data, setData] = useState({
@@ -141,6 +144,10 @@ export default function MerchantSettings() {
     return (
       <div className="flex justify-center items-center h-[400px]">
         <Loader size="lg" text="Fetching store profile" />
+        <div>
+          <p className="text-[13px] font-bold text-zinc-900">{isAr ? 'تأكيد التغييرات' : 'Commit Changes'}</p>
+          <p className="text-[11px] text-zinc-500 font-medium">{isAr ? 'تطبق التغييرات فوراً في المتجر.' : 'Changes will take effect immediately across the marketplace'}</p>
+        </div>
       </div>
     );
   }
@@ -148,8 +155,12 @@ export default function MerchantSettings() {
   return (
     <div className="max-w-[900px] mx-auto pb-20 relative font-sans">
       <div className="mb-8">
-        <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">Store Settings</h1>
-        <p className="text-[13px] text-zinc-500 font-medium">Configure your store identity and contact details</p>
+        <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">
+          {isAr ? "إعدادات المتجر" : "Store Settings"}
+        </h1>
+        <p className="text-[13px] text-zinc-500 font-medium">
+          {isAr ? "يمكنك تكوين هوية متجرك وتفاصيل الاتصال." : "Configure your store identity and contact details"}
+        </p>
       </div>
 
       {/* Floating Toast Notification */}
@@ -157,21 +168,21 @@ export default function MerchantSettings() {
         <div className="fixed bottom-6 start-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className="bg-emerald-50 border border-emerald-200 px-6 py-4 rounded-md shadow-lg flex items-center gap-3 text-[14px] font-bold text-emerald-700">
             <CheckCircle2 size={20} className="text-emerald-500" />
-            Changes updated successfully!
+            {isAr ? "تم تحديث التغييرات بنجاح!" : "Changes updated successfully!"}
           </div>
         </div>
       )}
 
       <div className="space-y-8">
         {/* Branding Section */}
-        <section className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
+                <section className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-zinc-50 border-b border-zinc-200">
-            <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-widest">Branding & Identity</h3>
+            <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-widest">{isAr ? 'العلامة التجارية والهوية' : 'Branding & Identity'}</h3>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="md:col-span-2 space-y-3">
-                <label className="text-[13px] font-bold text-zinc-900 block">Store Banner</label>
+                <label className="text-[13px] font-bold text-zinc-900 block">{isAr ? 'بانر المتجر' : 'Store Banner'}</label>
                 <input type="file" id="banner-upload" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'banner')} />
                 <div 
                   onClick={() => document.getElementById('banner-upload').click()}
@@ -182,14 +193,14 @@ export default function MerchantSettings() {
                     ) : (
                       <>
                         <Upload size={20} className="text-zinc-400 group-hover:text-[#be374f] mb-1 transition-colors" />
-                        <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">1200x400 px Recommended</span>
+                        <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">{isAr ? 'مقاس مقترح 1200x400 px' : '1200x400 px Recommended'}</span>
                       </>
                     )}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="text-[13px] font-bold text-zinc-900 block">Store Logo</label>
+                <label className="text-[13px] font-bold text-zinc-900 block">{isAr ? 'شعار المتجر' : 'Store Logo'}</label>
                 <input type="file" id="logo-upload" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'logo')} />
                 <div 
                   onClick={() => document.getElementById('logo-upload').click()}
@@ -200,7 +211,7 @@ export default function MerchantSettings() {
                     ) : (
                       <>
                         <ImageIcon size={20} className="text-zinc-400 group-hover:text-[#be374f] mb-1 transition-colors" />
-                        <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider text-center px-2">500x500 px</span>
+                        <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider text-center px-2">{isAr ? 'مقاس 500x500 px' : '500x500 px'}</span>
                       </>
                     )}
                 </div>
@@ -212,28 +223,28 @@ export default function MerchantSettings() {
         {/* Store Details Section */}
         <section className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-zinc-50 border-b border-zinc-200">
-            <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-widest">Business Details</h3>
+            <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-widest">{isAr ? 'تفاصيل النشاط التجاري' : 'Business Details'}</h3>
           </div>
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-zinc-900">Official Store Name</label>
-                <input type="text" value={data.storeName} onChange={(e) => setData({...data, storeName: e.target.value})} placeholder="Mahally Official Store" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
+                <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'اسم المتجر الرسمي' : 'Official Store Name'}</label>
+                <input type="text" value={data.storeName} onChange={(e) => setData({...data, storeName: e.target.value})} placeholder={isAr ? 'متجر محلي الرسمي' : 'Mahally Official Store'} className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-zinc-900">Primary Warehouse Location</label>
+                <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'موقع المستودع الرئيسي' : 'Primary Warehouse Location'}</label>
                 <select className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm cursor-pointer transition-all">
-                  <option>Amman, Jordan</option>
-                  <option>Zarqa, Jordan</option>
-                  <option>Irbid, Jordan</option>
-                  <option>Aqaba, Jordan</option>
+                  <option>{isAr ? 'عمان، الأردن' : 'Amman, Jordan'}</option>
+                  <option>{isAr ? 'الزرقاء، الأردن' : 'Zarqa, Jordan'}</option>
+                  <option>{isAr ? 'إربد، الأردن' : 'Irbid, Jordan'}</option>
+                  <option>{isAr ? 'العقبة، الأردن' : 'Aqaba, Jordan'}</option>
                 </select>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-[13px] font-bold text-zinc-900">WhatsApp Contact</label>
+                  <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'رقم واتساب للتواصل' : 'WhatsApp Contact'}</label>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{data.showWhatsapp ? 'Visible' : 'Hidden'}</span>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{data.showWhatsapp ? (isAr ? 'مرئي' : 'Visible') : (isAr ? 'مخفي' : 'Hidden')}</span>
                     <button 
                       onClick={() => setData({...data, showWhatsapp: !data.showWhatsapp})}
                       className={`w-8 h-4 rounded-full relative transition-colors ${data.showWhatsapp ? 'bg-emerald-500' : 'bg-zinc-300'}`}
@@ -242,41 +253,43 @@ export default function MerchantSettings() {
                     </button>
                   </div>
                 </div>
-                <div className="flex">
-                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-s-0 rounded-e-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
-                  <input type="tel" value={data.whatsappNumber} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setWhatsappCustomized(true); setData({...data, whatsappNumber: val}); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-s-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
+                <div className="flex" dir="ltr">
+                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-r-0 rounded-l-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
+                  <input type="tel" value={data.whatsappNumber} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setWhatsappCustomized(true); setData({...data, whatsappNumber: val}); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-r-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-zinc-900">Business Phone</label>
-                <div className="flex">
-                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-s-0 rounded-e-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
-                  <input type="tel" value={data.phone} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setData(prev => ({ ...prev, phone: val, whatsappNumber: whatsappCustomized ? prev.whatsappNumber : val })); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-s-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
+                <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'رقم هاتف المتجر' : 'Business Phone'}</label>
+                <div className="flex" dir="ltr">
+                  <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-r-0 rounded-l-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
+                  <input type="tel" value={data.phone} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setData(prev => ({ ...prev, phone: val, whatsappNumber: whatsappCustomized ? prev.whatsappNumber : val })); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-r-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
                 </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[13px] font-bold text-zinc-900">Merchant Biography</label>
-              <textarea rows={4} value={data.bio} onChange={(e) => setData({...data, bio: e.target.value})} className="w-full p-4 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm resize-none transition-all font-medium" placeholder="Tell your customers about your brand..."></textarea>
+              <div className="space-y-2">
+              <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'نبذة عن المتجر' : 'Merchant Biography'}</label>
+              <textarea rows={4} value={data.bio} onChange={(e) => setData({...data, bio: e.target.value})} className="w-full p-4 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm resize-none transition-all font-medium" placeholder={isAr ? 'أخبر عملائك عن علامتك التجارية...' : 'Tell your customers about your brand...'}></textarea>
             </div>
             
             <div className="pt-4 border-t border-zinc-200 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-zinc-900">Global Return Policy</label>
+                <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'سياسة الإرجاع (العامة)' : 'Global Return Policy'}</label>
                 <select 
                   value={data.returnPolicy}
                   onChange={(e) => setData({...data, returnPolicy: e.target.value})}
                   className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm cursor-pointer transition-all"
                 >
-                  <option value="no-returns">No Returns Accepted</option>
-                  <option value="global">Accept Returns (Global)</option>
+                  <option value="no-returns">{isAr ? 'لا قبول للإرجاع' : 'No Returns Accepted'}</option>
+                  <option value="global">{isAr ? 'قبول الإرجاع (عام)' : 'Accept Returns (Global)'}</option>
                 </select>
-                <p className="text-[11px] text-zinc-500">You can override this on individual products.</p>
+                <p className="text-[11px] text-zinc-500">
+                  {isAr ? "يمكنك تجاوز هذا على مستوى كل منتج على حدة." : "You can override this on individual products."}
+                </p>
               </div>
               
               {data.returnPolicy === "global" && (
                 <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-zinc-900">Return Period (Days)</label>
+                  <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'مدة الإرجاع (بالأيام)' : 'Return Period (Days)'}</label>
                   <input 
                     type="number" 
                     min="1"
@@ -284,7 +297,7 @@ export default function MerchantSettings() {
                     onChange={(e) => setData({...data, returnPeriod: e.target.value})}
                     className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" 
                   />
-                  <p className="text-[11px] text-zinc-500">Number of days a customer has to return an item.</p>
+                  <p className="text-[11px] text-zinc-500">{isAr ? 'عدد الأيام التي يمكن للعميل خلالها إرجاع المنتج.' : 'Number of days a customer has to return an item.'}</p>
                 </div>
               )}
             </div>
@@ -294,20 +307,20 @@ export default function MerchantSettings() {
         {/* Social Links Section */}
         <section className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-zinc-50 border-b border-zinc-200">
-            <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-widest">Social Links</h3>
+            <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-widest">{isAr ? 'الروابط الاجتماعية' : 'Social Links'}</h3>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-zinc-900">Facebook</label>
+                <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'فيسبوك' : 'Facebook'}</label>
                 <input type="url" value={data.facebook} onChange={(e) => setData({...data, facebook: e.target.value})} placeholder="https://facebook.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-zinc-900">Instagram</label>
+                <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'انستجرام' : 'Instagram'}</label>
                 <input type="url" value={data.instagram} onChange={(e) => setData({...data, instagram: e.target.value})} placeholder="https://instagram.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-zinc-900">Twitter / X</label>
+                <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'تويتر / إكس' : 'Twitter / X'}</label>
                 <input type="url" value={data.twitter} onChange={(e) => setData({...data, twitter: e.target.value})} placeholder="https://twitter.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
             </div>
@@ -319,14 +332,16 @@ export default function MerchantSettings() {
         <div className="flex items-center justify-between bg-white border border-zinc-200 rounded-md p-6 shadow-sm">
             <div>
                <p className="text-[13px] font-bold text-zinc-900">Commit Changes</p>
-               <p className="text-[11px] text-zinc-500 font-medium">Changes will take effect immediately across the marketplace</p>
+               <p className="text-[11px] text-zinc-500 font-medium">
+                 {isAr ? "تطبق التغييرات فوراً في المتجر." : "Changes will take effect immediately across the marketplace"}
+               </p>
             </div>
             <button 
               onClick={handleSave}
               disabled={isSaving}
               className={`h-[40px] px-10 rounded-md text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2 ${success ? 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-600' : 'bg-[#febd69] hover:bg-[#f7ac44] text-zinc-900 border border-[#e5a850]'}`}
             >
-              {isSaving ? <Loader size="sm" text="" /> : success ? <><CheckCircle2 size={16} /> Profile Updated</> : "Save Settings"}
+              {isSaving ? <Loader size="sm" text="" /> : success ? <><CheckCircle2 size={16} /> {isAr ? "تم تحديث الملف الشخصي" : "Profile Updated"}</> : (isAr ? "حفظ الإعدادات" : "Save Settings")}
             </button>
         </div>
       </div>

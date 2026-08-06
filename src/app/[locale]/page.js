@@ -7,6 +7,7 @@ import SuperBuyerSection from "@/components/SuperBuyerSection";
 import Testimonials from "@/components/Testimonials";
 import VideoPromo from "@/components/VideoPromo";
 import ProductGrid from "@/components/ProductGrid";
+import MadeInJordan from "@/components/MadeInJordan";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { ChevronRight, Smartphone, Watch, Laptop, Shirt, Home as HomeIcon, Zap, Tag, Star, ShieldCheck, Truck, ShoppingBag, Flame, Trophy, Clock, Menu, ChevronDown, Lock, CreditCard, RefreshCcw, Bell } from "lucide-react";
@@ -72,13 +73,16 @@ export default async function Home() {
       if (!v) return false;
       const metaArray = Array.isArray(v.meta_data) ? v.meta_data : [];
       const meta = Object.fromEntries(metaArray.filter(m => m && m.key).map(m => [m.key, m.value]));
-      return meta.dokan_enable_selling === "yes";
+      return meta.dokan_enable_selling !== "no";
     });
 
+    const activeList = approvedVendors.length > 0 ? approvedVendors : (allVendors || []);
+
     if (featuredIds.length > 0) {
-      vendors = approvedVendors.filter(v => v && featuredIds.includes(v.id));
+      const featured = activeList.filter(v => v && featuredIds.includes(v.id));
+      vendors = featured.length > 0 ? featured : activeList;
     } else {
-      vendors = approvedVendors;
+      vendors = activeList;
     }
 
     // Map customer avatars to feedback reviews
@@ -89,7 +93,9 @@ export default async function Home() {
         const meta = Array.isArray(c.meta_data) ? c.meta_data : [];
         const avatarUrl = meta.find(m => m && m.key === "mahally_avatar_url")?.value || meta.find(m => m && m.key === "mahally_store_logo")?.value || c.avatar_url || null;
         const avatarBgColor = meta.find(m => m && m.key === "mahally_avatar_bg_color")?.value || "#9b8676";
-        customerMap[c.id] = { avatarUrl, avatarBgColor };
+        const roleFromMeta = meta.find(m => m && m.key === "mahally_role")?.value;
+        const role = roleFromMeta || (c.roles && c.roles.length > 0 ? c.roles[0] : "customer");
+        customerMap[c.id] = { avatarUrl, avatarBgColor, role };
       });
 
       feedback = (feedback || []).map(f => {
@@ -97,7 +103,8 @@ export default async function Home() {
           return {
             ...f,
             avatarUrl: customerMap[f.userId].avatarUrl || f.avatarUrl || "",
-            avatarBgColor: customerMap[f.userId].avatarBgColor || f.avatarBgColor || "#9b8676"
+            avatarBgColor: customerMap[f.userId].avatarBgColor || f.avatarBgColor || "#9b8676",
+            role: customerMap[f.userId].role || f.role || "customer"
           };
         }
         return f;
@@ -148,6 +155,13 @@ export default async function Home() {
       {/* 4. TODAY'S DEALS (Ebay Style with Timers) */}
       <div className="py-5 bg-white">
         <LimitedTimeOffers products={products} />
+      </div>
+
+      <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
+
+      {/* 5.5 MADE IN JORDAN SECTION */}
+      <div className="py-5 bg-white">
+        <MadeInJordan products={products} />
       </div>
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>

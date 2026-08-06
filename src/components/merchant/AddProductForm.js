@@ -310,6 +310,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
         name: productToEdit.name || "",
         description: productToEdit.description || "",
         short_description: productToEdit.short_description || "",
+        // Use || chain so null/undefined/"" all fall back to price then ""
         regular_price: productToEdit.regular_price || productToEdit.price || "",
         sale_price: (productToEdit.sale_price && productToEdit.sale_price !== "0.00" && productToEdit.sale_price !== "0") ? productToEdit.sale_price : "",
         sku: productToEdit.sku || "",
@@ -338,12 +339,17 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
             setFormData(prev => ({
               ...prev,
               ...data,
-              regular_price: data.regular_price || data.price || prev.regular_price,
+              // Treat null/undefined/"" all as missing so we fall back safely
+              regular_price: (data.regular_price !== null && data.regular_price !== undefined && data.regular_price !== "")
+                ? data.regular_price
+                : (data.price || prev.regular_price || ""),
               sale_price: (data.sale_price && data.sale_price !== "0.00" && data.sale_price !== "0") ? data.sale_price : (data.sale_price === "" ? "" : prev.sale_price),
               date_on_sale_from: formatDateForInput(data.date_on_sale_from) || prev.date_on_sale_from,
               date_on_sale_to: formatDateForInput(data.date_on_sale_to) || prev.date_on_sale_to,
               variations: data.variations_data || prev.variations,
               categories: (data.categories || []).map(c => ({ id: c.id })),
+              // Explicitly map brands to {id} objects so display lookup always works
+              brands: (data.brands || prev.brands || []).map(b => ({ id: b.id })),
               images: (data.images || []).map(img => ({ id: img.id, src: img.src })),
               return_policy: data.meta_data?.find(m => m.key === 'mahally_return_policy')?.value || "global",
               return_period: data.meta_data?.find(m => m.key === 'mahally_return_period')?.value || ""
@@ -402,7 +408,12 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      setTags([...tags, data]);
+      setTags(prev => [...prev, data]);
+      // Auto-select the newly created tag so it's attached to the product
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, { id: data.id }]
+      }));
       setNewTagName("");
     } catch (err) {
       setError(err.message);
@@ -432,10 +443,23 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
+    setFormData(prev => {
+      const nextState = {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value
+      };
+      
+      // Auto-update stock status based on quantity if managing stock
+      if ((name === "stock_quantity" && nextState.manage_stock) || (name === "manage_stock" && checked)) {
+        if (Number(nextState.stock_quantity) > 0 && nextState.stock_status === "outofstock") {
+           nextState.stock_status = "instock";
+        } else if (Number(nextState.stock_quantity) <= 0 && nextState.stock_status === "instock") {
+           nextState.stock_status = "outofstock";
+        }
+      }
+      
+      return nextState;
+    });
   };
 
   const handleEnhanceWithAI = async () => {
@@ -1035,7 +1059,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         type="number"
                         step="0.01"
                         name="regular_price"
-                        value={formData.regular_price || ""}
+                        value={formData.regular_price !== undefined ? formData.regular_price : ""}
                         onChange={handleInputChange}
                         placeholder="0.00"
                         className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] font-bold outline-none focus:border-[#be374f] transition-all shadow-inner"
@@ -1182,8 +1206,8 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       </label>
 
                       {/* Display Gallery Images (Skip index 0 which is main) */}
-                      {formData.images.slice(1).filter(img => img.src).map((img) => (
-                        <div key={img.id} className="relative aspect-square rounded-xl border border-zinc-200 overflow-hidden group shadow-sm">
+                      {formData.images.slice(1).filter(img => img.src).map((img, index) => (
+                        <div key={img.id || img.src || index} className="relative aspect-square rounded-xl border border-zinc-200 overflow-hidden group shadow-sm">
                           <Image src={img.src} alt="Gallery image" fill className="object-cover" />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button 
@@ -1224,9 +1248,9 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto ps-2 custom-scrollbar">
-                        {categories.map(cat => (
+                        {categories.map((cat, index) => (
                           <button
-                            key={cat.id}
+                            key={cat.id || `cat-${index}`}
                             type="button"
                             onClick={() => handleCategoryToggle(cat.id)}
                             className={`flex items-center justify-between px-4 py-2.5 rounded-lg border text-[12px] font-bold transition-all ${
@@ -1262,9 +1286,9 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                         </button>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {tags.map(tag => (
+                        {tags.map((tag, index) => (
                           <button
-                            key={tag.id}
+                            key={tag.id || `tag-${index}`}
                             type="button"
                             onClick={() => {
                               const exists = formData.tags.find(t => t.id === tag.id);
@@ -1324,20 +1348,20 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                           }}
                           className="flex-1 h-10 px-3 bg-white border border-zinc-300 rounded-lg text-[13px] outline-none"
                         >
-                          <option value="">{l("Choose Existing...")}</option>
-                          {brandsList.map(brand => (
-                            <option key={brand.id} value={brand.id}>{decodeEntities(brand.name)}</option>
+                          <option key="__placeholder__" value="">{l("Choose Existing...")}</option>
+                          {brandsList.map((brand, index) => (
+                            <option key={brand.id || `brand-${index}`} value={brand.id}>{decodeEntities(brand.name)}</option>
                           ))}
                         </select>
                       </div>
                       
                       {/* Active Brand Display */}
                       <div className="flex flex-wrap gap-2">
-                         {(formData.brands || []).map(b => {
+                         {(formData.brands || []).map((b, index) => {
                            const brandObj = brandsList.find(bl => bl.id === b.id);
                            if (!brandObj) return null;
                            return (
-                            <span key={b.id} className="px-3 py-1 bg-[#febd69] text-zinc-900 text-[11px] font-bold rounded-full flex items-center gap-2">
+                            <span key={b.id || `active-brand-${index}`} className="px-3 py-1 bg-[#febd69] text-zinc-900 text-[11px] font-bold rounded-full flex items-center gap-2">
                               {decodeEntities(brandObj.name)}
                               <button 
                                 type="button"

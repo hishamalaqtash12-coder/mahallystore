@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import { resetAdminIdCache } from "@/lib/messages";
 
 const SETTINGS_PATH = path.join(process.cwd(), "src/data/settings.json");
 
@@ -17,7 +18,9 @@ export async function GET() {
       advertisingEnabled: true,
       reportingEnabled: false,
       promoVideoTitle: "Mahally Platform",
-      supportEmail: "support@mahally.jo"
+      supportEmail: "support@mahally.jo",
+      supportUserId: null,
+      supportUserName: ""
     });
   }
 }
@@ -36,6 +39,8 @@ export async function POST(request) {
       advertisingEnabled: body.advertisingEnabled !== false,
       reportingEnabled: body.reportingEnabled === true,
       supportEmail: body.supportEmail || "support@mahally.jo",
+      supportUserId: body.supportUserId ? Number(body.supportUserId) : null,
+      supportUserName: body.supportUserName || "",
       socialFacebook: body.socialFacebook || "",
       socialInstagram: body.socialInstagram || "",
       socialTwitter: body.socialTwitter || "",
@@ -43,6 +48,8 @@ export async function POST(request) {
     };
 
     await fs.writeFile(SETTINGS_PATH, JSON.stringify(newSettings, null, 2), "utf8");
+    // Invalidate the getAdminId() cache so new support user takes effect immediately
+    resetAdminIdCache();
     return NextResponse.json({ success: true, settings: newSettings });
   } catch (error) {
     console.error("Settings POST error:", error);

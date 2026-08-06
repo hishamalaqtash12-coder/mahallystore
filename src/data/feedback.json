@@ -1,5 +1,48 @@
 [
   {
+    "userId": 35,
+    "userName": "Ammar One Stop Shop",
+    "userEmail": "ammarm.odeh@gmail.com",
+    "role": "vendor",
+    "date": "2026-08-05T22:46:49.339Z",
+    "rating": 4,
+    "categories": [],
+    "specificIssue": "",
+    "comment": "رسالة اختبار للنظام!",
+    "path": "/",
+    "avatarUrl": "/uploads/vendors/logos/1785967778193-WhatsApp_Image_2026-07-30_at_00.22.32_(1).jpeg",
+    "avatarBgColor": "#9b8676"
+  },
+  {
+    "userId": 1,
+    "userName": "Ammar API Tester",
+    "userEmail": "ammarm.odeh@gmail.com",
+    "role": "admin",
+    "date": "2026-07-31T09:31:38.989Z",
+    "rating": 5,
+    "categories": [
+      "Bug"
+    ],
+    "specificIssue": "Brevo API HTTP Test",
+    "comment": "Testing if the new HTTP API method bypasses the ISP port block.",
+    "avatarUrl": "",
+    "avatarBgColor": ""
+  },
+  {
+    "userId": 36,
+    "userName": "Nizar Odeh",
+    "userEmail": "ammarmmodeh@outlook.com",
+    "role": "customer",
+    "date": "2026-07-31T09:53:25.010Z",
+    "rating": 5,
+    "categories": [],
+    "specificIssue": "",
+    "comment": "ممتاز، تجربة سلسة ورائعة",
+    "path": "/",
+    "avatarUrl": "/uploads/avatars/1779370630853-802_main-24.jpg",
+    "avatarBgColor": "#3B82F6"
+  },
+  {
     "userId": 101,
     "userName": "أسامة الكردي",
     "userEmail": "osama.kurdi@example.com",

@@ -15,10 +15,8 @@ import {
   Bell,
   LogOut,
   HelpCircle,
-  Home,
   Database,
   Clock,
-  ShieldCheck,
   CreditCard,
   RefreshCw,
   Truck,
@@ -37,9 +35,9 @@ const menuItems = [
     { name: "Promotions", arName: "العروض الترويجية", href: "/merchant/dashboard/advertising", icon: Megaphone },
   ]},
   { group: "FINANCE", arGroup: "المالية", items: [
+    { name: "Reports", arName: "التقارير", href: "/merchant/dashboard/reports", icon: BarChart3 },
     { name: "Withdraw", arName: "السحب والتحصيل", href: "/merchant/dashboard/withdraw", icon: RefreshCw },
     { name: "Refunds", arName: "الاسترجاع", href: "/merchant/dashboard/refunds", icon: Undo2 },
-    { name: "Reports", arName: "التقارير", href: "/merchant/dashboard/reports", icon: BarChart3 },
   ]},
   { group: "FEEDBACK", arGroup: "الآراء والملاحظات", items: [
     { name: "Inbox", arName: "الرسائل", href: "/messages", icon: MessageSquare },
@@ -50,7 +48,6 @@ const menuItems = [
   { group: "STORE", arGroup: "المتجر", items: [
     { name: "Settings", arName: "الإعدادات", href: "/merchant/dashboard/settings", icon: Settings },
     { name: "Shipping", arName: "الشحن والتوصيل", href: "/merchant/dashboard/shipping", icon: Truck },
-    { name: "Billing & Plans", arName: "الفواتير والاشتراكات", href: "/merchant/dashboard/billing", icon: CreditCard },
     { name: "Help Center", arName: "مركز المساعدة", href: "/help", icon: HelpCircle },
   ]}
 ];
@@ -62,29 +59,29 @@ export default function DashboardSidebar() {
   const isAr = locale === "ar";
 
   return (
-    <aside className="fixed end-0 top-0 z-40 h-screen w-64 bg-white text-zinc-900 flex flex-col border-r border-zinc-200">
+    <aside className={`fixed top-0 z-40 h-screen w-64 bg-white text-zinc-900 flex flex-col border-zinc-200 shadow-sm ${isAr ? 'right-0 border-l' : 'left-0 border-r'}`}>
       {/* Logo Area */}
       <div className="p-6 border-b border-zinc-200 h-[60px] flex items-center">
-              <Link href="/merchant/dashboard">
+              <Link href="/">
                 <Image 
                   src="/mahally-logo.webp" 
                   alt="Mahally.jo Logo" 
                   width={140} 
                   height={45} 
-                  className="object-contain"
+                  className="object-contain h-auto max-w-[120px]"
                   priority
                 />
               </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-6 overflow-y-auto no-scrollbar py-6">
+      <nav className="flex-1 overflow-y-auto no-scrollbar py-6 px-3 space-y-6">
         {menuItems.map((group, idx) => (
           <div key={idx} className="space-y-1">
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-3 mb-2">
+            <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider px-3 mb-2">
               {isAr ? group.arGroup : group.group}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {group.items.map((item) => {
                 const isActive = pathname === item.href;
                 if (item.href === "/admin/feedback" && !isAdmin) return null;
@@ -95,7 +92,7 @@ export default function DashboardSidebar() {
                   <Link 
                     key={item.name} 
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${isActive ? 'bg-zinc-100 text-[#be374f] font-bold' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'}`}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${isActive ? 'bg-zinc-100 text-[#be374f] font-semibold' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'}`}
                   >
                     <item.icon size={18} className={isActive ? 'text-[#be374f]' : 'text-zinc-400'} />
                     {isAr ? item.arName : item.name}
@@ -122,11 +119,6 @@ export default function DashboardSidebar() {
                   <Clock size={8} /> {isAr ? "قيد الانتظار" : "PENDING"}
                 </div>
               )}
-              {isApprovedVendor && (
-                <div className="flex items-center gap-0.5 px-1 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[9px] font-bold border border-emerald-100">
-                  <ShieldCheck size={8} /> {isAr ? "نشط" : "ACTIVE"}
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -139,7 +131,7 @@ export default function DashboardSidebar() {
         )}
         <button 
           onClick={logout}
-          className="w-full flex items-center gap-3 px-2 py-2 text-zinc-400 hover:text-red-600 text-[12px] font-medium transition-colors"
+          className="w-full flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 hover:bg-red-50 hover:text-red-600 transition-colors"
         >
           <LogOut size={16} /> {isAr ? "تسجيل الخروج" : "Logout"}
         </button>

@@ -370,7 +370,8 @@ function RegisterContent() {
               alt="Mahally.jo Logo" 
               width={160} 
               height={50} 
-              className="object-contain"
+              className="object-contain h-auto w-auto"
+              style={{ width: "auto", height: "auto" }}
               priority
             />
           </Link>

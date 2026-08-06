@@ -4,9 +4,9 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const { fromId, toId, text, metadata, locale } = await request.json();
+    const { fromId, toId, text, mediaUrl, mediaType, customMeta, replyTo, locale } = await request.json();
 
-    if (!fromId || !toId || !text) {
+    if (!fromId || !toId || (!text && !mediaUrl && !customMeta)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -16,7 +16,12 @@ export async function POST(request) {
       fromId,
       toId,
       text,
-      metadata: metadata || {}
+      metadata: {
+        ...(replyTo   ? { replyTo }   : {}),
+        ...(mediaUrl  ? { mediaUrl }  : {}),
+        ...(mediaType ? { mediaType } : {}),
+        ...(customMeta ? { customMeta } : {}),
+      }
     });
 
     // Automated Support Auto-Reply

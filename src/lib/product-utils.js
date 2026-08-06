@@ -5,7 +5,8 @@
 export function isProductOutOfStock(product) {
   if (!product) return true;
   if (product.stock_status === "outofstock") return true;
-  if (product.manage_stock && product.stock_quantity !== null && parseInt(product.stock_quantity) <= 0) return true;
+  // If stock quantity is explicitly 0 or less, treat as out of stock (catches WooCommerce sync issues)
+  if (product.stock_quantity !== null && parseInt(product.stock_quantity) <= 0) return true;
   return false;
 }
 

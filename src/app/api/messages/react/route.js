@@ -1,5 +1,6 @@
 import { wcApi } from "@/lib/woocommerce";
 import { NextResponse } from "next/server";
+import { getAdminId } from "@/lib/messages";
 
 /** POST /api/messages/react — Add or remove a reaction for BOTH sides */
 export async function POST(request) {
@@ -14,7 +15,8 @@ export async function POST(request) {
 
     // Function to sync reaction for one user
     const syncReactionForUser = async (uId, partnerId) => {
-      const targetId = uId === "admin" ? 1 : uId;
+      const adminId = await getAdminId();
+      const targetId = uId === "admin" ? adminId : uId;
       if (isNaN(targetId)) return;
       
       try {

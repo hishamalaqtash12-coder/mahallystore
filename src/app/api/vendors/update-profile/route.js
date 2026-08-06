@@ -1,4 +1,4 @@
-import { updateCustomerMeta, getCustomerById } from "@/lib/woocommerce";
+import { updateCustomerMeta, getCustomerById, clearVendorsCache } from "@/lib/woocommerce";
 import { VENDOR_CACHE } from "@/app/api/vendors/[slug]/route";
 import { NextResponse } from "next/server";
 
@@ -86,12 +86,12 @@ export async function POST(request) {
     // Update customer using the full updateCustomer function to sync billing info
     const updatePayload = {
       billing: {
-        phone: meta.mahally_store_phone,
-        first_name: meta.mahally_store_name || customer.first_name,
-        last_name: meta.mahally_store_name ? "" : customer.last_name
+        phone: meta.mahally_store_phone || customer.billing?.phone || "",
+        first_name: meta.mahally_store_name || customer.first_name || "",
+        last_name: meta.mahally_store_name ? "" : (customer.last_name || "")
       },
-      first_name: meta.mahally_store_name || customer.first_name,
-      last_name: meta.mahally_store_name ? "" : customer.last_name,
+      first_name: meta.mahally_store_name || customer.first_name || "",
+      last_name: meta.mahally_store_name ? "" : (customer.last_name || ""),
       meta_data: metaDataArray
     };
 
@@ -140,8 +140,13 @@ export async function POST(request) {
       }
     }
 
-    // Bust the vendor cache so the next GET returns fresh data
-    VENDOR_CACHE.delete(String(id));
+    // Bust the entire vendor cache so the next GET returns fresh data for any slug/id
+    if (typeof VENDOR_CACHE.clear === 'function') {
+      VENDOR_CACHE.clear();
+    }
+    
+    // Also bust the global vendors list cache (for the /vendors directory page)
+    clearVendorsCache();
 
     return NextResponse.json({ success: true });
   } catch (error) {
