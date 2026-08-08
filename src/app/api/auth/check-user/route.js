@@ -106,7 +106,21 @@ export async function POST(request) {
     const meta = Object.fromEntries((found.meta_data || []).map((m) => [m.key, m.value]));
 
     // 1. Branded Identity Enforcement
-    const role = (found.role === 'seller' || found.role === 'administrator') ? 'vendor' : (meta.mahally_role || "customer");
+    // The WordPress native role (found.role) is the absolute source of truth.
+    // If the admin changes the role in WP dashboard, we update mahally_role meta to match.
+    let role = "customer";
+    if (found.role === 'seller' || found.role === 'administrator' || found.role === 'shop_manager') {
+      role = "vendor";
+    }
+
+    if (meta.mahally_role !== role && found.role !== 'administrator') {
+      try {
+        await updateCustomerMeta(found.id, { mahally_role: role });
+        meta.mahally_role = role;
+      } catch (syncErr) {
+        console.warn("Failed to sync mahally_role:", syncErr.message);
+      }
+    }
     let mahallyId = meta.mahally_id || meta.mahally_public_id;
 
     if (!mahallyId || !mahallyId.startsWith('mah-')) {

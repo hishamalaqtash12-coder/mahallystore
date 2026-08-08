@@ -77,10 +77,12 @@ export default function SidebarFilter({ categories = [], products = [], filters,
   const [showAllTags, setShowAllTags] = useState(false);
   const [showAllSellers, setShowAllSellers] = useState(false);
 
-  // Identify active category object
   const activeCategory = useMemo(() => {
     if (!filters.category) return null;
-    return categories.find(c => c.id === Number(filters.category) || c.slug === filters.category);
+    return categories.find(c => 
+      c.id === Number(filters.category) || 
+      decodeURIComponent(c.slug) === decodeURIComponent(filters.category)
+    );
   }, [filters.category, categories]);
 
   const locale = useLocale();
@@ -213,7 +215,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
     merchant: null,
     madeInJordan: false,
     colors: [],
-    searchQuery: filters.searchQuery || "",
+    searchQuery: "",
   });
 
   return (

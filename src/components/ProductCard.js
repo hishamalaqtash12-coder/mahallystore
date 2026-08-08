@@ -10,7 +10,7 @@ import { useState } from "react";
 import QuickLookModal from "./QuickLookModal";
 import { useAuth } from "@/context/AuthContext";
 
-import { isProductOutOfStock, getProductMerchant } from "@/lib/product-utils";
+import { isProductOutOfStock, getProductMerchant, getProductUrl } from "@/lib/product-utils";
 import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 import { useEffect, useRef } from "react";
 
@@ -86,7 +86,7 @@ function CountdownTimer({ expiryDate, discountAmount, product }) {
 
 export default function ProductCard({ product }) {
   const t = useTranslations("ProductCard");
-  const { user, wooId, isVendor } = useAuth();
+  const { user, wooId, isVendor, isAdmin } = useAuth();
   const { addToCart, removeFromCart, isInCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
@@ -146,7 +146,7 @@ export default function ProductCard({ product }) {
     <div className="relative flex flex-col h-full bg-white group border border-zinc-200/80 hover:border-brand/40 transition-all duration-300 rounded-2xl p-2.5 shadow-xs hover:shadow-xl hover:-translate-y-1 min-w-0">
       {/* IMAGE */}
       <div className="relative aspect-square bg-[#F8F9FA] rounded-xl overflow-hidden flex items-center justify-center p-3 mb-2.5 group/img">
-        <Link href={`/product/${product.slug}`} className="block h-full w-full relative">
+        <Link href={getProductUrl(product)} className="block h-full w-full relative">
           <Image
             src={imageUrl}
             alt={product.name}
@@ -214,7 +214,7 @@ export default function ProductCard({ product }) {
         )}
 
         <div className="relative group/title">
-          <Link href={`/product/${product.slug}`}>
+          <Link href={getProductUrl(product)}>
             <h3 className="text-xs sm:text-sm leading-snug font-bold text-zinc-900 group-hover:text-brand transition-colors line-clamp-2">
               {product.name}
             </h3>
@@ -309,7 +309,7 @@ export default function ProductCard({ product }) {
             );
           }
 
-          if (isVendor) {
+          if (isVendor || isAdmin) {
             return (
               <div
                 className="absolute bottom-3 end-3 w-9 h-9 rounded-full bg-zinc-100 text-zinc-300 flex items-center justify-center cursor-not-allowed"

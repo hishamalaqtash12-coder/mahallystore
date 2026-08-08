@@ -48,8 +48,12 @@ export async function GET(request, { params }) {
 
     const { vendor: v, products } = result;
 
-    // Strict Role Check: Ensure they are actually a vendor (seller role or selling enabled)
-    const isVendor = v.role === "seller" || v.meta_data?.some(m => m.key === "dokan_enable_selling" && m.value === "yes");
+    // Strict Role Check: Ensure they are actually a vendor
+    const isVendor = 
+      v.role === "seller" ||
+      v.meta_data?.some(m => m.key === "dokan_enable_selling" && m.value === "yes") ||
+      v.meta_data?.some(m => m.key === "mahally_vendor_status" && m.value === "approved") ||
+      v.meta_data?.some(m => m.key === "mahally_role" && (m.value === "seller" || m.value === "administrator"));
     if (!isVendor) {
       return NextResponse.json({ error: "User is not a vendor" }, { status: 404 });
     }
@@ -101,7 +105,12 @@ export async function GET(request, { params }) {
       id: v.id,
       name: `${v.first_name} ${v.last_name}`.trim(),
       storeName: dokanStore.store_name || dokanSettings.store_name || meta.mahally_store_name || v.first_name,
-      storeSlug: meta.mahally_store_slug || dokanSettings.store_name?.toLowerCase().replace(/\s+/g, '-') || slug,
+      storeSlug: (() => {
+        const base = meta.mahally_store_slug || dokanSettings.store_name?.toLowerCase().replace(/\s+/g, '-') || slug;
+        const cleanBase = base.toLowerCase().trim().replace(/[\s_]+/g, '-').replace(/[^\u0600-\u06FFa-z0-9\-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        const stripped = cleanBase.replace(new RegExp(`-${v.id}$`), '') || cleanBase;
+        return stripped ? `${stripped}-${v.id}` : String(v.id);
+      })(),
       storeDescription: dokanStore.store_description || dokanSettings.store_description || meta.mahally_store_description || "",
       storeCategory: meta.mahally_store_category || "",
       // Use Dokan store API for resolved image URLs (banner/gravatar come as full URLs from this endpoint)

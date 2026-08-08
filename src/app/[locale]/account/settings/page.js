@@ -3,8 +3,11 @@
 import { useAuth } from "@/context/AuthContext";
 import { Globe, Coins, Languages, Check, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { redirect } from "next/navigation";
 
 export default function AccountSettingsPage() {
+  redirect("/account");
+
   const { wooId, refreshAuth, loading } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [activeEditing, setActiveEditing] = useState(null); // 'country' | 'language' | 'currency'

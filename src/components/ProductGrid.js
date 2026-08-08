@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { usePathname } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import ProductCard from "./ProductCard";
@@ -54,6 +54,35 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
     searchQuery: q || "",
   });
 
+  const router = useRouter();
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (newFilters.category && newFilters.category !== "All") {
+      const matchedCat = categories.find(c => 
+        c.id === newFilters.category || 
+        decodeURIComponent(c.slug) === decodeURIComponent(newFilters.category)
+      );
+      if (matchedCat) params.set("cat", decodeURIComponent(matchedCat.slug));
+      else params.set("cat", newFilters.category);
+    } else {
+      params.delete("cat");
+    }
+
+    if (newFilters.searchQuery) params.set("q", newFilters.searchQuery);
+    else params.delete("q");
+
+    if (newFilters.onSale) params.set("onDiscount", "true");
+    else params.delete("onDiscount");
+
+    if (newFilters.madeInJordan) params.set("madeInJordan", "true");
+    else params.delete("madeInJordan");
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   // ── Fetch categories (Bulletproof) ──
   useEffect(() => {
     fetch('/api/categories')
@@ -67,6 +96,17 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
         setCategories([]);
       });
   }, []);
+
+  // ── Sync URL Params to Local State ──
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      category: cat ? Number(cat) || cat : null,
+      searchQuery: q || "",
+      onSale: onDiscount,
+      madeInJordan: madeInJordanOnly
+    }));
+  }, [cat, q, onDiscount, madeInJordanOnly]);
 
   // ── Re-fetch products when URL params change ──
   useEffect(() => {
@@ -157,7 +197,9 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
       // Category
       if (filters.category !== null) {
         const matched = p.categories?.some(
-          c => c.id === filters.category || c.id.toString() === filters.category?.toString() || c.slug === filters.category
+          c => c.id === filters.category || 
+               c.id.toString() === filters.category?.toString() || 
+               decodeURIComponent(c.slug) === decodeURIComponent(filters.category)
         );
         if (!matched) return false;
       }
@@ -286,7 +328,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
             <>
               <span>{t("showingResults", { end: sortedProducts.length, total: totalPages * 20 })}</span>
               <span className="font-bold text-brand me-1">
-                &quot;{filters.searchQuery ? filters.searchQuery : (cat ? <span dangerouslySetInnerHTML={{ __html: categories.find(c => c.id === filters.category || c.slug === filters.category)?.name || t("category") }} /> : t("allProducts"))}&quot;
+                &quot;{filters.searchQuery ? filters.searchQuery : (cat ? <span dangerouslySetInnerHTML={{ __html: categories.find(c => c.id === filters.category || decodeURIComponent(c.slug) === decodeURIComponent(filters.category))?.name || t("category") }} /> : t("allProducts"))}&quot;
               </span>
             </>
           )}
@@ -357,7 +399,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
               categories={categories}
               products={products}
               filters={filters}
-              onFiltersChange={setFilters}
+              onFiltersChange={handleFiltersChange}
               priceBounds={priceBounds}
             />
           </div>
@@ -376,7 +418,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 categories={categories}
                 products={products}
                 filters={filters}
-                onFiltersChange={(f) => { setFilters(f); }}
+                onFiltersChange={(f) => { handleFiltersChange(f); }}
                 priceBounds={priceBounds}
               />
             </div>
@@ -409,7 +451,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
           {activeFilterCount > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-4 select-none">
               {filters.category !== null && (() => {
-                const catObj = categories.find(c => c.id === filters.category || c.slug === filters.category);
+                const catObj = categories.find(c => c.id === filters.category || decodeURIComponent(c.slug) === decodeURIComponent(filters.category));
                 return catObj ? (
                   <span key="cat" className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
                     <span dangerouslySetInnerHTML={{ __html: catObj.name }} />
@@ -479,7 +521,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 <p className="text-zinc-950 text-[16px] font-bold mb-1">{t("noProducts")}</p>
                 <p className="text-[#565959] text-[13px] mb-5">{t("noProductsDesc")}</p>
                 <button
-                  onClick={() => setFilters(f => ({ ...f, category: null, minRating: null, priceRange: null, onSale: false, freeShipping: false, inStockOnly: false, minDiscount: null, tags: [], merchant: null }))}
+                  onClick={() => handleFiltersChange({ category: null, minRating: null, priceRange: null, onSale: false, freeShipping: false, inStockOnly: false, minDiscount: null, tags: [], merchant: null, madeInJordan: false, searchQuery: "" })}
                   className="h-8 px-6 bg-brand hover:bg-brand-dark border border-brand text-white rounded-lg text-[12px] font-medium shadow-sm transition-all active:scale-98"
                 >
                   {t("clearAllFilters")}

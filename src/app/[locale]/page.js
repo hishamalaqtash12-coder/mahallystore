@@ -22,15 +22,7 @@ export default async function Home() {
   let promoData = { url: '', thumbnail: '', title: '' };
   let totalPages = 1;
 
-  // 1. Read local files first (instant synchronous operations)
-  let featuredIds = [];
-  try {
-    const featuredPath = join(process.cwd(), "src/data/featured-vendors.json");
-    if (existsSync(featuredPath)) {
-      const parsed = JSON.parse(readFileSync(featuredPath, "utf8"));
-      featuredIds = parsed.featuredIds || [];
-    }
-  } catch (e) {}
+
 
   try {
     const settingsPath = join(process.cwd(), "src/data/settings.json");
@@ -68,22 +60,25 @@ export default async function Home() {
     totalPages = productsResult?.totalPages || 1;
     categories = categoriesResult || [];
 
-    // Filter approved vendors and featured selection (bulletproof null-safe)
+    // Filter strictly approved vendors (must have dokan_enable_selling === "yes")
     const approvedVendors = (allVendors || []).filter(v => {
       if (!v) return false;
       const metaArray = Array.isArray(v.meta_data) ? v.meta_data : [];
       const meta = Object.fromEntries(metaArray.filter(m => m && m.key).map(m => [m.key, m.value]));
-      return meta.dokan_enable_selling !== "no";
+      return meta.dokan_enable_selling === "yes";
     });
 
-    const activeList = approvedVendors.length > 0 ? approvedVendors : (allVendors || []);
+    const activeList = approvedVendors;
 
-    if (featuredIds.length > 0) {
-      const featured = activeList.filter(v => v && featuredIds.includes(v.id));
-      vendors = featured.length > 0 ? featured : activeList;
-    } else {
-      vendors = activeList;
-    }
+    // Filter featured vendors based on meta field
+    const featured = activeList.filter(v => {
+      if (!v) return false;
+      const metaArray = Array.isArray(v.meta_data) ? v.meta_data : [];
+      const meta = Object.fromEntries(metaArray.filter(m => m && m.key).map(m => [m.key, m.value]));
+      return meta.mahally_show_in_carousel === "yes";
+    });
+
+    vendors = featured.length > 0 ? featured : activeList;
 
     // Map customer avatars to feedback reviews
     if (Array.isArray(customersResult) && customersResult.length > 0) {

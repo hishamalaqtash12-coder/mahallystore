@@ -249,7 +249,7 @@ export async function getProducts(options = {}, withRealRatings = false, retries
       search: options.search || null,
       featured: featuredFilter,
       status: options.status || null
-    });
+    }, {}, { tags: ['products'] });
     
     let products = (data?.products?.nodes || []).map(mapProduct);
 
@@ -463,20 +463,15 @@ export async function checkCustomerExists(email, phone) {
 }
 
 export async function getVendors({ page = 1, per_page = 40, includeRestricted = false } = {}) {
-  const cacheKey = `${page}_${per_page}_${includeRestricted}`;
-  const now = Date.now();
-  
-  if (WC_VENDORS_CACHE[cacheKey] && (now - WC_VENDORS_CACHE[cacheKey].timestamp < VENDORS_CACHE_TTL)) {
-    return WC_VENDORS_CACHE[cacheKey].data;
-  }
-
   try {
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
     const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
-    // We fetch all users (role=all) to find sellers and admins who are acting as merchants
+    // Use Next.js native fetch cache with a 'vendors' tag so revalidateTag('vendors')
+    // in the visibility API route busts this cache immediately across all server contexts.
     const response = await fetch(`${WP_URL}/wp-json/wc/v3/customers?role=all&per_page=${per_page}&page=${page}`, {
-      headers: { Authorization: `Basic ${auth}` }
+      headers: { Authorization: `Basic ${auth}` },
+      next: { tags: ['vendors'], revalidate: 300 } // 5 min default, but cleared on-demand by revalidateTag
     });
     
     if (!response.ok) {
@@ -493,27 +488,19 @@ export async function getVendors({ page = 1, per_page = 40, includeRestricted = 
         try { dokan = JSON.parse(dokan); } catch(e) { dokan = {}; }
       }
 
-      let storeSlug = "";
-      // First, use the stored mahally_store_slug if it exists (already has ID suffix from registration)
-      if (meta.mahally_store_slug) {
-        storeSlug = meta.mahally_store_slug;
-      } else {
-        // Fall back to generating a slug from the store name + user ID for uniqueness
-        const rawStoreName = dokan.store_name || meta.mahally_store_name;
-        if (rawStoreName) {
-          const baseSlug = rawStoreName
-            .toLowerCase()
-            .trim()
-            .replace(/[\s_]+/g, '-')
-            .replace(/[^\u0600-\u06FFa-z0-9\-]/g, '')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
-          storeSlug = baseSlug ? `${baseSlug}-${c.id}` : String(c.id);
-        }
-        if (!storeSlug) {
-          storeSlug = c.username || String(c.id);
-        }
-      }
+      // Build a slug from the mahally_store_slug or store name, then ALWAYS append the user ID
+      // to guarantee uniqueness even when two vendors share the same store name.
+      const rawSlugBase = meta.mahally_store_slug || dokan.store_name || meta.mahally_store_name || c.username || '';
+      const cleanBase = rawSlugBase
+        .toLowerCase()
+        .trim()
+        .replace(/[\s_]+/g, '-')
+        .replace(/[^\u0600-\u06FFa-z0-9\-]/g, '')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      // Strip any existing ID suffix (e.g. if mahally_store_slug already ends in -35) before re-appending
+      const strippedBase = cleanBase.replace(new RegExp(`-${c.id}$`), '') || cleanBase;
+      const storeSlug = strippedBase ? `${strippedBase}-${c.id}` : String(c.id);
 
       return {
         id: c.id,
@@ -543,10 +530,6 @@ export async function getVendors({ page = 1, per_page = 40, includeRestricted = 
       );
     }
     
-    WC_VENDORS_CACHE[cacheKey] = {
-      data: vendors,
-      timestamp: now
-    };
     return vendors;
   } catch (error) {
     console.error("Error fetching vendors:", error);
@@ -684,29 +667,32 @@ export async function getVendorById(vendorId) {
 
 export async function getVendorBySlug(slug) {
   try {
-    // If slug is a plain number OR starts with a number followed by a dash, look up by ID
-    const plainId = /^\d+$/.test(slug) ? parseInt(slug) : null;
-    const idMatch = slug.match(/^(\d+)-/);
-    if (plainId) {
-      return await getVendorById(plainId);
+    // If slug is a plain number, look up directly by WooCommerce customer ID
+    if (/^\d+$/.test(slug)) {
+      return await getVendorById(parseInt(slug));
     }
-    if (idMatch) {
-      return await getVendorById(parseInt(idMatch[1]));
+
+    // Primary pattern: slug ends with -{id} (e.g. "ammar-for-electronics-35")
+    // This is the canonical format we generate in getVendors() for uniqueness.
+    const idSuffixMatch = slug.match(/-(\d+)$/);
+    if (idSuffixMatch) {
+      const vendorId = parseInt(idSuffixMatch[1]);
+      return await getVendorById(vendorId);
     }
     
-    // Fetch all vendors (with full meta_data) and find by slug
+    // Fallback: full-text slug match against all vendors (handles old links without ID suffix)
     const vendors = await getVendors({ per_page: 100, includeRestricted: true });
     const cleanQuerySlug = slug.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '');
     const matchedVendor = vendors.find(c => {
-      // 1. Check mahally_store_slug
+      // 1. Canonical storeSlug (already includes ID suffix)
+      if (c.storeSlug && c.storeSlug.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '') === cleanQuerySlug) return true;
+
+      // 2. Raw mahally_store_slug meta value
       const mahallyStoreSlug = c.meta_data?.find(m => m.key === "mahally_store_slug")?.value || "";
       if (mahallyStoreSlug && mahallyStoreSlug.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '') === cleanQuerySlug) return true;
 
-      // 2. Check username
+      // 3. Username as last resort
       if (c.username && c.username.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '') === cleanQuerySlug) return true;
-
-      // 3. Check pre-generated storeSlug (from dokan_profile_settings)
-      if (c.storeSlug && c.storeSlug.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '') === cleanQuerySlug) return true;
 
       return false;
     });
@@ -801,9 +787,34 @@ export async function getVendorBySlug(slug) {
 
 export async function getCustomerById(id) {
   try {
+    const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://fallback.mahally.local';
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
+    
+    const res = await fetch(`${WP_URL}/wp-json/wc/v3/customers/${id}`, {
+      headers: { Authorization: `Basic ${auth}` },
+      next: { revalidate: 300, tags: [`customer-${id}`] }
+    });
+    
+    if (res.ok) {
+      const c = await res.json();
+      return {
+        id: c.id,
+        ID: c.id,
+        email: c.email,
+        first_name: c.first_name,
+        last_name: c.last_name,
+        username: c.username,
+        date_created: c.date_created,
+        avatar_url: c.avatar_url,
+        meta_data: c.meta_data || [],
+        roles: [c.role]
+      };
+    }
+
     const data = await fetchGraphQL(GET_VENDOR, { id: parseInt(id) }, getAuthHeaders());
     return mapUser(data?.user);
   } catch (error) {
+    console.error(`Error fetching customer ${id}:`, error);
     return null;
   }
 }

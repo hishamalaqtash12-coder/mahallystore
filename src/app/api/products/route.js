@@ -193,7 +193,7 @@ export async function GET(request) {
     // Resolve category slug → ID
     if (cat) {
       const categories = await getCategories({ hide_empty: false, per_page: 100 });
-      const found = categories.find(c => c.slug === cat);
+      const found = categories.find(c => decodeURIComponent(c.slug) === decodeURIComponent(cat));
       if (found) {
         options.category = found.id;
       } else {

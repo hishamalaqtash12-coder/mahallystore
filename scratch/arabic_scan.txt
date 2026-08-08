@@ -121,7 +121,7 @@ Line 855: <div className="pb-2 text-[13px] font-medium text-zinc-900">معلوم
 Line 863: {tab === "info" ? "معلومات" : tab === "products" ? "المنتجات" : "الطلبات"}
 Line 876: <h3 className="text-[15px] font-semibold text-zinc-900">دعم Mahally</h3>
 Line 878: <BadgeCheck size={11} /> مسؤول موثوق
-Line 882: <p className="text-[12px] text-zinc-500 text-center leading-relaxed">معالجة النزاعات في الطلبات والمشكلات التقنية وإعداد التجار في المنصة.</p>
+Line 882: <p className="text-[12px] text-zinc-500 text-center leading-relaxed">تقديم الدعم الفني والتشغيلي للمشترين والبائعين، والإجابة عن الاستفسارات، والمساعدة في استخدام المنصة.</p>
 Line 902: <BadgeCheck size={11} /> {vendor?.role === "customer" ? "مشتري موثوق" : "متجر رسمي"}
 Line 908: <span className="text-zinc-500">عضو منذ</span>
 Line 913: <span className="text-zinc-500">إجمالي الطلبات</span>

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Loader from "@/components/Loader";
 import { useLocale } from "next-intl";
+import { getProductUrl } from "@/lib/product-utils";
 
 export default function MerchantReviewsPage() {
   const locale = useLocale();
@@ -175,7 +176,7 @@ export default function MerchantReviewsPage() {
                           {new Date(review.date_created).toLocaleDateString()}
                        </div>
                         <a 
-                           href={`/product/${review.product_id}`}
+                           href={getProductUrl(review)}
                            target="_blank"
                            rel="noopener noreferrer"
                            className="flex items-center gap-2 text-[11px] text-[#be374f] font-bold hover:text-[#8f2d4a] transition-colors"

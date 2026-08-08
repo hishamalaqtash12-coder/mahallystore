@@ -19,15 +19,53 @@ export async function GET() {
     const totalVendors = parseInt(vendorsRes.headers.get('x-wp-total') || '0');
 
     const allOrders = await ordersRes.json();
-    const completedOrders = Array.isArray(allOrders) ? allOrders.filter(o => o.status !== 'cancelled' && o.status !== 'failed') : [];
-    const calculatedRevenue = completedOrders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0).toFixed(2);
+    
+    // Only count STRICTLY completed orders
+    const completedOrders = Array.isArray(allOrders) ? allOrders.filter(o => o.status === 'completed') : [];
+    
+    let totalGMV = 0;
+    let totalAdminCommission = 0;
+
+    completedOrders.forEach(o => {
+      const orderTotal = parseFloat(o.total || 0);
+      totalGMV += orderTotal;
+
+      o.line_items.forEach(item => {
+        const itemTotal = parseFloat(item.total || 0);
+        const metaType = item.meta_data.find(m => m.key === '_dokan_commission_type')?.value;
+        const metaRate = parseFloat(item.meta_data.find(m => m.key === '_dokan_commission_rate')?.value || 0);
+        const metaFee = parseFloat(item.meta_data.find(m => m.key === '_dokan_additional_fee')?.value || 0);
+        
+        let itemComm = 0;
+        if (metaType === 'percentage' || metaType === 'flat') {
+            itemComm = (itemTotal * (metaRate / 100)) + metaFee;
+        } else if (metaType === 'fixed') {
+            itemComm = metaFee;
+        } else {
+            itemComm = (itemTotal * (metaRate / 100)) + metaFee;
+        }
+
+        // Cap commission so it doesn't exceed the item total (handles JOD 1 fee on 0-value items)
+        if (itemComm > itemTotal) {
+          itemComm = itemTotal;
+        }
+
+        totalAdminCommission += itemComm;
+      });
+    });
+
+    const totalVendorEarnings = totalGMV - totalAdminCommission;
 
     const stats = {
       totalProducts,
       totalOrders,
       totalVendors,
-      totalRevenue: calculatedRevenue,
-      monthlyRevenue: calculatedRevenue,
+      totalGMV: totalGMV.toFixed(2),
+      adminRevenue: totalAdminCommission.toFixed(2),
+      vendorEarnings: totalVendorEarnings.toFixed(2),
+      // keep backward compatibility just in case other things use it
+      totalRevenue: totalAdminCommission.toFixed(2), 
+      monthlyRevenue: totalAdminCommission.toFixed(2),
     };
 
     return NextResponse.json(stats);

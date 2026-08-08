@@ -65,9 +65,9 @@ async function main() {
 
   // Build meta updates
   const metaUpdates = [
-    { key: "dokan_enable_selling",   value: "yes" },
-    { key: "mahally_vendor_status",  value: "approved" },
-    { key: "mahally_role",           value: "vendor" },
+    { key: "dokan_enable_selling", value: "yes" },
+    { key: "mahally_vendor_status", value: "approved" },
+    { key: "mahally_role", value: "vendor" },
   ];
 
   // Ensure mahally_id exists
@@ -90,7 +90,7 @@ async function main() {
   console.log(`   Role:   ${updated.role}`);
   console.log(`\n   ✅ dokan_enable_selling = yes`);
   console.log(`   ✅ mahally_vendor_status = approved`);
-  console.log(`   ✅ You can now log in and add products from /vendor/dashboard`);
+  console.log(`   ✅ You can now log in and add products from /merchant/dashboard`);
 }
 
 main().catch((err) => {

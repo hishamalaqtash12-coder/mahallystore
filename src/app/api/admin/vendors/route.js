@@ -42,7 +42,7 @@ export async function GET(request) {
         storeSlug: storeSlug,
         storeCategory: meta.mahally_store_category || "",
         storeDescription: storeDescription,
-        status: (meta.dokan_enable_selling === "yes") ? "approved" : (meta.mahally_vendor_status || "pending"),
+        status: (meta.dokan_enable_selling === "yes") ? "approved" : (meta.mahally_vendor_status === "rejected" ? "rejected" : "pending"),
         membershipPlan: meta.mahally_membership_plan || "free",
         dateCreated: v.date_created,
       };

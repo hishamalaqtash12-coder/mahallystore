@@ -49,7 +49,6 @@ const menuItems = [
   {
     groupKey: "sidebarSystem",
     items: [
-      { nameKey: "sidebarVisibility", href: "/admin/visibility-control", icon: AlertTriangle },
       { nameKey: "sidebarWordPress", href: process.env.NEXT_PUBLIC_WORDPRESS_URL + "/wp-admin", icon: ExternalLink, external: true },
       { nameKey: "sidebarSettings", href: "/admin/settings", icon: Settings },
     ]

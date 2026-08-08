@@ -17,6 +17,7 @@ export default function RecentlyViewedTracker({ product }) {
       recent.unshift({
         id: product.id,
         name: product.name,
+        slug: product.slug,
         image: product.images?.[0]?.src || "https://placehold.co/100",
         price: product.price || product.regular_price,
       });

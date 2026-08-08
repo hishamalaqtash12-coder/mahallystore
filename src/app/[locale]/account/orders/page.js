@@ -18,6 +18,7 @@ import TrackingModal from "@/components/TrackingModal";
 import ReviewSubmissionModal from "@/components/ReviewSubmissionModal";
 import ReturnRequestModal from "@/components/ReturnRequestModal";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { getProductUrl } from "@/lib/product-utils";
 
 const STATUS_TABS = {
   "all": null,
@@ -241,10 +242,10 @@ function AccountOrdersContent() {
                                   {item.image?.src ? <img src={item.image.src} alt={item.name} className="w-full h-full object-contain" /> : <Package size={24} className="text-gray-200" />}
                                 </div>
                                 <div className="flex-1">
-                                  <Link href={`/product/${item.product_id}`} className="text-[14px] text-gray-800 hover:text-[#be374f] font-medium line-clamp-1 mb-1">{item.name}</Link>
+                                  <Link href={getProductUrl(item)} className="text-[14px] text-gray-800 hover:text-[#be374f] font-medium line-clamp-1 mb-1">{item.name}</Link>
                                   <p className="text-[12px] text-gray-500 mb-2">الكمية: {item.quantity}</p>
                                   <div className="flex items-center gap-3">
-                                    <Link href={`/product/${item.product_id}`} className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors flex items-center">شراء مرة أخرى</Link>
+                                    <Link href={getProductUrl(item)} className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors flex items-center">شراء مرة أخرى</Link>
                                     {!isDelivered && (
                                       <button onClick={() => { setSelectedOrder(order); setIsTrackingOpen(true); }} className="cursor-pointer h-8 px-4 border border-gray-200 rounded-full text-[12px] font-bold hover:bg-gray-50 transition-colors">تتبع الشحنة</button>
                                     )}

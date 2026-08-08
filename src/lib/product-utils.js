@@ -34,6 +34,24 @@ export function getProductMerchant(product) {
   return { name, id, slug };
 }
 
+export function getProductIdentifier(product) {
+  if (!product) return "";
+  const { name: storeName, id: storeId } = getProductMerchant(product);
+  const cleanStoreName = (storeName || "MAH").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  const storePrefix = cleanStoreName.substring(0, 3).padEnd(3, "X");
+  const vendorIdStr = storeId || "0";
+  const productId = product.id || product.product_id || 0;
+  return `MAH-${storePrefix}-${vendorIdStr}-${productId}`;
+}
+
+export function getProductUrl(product) {
+  if (!product) return "/";
+  const productId = product.id || product.product_id || 0;
+  const slug = product.slug || productId || "product";
+  const identifier = getProductIdentifier(product);
+  return `/product/${identifier}-${slug}`;
+}
+
 // Complete Exhaustive English Category Translations Dictionary
 const CATEGORY_TRANSLATIONS_EN = {
   // Main Parent Categories

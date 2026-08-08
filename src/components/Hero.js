@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
-import { getCategoryName, getCategorySlug } from "@/lib/product-utils";
+import { getCategoryName, getCategorySlug, getProductUrl } from "@/lib/product-utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -99,7 +99,7 @@ const MerchantCarousel = memo(({ activeVendors }) => {
             "https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=400&auto=format&fit=crop", // Kitchen
             "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop", // Games
             "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop", // Books
-            "https://images.unsplash.com/photo-1594035910387-fea47714263f?q=80&w=400&auto=format&fit=crop", // Perfumes
+            "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=400&auto=format&fit=crop", // Perfumes
             "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=400&auto=format&fit=crop", // Digital
             "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=400&auto=format&fit=crop", // Home
             "https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?q=80&w=400&auto=format&fit=crop", // Tools
@@ -313,7 +313,7 @@ const CategoryCarousel = memo(({ categories }) => {
 
   return (
     <div className="relative z-40 bg-white rounded-3xl p-4 md:p-6 border border-zinc-100 shadow-sm transition-all duration-300">
-      
+
       {/* ─── Header Section ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
@@ -373,11 +373,10 @@ const CategoryCarousel = memo(({ categories }) => {
               <div
                 key={parentCat.id}
                 onClick={() => setActiveParentId(parentCat.id)}
-                className={`snap-start shrink-0 cursor-pointer group/card transition-all duration-300 rounded-2xl border p-4 min-w-[220px] max-w-[260px] md:min-w-[240px] ${
-                  isSelected
-                    ? "bg-zinc-900 text-white border-zinc-900 shadow-xl shadow-zinc-900/10 scale-[1.02]"
-                    : "bg-zinc-50/90 hover:bg-white text-zinc-800 border-zinc-200 hover:border-brand/50 hover:shadow-lg"
-                }`}
+                className={`snap-start shrink-0 cursor-pointer group/card transition-all duration-300 rounded-2xl border p-4 min-w-[220px] max-w-[260px] md:min-w-[240px] ${isSelected
+                  ? "bg-zinc-900 text-white border-zinc-900 shadow-xl shadow-zinc-900/10 scale-[1.02]"
+                  : "bg-zinc-50/90 hover:bg-white text-zinc-800 border-zinc-200 hover:border-brand/50 hover:shadow-lg"
+                  }`}
               >
                 <div className="flex items-center gap-3.5">
                   {/* Category Image Avatar */}
@@ -429,7 +428,7 @@ const CategoryCarousel = memo(({ categories }) => {
       {/* ─── Active Parent Category & Child Categories Sub-Panel ─── */}
       {activeParent && (
         <div className="mt-5 pt-6 border-t border-zinc-100 animate-in fade-in duration-300">
-          
+
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse"></span>
@@ -605,7 +604,7 @@ const CategoryCarousel = memo(({ categories }) => {
 //               return (
 //                 <Link
 //                   key={i}
-//                   href={`/product/${deal.slug}`}
+//                   href={getProductUrl(deal)}
 //                   className="flex flex-col shrink-0 w-[130px] p-3 gap-1.5 hover:bg-zinc-50 transition-colors"
 //                 >
 //                   {/* Image */}
@@ -680,7 +679,7 @@ const QuadCard = memo(({ title, items, link }) => {
       <h2 className="text-[20px] font-bold text-black mb-4 truncate">{title}</h2>
       <div className="grid grid-cols-2 gap-4 flex-1 mb-5">
         {items.map((item, i) => (
-          <Link href={`/product/${item.slug}`} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
+          <Link href={getProductUrl(item)} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
             <div className="relative aspect-square overflow-hidden bg-[#F5F5F5]">
               <Image
                 src={item?.images?.[0]?.src || "https://placehold.co/400x400"}
@@ -699,6 +698,7 @@ const QuadCard = memo(({ title, items, link }) => {
     </div>
   );
 });
+
 export default function Hero({ products = [], categories = [], vendors = [] }) {
   const t = useTranslations("Hero");
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -729,7 +729,7 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
 
     // Fallback merchants if backend returns empty or is not connected
     return [
-      { id: "v1", name: "محلي ستور الرسمي", storeSlug: "mahally-official", category: "متجر رسمي", logo: "https://images.unsplash.com/photo-1556742049-0a670fc8078a?q=80&w=200&auto=format&fit=crop" },
+      { id: "v1", name: "محلي ستور الرسمي", storeSlug: "mahally-official", category: "متجر رسمي", logo: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=200&auto=format&fit=crop" },
       { id: "v2", name: "حرف وجلديات أردنية", storeSlug: "jordanian-crafts", category: "حرف يدوية", logo: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?q=80&w=200&auto=format&fit=crop" },
       { id: "v3", name: "أزياء وتراث عمان", storeSlug: "amman-fashion", category: "أزياء وموضة", logo: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=200&auto=format&fit=crop" },
       { id: "v4", name: "إلكترونيات ومستلزمات", storeSlug: "jordan-tech", category: "إلكترونيات", logo: "https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=200&auto=format&fit=crop" }
@@ -859,7 +859,7 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
   //           title: cat.name,
   //           type: "single",
   //           item,
-  //           link: `/product/${item.slug}`
+  //           link: getProductUrl(item)
   //         });
   //         usedProductIds.add(item.id);
   //         usedTitles.add(cat.name);

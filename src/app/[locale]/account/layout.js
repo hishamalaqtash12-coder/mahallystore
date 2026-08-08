@@ -7,8 +7,11 @@ import { ShieldAlert, MessageCircle, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { useEffect, useState, Suspense } from "react";
+import { useLocale } from "next-intl";
 
 export default function AccountLayout({ children }) {
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
   const { user, customerName, isVendor, isApprovedVendor, logout, loading, wooCustomerDeleted, wooId, avatarUrl, avatarBgColor, isAdmin, role } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -58,7 +61,7 @@ export default function AccountLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] flex flex-col md:flex-row font-sans text-[#222]" dir="rtl">
+    <div className="min-h-screen bg-[#f9f9f9] flex flex-col md:flex-row font-sans text-[#222]" dir={dir}>
       <Suspense fallback={<div className="w-full md:w-72 bg-white md:min-h-screen border-l border-gray-100 py-6 px-4 shrink-0" />}>
         <AccountSidebar user={user} customerName={customerName} logout={handleLogout} isVendor={isVendor} vendorLogo={vendorLogo} avatarUrl={avatarUrl} avatarBgColor={avatarBgColor} />
       </Suspense>

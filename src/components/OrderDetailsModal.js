@@ -4,6 +4,7 @@ import { X, Package, Printer, MapPin, CreditCard, MessageCircle, Clock, RefreshC
 import { useState, useEffect } from "react";
 import { Link } from "@/i18n/routing";
 import ReportModal from "@/components/ReportModal";
+import { getProductUrl } from "@/lib/product-utils";
 
 
 function getMeta(item, key) {
@@ -626,7 +627,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <Link href={`/product/${item.product_id}`} className="text-[13px] font-semibold text-brand hover:text-brand-dark hover:underline leading-snug block">
+                          <Link href={getProductUrl(item)} className="text-[13px] font-semibold text-brand hover:text-brand-dark hover:underline leading-snug block">
                             {item.name}
                           </Link>
 
@@ -653,7 +654,7 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
                           {/* Actions */}
                           <div className="flex flex-wrap gap-2 mt-3">
-                            <Link href={`/product/${item.product_id}`} className="h-[28px] px-4 bg-brand hover:bg-brand-dark border border-brand text-white rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center">
+                            <Link href={getProductUrl(item)} className="h-[28px] px-4 bg-brand hover:bg-brand-dark border border-brand text-white rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center">
                               شراء مرة أخرى
                             </Link>
                             {order.status === "completed" && (

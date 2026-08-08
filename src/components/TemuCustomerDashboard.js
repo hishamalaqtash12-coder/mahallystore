@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from "@/i18n/routing";
 import Image from 'next/image';
+import { getProductUrl } from "@/lib/product-utils";
 import { 
   RotateCcw, 
   Star, 
@@ -261,7 +262,7 @@ const TemuCustomerDashboard = ({ user, logout }) => {
                                  {item.image?.src ? <img src={item.image.src} alt={item.name} className="w-full h-full object-contain" /> : <Package size={24} className="text-gray-200" />}
                                </div>
                                <div className="flex-1">
-                                  <Link href={`/product/${item.product_id}`} className="text-[14px] text-gray-800 hover:text-[#be374f] font-medium line-clamp-1 mb-1">{item.name}</Link>
+                                  <Link href={getProductUrl(item)} className="text-[14px] text-gray-800 hover:text-[#be374f] font-medium line-clamp-1 mb-1">{item.name}</Link>
                                   <p className="text-[12px] text-gray-500 mb-2">Qty: {item.quantity}</p>
                                   <div className="flex items-center gap-3">
                                      <button className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors">Buy it again</button>

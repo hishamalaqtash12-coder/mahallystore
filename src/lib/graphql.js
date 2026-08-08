@@ -1,4 +1,4 @@
-export async function fetchGraphQL(query, variables = {}, customHeaders = {}) {
+export async function fetchGraphQL(query, variables = {}, customHeaders = {}, nextOptions = {}) {
   let WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || process.env.WORDPRESS_GRAPHQL_URL;
 
   if (!WP_URL && process.env.NEXT_PUBLIC_WORDPRESS_URL) {
@@ -27,7 +27,7 @@ export async function fetchGraphQL(query, variables = {}, customHeaders = {}) {
         query,
         variables,
       }),
-      next: { revalidate: 60 }
+      next: { revalidate: 60, ...nextOptions }
     });
 
     if (!res.ok) {

@@ -20,7 +20,7 @@ export default async function BrowsePage({ searchParams }) {
     }
 
     if (cat) {
-      const found = categories.find(c => c.slug === cat);
+      const found = categories.find(c => decodeURIComponent(c.slug) === decodeURIComponent(cat));
       if (found) options.category = found.id;
     }
 

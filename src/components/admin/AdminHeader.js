@@ -132,7 +132,7 @@ export default function AdminHeader() {
           <Globe size={15} />
         </button>
 
-        <div className="relative">
+        <div className="relative" ref={accountMenuRef}>
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 hover:bg-zinc-50 transition-colors"
@@ -151,7 +151,7 @@ export default function AdminHeader() {
           </button>
 
           {isUserMenuOpen && (
-            <div className="absolute start-0 mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg py-1.5 z-50">
+            <div className="absolute end-0 mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg py-1.5 z-50">
               <div className="px-4 py-2.5 border-b border-zinc-100 mb-1">
                 <p className="text-xs font-medium text-zinc-400">{t("signedInAs")}</p>
                 <p className="text-sm font-medium text-zinc-900 truncate mt-0.5">{user?.email}</p>

@@ -43,9 +43,9 @@ export default function MerchantLayout({ children }) {
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="min-h-screen bg-zinc-50 flex font-sans">
       <DashboardSidebar />
-      <div className={`flex-1 flex flex-col min-h-screen relative ${isAr ? "pr-64" : "pl-64"}`}>
+      <div className={`flex-1 flex flex-col min-w-0 min-h-screen relative ${isAr ? "pr-64" : "pl-64"}`}>
         <DashboardHeader />
-        <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8 xl:px-10 bg-white overflow-y-auto">
+        <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8 xl:px-10 bg-white overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1700px]">{children}</div>
         </main>
       </div>

@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.js');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactCompiler: true,
+  reactCompiler: false,
 
   sassOptions: {
     includePaths: ['./src/styles'],
@@ -18,6 +18,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'placehold.co' },
       { protocol: 'https', hostname: 'secure.gravatar.com' },
+      { protocol: 'https', hostname: 'whitesmoke-monkey-771359.hostingersite.com' },
     ],
   },
 };

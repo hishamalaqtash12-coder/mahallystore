@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 
 const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
 const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
@@ -65,6 +66,12 @@ export async function PUT(request) {
 
     if (!res.ok) {
       return NextResponse.json({ error: data.message || "Failed to update visibility" }, { status: res.status });
+    }
+
+    // Bust Next.js Data Cache for the 'vendors' tag so changes take effect immediately
+    // across all server contexts (works with Turbopack's multi-worker model)
+    if (type === 'vendor') {
+      revalidateTag('vendors');
     }
 
     return NextResponse.json({ success: true, data });

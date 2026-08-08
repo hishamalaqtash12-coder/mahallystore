@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
-import { 
-  ImageIcon, 
-  Upload, 
-  MapPin, 
+import {
+  ImageIcon,
+  Upload,
+  MapPin,
   CheckCircle2,
   Save,
   Loader2
@@ -18,7 +18,7 @@ export default function MerchantSettings() {
   const locale = useLocale();
   const isAr = locale === "ar";
   const { wooId, refreshAuth } = useAuth();
-  
+
   const [data, setData] = useState({
     storeName: "",
     whatsappNumber: "",
@@ -36,7 +36,7 @@ export default function MerchantSettings() {
 
   // Tracks whether the vendor has manually customized the WhatsApp number
   const [whatsappCustomized, setWhatsappCustomized] = useState(false);
-  
+
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -46,33 +46,33 @@ export default function MerchantSettings() {
     fetch(`/api/vendors/${wooId}`)
       .then(res => res.json())
       .then(res => {
-         if (res.vendor) {
-            const phone = (res.vendor.phone || "").replace(/^\+?962/, '');
-            const savedWhatsapp = (res.vendor.whatsappNumber || "").replace(/^\+?962/, '');
-            // If a distinct WhatsApp number was explicitly saved, mark it as customized
-            const isCustomized = !!savedWhatsapp && savedWhatsapp !== phone;
-            if (isCustomized) setWhatsappCustomized(true);
-            setData({
-              storeName: res.vendor.storeName || "",
-              // Default WhatsApp to business phone if not explicitly customized
-              whatsappNumber: savedWhatsapp || phone,
-              phone,
-              bio: res.vendor.storeDescription || "",
-              storeBanner: res.vendor.storeBanner || "",
-              storeLogo: res.vendor.storeLogo || "",
-              showWhatsapp: res.vendor.showWhatsapp !== false,
-              returnPolicy: res.vendor.returnPolicy || "no-returns",
-              returnPeriod: res.vendor.returnPeriod || "",
-              facebook: res.vendor.facebook || res.vendor.social?.facebook || "",
-              instagram: res.vendor.instagram || res.vendor.social?.instagram || "",
-              twitter: res.vendor.twitter || res.vendor.social?.twitter || ""
-            });
-         }
-         setIsLoading(false);
+        if (res.vendor) {
+          const phone = (res.vendor.phone || "").replace(/^\+?962/, '');
+          const savedWhatsapp = (res.vendor.whatsappNumber || "").replace(/^\+?962/, '');
+          // If a distinct WhatsApp number was explicitly saved, mark it as customized
+          const isCustomized = !!savedWhatsapp && savedWhatsapp !== phone;
+          if (isCustomized) setWhatsappCustomized(true);
+          setData({
+            storeName: res.vendor.storeName || "",
+            // Default WhatsApp to business phone if not explicitly customized
+            whatsappNumber: savedWhatsapp || phone,
+            phone,
+            bio: res.vendor.storeDescription || "",
+            storeBanner: res.vendor.storeBanner || "",
+            storeLogo: res.vendor.storeLogo || "",
+            showWhatsapp: res.vendor.showWhatsapp !== false,
+            returnPolicy: res.vendor.returnPolicy || "no-returns",
+            returnPeriod: res.vendor.returnPeriod || "",
+            facebook: res.vendor.facebook || res.vendor.social?.facebook || "",
+            instagram: res.vendor.instagram || res.vendor.social?.instagram || "",
+            twitter: res.vendor.twitter || res.vendor.social?.twitter || ""
+          });
+        }
+        setIsLoading(false);
       })
       .catch(err => {
-         console.error(err);
-         setIsLoading(false);
+        console.error(err);
+        setIsLoading(false);
       });
   }, [wooId]);
 
@@ -153,7 +153,7 @@ export default function MerchantSettings() {
   }
 
   return (
-    <div className="max-w-[900px] mx-auto pb-20 relative font-sans">
+    <div className="mx-auto pb-20 relative font-sans">
       <div className="mb-8">
         <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">
           {isAr ? "إعدادات المتجر" : "Store Settings"}
@@ -175,7 +175,7 @@ export default function MerchantSettings() {
 
       <div className="space-y-8">
         {/* Branding Section */}
-                <section className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
+        <section className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-zinc-50 border-b border-zinc-200">
             <h3 className="text-[14px] font-bold text-zinc-900 uppercase tracking-widest">{isAr ? 'العلامة التجارية والهوية' : 'Branding & Identity'}</h3>
           </div>
@@ -184,36 +184,36 @@ export default function MerchantSettings() {
               <div className="md:col-span-2 space-y-3">
                 <label className="text-[13px] font-bold text-zinc-900 block">{isAr ? 'بانر المتجر' : 'Store Banner'}</label>
                 <input type="file" id="banner-upload" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'banner')} />
-                <div 
+                <div
                   onClick={() => document.getElementById('banner-upload').click()}
                   className="relative aspect-[3/1] bg-zinc-50 border border-zinc-300 rounded-md flex flex-col items-center justify-center group hover:bg-zinc-100 transition-all cursor-pointer overflow-hidden border-dashed shadow-inner"
                 >
-                    {data.storeBanner ? (
-                      <Image src={data.storeBanner} alt="Banner" fill className="object-cover" />
-                    ) : (
-                      <>
-                        <Upload size={20} className="text-zinc-400 group-hover:text-[#be374f] mb-1 transition-colors" />
-                        <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">{isAr ? 'مقاس مقترح 1200x400 px' : '1200x400 px Recommended'}</span>
-                      </>
-                    )}
+                  {data.storeBanner ? (
+                    <Image src={data.storeBanner} alt="Banner" fill className="object-cover" />
+                  ) : (
+                    <>
+                      <Upload size={20} className="text-zinc-400 group-hover:text-[#be374f] mb-1 transition-colors" />
+                      <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">{isAr ? 'مقاس مقترح 1200x400 px' : '1200x400 px Recommended'}</span>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-3">
                 <label className="text-[13px] font-bold text-zinc-900 block">{isAr ? 'شعار المتجر' : 'Store Logo'}</label>
                 <input type="file" id="logo-upload" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'logo')} />
-                <div 
+                <div
                   onClick={() => document.getElementById('logo-upload').click()}
                   className="relative aspect-square bg-zinc-50 border border-zinc-300 rounded-md flex flex-col items-center justify-center group hover:bg-zinc-100 transition-all cursor-pointer overflow-hidden border-dashed shadow-inner"
                 >
-                    {data.storeLogo ? (
-                      <Image src={data.storeLogo} alt="Logo" fill className="object-cover" />
-                    ) : (
-                      <>
-                        <ImageIcon size={20} className="text-zinc-400 group-hover:text-[#be374f] mb-1 transition-colors" />
-                        <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider text-center px-2">{isAr ? 'مقاس 500x500 px' : '500x500 px'}</span>
-                      </>
-                    )}
+                  {data.storeLogo ? (
+                    <Image src={data.storeLogo} alt="Logo" fill className="object-cover" />
+                  ) : (
+                    <>
+                      <ImageIcon size={20} className="text-zinc-400 group-hover:text-[#be374f] mb-1 transition-colors" />
+                      <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider text-center px-2">{isAr ? 'مقاس 500x500 px' : '500x500 px'}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function MerchantSettings() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'اسم المتجر الرسمي' : 'Official Store Name'}</label>
-                <input type="text" value={data.storeName} onChange={(e) => setData({...data, storeName: e.target.value})} placeholder={isAr ? 'متجر محلي الرسمي' : 'Mahally Official Store'} className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
+                <input type="text" value={data.storeName} onChange={(e) => setData({ ...data, storeName: e.target.value })} placeholder={isAr ? 'متجر محلي الرسمي' : 'Mahally Official Store'} className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'موقع المستودع الرئيسي' : 'Primary Warehouse Location'}</label>
@@ -245,8 +245,8 @@ export default function MerchantSettings() {
                   <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'رقم واتساب للتواصل' : 'WhatsApp Contact'}</label>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{data.showWhatsapp ? (isAr ? 'مرئي' : 'Visible') : (isAr ? 'مخفي' : 'Hidden')}</span>
-                    <button 
-                      onClick={() => setData({...data, showWhatsapp: !data.showWhatsapp})}
+                    <button
+                      onClick={() => setData({ ...data, showWhatsapp: !data.showWhatsapp })}
                       className={`w-8 h-4 rounded-full relative transition-colors ${data.showWhatsapp ? 'bg-emerald-500' : 'bg-zinc-300'}`}
                     >
                       <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${data.showWhatsapp ? 'start-0.5' : 'end-0.5'}`} />
@@ -255,7 +255,7 @@ export default function MerchantSettings() {
                 </div>
                 <div className="flex" dir="ltr">
                   <span className="h-[36px] px-3 bg-zinc-50 border border-zinc-300 border-r-0 rounded-l-md text-[13px] font-bold text-zinc-500 flex items-center shadow-sm">+962</span>
-                  <input type="tel" value={data.whatsappNumber} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setWhatsappCustomized(true); setData({...data, whatsappNumber: val}); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-r-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
+                  <input type="tel" value={data.whatsappNumber} onChange={(e) => { const val = e.target.value.replace(/^\+?962/, ''); setWhatsappCustomized(true); setData({ ...data, whatsappNumber: val }); }} className="flex-1 w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-r-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" placeholder="7X XXX XXXX" />
                 </div>
               </div>
               <div className="space-y-2">
@@ -266,17 +266,17 @@ export default function MerchantSettings() {
                 </div>
               </div>
             </div>
-              <div className="space-y-2">
+            <div className="space-y-2">
               <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'نبذة عن المتجر' : 'Merchant Biography'}</label>
-              <textarea rows={4} value={data.bio} onChange={(e) => setData({...data, bio: e.target.value})} className="w-full p-4 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm resize-none transition-all font-medium" placeholder={isAr ? 'أخبر عملائك عن علامتك التجارية...' : 'Tell your customers about your brand...'}></textarea>
+              <textarea rows={4} value={data.bio} onChange={(e) => setData({ ...data, bio: e.target.value })} className="w-full p-4 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm resize-none transition-all font-medium" placeholder={isAr ? 'أخبر عملائك عن علامتك التجارية...' : 'Tell your customers about your brand...'}></textarea>
             </div>
-            
+
             <div className="pt-4 border-t border-zinc-200 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'سياسة الإرجاع (العامة)' : 'Global Return Policy'}</label>
-                <select 
+                <select
                   value={data.returnPolicy}
-                  onChange={(e) => setData({...data, returnPolicy: e.target.value})}
+                  onChange={(e) => setData({ ...data, returnPolicy: e.target.value })}
                   className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm cursor-pointer transition-all"
                 >
                   <option value="no-returns">{isAr ? 'لا قبول للإرجاع' : 'No Returns Accepted'}</option>
@@ -286,16 +286,16 @@ export default function MerchantSettings() {
                   {isAr ? "يمكنك تجاوز هذا على مستوى كل منتج على حدة." : "You can override this on individual products."}
                 </p>
               </div>
-              
+
               {data.returnPolicy === "global" && (
                 <div className="space-y-2">
                   <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'مدة الإرجاع (بالأيام)' : 'Return Period (Days)'}</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     min="1"
                     value={data.returnPeriod}
-                    onChange={(e) => setData({...data, returnPeriod: e.target.value})}
-                    className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" 
+                    onChange={(e) => setData({ ...data, returnPeriod: e.target.value })}
+                    className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all"
                   />
                   <p className="text-[11px] text-zinc-500">{isAr ? 'عدد الأيام التي يمكن للعميل خلالها إرجاع المنتج.' : 'Number of days a customer has to return an item.'}</p>
                 </div>
@@ -313,15 +313,15 @@ export default function MerchantSettings() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'فيسبوك' : 'Facebook'}</label>
-                <input type="url" value={data.facebook} onChange={(e) => setData({...data, facebook: e.target.value})} placeholder="https://facebook.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
+                <input type="url" value={data.facebook} onChange={(e) => setData({ ...data, facebook: e.target.value })} placeholder="https://facebook.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'انستجرام' : 'Instagram'}</label>
-                <input type="url" value={data.instagram} onChange={(e) => setData({...data, instagram: e.target.value})} placeholder="https://instagram.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
+                <input type="url" value={data.instagram} onChange={(e) => setData({ ...data, instagram: e.target.value })} placeholder="https://instagram.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-zinc-900">{isAr ? 'تويتر / إكس' : 'Twitter / X'}</label>
-                <input type="url" value={data.twitter} onChange={(e) => setData({...data, twitter: e.target.value})} placeholder="https://twitter.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
+                <input type="url" value={data.twitter} onChange={(e) => setData({ ...data, twitter: e.target.value })} placeholder="https://twitter.com/yourstore" className="w-full h-[36px] px-3 bg-white border border-zinc-300 rounded-md text-[13px] focus:border-[#be374f] outline-none shadow-sm transition-all" />
               </div>
             </div>
           </div>
@@ -330,19 +330,19 @@ export default function MerchantSettings() {
 
 
         <div className="flex items-center justify-between bg-white border border-zinc-200 rounded-md p-6 shadow-sm">
-            <div>
-               <p className="text-[13px] font-bold text-zinc-900">Commit Changes</p>
-               <p className="text-[11px] text-zinc-500 font-medium">
-                 {isAr ? "تطبق التغييرات فوراً في المتجر." : "Changes will take effect immediately across the marketplace"}
-               </p>
-            </div>
-            <button 
-              onClick={handleSave}
-              disabled={isSaving}
-              className={`h-[40px] px-10 rounded-md text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2 ${success ? 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-600' : 'bg-[#febd69] hover:bg-[#f7ac44] text-zinc-900 border border-[#e5a850]'}`}
-            >
-              {isSaving ? <Loader size="sm" text="" /> : success ? <><CheckCircle2 size={16} /> {isAr ? "تم تحديث الملف الشخصي" : "Profile Updated"}</> : (isAr ? "حفظ الإعدادات" : "Save Settings")}
-            </button>
+          <div>
+            <p className="text-[13px] font-bold text-zinc-900">Commit Changes</p>
+            <p className="text-[11px] text-zinc-500 font-medium">
+              {isAr ? "تطبق التغييرات فوراً في المتجر." : "Changes will take effect immediately across the marketplace"}
+            </p>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className={`h-[40px] px-10 rounded-md text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2 ${success ? 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-600' : 'bg-[#febd69] hover:bg-[#f7ac44] text-zinc-900 border border-[#e5a850]'}`}
+          >
+            {isSaving ? <Loader size="sm" text="" /> : success ? <><CheckCircle2 size={16} /> {isAr ? "تم تحديث الملف الشخصي" : "Profile Updated"}</> : (isAr ? "حفظ الإعدادات" : "Save Settings")}
+          </button>
         </div>
       </div>
     </div>
