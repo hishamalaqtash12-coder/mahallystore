@@ -723,75 +723,225 @@
       "recommended": [
         {
           "q": "How do I track my order?",
-          "a": "You can track your order in the 'My Orders' section. Click the 'Track' button next to the order for real-time shipping status. We also send email notifications for every update."
+          "a": "You can track your order in the 'My Orders' section. Click the 'Track' button next to the order for real-time shipping status. We also send email notifications for every update.",
+          "action": {
+            "type": "customer_orders",
+            "label": "Track My Orders"
+          },
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         },
         {
           "q": "Where is the order number?",
-          "a": "The order number is a numeric ID usually starting with #Order. You can find it in the order confirmation email and in the 'My Orders' section inside your account."
+          "a": "The order number is a numeric ID usually starting with #Order. You can find it in the order confirmation email and in the 'My Orders' section inside your account.",
+          "action": {
+            "type": "customer_orders",
+            "label": "View My Orders"
+          },
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         },
         {
           "q": "How do I cancel my order?",
-          "a": "An order can be cancelled within 30 minutes of creation. Go to 'My Orders', find the order, and click 'Cancel Order'. If the order status becomes 'Processing' or 'Shipped', you will have to wait until delivery."
+          "a": "An order can be cancelled within 30 minutes of creation. Go to 'My Orders', find the order, and click 'Cancel Order'. If the order status becomes 'Processing' or 'Shipped', you will have to wait until delivery.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         },
         {
           "q": "How do I become a merchant / seller?",
-          "a": "You can register as a seller from the 'Create Account' page. Simply select 'I am a seller / merchant', fill in your store details, and submit for administration approval."
+          "a": "You can register as a seller from the 'Create Account' page. Simply select 'I am a seller / merchant', fill in your store details, and submit for administration approval.",
+          "action": {
+            "type": "guest_register_vendor",
+            "label": "Create Merchant Account"
+          },
+          "targetRole": [
+            "guest",
+            "customer"
+          ]
         },
         {
           "q": "How do I add a new product to my store?",
-          "a": "If you are an approved merchant, go to your Merchant Dashboard, navigate to 'Products', and click 'Add New Product'. Ensure you provide clear images and an accurate description."
+          "a": "If you are an approved merchant, go to your Merchant Dashboard, navigate to 'Products', and click 'Add New Product'. Ensure you provide clear images and an accurate description.",
+          "action": {
+            "type": "vendor_add_product",
+            "label": "Add New Product"
+          },
+          "targetRole": [
+            "vendor"
+          ]
+        },
+        {
+          "q": "How do I process a new order?",
+          "a": "When you receive an order, it will appear in the Orders section of your Merchant Dashboard. You can update its status to Processing, and later to Shipped once you hand it to the courier.",
+          "targetRole": [
+            "vendor"
+          ],
+          "action": {
+            "type": "vendor_orders",
+            "label": "Manage Orders"
+          }
         }
       ],
       "order-issues": [
         {
           "q": "Can I cancel part of my order?",
-          "a": "Yes, you can cancel specific items from the order before they are processed for shipping. Open the order details and choose 'Cancel Item' for the desired product."
+          "a": "Yes, you can cancel specific items from the order before they are processed for shipping. Open the order details and choose 'Cancel Item' for the desired product.",
+          "action": {
+            "type": "customer_orders",
+            "label": "View My Orders"
+          },
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         },
         {
           "q": "How do I ask for help with an order?",
-          "a": "Select the order from the 'My Orders' section and click 'Get Help'. You will be connected directly with the seller or the official support team via messaging."
+          "a": "Select the order from the 'My Orders' section and click 'Get Help'. You will be connected directly with the seller or the official support team via messaging.",
+          "action": {
+            "type": "customer_orders",
+            "label": "Get Help"
+          },
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         },
         {
           "q": "I ordered several products together, why do I only see some of them?",
-          "a": "Mahally is a multi-vendor marketplace. Orders are managed by different sellers separately, so you might receive multiple packages and tracking numbers for one order."
+          "a": "Mahally is a multi-vendor marketplace. Orders are managed by different sellers separately, so you might receive multiple packages and tracking numbers for one order.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
+        },
+        {
+          "q": "How do I return a product?",
+          "a": "If your order is eligible for a return, you can initiate a return request from My Orders within 14 days of delivery. Ensure the item is unused and in its original packaging.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ],
+          "action": {
+            "type": "customer_orders",
+            "label": "View My Orders"
+          }
         }
       ],
       "buying": [
         {
           "q": "How do I use a discount code?",
-          "a": "You can enter the discount code on the checkout page under the 'Payment' section. Click 'Apply Coupon' before completing the purchase."
+          "a": "You can enter the discount code on the checkout page under the 'Payment' section. Click 'Apply Coupon' before completing the purchase.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         },
         {
           "q": "Is shopping on Mahally safe?",
-          "a": "Absolutely. We use SSL encryption for all transactions and provide Mahally Buyer Protection to guarantee your funds until the order is delivered safely."
+          "a": "Absolutely. We use SSL encryption for all transactions and provide Mahally Buyer Protection to guarantee your funds until the order is delivered safely.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
+        },
+        {
+          "q": "How do I leave a review?",
+          "a": "After you receive your order, you can leave a review by going to My Orders, selecting the delivered product, and clicking Write a Review.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         }
       ],
       "shipping": [
         {
           "q": "How long does shipping take?",
-          "a": "Standard shipping within Jordan usually takes 2 to 5 business days. The duration may vary depending on the seller's location."
+          "a": "Standard shipping within Jordan usually takes 2 to 5 business days. The duration may vary depending on the seller's location.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         },
         {
           "q": "Is there express shipping?",
-          "a": "Express shipping options are available for some products. Look for the 'Express' shipping speed during checkout."
+          "a": "Express shipping options are available for some products. Look for the 'Express' shipping speed during checkout.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
         }
       ],
       "account": [
         {
           "q": "How do I secure my account?",
-          "a": "We recommend using a strong, unique password and enabling any additional verification options available in account settings."
+          "a": "We recommend using a strong, unique password and enabling any additional verification options available in account settings.",
+          "targetRole": [
+            "vendor",
+            "customer",
+            "guest"
+          ]
+        },
+        {
+          "q": "Can I save products for later?",
+          "a": "Yes! Just click the heart icon on any product to add it to your Wishlist.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ],
+          "action": {
+            "type": "customer_wishlist",
+            "label": "View Wishlist"
+          }
+        },
+        {
+          "q": "How do I withdraw my earnings?",
+          "a": "You can request a withdrawal of your available balance directly from your Merchant Dashboard. Navigate to the Withdraw section, enter the amount, and select your payout method.",
+          "targetRole": [
+            "vendor"
+          ],
+          "action": {
+            "type": "vendor_withdraw",
+            "label": "Request Withdrawal"
+          }
         }
       ],
       "promotions": [
         {
           "q": "How do promo credits work?",
-          "a": "Promo credits are automatically applied to your cart at checkout for eligible products. You can view your available credits in your profile."
+          "a": "Promo credits are automatically applied to your cart at checkout for eligible products. You can view your available credits in your profile.",
+          "targetRole": [
+            "customer",
+            "guest"
+          ]
+        },
+        {
+          "q": "How do I create a discount coupon for my store?",
+          "a": "Go to the Coupons section in your Merchant Dashboard. You can set up percentage or fixed discounts, specify expiry dates, and restrict usage limits.",
+          "targetRole": [
+            "vendor"
+          ],
+          "action": {
+            "type": "vendor_coupons",
+            "label": "Manage Coupons"
+          }
         }
       ],
       "technical": [
         {
           "q": "The website is slow or not working.",
-          "a": "Try clearing your browser cache and cookies or using another device. If the problem persists, contact the support team."
+          "a": "Try clearing your browser cache and cookies or using another device. If the problem persists, contact the support team.",
+          "targetRole": [
+            "vendor",
+            "customer",
+            "guest"
+          ]
         }
       ]
     },
@@ -1600,5 +1750,72 @@
     "verifiedPurchase": "Verified Purchase",
     "helpful": "Helpful",
     "report": "Report"
+  },
+  "MerchantSettings": {
+    "pageTitle": "Store Settings",
+    "pageSubtitle": "Configure your store identity and contact details",
+    "fetchingProfile": "Fetching store profile",
+    "changesUpdated": "Changes updated successfully!",
+    "brandingIdentity": "Branding & Identity",
+    "storeBanner": "Store Banner",
+    "bannerSize": "1200x400 px Recommended",
+    "storeLogo": "Store Logo",
+    "logoSize": "500x500 px",
+    "businessDetails": "Business Details",
+    "officialStoreName": "Official Store Name",
+    "storeNamePlaceholder": "Mahally Official Store",
+    "warehouseLocation": "Primary Warehouse Location",
+    "amman": "Amman, Jordan",
+    "zarqa": "Zarqa, Jordan",
+    "irbid": "Irbid, Jordan",
+    "aqaba": "Aqaba, Jordan",
+    "whatsappContact": "WhatsApp Contact",
+    "visible": "Visible",
+    "hidden": "Hidden",
+    "businessPhone": "Business Phone",
+    "merchantBio": "Merchant Biography",
+    "bioPlaceholder": "Tell your customers about your brand...",
+    "globalReturnPolicy": "Global Return Policy",
+    "noReturns": "No Returns Accepted",
+    "acceptReturns": "Accept Returns (Global)",
+    "overrideNote": "You can override this on individual products.",
+    "returnPeriod": "Return Period (Days)",
+    "returnPeriodNote": "Number of days a customer has to return an item.",
+    "socialLinks": "Social Links",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "twitter": "Twitter / X",
+    "commitChanges": "Commit Changes",
+    "changesNote": "Changes will take effect immediately across the marketplace",
+    "profileUpdated": "Profile Updated",
+    "saveSettings": "Save Settings"
+  },
+  "MerchantShipping": {
+    "pageTitle": "Shipping Settings",
+    "pageSubtitle": "Configure delivery fees for each Jordan governorate.",
+    "saveChanges": "Save Changes",
+    "saved": "Saved!",
+    "saveFailed": "Failed to save shipping settings.",
+    "infoNote": "Set a flat delivery fee for each governorate. If you want to offer free shipping above a certain order amount (e.g., Free delivery over 20 JOD), enter the amount in the \"Free Over\" column. Leave it blank if you don't offer free shipping.",
+    "governorate": "Governorate",
+    "deliveryFee": "Delivery Fee (JOD)",
+    "freeOver": "Free Over (JOD)",
+    "optional": "Optional",
+    "updateSuccess": "Shipping settings updated successfully!"
+  },
+  "MerchantAnnouncements": {
+    "pageTitle": "Official Announcements",
+    "pageSubtitle": "Stay updated with the latest news and updates from Mahally Marketplace.",
+    "searchPlaceholder": "Search announcements...",
+    "fetching": "Fetching updates...",
+    "noAnnouncements": "No Announcements Yet",
+    "noAnnouncementsDesc": "When the marketplace administration sends out official updates, they will appear here.",
+    "updated": "Updated",
+    "official": "Official",
+    "readFull": "Read Full Update",
+    "lastUpdated": "Last Updated",
+    "officialNotice": "Official Marketplace Notice",
+    "officialNoticeDesc": "This is an official announcement from the Mahally Marketplace Administration. Please ensure you comply with any requirements or updates mentioned above.",
+    "gotIt": "Got it, thanks"
   }
 }

@@ -400,3 +400,37 @@ body {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+/* Sync carousel card width with grid columns */
+.mahally-carousel-card {
+  width: calc((100vw - 32px - 10px) / 2);
+}
+@media (min-width: 640px) {
+  .mahally-carousel-card {
+    width: calc((100vw - 48px - 24px) / 3);
+  }
+}
+@media (min-width: 768px) {
+  .mahally-carousel-card {
+    width: calc((100vw - 48px - 30px) / 3);
+  }
+}
+@media (min-width: 1024px) {
+  .mahally-carousel-card {
+    width: calc((100vw - 64px - 45px) / 4);
+  }
+}
+@media (min-width: 1200px) {
+  .mahally-carousel-card {
+    width: 272.75px;
+  }
+}
+@media (min-width: 1280px) {
+  .mahally-carousel-card {
+    width: 212.8px;
+  }
+}
+@media (min-width: 1440px) {
+  .mahally-carousel-card {
+    width: 211.2px;
+  }
+}

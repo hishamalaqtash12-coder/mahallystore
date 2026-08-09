@@ -40,6 +40,7 @@ export default function NewProduct() {
   const [regularPrice, setRegularPrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [categories, setCategories] = useState([]);
+  const [isMadeInJordan, setIsMadeInJordan] = useState(false);
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -97,7 +98,8 @@ export default function NewProduct() {
         meta_data: [
           { key: "merchant_email", value: email || "" },
           { key: "merchant_phone", value: phone || "" },
-          { key: "merchant_name", value: customerName || "Merchant User" }
+          { key: "merchant_name", value: customerName || "Merchant User" },
+          { key: "mahally_made_in_jordan", value: isMadeInJordan ? "yes" : "no" }
         ]
       };
 
@@ -166,6 +168,19 @@ export default function NewProduct() {
                 placeholder="e.g. Handmade Ceramic Vase" 
                 className="w-full h-12 px-4 bg-zinc-50 rounded-xl border border-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all text-sm" 
               />
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
+              <input 
+                type="checkbox"
+                id="made_in_jordan"
+                checked={isMadeInJordan}
+                onChange={(e) => setIsMadeInJordan(e.target.checked)}
+                className="w-4 h-4 accent-emerald-600 cursor-pointer"
+              />
+              <label htmlFor="made_in_jordan" className="text-[13px] font-bold text-emerald-800 cursor-pointer select-none">
+                This product is Made in Jordan (صُنع في الأردن)
+              </label>
             </div>
 
             <div className="space-y-1.5">

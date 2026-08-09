@@ -4,10 +4,12 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { Globe } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Footer() {
    const t = useTranslations("Footer");
    const [settings, setSettings] = useState(null);
+   const { user } = useAuth();
 
    useEffect(() => {
       fetch("/api/settings/public")
@@ -40,7 +42,7 @@ export default function Footer() {
                   <li><Link href="/" className="hover:text-brand transition-colors">{t("home")}</Link></li>
                   <li><Link href="/conditions" className="hover:text-brand transition-colors">{t("privacyPolicy")}</Link></li>
                   <li><Link href="/contact" className="hover:text-brand transition-colors">{t("contactUs")}</Link></li>
-                  <li><Link href="/register" className="hover:text-brand transition-colors">{t("joinAsMerchant")}</Link></li>
+                  {!user && <li><Link href="/register" className="hover:text-brand transition-colors">{t("joinAsMerchant")}</Link></li>}
                   <li><Link href="/about" className="hover:text-brand transition-colors">{t("aboutMahally")}</Link></li>
                   <li><Link href="/help" className="hover:text-brand transition-colors">{t("faq")}</Link></li>
                </ul>

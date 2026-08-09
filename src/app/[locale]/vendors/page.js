@@ -39,8 +39,14 @@ export default function VendorsPage() {
 
         if (wooId) {
           const uRes = await fetch(`/api/vendors/follow/status?userId=${wooId}&t=${Date.now()}`, { cache: 'no-store' });
-          const uData = await uRes.json();
-          setFollowedStores(uData.followed || []);
+          const contentType = uRes.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const uData = await uRes.json();
+            setFollowedStores(uData.followed || []);
+          } else {
+            console.warn("Follow status API did not return JSON");
+            setFollowedStores([]);
+          }
         }
       } catch (err) {
         console.error("Vendors fetch error:", err);
@@ -104,11 +110,11 @@ export default function VendorsPage() {
     const maxVisible = 5;
     let start = Math.max(1, currentPage - 2);
     let end = Math.min(totalPages, start + maxVisible - 1);
-    
+
     if (end - start + 1 < maxVisible) {
       start = Math.max(1, end - maxVisible + 1);
     }
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
@@ -320,8 +326,8 @@ export default function VendorsPage() {
                             onClick={() => handleToggleFollow(v.id)}
                             disabled={loadingStores[v.id]}
                             className={`cursor-pointer h-8 px-4 rounded-md text-[12px] font-medium shadow-sm transition-all border flex items-center justify-center gap-1.5 group ${followedStores.some(id => String(id) === String(v.id))
-                                ? 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                                : 'bg-brand hover:bg-brand-dark text-white border-brand'
+                              ? 'bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                              : 'bg-brand hover:bg-brand-dark text-white border-brand'
                               } ${loadingStores[v.id] ? 'opacity-70 cursor-not-allowed' : ''}`}
                           >
                             {loadingStores[v.id] && (
@@ -356,7 +362,7 @@ export default function VendorsPage() {
                   >
                     {t("previous")}
                   </button>
-                  
+
                   <div className="flex items-center gap-1">
                     {getPageNumbers().map((pageNumber) => (
                       <button
@@ -365,11 +371,10 @@ export default function VendorsPage() {
                           setCurrentPage(pageNumber);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className={`h-9 w-9 rounded-md text-[13px] font-medium transition-all cursor-pointer flex items-center justify-center ${
-                          currentPage === pageNumber
-                            ? "bg-brand text-white shadow-sm font-semibold"
-                            : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
-                        }`}
+                        className={`h-9 w-9 rounded-md text-[13px] font-medium transition-all cursor-pointer flex items-center justify-center ${currentPage === pageNumber
+                          ? "bg-brand text-white shadow-sm font-semibold"
+                          : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                          }`}
                       >
                         {pageNumber}
                       </button>

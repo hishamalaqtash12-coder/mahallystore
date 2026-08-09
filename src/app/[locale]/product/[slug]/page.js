@@ -280,6 +280,7 @@ export default async function ProductPage({ params }) {
                   <ProductGallery
                     images={allImages}
                     productName={product.name}
+                    isJordanian={isJordanian}
                   />
                 );
               })()}
@@ -293,12 +294,6 @@ export default async function ProductPage({ params }) {
                 <h1 className="text-[20px] sm:text-[24px] font-medium text-[#0F1111] leading-tight">
                   {product.name}
                 </h1>
-                {isJordanian && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[12px] font-bold text-emerald-700">
-                    <span>🇯🇴</span>
-                    <span>{t("madeInJordan")}</span>
-                  </span>
-                )}
               </div>
 
               {(() => {

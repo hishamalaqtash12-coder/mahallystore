@@ -28,8 +28,21 @@ export default function AccountFollowedStoresPage() {
         fetch(`/api/vendors?t=${Date.now()}`, { cache: "no-store" }),
       ]);
 
-      const statusData = await statusRes.json();
-      const vendorsData = await vendorsRes.json();
+      const statusContentType = statusRes.headers.get("content-type");
+      let statusData = {};
+      if (statusContentType && statusContentType.includes("application/json")) {
+        statusData = await statusRes.json();
+      } else {
+        console.warn("Follow status API did not return JSON");
+      }
+
+      const vendorsContentType = vendorsRes.headers.get("content-type");
+      let vendorsData = {};
+      if (vendorsContentType && vendorsContentType.includes("application/json")) {
+        vendorsData = await vendorsRes.json();
+      } else {
+        console.warn("Vendors API did not return JSON");
+      }
 
       setFollowedIds(statusData.followed || []);
       setVendors(Array.isArray(vendorsData.vendors) ? vendorsData.vendors : []);

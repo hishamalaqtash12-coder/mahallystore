@@ -33,6 +33,16 @@ function HelpContent() {
 
   const { user, customerName, wooId, isVendor } = useAuth();
 
+  const isTargetAudience = (faq) => {
+    if (faq.targetRole) {
+      if (faq.targetRole.includes('vendor') && isVendor) return true;
+      if (faq.targetRole.includes('customer') && user && !isVendor) return true;
+      if (faq.targetRole.includes('guest') && !user) return true;
+      return false;
+    }
+    return true;
+  };
+
   const HELP_TOPICS = useMemo(() => [
     { id: "recommended", title: t("topics.recommended"), icon: Headphones },
     { id: "order-issues", title: t("topics.order-issues"), icon: Package },
@@ -110,6 +120,50 @@ function HelpContent() {
     }
   };
 
+  const renderAction = (action) => {
+    if (!action) return null;
+    
+    switch (action.type) {
+      case "vendor_add_product":
+        if (isVendor) {
+          return <Link href="/merchant/dashboard/products/new" className="mt-3 inline-flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg text-[13px] font-bold hover:bg-brand-dark transition-colors">{action.label} <ExternalLink size={14} /></Link>;
+        }
+        return null;
+      case "vendor_orders":
+        if (isVendor) {
+          return <Link href="/merchant/dashboard/orders" className="mt-3 inline-flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg text-[13px] font-bold hover:bg-brand-dark transition-colors">{action.label} <ExternalLink size={14} /></Link>;
+        }
+        return null;
+      case "vendor_withdraw":
+        if (isVendor) {
+          return <Link href="/merchant/dashboard/withdraw" className="mt-3 inline-flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg text-[13px] font-bold hover:bg-brand-dark transition-colors">{action.label} <ExternalLink size={14} /></Link>;
+        }
+        return null;
+      case "vendor_coupons":
+        if (isVendor) {
+          return <Link href="/merchant/dashboard/coupons" className="mt-3 inline-flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg text-[13px] font-bold hover:bg-brand-dark transition-colors">{action.label} <ExternalLink size={14} /></Link>;
+        }
+        return null;
+      case "customer_orders":
+        if (user) {
+          return <Link href="/account/orders" className="mt-3 inline-flex items-center gap-2 bg-zinc-900 text-white px-4 py-2 rounded-lg text-[13px] font-bold hover:bg-zinc-800 transition-colors">{action.label} <ExternalLink size={14} /></Link>;
+        }
+        return null;
+      case "customer_wishlist":
+        if (user) {
+          return <Link href="/account/wishlist" className="mt-3 inline-flex items-center gap-2 bg-zinc-900 text-white px-4 py-2 rounded-lg text-[13px] font-bold hover:bg-zinc-800 transition-colors">{action.label} <ExternalLink size={14} /></Link>;
+        }
+        return null;
+      case "guest_register_vendor":
+        if (!user) {
+          return <Link href="/register?role=vendor" className="mt-3 inline-flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg text-[13px] font-bold hover:bg-brand-dark transition-colors">{action.label} <ExternalLink size={14} /></Link>;
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
+
   const filteredFaqs = useMemo(() => {
     if (!searchQuery) return [];
     const queryClean = searchQuery.toLowerCase().trim().replace(/[?.,!]/g, '');
@@ -136,7 +190,7 @@ function HelpContent() {
           });
         }
 
-        if (score > 0) {
+        if (score > 0 && isTargetAudience(faq)) {
           results.push({ ...faq, id, topic, score });
         }
       });
@@ -144,11 +198,15 @@ function HelpContent() {
 
     // Sort by highest score first
     return results.sort((a, b) => b.score - a.score);
-  }, [searchQuery, FAQ_DATA]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, FAQ_DATA, isVendor, user]);
 
   const defaultFaqs = useMemo(() => {
-    return (FAQ_DATA["recommended"] || []).map((faq, index) => ({ ...faq, id: `recommended-${index}` }));
-  }, [FAQ_DATA]);
+    return (FAQ_DATA["recommended"] || [])
+      .filter(isTargetAudience)
+      .map((faq, index) => ({ ...faq, id: `recommended-${index}` }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [FAQ_DATA, isVendor, user]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] font-sans text-zinc-800">
@@ -252,7 +310,10 @@ function HelpContent() {
                           <div className="p-4 rounded-xl bg-zinc-50 text-zinc-700 text-[13px] leading-relaxed border border-zinc-100 relative">
                             {/* Little speech bubble tail */}
                             <div className={`absolute top-0 ${isAr ? 'left-8' : 'right-8'} -mt-2 w-4 h-4 bg-zinc-50 border-l border-t border-zinc-100 rotate-45`} />
-                            <div className="relative z-10">{faq.a}</div>
+                            <div className="relative z-10">
+                              <p>{faq.a}</p>
+                              {faq.action && renderAction(faq.action)}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -431,7 +492,7 @@ function HelpContent() {
                       <div>
                         <div className="text-sm font-bold text-zinc-900 mb-1">{topic.title}</div>
                         <div className="text-[11px] text-zinc-500 line-clamp-2">
-                          {(FAQ_DATA[topic.id] || [])[0]?.q || "..."}
+                          {((FAQ_DATA[topic.id] || []).filter(isTargetAudience))[0]?.q || "..."}
                         </div>
                       </div>
                     </button>
@@ -458,7 +519,12 @@ function HelpContent() {
                         <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedItems[faq.id] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                           <div className="p-4 pt-0 border-t border-zinc-100">
                             <div className="text-zinc-600 text-[13px] leading-relaxed">
-                              {faq.a}
+                              <p>{faq.a}</p>
+                              {faq.action && (
+                                <div>
+                                  {renderAction(faq.action)}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

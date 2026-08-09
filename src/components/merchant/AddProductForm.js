@@ -297,7 +297,8 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
     menu_order: 0,
     reviews_allowed: true,
     return_policy: "global",
-    return_period: ""
+    return_period: "",
+    made_in_jordan: false
   });
 
   useEffect(() => {
@@ -352,7 +353,8 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               brands: (data.brands || prev.brands || []).map(b => ({ id: b.id })),
               images: (data.images || []).map(img => ({ id: img.id, src: img.src })),
               return_policy: data.meta_data?.find(m => m.key === 'mahally_return_policy')?.value || "global",
-              return_period: data.meta_data?.find(m => m.key === 'mahally_return_period')?.value || ""
+              return_period: data.meta_data?.find(m => m.key === 'mahally_return_period')?.value || "",
+              made_in_jordan: data.meta_data?.find(m => m.key === 'mahally_made_in_jordan')?.value === "yes"
             }));
           }
         })
@@ -750,7 +752,8 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
         { key: "mahally_owner_name", value: customerName || "Unknown Merchant" },
         { key: "_vendor_id", value: wooId?.toString() || "" },
         { key: "mahally_return_policy", value: formData.return_policy },
-        { key: "mahally_return_period", value: formData.return_period }
+        { key: "mahally_return_period", value: formData.return_period },
+        { key: "mahally_made_in_jordan", value: formData.made_in_jordan ? "yes" : "no" }
       ]
     };
 
@@ -793,7 +796,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
     { id: "attributes", label: l("Attributes"), icon: Layers },
     { id: "variations", label: l("Variations"), icon: Layers, hide: formData.type === "simple" },
     { id: "advanced", label: l("Advanced"), icon: Plus },
-    { id: "bulk", label: l("Bulk Upload"), icon: Layers }
+    { id: "bulk", label: l("Bulk Upload"), icon: Layers, disabled: true }
   ].filter(t => !t.hide);
 
   useEffect(() => {
@@ -824,28 +827,6 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
 
           <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-200/60">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <input 
-                  type="checkbox"
-                  id="virtual"
-                  name="virtual"
-                  checked={formData.virtual}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 accent-[#be374f]"
-                />
-                <label htmlFor="virtual" className="text-xs sm:text-[13px] font-bold text-zinc-700 cursor-pointer">{l("Virtual")}</label>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <input 
-                  type="checkbox"
-                  id="downloadable"
-                  name="downloadable"
-                  checked={formData.downloadable}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 accent-[#be374f]"
-                />
-                <label htmlFor="downloadable" className="text-xs sm:text-[13px] font-bold text-zinc-700 cursor-pointer">{l("Downloadable")}</label>
-              </div>
             </div>
 
             <button onClick={onClose} className="p-2 hover:bg-zinc-200 rounded-full transition-colors hidden sm:block">
@@ -860,11 +841,14 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => !tab.disabled && setActiveTab(tab.id)}
+                disabled={tab.disabled}
                 className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-[13px] font-bold transition-all whitespace-nowrap shrink-0 ${
-                  activeTab === tab.id 
-                    ? "bg-[#febd69] text-zinc-900 shadow-sm" 
-                    : "text-zinc-600 hover:bg-zinc-100 bg-white md:bg-transparent border md:border-0 border-zinc-200"
+                  tab.disabled
+                    ? "text-zinc-400 opacity-50 cursor-not-allowed bg-transparent border md:border-0 border-zinc-200"
+                    : activeTab === tab.id 
+                      ? "bg-[#febd69] text-zinc-900 shadow-sm" 
+                      : "text-zinc-600 hover:bg-zinc-100 bg-white md:bg-transparent border md:border-0 border-zinc-200"
                 }`}
               >
                 <tab.icon size={16} className="shrink-0" />
@@ -903,6 +887,20 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       placeholder={l("e.g. Premium Leather Wallet")}
                       className="w-full h-11 px-4 bg-white border border-zinc-300 rounded-lg text-[14px] outline-none focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] transition-all shadow-inner"
                     />
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
+                    <input 
+                      type="checkbox"
+                      id="made_in_jordan"
+                      name="made_in_jordan"
+                      checked={formData.made_in_jordan}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 accent-emerald-600"
+                    />
+                    <label htmlFor="made_in_jordan" className="text-[13px] font-bold text-emerald-800 cursor-pointer select-none">
+                      {isAr ? "هذا المنتج صُنع في الأردن" : "This product is Made in Jordan"}
+                    </label>
                   </div>
 
                   <div className="space-y-2">

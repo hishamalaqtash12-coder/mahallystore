@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTranslations, useLocale } from "next-intl";
 import ProductCountdown from "./ProductCountdown";
 import ShippingInfoDisplay from "./ShippingInfoDisplay";
+import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 
 export default function QuickLookModal({ product: initialProduct, isOpen, onClose }) {
   const t = useTranslations("QuickLook");
@@ -222,6 +223,12 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
             {/* LEFT: Image Gallery */}
             <div className="w-full md:w-[45%] p-4 sm:p-6 pt-3 md:pt-6 flex flex-col bg-white border-b md:border-b-0 md:border-l border-zinc-200 shrink-0 md:overflow-y-auto no-scrollbar">
               <div className="relative aspect-square max-h-[240px] sm:max-h-[280px] md:max-h-none mb-3 md:mb-6 flex items-center justify-center bg-zinc-50/50 rounded-xl overflow-hidden border border-zinc-100 shadow-xs mx-auto w-full">
+                {isMadeInJordanProduct(product) && (
+                  <div className="absolute top-0 start-0 bg-zinc-900 text-white text-[10px] sm:text-[11px] font-black px-3 py-1.5 z-10 uppercase tracking-widest rounded-ee-xl shadow-sm flex items-center gap-1.5">
+                    <span className="text-[12px] leading-none">🇯🇴</span>
+                    <span className="mt-0.5">{locale === "ar" ? "صُنع بأيادٍ أردنية" : "Made in Jordan"}</span>
+                  </div>
+                )}
                 <Image
                   src={displayImages[selectedImage]?.src || displayImages[0]?.src || "https://placehold.co/600"}
                   alt={product.name}
