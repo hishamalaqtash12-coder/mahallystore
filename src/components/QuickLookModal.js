@@ -7,20 +7,22 @@ import { Link } from "@/i18n/routing";
 import { useRouter } from "@/i18n/routing";
 import { X, ChevronRight, Star, Truck, ShieldCheck, RotateCcw, Plus, Minus, Trash2, AlertCircle, Clock } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { isProductOutOfStock, getProductMerchant } from "@/lib/product-utils";
+import { isProductOutOfStock, getProductMerchant, getProductUrl } from "@/lib/product-utils";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations, useLocale } from "next-intl";
 import ProductCountdown from "./ProductCountdown";
 import ShippingInfoDisplay from "./ShippingInfoDisplay";
+import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
 
 export default function QuickLookModal({ product: initialProduct, isOpen, onClose }) {
   const t = useTranslations("QuickLook");
   const locale = useLocale();
   const router = useRouter();
-  const { user, wooId, isVendor } = useAuth();
+  const { user, wooId, isVendor, isAdmin } = useAuth();
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
   const [product, setProduct] = useState(initialProduct);
   const [vendorData, setVendorData] = useState(null);
+  const [vendorLoading, setVendorLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -106,9 +108,11 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
             // 3. Fetch Vendor Data for policies
             const { id: vId } = getProductMerchant(data);
             if (vId) {
+              setVendorLoading(true);
               fetch(`/api/vendors/${vId}`).then(r => r.json()).then(v => {
                 if (v?.vendor) setVendorData(v.vendor);
-              }).catch(() => { });
+              }).catch(() => { })
+              .finally(() => setVendorLoading(false));
             }
           }
         } catch (e) {
@@ -131,13 +135,15 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
   };
 
   // Return Policy Logic
-  const returnPolicyStr = useMemo(() => {
-    if (!product) return "";
+  const returnPolicyData = useMemo(() => {
+    if (!product) return { text: "", isReady: false };
     const itemReturnPolicy = product.meta_data?.find(m => m.key === "mahally_return_policy")?.value;
     const itemReturnPeriod = product.meta_data?.find(m => m.key === "mahally_return_period")?.value;
 
-    if (itemReturnPolicy === "no-returns") return t("noReturns");
-    if (itemReturnPolicy === "custom") return t("eligibleForReturn", { days: itemReturnPeriod || "14" });
+    if (itemReturnPolicy === "no-returns") return { text: t("noReturns"), isReady: true };
+    if (itemReturnPolicy === "custom") return { text: t("eligibleForReturn", { days: itemReturnPeriod || "14" }), isReady: true };
+
+    if (vendorLoading) return { text: "", isReady: false };
 
     // Check Vendor Global Policy
     if (vendorData) {
@@ -145,14 +151,14 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
       const globalPolicy = vendorData.returnPolicy || vendorData.meta_data?.find(m => m.key === "mahally_return_policy")?.value;
       const globalPeriod = vendorData.returnPeriod || vendorData.meta_data?.find(m => m.key === "mahally_return_period")?.value;
 
-      if (globalPolicy === "no-returns") return t("noReturns");
+      if (globalPolicy === "no-returns") return { text: t("noReturns"), isReady: true };
       if (globalPolicy === "global" || globalPolicy === "eligible" || globalPeriod) {
-        return t("eligibleForReturn", { days: globalPeriod || "14" });
+        return { text: t("eligibleForReturn", { days: globalPeriod || "14" }), isReady: true };
       }
     }
 
-    return t("eligibleForReturnGlobal");
-  }, [product, vendorData]);
+    return { text: t("eligibleForReturnGlobal"), isReady: true };
+  }, [product, vendorData, vendorLoading, t]);
 
   // Delivery Dates
   const deliveryDates = useMemo(() => {
@@ -217,6 +223,12 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
             {/* LEFT: Image Gallery */}
             <div className="w-full md:w-[45%] p-4 sm:p-6 pt-3 md:pt-6 flex flex-col bg-white border-b md:border-b-0 md:border-l border-zinc-200 shrink-0 md:overflow-y-auto no-scrollbar">
               <div className="relative aspect-square max-h-[240px] sm:max-h-[280px] md:max-h-none mb-3 md:mb-6 flex items-center justify-center bg-zinc-50/50 rounded-xl overflow-hidden border border-zinc-100 shadow-xs mx-auto w-full">
+                {isMadeInJordanProduct(product) && (
+                  <div className="absolute top-0 start-0 bg-zinc-900 text-white text-[10px] sm:text-[11px] font-black px-3 py-1.5 z-10 uppercase tracking-widest rounded-ee-xl shadow-sm flex items-center gap-1.5">
+                    <span className="text-[12px] leading-none">🇯🇴</span>
+                    <span className="mt-0.5">{locale === "ar" ? "صُنع بأيادٍ أردنية" : "Made in Jordan"}</span>
+                  </div>
+                )}
                 <Image
                   src={displayImages[selectedImage]?.src || displayImages[0]?.src || "https://placehold.co/600"}
                   alt={product.name}
@@ -294,10 +306,18 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                   productPrice={salePrice}
                   merchantName={merchantName}
                 />
-                <div className="flex items-center gap-3 text-[13px] pt-3 px-1">
-                  <RotateCcw size={16} className={returnPolicyStr === t("noReturns") ? "text-rose-500" : "text-zinc-600"} />
-                  <span className={`font-medium ${returnPolicyStr === t("noReturns") ? "text-rose-600" : "text-brand hover:text-brand-dark hover:underline cursor-pointer"}`}>{returnPolicyStr}</span>
-                </div>
+                
+                {!returnPolicyData.isReady ? (
+                  <div className="flex items-center gap-3 text-[13px] pt-3 px-1">
+                    <div className="w-4 h-4 rounded-full border-2 border-zinc-200 border-t-brand animate-spin" />
+                    <div className="h-3 bg-zinc-200 rounded w-24 animate-pulse" />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 text-[13px] pt-3 px-1">
+                    <RotateCcw size={16} className={returnPolicyData.text === t("noReturns") ? "text-rose-500" : "text-zinc-600"} />
+                    <span className={`font-medium ${returnPolicyData.text === t("noReturns") ? "text-rose-600" : "text-brand hover:text-brand-dark hover:underline cursor-pointer"}`}>{returnPolicyData.text}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 text-[12px] pt-1 px-1">
                   <Clock size={14} className="text-zinc-400" />
                   <span className="text-zinc-500">{t("expectedDelivery")} <span className="font-bold text-zinc-700">{deliveryDates}</span></span>
@@ -364,7 +384,13 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     );
                   }
 
-                  // Removed vendor purchasing restriction
+                  if (isVendor || isAdmin) {
+                    return (
+                      <div className="w-full text-center text-[13px] font-medium text-zinc-500 bg-zinc-100 border border-zinc-200 rounded-md py-2 px-3">
+                        خيارات الشراء غير متاحة لحسابات الإدارة والبائعين
+                      </div>
+                    );
+                  }
 
                   if (outOfStock) {
                     return (
@@ -427,9 +453,9 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
               </div>
 
               <div className="mt-auto pt-4 border-t border-zinc-100 flex justify-between items-center">
-                <a href={`/product/${product.slug}`} className="text-[13px] text-brand hover:text-brand-dark hover:underline flex items-center gap-1">
+                <Link href={getProductUrl(product)} className="text-[13px] text-brand hover:text-brand-dark hover:underline flex items-center gap-1">
                   {t("viewFullDetails")} <ChevronRight size={14} className="rtl:-scale-x-100" />
-                </a>
+                </Link>
                 <a href={merchantSlug || merchantId ? `/vendor/${merchantSlug || merchantId}` : "/vendors"} className="text-[11px] text-zinc-400 hover:text-brand hover:underline transition-colors">
                   {t("soldBy", { merchantName: merchantName || (typeof t === 'function' ? t('mahallyOfficial', { fallback: "Mahally Official" }) : "Mahally Official") })}
                 </a>

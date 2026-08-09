@@ -8,6 +8,7 @@ import { Link } from "@/i18n/routing";
 import AddProductForm from "@/components/merchant/AddProductForm";
 import Loader from "@/components/Loader";
 import { useLocale } from "next-intl";
+import { getProductUrl } from "@/lib/product-utils";
 
 const translations = {
   en: {
@@ -517,8 +518,7 @@ export default function MerchantProductsPage() {
       </div>
 
       {/* Product Table */}
-      <div className="bg-white border border-zinc-200 shadow-sm rounded-md overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white border border-zinc-200 shadow-sm rounded-md overflow-x-auto">
           <table className="min-w-[1200px] w-full text-end border-collapse">
             <thead>
               <tr className="bg-zinc-100/50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
@@ -590,7 +590,7 @@ export default function MerchantProductsPage() {
                             <span className="text-zinc-200">•</span>
                             <button onClick={() => handleDelete(product.id)} className="text-rose-600 hover:underline">{t.table.actions.trash}</button>
                             <span className="text-zinc-200">•</span>
-                            <Link href={`/product/${product.slug}`} target="_blank" className="text-zinc-400 hover:text-zinc-600">{t.table.actions.preview}</Link>
+                            <Link href={getProductUrl(product)} target="_blank" className="text-gray-400 hover:text-[#be374f]" title={t.viewProduct}>{t.table.actions.preview}</Link>
                           </>
                         )}
                       </div>
@@ -692,7 +692,6 @@ export default function MerchantProductsPage() {
               )}
             </tbody>
           </table>
-        </div>
 
         {/* Footer Info */}
         <div className="p-4 border-t border-zinc-100 flex items-center justify-between text-[12px] font-bold text-zinc-400 bg-zinc-50/50">

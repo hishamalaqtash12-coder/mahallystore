@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useLocation } from "@/context/LocationContext";
 import { JORDAN_GOVERNORATES, GOVERNORATES_MAP_AR } from "@/lib/constants";
-import { isProductOutOfStock, getCategoryName } from "@/lib/product-utils";
+import { isProductOutOfStock, getCategoryName, getProductUrl, getProductMerchant } from "@/lib/product-utils";
 
 const decodeHtml = (html) => {
   if (!html) return '';
@@ -53,7 +53,8 @@ import {
   PlusCircle,
   BarChart3,
   Boxes,
-  ChevronLeft
+  ChevronLeft,
+  History
 } from "lucide-react";
 import UserAvatar from "@/components/UserAvatar";
 
@@ -90,10 +91,45 @@ export default function Header() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [recentViews, setRecentViews] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [recentSearches, setRecentSearches] = useState([]);
+  // Accordion state for Shop by Category
+  const [openAccordionId, setOpenAccordionId] = useState(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('mahally_recent_searches');
+    if (saved) {
+      try {
+        setRecentSearches(JSON.parse(saved));
+      } catch (e) { }
+    }
+  }, []);
 
   const searchRef = useRef(null);
   const categoryHoverTimeoutRef = useRef(null);
   const cartItemsCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Build hierarchy from flat categories list (WooCommerce-style: parent field)
+  const mainCategories = useMemo(() => {
+    if (!categories?.length) return [];
+
+    const byParent = {};
+    categories.forEach((cat) => {
+      const parentId = cat.parent || 0;
+      if (!byParent[parentId]) byParent[parentId] = [];
+      byParent[parentId].push(cat);
+    });
+
+    const topLevel = byParent[0] || [];
+
+    return topLevel.map((cat) => ({
+      ...cat,
+      children: byParent[cat.id] || [],
+    }));
+  }, [categories]);
+
+  const toggleAccordion = (id) => {
+    setOpenAccordionId((prev) => (prev === id ? null : id));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -114,29 +150,41 @@ export default function Header() {
         const stored = localStorage.getItem("mahally_recently_viewed");
         if (stored) {
           const parsed = JSON.parse(stored);
-          setRecentViews(parsed);
+          // Show stale data immediately while we check live availability
+          setRecentViews(parsed.map(p => ({ ...p, availability_checked: false })));
 
           if (parsed.length > 0) {
             const ids = parsed.map(p => p.id).join(",");
             const res = await fetch(`/api/products?include=${ids}&per_page=${parsed.length}`);
             if (res.ok) {
               const data = await res.json();
-              if (data.products && data.products.length > 0) {
-                const updatedViews = parsed.map(p => {
-                  const live = data.products.find(lp => lp.id === p.id);
-                  if (live) {
-                    return {
-                      ...p,
-                      ...live,
-                      image: live.images?.[0]?.src || p.image || "https://placehold.co/100"
-                    };
-                  }
-                  return null;
-                }).filter(Boolean);
+              const liveProducts = data.products || [];
 
-                setRecentViews(updatedViews);
-                localStorage.setItem("mahally_recently_viewed", JSON.stringify(updatedViews));
-              }
+              // Always map ALL stored items — mark deleted if not returned by API
+              const updatedViews = parsed.map(p => {
+                const live = liveProducts.find(lp => lp.id === p.id);
+                if (live) {
+                  return {
+                    ...p,
+                    ...live,
+                    image: live.images?.[0]?.src || p.image || "https://placehold.co/100",
+                    is_deleted: false,
+                    availability_checked: true
+                  };
+                }
+                // Product not returned by API = deleted or unpublished
+                return {
+                  ...p,
+                  is_deleted: true,
+                  availability_checked: true
+                };
+              });
+
+              setRecentViews(updatedViews);
+              // Don't persist `is_deleted` to localStorage — re-check every time
+              localStorage.setItem("mahally_recently_viewed", JSON.stringify(
+                updatedViews.filter(p => !p.is_deleted).map(({ availability_checked, ...rest }) => rest)
+              ));
             }
           }
         }
@@ -335,11 +383,17 @@ export default function Header() {
   }, [searchQuery, selectedCategory]);
 
   const handleSearch = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (searchQuery.trim()) {
+      const q = searchQuery.trim();
+      const updated = [q, ...recentSearches.filter(s => s !== q)].slice(0, 5);
+      setRecentSearches(updated);
+      localStorage.setItem('mahally_recent_searches', JSON.stringify(updated));
+
       setShowSuggestions(false);
+      setIsCategoryOpen(false);
       const catParam = selectedCategory !== "All" ? `&cat=${selectedCategory}` : "";
-      router.push(`/browse?q=${encodeURIComponent(searchQuery)}${catParam}`);
+      router.push(`/browse?q=${encodeURIComponent(q)}${catParam}`);
     }
   };
 
@@ -350,11 +404,11 @@ export default function Header() {
         {/* 1. TOP MAIN HEADER */}
         <div className="bg-white px-2 py-2 flex flex-wrap lg:flex-nowrap items-center gap-2 min-h-[50px] border-b border-zinc-200">
           <Link href="/" className="order-1 p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm transition-all flex items-center shrink-0">
-            <Image 
-              src="/mahally-logo.webp" 
-              alt="Mahally.jo Logo" 
-              width={120} 
-              height={40} 
+            <Image
+              src="/mahally-logo.webp"
+              alt="Mahally.jo Logo"
+              width={120}
+              height={40}
               className="object-contain"
               priority
             />
@@ -392,18 +446,101 @@ export default function Header() {
                 {isSearching ? <div className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" /> : <Search size={24} />}
               </button>
             </form>
-            {showSuggestions && searchQuery.length > 0 && (
+            {showSuggestions && (
               <div className="absolute top-[102%] end-0 w-full bg-white border border-zinc-300 shadow-2xl z-[150] mt-0 rounded-sm overflow-hidden text-zinc-900">
-                {suggestions.length > 0 ? (
-                  <div className="py-2">
-                    {suggestions.map((p) => (
-                      <Link key={p.id} href={`/product/${p.slug || p.id}`} onClick={() => setShowSuggestions(false)} className="flex items-center gap-3 px-4 py-2 hover:bg-zinc-100 transition-colors">
-                        <div className="w-8 h-8 relative shrink-0 bg-white"><Image src={p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Product"} fill className="object-contain" /></div>
-                        <p className="text-[14px] truncate flex-1 font-bold">{p.name}</p>
-                      </Link>
-                    ))}
+                {searchQuery.length > 0 ? (
+                  suggestions.length > 0 ? (
+                    <div className="py-0 flex flex-col max-h-[400px] overflow-y-auto custom-scrollbar">
+                      {suggestions.map((p) => {
+                        const hasDiscount = p.regular_price && p.sale_price && Number(p.regular_price) > Number(p.sale_price);
+                        const discountPercent = hasDiscount ? Math.round(((Number(p.regular_price) - Number(p.sale_price)) / Number(p.regular_price)) * 100) : 0;
+                        const { name: merchantName } = getProductMerchant(p);
+
+                        return (
+                          <Link key={p.id} href={getProductUrl(p)} onClick={() => setShowSuggestions(false)} className="flex items-start gap-3 px-4 py-3 hover:bg-zinc-50 border-b border-zinc-100 last:border-0 transition-colors group">
+                            <div className="w-14 h-14 relative shrink-0 bg-white border border-zinc-100 rounded overflow-hidden">
+                              <Image src={p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Product"} fill className="object-cover group-hover:scale-105 transition-transform" />
+                              {hasDiscount && (
+                                <div className="absolute top-0 start-0 bg-brand text-white text-[9px] font-bold px-1 py-0.5 rounded-br-sm z-10 leading-none">
+                                  -{discountPercent}%
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col flex-1 min-w-0">
+                              <div className="flex justify-between items-start gap-2 mb-1">
+                                <div className="flex flex-col gap-0.5">
+                                  <p className="text-[13px] sm:text-[14px] leading-tight line-clamp-2 font-bold text-zinc-900 group-hover:text-brand transition-colors">{p.name}</p>
+                                  {merchantName && (
+                                    <div className="flex items-center gap-1 text-zinc-500">
+                                      <Store size={10} />
+                                      <span className="text-[10px] font-medium truncate">{merchantName}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex flex-col items-end shrink-0 mt-0.5">
+                                  <span className="text-[13px] font-bold text-brand">{p.price || "0.00"} {t('jod')}</span>
+                                  {hasDiscount && (
+                                    <span className="text-[11px] text-zinc-400 line-through">{p.regular_price} {t('jod')}</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between mt-auto">
+                                <div className="flex items-center gap-2">
+                                  {p.categories?.length > 0 && (
+                                    <span className="text-[10px] text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded font-medium truncate max-w-[80px] sm:max-w-[120px]">{p.categories[0].name}</span>
+                                  )}
+                                  {p.stock_status === 'outofstock' ? (
+                                    <span className="text-[10px] text-rose-600 font-bold px-1.5 py-0.5 bg-rose-50 rounded-sm">{t('outOfStock')}</span>
+                                  ) : (p.stock_quantity > 0 && p.stock_quantity <= 5) ? (
+                                    <span className="text-[10px] text-orange-600 font-bold px-1.5 py-0.5 bg-orange-50 rounded-sm">{t('almostOutOfStock')}</span>
+                                  ) : null}
+                                </div>
+
+                                {Number(p.average_rating) > 0 && (
+                                  <div className="flex items-center gap-0.5 shrink-0">
+                                    <Star size={12} className="text-amber-400 fill-amber-400" />
+                                    <span className="text-[11px] text-zinc-600 font-bold">{Number(p.average_rating).toFixed(1)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  ) : (!isSearching && <div className="p-4 text-zinc-400 text-sm italic">{t("noResults")}</div>)
+                ) : (
+                  <div className="p-4 flex flex-col gap-4">
+                    <div>
+                      <h4 className="text-[13px] font-bold text-zinc-800 mb-2 uppercase tracking-wider">{locale === 'ar' ? "الأقسام" : "Categories"}</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {categories.slice(0, 8).map(cat => (
+                          <Link key={cat.id} href={`/browse?cat=${cat.slug}`} onClick={() => setShowSuggestions(false)} className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-[13px] rounded-full transition-colors whitespace-nowrap">
+                            {cat.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    {recentSearches.length > 0 && (
+                      <div className="pt-3 border-t border-zinc-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-[13px] font-bold text-zinc-800 uppercase tracking-wider">{locale === 'ar' ? "عمليات البحث الأخيرة" : "Recent Searches"}</h4>
+                          <button type="button" onClick={() => { setRecentSearches([]); localStorage.removeItem('mahally_recent_searches'); }} className="text-[11px] text-zinc-500 hover:text-brand transition-colors">{locale === 'ar' ? "مسح الكل" : "Clear all"}</button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {recentSearches.map((s, i) => (
+                            <button key={i} type="button" onClick={() => { setSearchQuery(s); const catParam = selectedCategory !== "All" ? `&cat=${selectedCategory}` : ""; router.push(`/browse?q=${encodeURIComponent(s)}${catParam}`); setShowSuggestions(false); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100 text-zinc-700 text-[13px] rounded-full transition-colors">
+                              <History size={13} className="text-zinc-400" />
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : (!isSearching && <div className="p-4 text-zinc-400 text-sm italic">{t("noResults")}</div>)}
+                )}
               </div>
             )}
           </div>
@@ -445,9 +582,9 @@ export default function Header() {
               {isAccountMenuOpen && user && !authLoading && (
                 <div className="absolute top-[100%] end-0 pt-2 z-[200]">
                   <div className="absolute top-[4px] end-4 sm:end-10 w-4 h-4 bg-white rotate-45 border-r border-t border-zinc-200 z-[201]"></div>
-                  <div className="w-[300px] sm:w-[580px] h-auto max-h-[420px] sm:h-[420px] bg-white text-zinc-900 shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-md border border-zinc-200 flex flex-col sm:flex-row animate-in fade-in zoom-in-95 duration-200 overflow-hidden relative z-[200]">
+                  <div className="w-[300px] sm:w-[580px] h-auto max-h-[calc(100vh-80px)] bg-white text-zinc-900 shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-md border border-zinc-200 flex flex-col sm:flex-row animate-in fade-in zoom-in-95 duration-200 overflow-hidden relative z-[200]">
                     {/* Right Side: Account Menu */}
-                    <div className="flex-1 h-full bg-white p-5 flex flex-col relative z-10">
+                    <div className="flex-1 h-full min-h-0 bg-white p-5 flex flex-col relative z-10 overflow-hidden">
                       <div className="flex items-center gap-4 mb-4 pb-4 border-b border-zinc-100 shrink-0">
                         <UserAvatar
                           user={user}
@@ -462,81 +599,92 @@ export default function Header() {
                       </div>
                       <ul className="space-y-1 text-[15px] text-zinc-700 flex-1 overflow-y-auto ps-1.5 custom-scrollbar pb-2">
                         {isAdmin && (
-                          <>
-                            <li><Link href="/admin" className="flex items-center gap-3.5 hover:bg-blue-50 text-blue-600 font-bold py-2 px-3 rounded-md transition-colors"><ShieldCheck size={18} strokeWidth={1.5} className="text-blue-600" /> {t('adminDashboardMenu')}</Link></li>
-                            <li><Link href="/admin/vendors" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Store size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('manageVendors')}</Link></li>
-                            <li><Link href="/admin/feedback" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><MessageSquare size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('siteFeedback')}</Link></li>
-                            <li><Link href="/admin/settings" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Settings size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('generalSettings')}</Link></li>
-                            <li className="border-b border-zinc-100 pb-1 mb-1"></li>
-                          </>
+                          <div className="space-y-0.5 mb-2">
+                            <li><Link href="/admin" className="flex items-center gap-3 hover:bg-blue-50/50 text-blue-600 font-bold py-1.5 px-2 rounded-md transition-colors text-[13px]"><ShieldCheck size={16} strokeWidth={1.5} className="text-blue-600" /> {t('adminDashboardMenu')}</Link></li>
+                            <li><Link href="/admin/vendors" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Store size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('manageVendors')}</Link></li>
+                            <li><Link href="/admin/feedback" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><MessageSquare size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('siteFeedback')}</Link></li>
+                            <li><Link href="/admin/settings" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Settings size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('generalSettings')}</Link></li>
+                          </div>
                         )}
                         {(isApprovedVendor && !isAdmin) && (
-                          <>
-                            <li><Link href="/merchant/dashboard" className="flex items-center gap-3.5 hover:bg-brand-light text-brand font-bold py-2.5 px-3 rounded-md transition-colors"><Store size={20} strokeWidth={1.5} className="text-brand" /> {t('vendorDashboard')}</Link></li>
-                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><PlusCircle size={18} strokeWidth={1.5} className="text-emerald-500" /> {t('addNewProduct')}</Link></li>
-                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Package size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('products')}</Link></li>
-                            <li><Link href="/merchant/dashboard/inventory" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Boxes size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('inventory')}</Link></li>
-                            <li><Link href="/merchant/dashboard/orders" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><ShoppingCart size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('orders')}</Link></li>
-                            <li><Link href="/merchant/dashboard/reviews" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Star size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('reviews')}</Link></li>
-                            <li><Link href="/merchant/dashboard/reports" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><BarChart3 size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('reports')}</Link></li>
-                            <li><Link href="/merchant/dashboard/settings" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2 px-3 rounded-md transition-colors text-[14px]"><Settings size={18} strokeWidth={1.5} className="text-zinc-500" /> {t('storeSettings')}</Link></li>
-                            <li className="border-b border-zinc-100 pb-1 mb-1"></li>
-                          </>
+                          <div className="space-y-0.5 mb-2 pb-2 border-b border-zinc-100">
+                            <li><Link href="/merchant/dashboard" className="flex items-center gap-3 hover:bg-brand-light/50 text-brand font-bold py-1.5 px-2 rounded-md transition-colors text-[13px]"><Store size={16} strokeWidth={1.5} className="text-brand" /> {t('vendorDashboard')}</Link></li>
+                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><PlusCircle size={16} strokeWidth={1.5} className="text-emerald-500" /> {t('addNewProduct')}</Link></li>
+                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Package size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('products')}</Link></li>
+                            <li><Link href="/merchant/dashboard/inventory" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Boxes size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('inventory')}</Link></li>
+                            <li><Link href="/merchant/dashboard/orders" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><ShoppingCart size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('orders')}</Link></li>
+                            <li><Link href="/merchant/dashboard/reviews" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Star size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('reviews')}</Link></li>
+                            <li><Link href="/merchant/dashboard/reports" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><BarChart3 size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('reports')}</Link></li>
+                            <li><Link href="/merchant/dashboard/settings" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Settings size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('storeSettings')}</Link></li>
+                          </div>
                         )}
-                        {true && (
-                          <>
-                            <li><Link href="/account" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><UserCircle size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
-                            <li><Link href="/account/security" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><ShieldCheck size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('accountSecurity')}</Link></li>
-                            <li><Link href="/account/orders" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><Package size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('yourOrders')}</Link></li>
+                        {!isAdmin && (
+                          <div className="space-y-0.5 mb-2">
+                            <li><Link href="/account" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><UserCircle size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
+                            <li><Link href="/account/security" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><ShieldCheck size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('accountSecurity')}</Link></li>
+                            <li><Link href="/account/orders" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Package size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('yourOrders')}</Link></li>
                             {messagingEnabled && (
-                              <li><Link href="/account/reviews" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><MessageSquare size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('yourReviews')}</Link></li>
+                              <li><Link href="/account/reviews" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><MessageSquare size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('yourReviews')}</Link></li>
                             )}
-                            <li><Link href="/account/addresses" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><MapPin size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('addresses')}</Link></li>
-                            <li><Link href="/account/coupons" className="flex items-center gap-3.5 hover:bg-zinc-50 py-2.5 px-3 rounded-md transition-colors"><Tag size={20} strokeWidth={1.5} className="text-zinc-600" /> {t('couponsAndOffers')}</Link></li>
-                          </>
+                            <li><Link href="/account/addresses" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><MapPin size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('addresses')}</Link></li>
+                            <li><Link href="/account/coupons" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Tag size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('couponsAndOffers')}</Link></li>
+                          </div>
                         )}
-                        <li className="pt-2 mt-2 border-t border-zinc-100"><button onClick={logout} className="cursor-pointer w-full flex items-center gap-3.5 hover:bg-red-50 text-red-600 py-2.5 px-3 rounded-md transition-colors"><LogOut className="cursor-pointer" size={20} strokeWidth={1.5} /> {t('logout')}</button></li>
+                        <li className="pt-2 border-t border-zinc-100"><button onClick={logout} className="cursor-pointer w-full flex items-center gap-3 hover:bg-red-50 text-red-600 py-1.5 px-2 rounded-md transition-colors text-[13px] font-medium"><LogOut className="cursor-pointer" size={16} strokeWidth={1.5} /> {t('logout')}</button></li>
                       </ul>
                     </div>
                     {/* Left Side: Browsing History */}
-                    <div className="hidden sm:flex w-[280px] h-full bg-white border-r border-zinc-100 p-5 flex-col relative z-10">
+                    <div className="hidden sm:flex w-[280px] h-full min-h-0 bg-white border-r border-zinc-100 p-5 flex-col relative z-10 overflow-hidden">
                       <div className="flex justify-between items-center mb-4 shrink-0">
                         <Link href="/account/recently-viewed" className="font-medium text-[16px] flex items-center gap-1 hover:text-brand transition-colors">{t('browsingHistory')} <ChevronLeft size={16} /></Link>
                       </div>
                       {recentViews.length > 0 ? (
                         <div className="space-y-4 flex-1 overflow-y-auto ps-1.5 custom-scrollbar pb-2">
-                           {recentViews.slice(0, 10).map((p) => (
-                            <Link href={`/product/${p.slug}`} key={p.id} className="flex items-center gap-3 group relative block">
-                              <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded relative shrink-0 overflow-hidden"><Image src={p.image || p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Recently viewed product"} fill className="object-cover" /></div>
-                              <div className="flex flex-col flex-1 overflow-hidden">
-                                <p className="text-[13px] text-zinc-800 line-clamp-1 group-hover:underline transition-colors leading-tight mb-1">{p.name}</p>
-                                {p.stock_status === 'outofstock' ? (
-                                  <p className="text-[11px] text-red-600 font-medium mb-0.5">{t("outOfStock")}</p>
-                                ) : (p.stock_quantity > 0 && p.stock_quantity <= 5) ? (
-                                  <p className="text-[11px] text-brand-dark font-medium mb-0.5">{t('almostOutOfStock')} ({t('onlyLeft')} {p.stock_quantity})</p>
-                                ) : (
-                                  <p className="text-[11px] text-green-600 font-medium mb-0.5">{t("inStock")}</p>
-                                )}
-                                <div className="flex items-center justify-between">
-                                  <p className="text-[16px] font-bold">{p.price || "0.00"} {t('jod')}</p>
-                                  {p.stock_status !== 'outofstock' && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        addToCart(p, 1);
-                                        setIsCartOpen(true);
-                                      }}
-                                      className="w-7 h-7 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors cursor-pointer animate-fade-in"
-                                      title={t("addToCart")}
-                                    >
-                                      <ShoppingCart size={14} className="text-zinc-700" />
-                                    </button>
-                                  )}
+                          {recentViews.slice(0, 10).map((p) => {
+                            const isChecked = p.availability_checked !== false;
+                            const ItemWrapper = p.is_deleted ? 'div' : Link;
+                            const wrapperProps = p.is_deleted
+                              ? { className: "flex items-center gap-3 group relative block opacity-60 cursor-default" }
+                              : { href: getProductUrl(p), className: "flex items-center gap-3 group relative block" };
+                            return (
+                              <ItemWrapper key={p.id} {...wrapperProps}>
+                                <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded relative shrink-0 overflow-hidden">
+                                  <Image src={p.image || p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Recently viewed product"} fill className={`object-cover ${p.is_deleted ? 'grayscale' : ''}`} />
                                 </div>
-                              </div>
-                            </Link>
-                          ))}
+                                <div className="flex flex-col flex-1 overflow-hidden">
+                                  <p className={`text-[13px] line-clamp-1 leading-tight mb-1 ${p.is_deleted ? 'text-zinc-400 line-through' : 'text-zinc-800 group-hover:underline transition-colors'}`}>{p.name}</p>
+                                  {p.is_deleted ? (
+                                    <p className="text-[11px] text-zinc-400 font-medium mb-0.5">{locale === "ar" ? "غير متوفر / تمت إزالته" : "Unavailable / Removed"}</p>
+                                  ) : !isChecked ? (
+                                    <p className="text-[11px] text-zinc-400 mb-0.5 animate-pulse">{locale === "ar" ? "جارٍ التحقق..." : "Checking..."}</p>
+                                  ) : p.stock_status === 'outofstock' ? (
+                                    <p className="text-[11px] text-red-600 font-medium mb-0.5">{t("outOfStock")}</p>
+                                  ) : (p.stock_quantity > 0 && p.stock_quantity <= 5) ? (
+                                    <p className="text-[11px] text-brand-dark font-medium mb-0.5">{t('almostOutOfStock')} ({t('onlyLeft')} {p.stock_quantity})</p>
+                                  ) : (
+                                    <p className="text-[11px] text-green-600 font-medium mb-0.5">{t("inStock")}</p>
+                                  )}
+                                  <div className="flex items-center justify-between">
+                                    <p className={`text-[16px] font-bold ${p.is_deleted ? 'text-zinc-300' : ''}`}>{p.price || "0.00"} {t('jod')}</p>
+                                    {!p.is_deleted && isChecked && p.stock_status !== 'outofstock' && !isAdmin && !isVendor && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          addToCart(p, 1);
+                                          setIsCartOpen(true);
+                                        }}
+                                        className="w-7 h-7 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors cursor-pointer animate-fade-in"
+                                        title={t("addToCart")}
+                                      >
+                                        <ShoppingCart size={14} className="text-zinc-700" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </ItemWrapper>
+                            );
+                          })}
                         </div>
                       ) : (
                         <p className="text-[13px] text-zinc-500 py-4 text-center">{t("noRecentItems")}</p>
@@ -573,9 +721,9 @@ export default function Header() {
               </div>
             </Link>
 
-            <button 
+            <button
               onClick={() => router.replace(pathname, { locale: locale === 'ar' ? 'en' : 'ar' })}
-              className="flex items-center justify-center p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm font-bold text-[14px] text-zinc-900 shrink-0"
+              className="flex items-center cursor-pointer justify-center p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm font-bold text-[14px] text-zinc-900 shrink-0"
             >
               <Globe size={18} className="me-1 sm:ms-1" />
               {locale === 'ar' ? 'EN' : 'AR'}
@@ -649,10 +797,18 @@ export default function Header() {
           </button>
         </div>
       </header>
+
       {/* SIDEBAR */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-[1000] flex">
-          <div className="absolute inset-0 bg-black/80 animate-in fade-in duration-300" onClick={() => { setIsSidebarOpen(false); setIsExpanded(false); }} />
+          <div
+            className="absolute inset-0 bg-black/80 animate-in fade-in duration-300"
+            onClick={() => {
+              setIsSidebarOpen(false);
+              setIsExpanded(false);
+              setOpenAccordionId(null);
+            }}
+          />
           <div className="relative w-[85vw] max-w-[365px] h-full bg-white animate-in slide-in-from-left duration-300 flex flex-col shadow-2xl overflow-hidden">
             <Link
               href={user ? "/account" : "/login"}
@@ -672,27 +828,103 @@ export default function Header() {
                   <li><Link href="/browse?sort=newest" onClick={() => setIsSidebarOpen(false)} className="px-6 py-3 flex items-center gap-3 hover:bg-zinc-100 transition-colors"><TrendingUp size={18} className="text-blue-500" /> {t('newProducts')}</Link></li>
                 </ul>
               </div>
+
+              {/* ===== SHOP BY CATEGORY – ACCORDION ===== */}
               <div className="py-4 border-b border-zinc-200">
                 <h4 className="px-6 text-[18px] font-bold text-zinc-900 mb-2">{t('shopByCategory')}</h4>
-                {categories && categories.length > 0 ? (
+
+                {mainCategories.length > 0 ? (
                   <ul className="text-[14px]">
-                    {(isExpanded ? categories : categories.slice(0, 8)).map(cat => (
-                      <li key={cat.id}>
-                        <Link href={`/browse?cat=${cat.slug}`} onClick={() => setIsSidebarOpen(false)} className="px-6 py-3 flex justify-between items-center hover:bg-zinc-100 transition-colors group">
-                          {decodeHtml(getCategoryName(cat, locale))} <ChevronRight size={16} className="text-zinc-400 group-hover:text-zinc-900" />
-                        </Link>
-                      </li>
-                    ))}
-                    {categories.length > 8 && (
+                    {(isExpanded ? mainCategories : mainCategories.slice(0, 8)).map((cat) => {
+                      const hasChildren = cat.children && cat.children.length > 0;
+                      const isOpen = openAccordionId === cat.id;
+
+                      return (
+                        <li key={cat.id} className="border-b border-zinc-100 last:border-b-0">
+                          {/* Accordion header */}
+                          <div className="flex items-center">
+                            <Link
+                              href={`/browse?cat=${cat.slug}`}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className="flex-1 px-6 py-3 hover:bg-zinc-100 transition-colors font-medium flex items-center justify-between"
+                            >
+                              <span>{decodeHtml(getCategoryName(cat, locale))}</span>
+                              {cat.count !== undefined && (
+                                <span className="text-[11px] text-zinc-500 bg-zinc-200/50 px-2 py-0.5 rounded-full font-bold ms-2">
+                                  {cat.count}
+                                </span>
+                              )}
+                            </Link>
+
+                            {hasChildren ? (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  toggleAccordion(cat.id);
+                                }}
+                                className="px-4 py-3 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+                                aria-expanded={isOpen}
+                                aria-label={isOpen ? "Collapse" : "Expand"}
+                              >
+                                <ChevronDown
+                                  size={18}
+                                  className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                                />
+                              </button>
+                            ) : (
+                              <span className="px-4 py-3">
+                                <ChevronRight size={16} className="text-zinc-400" />
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Accordion content – sub-categories */}
+                          {hasChildren && (
+                            <div
+                              className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+                                }`}
+                            >
+                              <ul className="bg-zinc-50/70 pb-1">
+                                {cat.children.map((child) => (
+                                  <li key={child.id}>
+                                    <Link
+                                      href={`/browse?cat=${child.slug}`}
+                                      onClick={() => setIsSidebarOpen(false)}
+                                      className="px-10 py-2.5 flex items-center justify-between text-[13px] text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors group"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-300 shrink-0 group-hover:bg-brand transition-colors" />
+                                        <span>{decodeHtml(getCategoryName(child, locale))}</span>
+                                      </div>
+                                      {child.count !== undefined && (
+                                        <span className="text-[10px] text-zinc-400 font-medium">
+                                          {child.count}
+                                        </span>
+                                      )}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
+
+                    {mainCategories.length > 8 && (
                       <li>
                         <button
                           onClick={() => setIsExpanded(!isExpanded)}
                           className="px-6 py-3 w-full text-end flex items-center gap-2 text-zinc-600 hover:text-zinc-900 font-bold transition-colors"
                         >
                           {isExpanded ? (
-                            <>{t('viewLess')} <ChevronDown size={14} className="rotate-180" /></>
+                            <>
+                              {t('viewLess')} <ChevronDown size={14} className="rotate-180" />
+                            </>
                           ) : (
-                            <>{t('viewAllMenu')} <ChevronDown size={14} /></>
+                            <>
+                              {t('viewAllMenu')} <ChevronDown size={14} />
+                            </>
                           )}
                         </button>
                       </li>
@@ -701,13 +933,20 @@ export default function Header() {
                 ) : (
                   <div className="px-6 py-5 mx-6 bg-zinc-50 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center gap-2 mb-2">
                     <FolderTree size={28} className="text-zinc-400" />
-                    <p className="text-[13px] text-zinc-500 font-medium">{locale === 'ar' ? "لا توجد أقسام حالياً." : "No categories found."}</p>
-                    <Link href="/browse" onClick={() => setIsSidebarOpen(false)} className="mt-1 text-xs font-bold text-brand hover:underline">
+                    <p className="text-[13px] text-zinc-500 font-medium">
+                      {locale === 'ar' ? "لا توجد أقسام حالياً." : "No categories found."}
+                    </p>
+                    <Link
+                      href="/browse"
+                      onClick={() => setIsSidebarOpen(false)}
+                      className="mt-1 text-xs font-bold text-brand hover:underline"
+                    >
                       {locale === 'ar' ? "تصفح جميع المنتجات" : "Browse All Products"}
                     </Link>
                   </div>
                 )}
               </div>
+
               {isVendor && (
                 <div className="py-4 border-b border-zinc-200">
                   <h4 className="px-6 text-[18px] font-bold text-zinc-900 mb-2">{t('ourMerchants')}</h4>
@@ -747,7 +986,11 @@ export default function Header() {
           </div>
           {/* Close button with square border as requested */}
           <button
-            onClick={() => { setIsSidebarOpen(false); setIsExpanded(false); }}
+            onClick={() => {
+              setIsSidebarOpen(false);
+              setIsExpanded(false);
+              setOpenAccordionId(null);
+            }}
             className="absolute start-[85vw] max-sm:start-[calc(85vw+10px)] sm:start-[380px] top-5 text-white hover:text-brand-light transition-all z-[1100] group flex items-center justify-center w-10 h-10 border-2 border-white rounded-md bg-zinc-900/50 hover:bg-zinc-900/80 shadow-2xl"
             aria-label="Close menu"
           >
@@ -794,7 +1037,7 @@ export default function Header() {
                     <li className="border-b border-zinc-200 my-2"></li>
                   </>
                 )}
-                {true && (
+                {!isAdmin && (
                   <>
                     <li><Link href="/account" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><UserCircle size={20} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
                     <li><Link href="/account/orders" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Package size={20} className="text-zinc-600" /> {t('yourOrders')}</Link></li>

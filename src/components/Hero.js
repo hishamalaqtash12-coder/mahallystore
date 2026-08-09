@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
-import { getCategoryName, getCategorySlug } from "@/lib/product-utils";
+import { getCategoryName, getCategorySlug, getProductUrl } from "@/lib/product-utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -49,13 +49,14 @@ const MerchantCarousel = memo(({ activeVendors }) => {
         return;
       }
 
+      const THRESHOLD = 50;
       if (isRtl) {
         const scrolledAmount = Math.abs(scrollLeft);
-        setCanScrollStart(scrolledAmount > 10);
-        setCanScrollEnd(scrolledAmount < maxScroll - 10);
+        setCanScrollStart(scrolledAmount > THRESHOLD);
+        setCanScrollEnd(scrolledAmount < maxScroll - THRESHOLD);
       } else {
-        setCanScrollStart(scrollLeft > 10);
-        setCanScrollEnd(scrollLeft < maxScroll - 10);
+        setCanScrollStart(scrollLeft > THRESHOLD);
+        setCanScrollEnd(scrollLeft < maxScroll - THRESHOLD);
       }
     }
   };
@@ -99,7 +100,7 @@ const MerchantCarousel = memo(({ activeVendors }) => {
             "https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=400&auto=format&fit=crop", // Kitchen
             "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop", // Games
             "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop", // Books
-            "https://images.unsplash.com/photo-1594035910387-fea47714263f?q=80&w=400&auto=format&fit=crop", // Perfumes
+            "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=400&auto=format&fit=crop", // Perfumes
             "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=400&auto=format&fit=crop", // Digital
             "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=400&auto=format&fit=crop", // Home
             "https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?q=80&w=400&auto=format&fit=crop", // Tools
@@ -128,24 +129,26 @@ const MerchantCarousel = memo(({ activeVendors }) => {
 
       <div className="relative z-10">
         {/* Scroll Forward / Next Button (Physically on the LEFT in RTL, RIGHT in LTR) */}
-        <button
-          onClick={scrollForward}
-          disabled={!canScrollEnd}
-          className={`hidden md:flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          aria-label={isAr ? "تمرير لليسار" : "Scroll Next"}
-        >
-          {isAr ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
-        </button>
+        {canScrollEnd && (
+          <button
+            onClick={scrollForward}
+            className="hidden md:flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand"
+            aria-label={isAr ? "تمرير لليسار" : "Scroll Next"}
+          >
+            {isAr ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
+          </button>
+        )}
 
         {/* Scroll Back / Prev Button (Physically on the RIGHT in RTL, LEFT in LTR) */}
-        <button
-          onClick={scrollBack}
-          disabled={!canScrollStart}
-          className={`hidden md:flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand ${!canScrollStart ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          aria-label={isAr ? "تمرير لليمين" : "Scroll Previous"}
-        >
-          {isAr ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
-        </button>
+        {canScrollStart && (
+          <button
+            onClick={scrollBack}
+            className="hidden md:flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full items-center justify-center z-50 transition-all shadow-xl hover:scale-110 active:scale-95 hover:bg-brand hover:border-brand"
+            aria-label={isAr ? "تمرير لليمين" : "Scroll Previous"}
+          >
+            {isAr ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+          </button>
+        )}
 
         <div
           ref={scrollRef}
@@ -204,8 +207,6 @@ const CategoryCarousel = memo(({ categories }) => {
   const locale = useLocale();
   const isAr = locale === "ar";
   const scrollRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
   const [activeParentId, setActiveParentId] = useState(null);
 
   // Separate parent and child categories
@@ -262,13 +263,14 @@ const CategoryCarousel = memo(({ categories }) => {
         return;
       }
 
+      const THRESHOLD = 50;
       if (isRtl) {
         const scrolledAmount = Math.abs(scrollLeft);
-        setCanScrollStart(scrolledAmount > 10);
-        setCanScrollEnd(scrolledAmount < maxScroll - 10);
+        setCanScrollStart(scrolledAmount > THRESHOLD);
+        setCanScrollEnd(scrolledAmount < maxScroll - THRESHOLD);
       } else {
-        setCanScrollStart(scrollLeft > 10);
-        setCanScrollEnd(scrollLeft < maxScroll - 10);
+        setCanScrollStart(scrollLeft > THRESHOLD);
+        setCanScrollEnd(scrollLeft < maxScroll - THRESHOLD);
       }
     }
   };
@@ -285,7 +287,7 @@ const CategoryCarousel = memo(({ categories }) => {
   const scrollForward = () => {
     if (scrollRef.current) {
       const isRtl = document.documentElement.dir === 'rtl' || isAr;
-      const amount = 340;
+      const amount = 300;
       scrollRef.current.scrollBy({ left: isRtl ? -amount : amount, behavior: 'smooth' });
       setTimeout(checkScroll, 350);
     }
@@ -294,7 +296,7 @@ const CategoryCarousel = memo(({ categories }) => {
   const scrollBack = () => {
     if (scrollRef.current) {
       const isRtl = document.documentElement.dir === 'rtl' || isAr;
-      const amount = 340;
+      const amount = 300;
       scrollRef.current.scrollBy({ left: isRtl ? amount : -amount, behavior: 'smooth' });
       setTimeout(checkScroll, 350);
     }
@@ -302,8 +304,8 @@ const CategoryCarousel = memo(({ categories }) => {
 
   if (parentCategories.length === 0) {
     return (
-      <div className="relative z-40 bg-white rounded-3xl p-8 border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center">
-        <FolderTree size={40} className="text-zinc-200 mb-4" />
+      <div className="relative z-40 bg-white rounded-xl p-8 border-2 border-zinc-300 flex flex-col items-center justify-center text-center">
+        <FolderTree size={40} className="text-zinc-300 mb-4" />
         <p className="text-zinc-500 font-medium">
           {isAr ? "لا توجد أقسام حالياً." : "No categories found."}
         </p>
@@ -312,13 +314,13 @@ const CategoryCarousel = memo(({ categories }) => {
   }
 
   return (
-    <div className="relative z-40 bg-white rounded-3xl p-4 md:p-6 border border-zinc-100 shadow-sm transition-all duration-300">
-      
+    <div className="relative z-40 bg-white rounded-xl p-4 md:p-6 border-2 border-zinc-300 transition-all duration-300">
+
       {/* ─── Header Section ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-2 rounded-xl bg-brand/10 text-brand">
+            <span className="p-2 rounded-lg bg-brand/10 text-brand border border-brand/20">
               <FolderTree size={20} />
             </span>
             <span className="text-sm font-black uppercase tracking-wider text-brand">
@@ -332,7 +334,7 @@ const CategoryCarousel = memo(({ categories }) => {
 
         <Link
           href="/browse"
-          className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-brand transition-colors bg-zinc-100/80 hover:bg-brand/10 px-5 py-2.5 rounded-full border border-zinc-200/80 w-fit"
+          className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-brand transition-colors bg-zinc-100/80 hover:bg-brand/10 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-brand/60 w-fit"
         >
           {t("viewAll")} <ChevronLeft size={18} className="rtl:rotate-0 rotate-180" />
         </Link>
@@ -341,27 +343,31 @@ const CategoryCarousel = memo(({ categories }) => {
       {/* ─── Parent Categories Scroll Container ─── */}
       <div className="relative group/carousel">
         {/* Scroll Forward Button (Physically on the LEFT in RTL, RIGHT in LTR) */}
-        <button
-          onClick={scrollForward}
-          className={`flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-zinc-200 text-zinc-800 rounded-full items-center justify-center z-30 transition-all shadow-md hover:scale-110 active:scale-95 ${!canScrollEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          aria-label={isAr ? "تمرير لليسار" : "Scroll Next"}
-        >
-          {isAr ? <ChevronLeft className="w-6 h-6" /> : <ChevronRight className="w-6 h-6" />}
-        </button>
+        {canScrollEnd && (
+          <button
+            onClick={scrollForward}
+            className="flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border-2 border-zinc-400 text-zinc-800 rounded-lg items-center justify-center z-30 transition-all shadow-md hover:scale-105 active:scale-95 hover:border-zinc-900"
+            aria-label={isAr ? "تمرير لليسار" : "Scroll Next"}
+          >
+            {isAr ? <ChevronLeft className="w-6 h-6" /> : <ChevronRight className="w-6 h-6" />}
+          </button>
+        )}
 
         {/* Scroll Back Button (Physically on the RIGHT in RTL, LEFT in LTR) */}
-        <button
-          onClick={scrollBack}
-          className={`flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-zinc-200 text-zinc-800 rounded-full items-center justify-center z-30 transition-all shadow-md hover:scale-110 active:scale-95 ${!canScrollStart ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          aria-label={isAr ? "تمرير لليمين" : "Scroll Previous"}
-        >
-          {isAr ? <ChevronRight className="w-6 h-6" /> : <ChevronLeft className="w-6 h-6" />}
-        </button>
+        {canScrollStart && (
+          <button
+            onClick={scrollBack}
+            className="flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border-2 border-zinc-400 text-zinc-800 rounded-lg items-center justify-center z-30 transition-all shadow-md hover:scale-105 active:scale-95 hover:border-zinc-900"
+            aria-label={isAr ? "تمرير لليمين" : "Scroll Previous"}
+          >
+            {isAr ? <ChevronRight className="w-6 h-6" /> : <ChevronLeft className="w-6 h-6" />}
+          </button>
+        )}
 
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex items-center gap-3.5 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-4 pt-1 px-1"
+          className="flex items-center gap-3.5 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-4 pt-1 px-11"
         >
           {parentCategories.map((parentCat) => {
             const parentName = getCategoryName(parentCat, locale);
@@ -373,15 +379,14 @@ const CategoryCarousel = memo(({ categories }) => {
               <div
                 key={parentCat.id}
                 onClick={() => setActiveParentId(parentCat.id)}
-                className={`snap-start shrink-0 cursor-pointer group/card transition-all duration-300 rounded-2xl border p-4 min-w-[220px] max-w-[260px] md:min-w-[240px] ${
-                  isSelected
-                    ? "bg-zinc-900 text-white border-zinc-900 shadow-xl shadow-zinc-900/10 scale-[1.02]"
-                    : "bg-zinc-50/90 hover:bg-white text-zinc-800 border-zinc-200 hover:border-brand/50 hover:shadow-lg"
-                }`}
+                className={`snap-start shrink-0 cursor-pointer group/card transition-all duration-300 rounded-xl border-2 p-4 min-w-[220px] max-w-[260px] md:min-w-[240px] ${isSelected
+                  ? "bg-zinc-900 text-white border-zinc-900 shadow-xl shadow-zinc-900/10"
+                  : "bg-zinc-50/90 hover:bg-white text-zinc-800 border-zinc-300 hover:border-zinc-900"
+                  }`}
               >
                 <div className="flex items-center gap-3.5">
                   {/* Category Image Avatar */}
-                  <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden shrink-0 border transition-transform duration-300 group-hover/card:scale-105 ${isSelected ? 'border-zinc-700' : 'border-zinc-200 bg-white'}`}>
+                  <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-lg overflow-hidden shrink-0 border-2 transition-transform duration-300 group-hover/card:scale-105 ${isSelected ? 'border-zinc-700' : 'border-zinc-300 bg-white'}`}>
                     <Image
                       src={parentCat.image?.src || `https://placehold.co/100x100?text=${encodeURIComponent(parentName[0] || (isAr ? 'قسم' : 'Category'))}`}
                       alt={decodeEntities(parentName)}
@@ -397,7 +402,7 @@ const CategoryCarousel = memo(({ categories }) => {
 
                     <div className="flex items-center gap-2 mt-1.5">
                       {childrenCount > 0 && (
-                        <span className={`text-xs font-black px-2.5 py-0.5 rounded-full ${isSelected ? 'bg-zinc-800 text-brand-light border border-zinc-700' : 'bg-brand/10 text-brand'}`}>
+                        <span className={`text-xs font-black px-2.5 py-0.5 rounded-full border ${isSelected ? 'bg-zinc-800 text-brand-light border-zinc-700' : 'bg-brand/10 text-brand border-brand/20'}`}>
                           {childrenCount} {isAr ? "قسم فرعي" : "sub"}
                         </span>
                       )}
@@ -412,7 +417,7 @@ const CategoryCarousel = memo(({ categories }) => {
 
                 {/* Subcategory mini badges preview inside parent card */}
                 {childrenCount > 0 && (
-                  <div className="mt-3.5 pt-3 border-t border-dashed border-zinc-200/40 flex items-center justify-between text-xs">
+                  <div className="mt-3.5 pt-3 border-t-2 border-dashed border-zinc-300/60 flex items-center justify-between text-xs">
                     <span className={`flex items-center gap-1.5 font-bold ${isSelected ? 'text-zinc-300' : 'text-zinc-600'}`}>
                       <Layers size={14} className={isSelected ? 'text-brand' : 'text-zinc-400'} />
                       {isAr ? "عرض الفئات الفرعية" : "Explore subcategories"}
@@ -428,8 +433,8 @@ const CategoryCarousel = memo(({ categories }) => {
 
       {/* ─── Active Parent Category & Child Categories Sub-Panel ─── */}
       {activeParent && (
-        <div className="mt-5 pt-6 border-t border-zinc-100 animate-in fade-in duration-300">
-          
+        <div className="mt-5 pt-6 border-t-2 border-zinc-200 animate-in fade-in duration-300">
+
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse"></span>
@@ -452,7 +457,7 @@ const CategoryCarousel = memo(({ categories }) => {
               {/* Parent Direct Link Chip */}
               <Link
                 href={`/category/${getCategorySlug(activeParent, locale)}`}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs md:text-sm font-bold transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs md:text-sm font-bold transition-all border-2 border-zinc-900 shadow-sm"
               >
                 <span>{isAr ? "الكل في" : "All in"} {decodeEntities(getCategoryName(activeParent, locale))}</span>
                 <ArrowUpRight size={14} />
@@ -465,10 +470,10 @@ const CategoryCarousel = memo(({ categories }) => {
                   <Link
                     key={childCat.id}
                     href={`/category/${childSlug}`}
-                    className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-50 hover:bg-white border border-zinc-200 hover:border-brand/60 hover:shadow-md text-zinc-800 hover:text-brand text-xs md:text-sm font-bold transition-all group/child"
+                    className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-zinc-50 hover:bg-white border-2 border-zinc-300 hover:border-zinc-900 hover:shadow-md text-zinc-800 hover:text-brand text-xs md:text-sm font-bold transition-all group/child"
                   >
                     {childCat.image?.src && (
-                      <span className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 bg-zinc-200">
+                      <span className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 bg-zinc-200 border border-zinc-300">
                         <Image src={childCat.image.src} alt={childName} fill className="object-cover" />
                       </span>
                     )}
@@ -483,7 +488,7 @@ const CategoryCarousel = memo(({ categories }) => {
               })}
             </div>
           ) : (
-            <div className="p-5 bg-zinc-50 rounded-2xl text-center text-xs md:text-sm font-semibold text-zinc-500 flex items-center justify-center gap-2">
+            <div className="p-5 bg-zinc-50 rounded-xl border-2 border-dashed border-zinc-300 text-center text-xs md:text-sm font-semibold text-zinc-500 flex items-center justify-center gap-2">
               <span>{isAr ? "لا توجد أقسام فرعية مفردة لهذا القسم." : "No separate subcategories for this section."}</span>
               <Link href={`/category/${activeParent.slug}`} className="text-brand font-bold hover:underline">
                 {isAr ? "تصفح جميع منتجات القسم" : "Browse all section products"}
@@ -605,7 +610,7 @@ const CategoryCarousel = memo(({ categories }) => {
 //               return (
 //                 <Link
 //                   key={i}
-//                   href={`/product/${deal.slug}`}
+//                   href={getProductUrl(deal)}
 //                   className="flex flex-col shrink-0 w-[130px] p-3 gap-1.5 hover:bg-zinc-50 transition-colors"
 //                 >
 //                   {/* Image */}
@@ -680,7 +685,7 @@ const QuadCard = memo(({ title, items, link }) => {
       <h2 className="text-[20px] font-bold text-black mb-4 truncate">{title}</h2>
       <div className="grid grid-cols-2 gap-4 flex-1 mb-5">
         {items.map((item, i) => (
-          <Link href={`/product/${item.slug}`} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
+          <Link href={getProductUrl(item)} key={i} className="flex flex-col gap-2 cursor-pointer group/item">
             <div className="relative aspect-square overflow-hidden bg-[#F5F5F5]">
               <Image
                 src={item?.images?.[0]?.src || "https://placehold.co/400x400"}
@@ -699,6 +704,7 @@ const QuadCard = memo(({ title, items, link }) => {
     </div>
   );
 });
+
 export default function Hero({ products = [], categories = [], vendors = [] }) {
   const t = useTranslations("Hero");
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -729,7 +735,7 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
 
     // Fallback merchants if backend returns empty or is not connected
     return [
-      { id: "v1", name: "محلي ستور الرسمي", storeSlug: "mahally-official", category: "متجر رسمي", logo: "https://images.unsplash.com/photo-1556742049-0a670fc8078a?q=80&w=200&auto=format&fit=crop" },
+      { id: "v1", name: "محلي ستور الرسمي", storeSlug: "mahally-official", category: "متجر رسمي", logo: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=200&auto=format&fit=crop" },
       { id: "v2", name: "حرف وجلديات أردنية", storeSlug: "jordanian-crafts", category: "حرف يدوية", logo: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?q=80&w=200&auto=format&fit=crop" },
       { id: "v3", name: "أزياء وتراث عمان", storeSlug: "amman-fashion", category: "أزياء وموضة", logo: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=200&auto=format&fit=crop" },
       { id: "v4", name: "إلكترونيات ومستلزمات", storeSlug: "jordan-tech", category: "إلكترونيات", logo: "https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=200&auto=format&fit=crop" }
@@ -776,102 +782,6 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
     }, 8000);
     return () => clearInterval(timer);
   }, [banners.length]);
-
-  // Dynamically generate cards based on products
-  // const cardsData = useMemo(() => {
-  //   const generatedCards = [];
-  //   const usedTitles = new Set();
-  //   const usedProductIds = new Set();
-
-  //   if (products && products.length > 0) {
-  //     // 1. Top Sellers
-  //     const topSellers = [...products]
-  //       .filter(p => !usedProductIds.has(p.id))
-  //       .sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0));
-
-  //     if (topSellers.length >= 4) {
-  //       const items = topSellers.slice(0, 4);
-  //       generatedCards.push({
-  //         title: "Top Sellers",
-  //         type: "quad",
-  //         items,
-  //         link: "/browse?sort=popularity"
-  //       });
-  //       items.forEach(p => usedProductIds.add(p.id));
-  //       usedTitles.add("Top Sellers");
-  //     }
-
-  //     // 2. Top Rated
-  //     const topRated = [...products]
-  //       .filter(p => !usedProductIds.has(p.id))
-  //       .sort((a, b) => Number(b.average_rating || 0) - Number(a.average_rating || 0));
-
-  //     if (topRated.length >= 4) {
-  //       const items = topRated.slice(0, 4);
-  //       generatedCards.push({
-  //         title: "Top Rated",
-  //         type: "quad",
-  //         items,
-  //         link: "/browse?sort=rating"
-  //       });
-  //       items.forEach(p => usedProductIds.add(p.id));
-  //       usedTitles.add("Top Rated");
-  //     }
-
-  //     // 3. Group by Categories
-  //     const categoryGroups = {};
-  //     products.forEach(p => {
-  //       if (usedProductIds.has(p.id)) return;
-  //       p.categories?.forEach(cat => {
-  //         if (!categoryGroups[cat.name]) categoryGroups[cat.name] = [];
-  //         if (!categoryGroups[cat.name].find(item => item.id === p.id)) {
-  //           categoryGroups[cat.name].push(p);
-  //         }
-  //       });
-  //     });
-
-  //     const availableCategories = Object.keys(categoryGroups)
-  //       .filter(name => name !== 'Uncategorized')
-  //       .map(name => ({
-  //         name,
-  //         slug: products.find(p => p.categories.some(c => c.name === name))?.categories.find(c => c.name === name)?.slug || "",
-  //         products: categoryGroups[name]
-  //       }))
-  //       .sort((a, b) => b.products.length - a.products.length);
-
-  //     for (const cat of availableCategories) {
-  //       if (usedTitles.has(cat.name)) continue;
-  //       const unusedProducts = cat.products.filter(p => !usedProductIds.has(p.id));
-
-  //       if (unusedProducts.length >= 4) {
-  //         const items = unusedProducts.slice(0, 4);
-  //         generatedCards.push({
-  //           title: cat.name,
-  //           type: "quad",
-  //           items,
-  //           link: `/browse?cat=${cat.slug}`
-  //         });
-  //         items.forEach(p => usedProductIds.add(p.id));
-  //         usedTitles.add(cat.name);
-  //       } else if (unusedProducts.length > 0) {
-  //         const item = unusedProducts[0];
-  //         generatedCards.push({
-  //           title: cat.name,
-  //           type: "single",
-  //           item,
-  //           link: `/product/${item.slug}`
-  //         });
-  //         usedProductIds.add(item.id);
-  //         usedTitles.add(cat.name);
-  //       }
-
-  //       if (generatedCards.length >= 8) break;
-  //     }
-  //   }
-
-  //   return generatedCards;
-  // }, [products]);
-
 
   return (
     <div className="w-full bg-white font-sans relative">
@@ -920,34 +830,7 @@ export default function Hero({ products = [], categories = [], vendors = [] }) {
         <MerchantCarousel activeVendors={activeVendors} />
         <CategoryCarousel categories={categories} />
 
-        {/* {cardsData.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {cardsData.slice(0, 4).map((card, i) => (
-              card.type === "single" ? (
-                <SingleCard key={i} title={card.title} item={card.item} link={card.link} />
-              ) : (
-                <QuadCard key={i} title={card.title} items={card.items} link={card.link} />
-              )
-            ))}
-          </div>
-        )} */}
-
       </div>
-
-      {/* 3. ADDITIONAL ROW */}
-      {/* {cardsData.length > 4 && (
-        <div className="max-w-[1200px] mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {cardsData.slice(4, 8).map((card, i) => (
-              card.type === "single" ? (
-                <SingleCard key={i} title={card.title} item={card.item} link={card.link} />
-              ) : (
-                <QuadCard key={i} title={card.title} items={card.items} link={card.link} />
-              )
-            ))}
-          </div>
-        </div>
-      )} */}
 
     </div>
   );

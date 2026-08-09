@@ -187,7 +187,8 @@ export async function GET(request) {
           unreadCount,
           isOnline: isSystemAdmin ? true : Math.random() > 0.5,
           isVerified: isSystemAdmin ? true : (cMeta.mahally_vendor_status === "approved" || cMeta.mahally_role === "vendor"),
-          role: isSystemAdmin ? "admin" : (cMeta.mahally_role || "customer")
+          role: isSystemAdmin ? "admin" : (cMeta.mahally_role || "customer"),
+          messages: history
         };
       } catch (e) {
         return null;

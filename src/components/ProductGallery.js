@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "next-intl";
 
-export default function ProductGallery({ images, productName }) {
+export default function ProductGallery({ images, productName, isJordanian }) {
   const [activeImage, setActiveImage] = useState(0);
+  const locale = useLocale();
   const galleryImages = images?.length > 0 ? images : [{ src: `https://placehold.co/600/f5f5f5/ff6000?text=${encodeURIComponent(productName || 'Product')}` }];
 
   const nextImage = () => setActiveImage((prev) => (prev + 1) % galleryImages.length);
@@ -86,10 +88,13 @@ export default function ProductGallery({ images, productName }) {
           {activeImage + 1} / {galleryImages.length}
         </div>
 
-        {/* Ad Tag */}
-        <div className="absolute top-0 start-0 bg-zinc-900 text-white text-[9px] font-black px-2 py-1 uppercase z-10 tracking-widest">
-          MAHALLY EXCLUSIVE
-        </div>
+        {/* Ad Tag / Made In Jordan */}
+        {isJordanian && (
+          <div className="absolute top-0 start-0 bg-zinc-900 text-white text-[10px] sm:text-[11px] font-black px-3 py-1.5 z-10 uppercase tracking-widest rounded-ee-xl shadow-sm flex items-center gap-1.5">
+            <span className="text-[12px] leading-none">🇯🇴</span>
+            <span className="mt-0.5">{locale === "ar" ? "صُنع بأيادٍ أردنية" : "Made in Jordan"}</span>
+          </div>
+        )}
       </div>
     </div>
   );

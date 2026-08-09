@@ -1,6 +1,7 @@
 import { updateCustomerMeta, getCustomerById, clearVendorsCache } from "@/lib/woocommerce";
 import { VENDOR_CACHE } from "@/app/api/vendors/[slug]/route";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 export async function POST(request) {
   try {
@@ -147,6 +148,9 @@ export async function POST(request) {
     
     // Also bust the global vendors list cache (for the /vendors directory page)
     clearVendorsCache();
+    
+    // Clear Next.js cache for this customer
+    revalidateTag(`customer-${id}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

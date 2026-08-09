@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { dokanApi } from "@/lib/dokan";
 import { wcApi, clearProductsCache } from "@/lib/woocommerce";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+import { revalidateTag } from "next/cache";
 
 export const dynamic = 'force-dynamic';
 
@@ -281,6 +282,7 @@ export async function POST(req) {
     }
 
     clearProductsCache();
+    revalidateTag("products");
     return NextResponse.json(createdProduct);
   } catch (error) {
     console.error("Product creation error:", error.response?.data || error.message);
@@ -448,6 +450,7 @@ export async function PUT(req) {
     }
 
     clearProductsCache();
+    revalidateTag("products");
     return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error("Product update error:", error.response?.data || error.message);
@@ -491,6 +494,7 @@ export async function DELETE(req) {
       });
       const results = await Promise.all(deletePromises);
       clearProductsCache();
+      revalidateTag("products");
       return NextResponse.json({ success: true, deleted: results.filter(r => r !== null).length });
     }
 
@@ -500,6 +504,7 @@ export async function DELETE(req) {
     const force = await shouldForceDelete(id);
     const res = await dokanApi.fetch(`products/${id}?force=${force}`, { method: 'DELETE' });
     clearProductsCache();
+    revalidateTag("products");
     return NextResponse.json(res);
   } catch (error) {
     console.error("Delete error:", error);

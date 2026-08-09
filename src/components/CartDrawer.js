@@ -9,7 +9,7 @@ import { useLocale } from "next-intl";
 
 export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, clearCart } = useCart();
-  const { isVendor, user } = useAuth();
+  const { isVendor, isAdmin, user } = useAuth();
   const locale = useLocale();
   const isAr = locale === "ar";
 
@@ -54,7 +54,17 @@ export default function CartDrawer() {
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-4">
-          {cart.length === 0 ? (
+          {isAdmin ? (
+            <div className="bg-white rounded-sm p-8 flex flex-col items-center text-center shadow-sm">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <ShoppingCart size={32} className="text-blue-300" />
+              </div>
+              <h3 className="text-xl font-bold text-zinc-900 mb-2">{isAr ? "حساب إداري" : "Admin Account"}</h3>
+              <p className="text-sm text-zinc-500">
+                {isAr ? "حسابات الإدارة لا تستطيع إجراء عمليات شراء." : "Admin accounts cannot make purchases."}
+              </p>
+            </div>
+          ) : cart.length === 0 ? (
             <div className="bg-white rounded-sm p-8 flex flex-col items-center text-center shadow-sm">
               <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4">
                 <ShoppingCart size={32} className="text-zinc-300" />
@@ -131,7 +141,7 @@ export default function CartDrawer() {
         </div>
 
         {/* 3. FOOTER - SUB TOTAL & CHECKOUT */}
-        {cart.length > 0 && (
+        {cart.length > 0 && !isAdmin && (
           <div className="bg-white p-5 border-t border-zinc-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] shrink-0 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-zinc-600">

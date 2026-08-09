@@ -11,11 +11,15 @@ import {
   Info,
   Loader2,
   AlertCircle,
-  X
+  X,
 } from "lucide-react";
 import Loader from "@/components/Loader";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function MerchantAnnouncementsPage() {
+  const t = useTranslations("MerchantAnnouncements");
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
   const { user, wooId } = useAuth();
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,32 +46,41 @@ export default function MerchantAnnouncementsPage() {
     }
   };
 
-  const filteredAnnouncements = announcements.filter((a) =>
-    a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.content.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAnnouncements = announcements.filter(
+    (a) =>
+      a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const formatDate = (isoString) => {
+    if (!isoString) return "";
     const date = new Date(isoString);
-    return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    return date.toLocaleDateString(locale === "ar" ? "ar-JO" : "en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+    <div className="mx-auto space-y-8 pb-20" dir={dir}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 pb-6">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-3">
             <Megaphone className="text-[#800000]" />
-            Official Announcements
+            {t("pageTitle")}
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">Stay updated with the latest news and updates from Mahally Marketplace.</p>
+          <p className="text-sm text-zinc-500 mt-1">{t("pageSubtitle")}</p>
         </div>
 
         <div className="relative">
-          <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+          <Search
+            className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            size={16}
+          />
           <input
             type="text"
-            placeholder="Search announcements..."
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-10 pe-10 ps-4 bg-white border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-[#800000] w-full md:w-64 transition-all"
@@ -78,15 +91,19 @@ export default function MerchantAnnouncementsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="animate-spin text-zinc-300 mb-4" size={40} />
-          <p className="text-zinc-500 font-medium">Fetching updates...</p>
+          <p className="text-zinc-500 font-medium">{t("fetching")}</p>
         </div>
       ) : announcements.length === 0 ? (
         <div className="bg-zinc-50 border border-dashed border-zinc-200 rounded-3xl p-12 text-center">
           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
             <Megaphone className="text-zinc-300" size={32} />
           </div>
-          <h3 className="text-lg font-bold text-zinc-900">No Announcements Yet</h3>
-          <p className="text-sm text-zinc-500 max-w-xs mx-auto mt-2">When the marketplace administration sends out official updates, they will appear here.</p>
+          <h3 className="text-lg font-bold text-zinc-900">
+            {t("noAnnouncements")}
+          </h3>
+          <p className="text-sm text-zinc-500 max-w-xs mx-auto mt-2">
+            {t("noAnnouncementsDesc")}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -98,17 +115,26 @@ export default function MerchantAnnouncementsPage() {
             >
               <div className="flex items-center gap-2 mb-4">
                 <span className="px-2 py-1 bg-[#800000]/5 text-[#800000] text-[10px] font-black uppercase tracking-widest rounded-md">
-                  {a.editedAt ? "Updated" : "Official"}
+                  {a.editedAt ? t("updated") : t("official")}
                 </span>
-                <span className="text-[11px] text-zinc-400 me-auto font-medium">{formatDate(a.createdAt)}</span>
+                <span className="text-[11px] text-zinc-400 me-auto font-medium">
+                  {formatDate(a.createdAt)}
+                </span>
               </div>
 
-              <h3 className="text-[17px] font-bold text-zinc-900 mb-2 group-hover:text-[#800000] transition-colors line-clamp-2">{a.title}</h3>
-              <p className="text-sm text-zinc-500 line-clamp-3 mb-6 leading-relaxed">{a.content}</p>
+              <h3 className="text-[17px] font-bold text-zinc-900 mb-2 group-hover:text-[#800000] transition-colors line-clamp-2">
+                {a.title}
+              </h3>
+              <p className="text-sm text-zinc-500 line-clamp-3 mb-6 leading-relaxed">
+                {a.content}
+              </p>
 
               <div className="mt-auto pt-4 border-t border-zinc-50 flex items-center justify-between text-[13px] font-bold text-[#800000]">
-                Read Full Update
-                <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                {t("readFull")}
+                <ChevronRight
+                  size={16}
+                  className="group-hover:translate-x-1 transition-transform rtl:rotate-180"
+                />
               </div>
             </div>
           ))}
@@ -120,15 +146,26 @@ export default function MerchantAnnouncementsPage() {
           <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden border border-zinc-200">
             <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
               <div className="flex flex-col">
-                <h3 className="text-xl font-bold text-zinc-900">{selectedAnnouncement.title}</h3>
+                <h3 className="text-xl font-bold text-zinc-900">
+                  {selectedAnnouncement.title}
+                </h3>
                 <div className="flex items-center gap-4 text-xs text-zinc-400 mt-2 font-bold uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5"><Calendar size={14} /> {formatDate(selectedAnnouncement.createdAt)}</span>
+                  <span className="flex items-center gap-1.5">
+                    <Calendar size={14} />{" "}
+                    {formatDate(selectedAnnouncement.createdAt)}
+                  </span>
                   {selectedAnnouncement.editedAt && (
-                    <span className="text-amber-600 font-black flex items-center gap-1.5"><Clock size={14} /> Last Updated: {formatDate(selectedAnnouncement.editedAt)}</span>
+                    <span className="text-amber-600 font-black flex items-center gap-1.5">
+                      <Clock size={14} /> {t("lastUpdated")}:{" "}
+                      {formatDate(selectedAnnouncement.editedAt)}
+                    </span>
                   )}
                 </div>
               </div>
-              <button onClick={() => setSelectedAnnouncement(null)} className="p-2 hover:bg-zinc-200 rounded-full transition-all">
+              <button
+                onClick={() => setSelectedAnnouncement(null)}
+                className="p-2 hover:bg-zinc-200 rounded-full transition-all"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -143,9 +180,11 @@ export default function MerchantAnnouncementsPage() {
                   <Info size={20} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-blue-900 mb-1">Official Marketplace Notice</h4>
+                  <h4 className="text-sm font-bold text-blue-900 mb-1">
+                    {t("officialNotice")}
+                  </h4>
                   <p className="text-[13px] text-blue-700 leading-relaxed">
-                    This is an official announcement from the Mahally Marketplace Administration. Please ensure you comply with any requirements or updates mentioned above.
+                    {t("officialNoticeDesc")}
                   </p>
                 </div>
               </div>
@@ -156,7 +195,7 @@ export default function MerchantAnnouncementsPage() {
                 onClick={() => setSelectedAnnouncement(null)}
                 className="px-8 py-3 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg shadow-zinc-200"
               >
-                Got it, thanks
+                {t("gotIt")}
               </button>
             </div>
           </div>

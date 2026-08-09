@@ -76,11 +76,14 @@ export default function SidebarFilter({ categories = [], products = [], filters,
   const pathname = usePathname();
   const [showAllTags, setShowAllTags] = useState(false);
   const [showAllSellers, setShowAllSellers] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
-  // Identify active category object
   const activeCategory = useMemo(() => {
     if (!filters.category) return null;
-    return categories.find(c => c.id === Number(filters.category) || c.slug === filters.category);
+    return categories.find(c => 
+      c.id === Number(filters.category) || 
+      decodeURIComponent(c.slug) === decodeURIComponent(filters.category)
+    );
   }, [filters.category, categories]);
 
   const locale = useLocale();
@@ -90,16 +93,19 @@ export default function SidebarFilter({ categories = [], products = [], filters,
     const updateCat = (id) => onFiltersChange({ ...filters, category: id });
 
     if (!activeCategory) {
+      const rootCategories = categories.filter(c => c.parent === 0);
+      const displayedCategories = showAllCategories ? rootCategories : rootCategories.slice(0, 10);
+      
       return (
         <div className="mb-4">
           <SectionTitle title={t("category")} />
-          <div className="max-h-[260px] overflow-y-auto ps-1">
+          <div className="ps-1">
             <ul className="space-y-1">
-              {categories.filter(c => c.parent === 0).map(cat => (
+              {displayedCategories.map(cat => (
                 <li key={cat.id}>
                   <button
                     onClick={() => updateCat(cat.id)}
-                    className="flex items-center justify-between w-full group cursor-pointer"
+                    className="flex items-center justify-between w-full group cursor-pointer py-0.5"
                   >
                     <span 
                       className="text-[13px] font-normal text-[#0F1111] group-hover:text-[#9b2c41] transition-colors text-start truncate pe-2"
@@ -110,6 +116,15 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                 </li>
               ))}
             </ul>
+            {rootCategories.length > 10 && (
+              <button
+                onClick={() => setShowAllCategories(!showAllCategories)}
+                className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+              >
+                <span>{showAllCategories ? t("showLess") : t("showMoreCount", { count: rootCategories.length })}</span>
+                <ChevronDown size={12} className={`transform transition-transform ${showAllCategories ? 'rotate-180' : ''}`} />
+              </button>
+            )}
           </div>
         </div>
       );
@@ -117,16 +132,17 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
     const parentCategory = activeCategory.parent ? categories.find(c => c.id === activeCategory.parent) : null;
     const children = categories.filter(c => c.parent === activeCategory.id);
+    const displayedChildren = showAllCategories ? children : children.slice(0, 10);
 
     return (
       <div className="mb-4">
         <SectionTitle title={t("category")} />
-        <div className="max-h-[260px] overflow-y-auto ps-1">
+        <div className="ps-1">
           <ul className="space-y-1">
             <li>
               <button
                 onClick={() => updateCat(null)}
-                className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-start cursor-pointer"
+                className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-start cursor-pointer py-0.5"
               >
                 <ChevronLeft size={12} className="shrink-0 rotate-180" />
                 <span>{t("allCategories")}</span>
@@ -136,12 +152,12 @@ export default function SidebarFilter({ categories = [], products = [], filters,
               <li className="ps-3">
                 <button
                   onClick={() => updateCat(parentCategory.id)}
-                  className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-start cursor-pointer"
+                  className="text-[13px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 w-full text-start cursor-pointer py-0.5"
                   dangerouslySetInnerHTML={{ __html: `&gt; ${getCategoryName(parentCategory, locale)}` }}
                 />
               </li>
             )}
-            <li className={`${parentCategory ? 'ps-5' : 'ps-3'}`}>
+            <li className={`${parentCategory ? 'ps-5' : 'ps-3'} py-0.5`}>
               <div className="flex items-center justify-between">
                 <span
                   className="text-[13px] font-bold text-[#0F1111] truncate pe-2"
@@ -150,11 +166,11 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                 <span className="text-[#565959] text-[11px] shrink-0 font-normal">({activeCategory.count || 0})</span>
               </div>
             </li>
-            {children.map(child => (
+            {displayedChildren.map(child => (
               <li key={child.id} className={`${parentCategory ? 'ps-8' : 'ps-6'}`}>
                   <button
                     onClick={() => updateCat(child.id)}
-                    className="flex items-center justify-between w-full group cursor-pointer"
+                    className="flex items-center justify-between w-full group cursor-pointer py-0.5"
                   >
                     <span
                       className="text-[13px] font-normal text-[#0F1111] group-hover:text-[#9b2c41] transition-colors text-start truncate pe-2"
@@ -165,10 +181,19 @@ export default function SidebarFilter({ categories = [], products = [], filters,
               </li>
             ))}
           </ul>
+          {children.length > 10 && (
+            <button
+              onClick={() => setShowAllCategories(!showAllCategories)}
+              className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+            >
+              <span>{showAllCategories ? t("showLess") : t("showMoreCount", { count: children.length })}</span>
+              <ChevronDown size={12} className={`transform transition-transform ${showAllCategories ? 'rotate-180' : ''}`} />
+            </button>
+          )}
         </div>
       </div>
     );
-  }, [activeCategory, categories, filters, onFiltersChange, locale]);
+  }, [activeCategory, categories, filters, onFiltersChange, locale, showAllCategories]);
 
   const allTags = useMemo(() => {
     const tagMap = new Map();
@@ -213,7 +238,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
     merchant: null,
     madeInJordan: false,
     colors: [],
-    searchQuery: filters.searchQuery || "",
+    searchQuery: "",
   });
 
   return (
@@ -264,7 +289,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
       {allTags.length > 0 && (
         <div className="mb-4">
           <SectionTitle title={t("brands")} />
-          <div className="space-y-1.5 max-h-[220px] overflow-y-auto ps-1">
+          <div className="space-y-1.5 ps-1">
             {displayedTags.map(({ name, count }) => {
               const selected = (filters.tags || []).includes(name);
               return (
@@ -312,7 +337,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
         return (
           <div className="mb-4">
             <SectionTitle title={t("seller")} />
-            <div className="space-y-1.5 max-h-[160px] overflow-y-auto ps-1">
+            <div className="space-y-1.5 ps-1">
               {displayedSellers.map(({ name, count }) => {
                 const selected = filters.merchant === name;
                 return (
@@ -476,11 +501,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
       <div className="mb-4">
         <SectionTitle title={t("shippingAndAvailability")} />
         <div className="space-y-2">
-          <AmazonCheckbox
-            label={t("eligibleForFreeShipping")}
-            checked={filters.freeShipping}
-            onChange={() => update("freeShipping", !filters.freeShipping)}
-          />
+
           <AmazonCheckbox
             label={t("inStockOnly")}
             checked={filters.inStockOnly}

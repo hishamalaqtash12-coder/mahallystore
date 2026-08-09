@@ -23,12 +23,14 @@ import {
   Plus
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import AdminSearch from "@/components/admin/AdminSearch";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function AdminAnnouncementsPage() {
   const t = useTranslations("AdminAnnouncements");
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
   const { user, isAdmin } = useAuth();
+
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -88,32 +90,35 @@ export default function AdminAnnouncementsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content })
       });
-        const contentType = res.headers.get("content-type") || "";
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          setStatus({ type: 'error', message: `Server error: ${res.status}` });
-          console.error("Broadcast failed:", res.status, text);
-          return;
-        }
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        setStatus({ type: "error", message: t("serverError", { status: res.status }) });
+        console.error("Broadcast failed:", res.status, text);
+        return;
+      }
 
-        if (!contentType.includes("application/json")) {
-          const text = await res.text().catch(() => "");
-          setStatus({ type: 'error', message: "Unexpected server response" });
-          console.error("Unexpected non-JSON response from broadcast:", text);
-          return;
-        }
+      if (!contentType.includes("application/json")) {
+        const text = await res.text().catch(() => "");
+        setStatus({ type: "error", message: t("unexpectedResponse") });
+        console.error("Unexpected non-JSON response from broadcast:", text);
+        return;
+      }
 
-        const data = await res.json();
-        if (data && data.success) {
-          setStatus({ type: 'success', message: `Broadcasted successfully to ${data.details.totalVendors} vendors!` });
-          setTitle("");
-          setContent("");
-          fetchAnnouncements();
-        } else {
-          setStatus({ type: 'error', message: data.error || "Failed to send broadcast" });
-        }
+      const data = await res.json();
+      if (data && data.success) {
+        setStatus({
+          type: "success",
+          message: t("broadcastSuccess", { count: data.details.totalVendors })
+        });
+        setTitle("");
+        setContent("");
+        fetchAnnouncements();
+      } else {
+        setStatus({ type: "error", message: data.error || t("broadcastFailed") });
+      }
     } catch (err) {
-      setStatus({ type: 'error', message: "Connection error. Please try again." });
+      setStatus({ type: "error", message: t("connectionError") });
     } finally {
       setSending(false);
     }
@@ -135,27 +140,28 @@ export default function AdminAnnouncementsPage() {
         setContent("");
       }
     } catch (err) {
-      alert("Update failed");
+      alert(t("updateFailed"));
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure? This will also remove the message from all vendor inboxes.")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     try {
       const res = await fetch(`/api/admin/announcements?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchAnnouncements();
       }
     } catch (err) {
-      alert("Failed to delete announcement");
+      alert(t("deleteFailed"));
     }
   };
 
   // Filtered & Paginated Data
   const filteredData = useMemo(() => {
-    return announcements.filter(a =>
-      a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.content.toLowerCase().includes(searchQuery.toLowerCase())
+    return announcements.filter(
+      (a) =>
+        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.content.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [announcements, searchQuery]);
 
@@ -167,23 +173,32 @@ export default function AdminAnnouncementsPage() {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const formatDate = (isoString) => {
+    if (!isoString) return "";
     const date = new Date(isoString);
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return date.toLocaleDateString(locale === "ar" ? "ar-JO" : "en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
   };
 
   const formatTime = (isoString) => {
+    if (!isoString) return "";
     const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString(locale === "ar" ? "ar-JO" : undefined, {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-[1400px] mx-auto pb-10">
+    <div className="space-y-6 sm:space-y-8 max-w-[1400px] mx-auto pb-10" dir={dir}>
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-200 pb-6">
         <div>
-            <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
-            <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
-          </div>
+          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
+          <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={fetchAnnouncements}
@@ -193,8 +208,6 @@ export default function AdminAnnouncementsPage() {
           </button>
         </div>
       </div>
-
-
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Left: Compose Form */}
@@ -207,16 +220,26 @@ export default function AdminAnnouncementsPage() {
 
             <form onSubmit={handleBroadcast} className="space-y-5">
               {status && (
-                <div className={`p-4 rounded-lg flex items-start gap-3 border text-[13px] ${status.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-800' : 'bg-rose-50 border-rose-100 text-rose-800'
-                  }`}>
-                  {status.type === 'success' ? <CheckCircle className="shrink-0" size={16} /> : <AlertCircle className="shrink-0" size={16} />}
+                <div
+                  className={`p-4 rounded-lg flex items-start gap-3 border text-[13px] ${status.type === "success"
+                      ? "bg-emerald-50 border-emerald-100 text-emerald-800"
+                      : "bg-rose-50 border-rose-100 text-rose-800"
+                    }`}
+                >
+                  {status.type === "success" ? (
+                    <CheckCircle className="shrink-0" size={16} />
+                  ) : (
+                    <AlertCircle className="shrink-0" size={16} />
+                  )}
                   <p>{status.message}</p>
                 </div>
               )}
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{t("announcementTitleLabel")}</label>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                    {t("announcementTitleLabel")}
+                  </label>
                   <input
                     type="text"
                     value={title}
@@ -228,7 +251,9 @@ export default function AdminAnnouncementsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{t("detailedMessageLabel")}</label>
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                    {t("detailedMessageLabel")}
+                  </label>
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -244,8 +269,12 @@ export default function AdminAnnouncementsPage() {
                 <div className="flex items-start gap-3">
                   <MessageSquare size={18} className="text-blue-600 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-[13px] font-bold text-blue-900 mb-0.5">{t("broadcastInfoTitle")}</h4>
-                    <p className="text-[11px] text-blue-700 leading-relaxed">{t("broadcastInfoDesc")}</p>
+                    <h4 className="text-[13px] font-bold text-blue-900 mb-0.5">
+                      {t("broadcastInfoTitle")}
+                    </h4>
+                    <p className="text-[11px] text-blue-700 leading-relaxed">
+                      {t("broadcastInfoDesc")}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -256,7 +285,7 @@ export default function AdminAnnouncementsPage() {
                 className="w-full h-11 bg-zinc-900 text-white rounded-lg text-sm font-bold hover:bg-black transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {sending ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
-                {sending ? t("fetchingHistory") : t("dispatchBroadcast")}
+                {sending ? t("sending") : t("dispatchBroadcast")}
               </button>
             </form>
           </div>
@@ -267,44 +296,54 @@ export default function AdminAnnouncementsPage() {
           {/* Filters & Total Info */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="relative w-full sm:w-80">
-              <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+              <Search
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                size={16}
+              />
               <input
                 type="text"
-                placeholder="Search history..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-10 pe-10 ps-4 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#800000] focus:border-[#800000]"
               />
             </div>
             <div className="text-xs font-semibold text-zinc-500 bg-zinc-100 border border-zinc-200 rounded-full px-3.5 py-1 w-fit shadow-sm">
-              Total Broadcasts: <span className="text-zinc-900 font-bold">{announcements.length}</span>
+              {t("totalBroadcasts")}:{" "}
+              <span className="text-zinc-900 font-bold">{announcements.length}</span>
             </div>
           </div>
 
           {/* Table */}
           <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
-            <table className="w-full text-end border-collapse">
+            <table className="w-full text-start border-collapse">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-200">
-                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">Announcement</th>
-                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">Sent Date</th>
-                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest text-start">Actions</th>
+                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                    {t("colAnnouncement")}
+                  </th>
+                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                    {t("colSentDate")}
+                  </th>
+                  <th className="px-6 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest text-end">
+                    {t("colActions")}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {loading ? (
                   <tr>
-                    <td colSpan="3" className="px-6 py-12 text-center">
+                    <td colSpan={3} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center gap-2">
                         <Loader2 className="animate-spin text-zinc-300" size={24} />
-                        <p className="text-xs text-zinc-400 font-medium">Fetching history...</p>
+                        <p className="text-xs text-zinc-400 font-medium">{t("fetchingHistory")}</p>
                       </div>
                     </td>
                   </tr>
                 ) : paginatedData.length === 0 ? (
                   <tr>
-                    <td colSpan="3" className="px-6 py-12 text-center text-zinc-500 italic text-sm">
-                      No announcements found.
+                    <td colSpan={3} className="px-6 py-12 text-center text-zinc-500 italic text-sm">
+                      {t("noAnnouncements")}
                     </td>
                   </tr>
                 ) : (
@@ -313,10 +352,12 @@ export default function AdminAnnouncementsPage() {
                       <td className="px-6 py-4">
                         <div className="max-w-md">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-bold text-zinc-900 line-clamp-1">{a.title}</p>
+                            <p className="text-sm font-bold text-zinc-900 line-clamp-1">
+                              {a.title}
+                            </p>
                             {a.editedAt && (
                               <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-black uppercase tracking-tighter rounded border border-amber-100">
-                                Edited
+                                {t("edited")}
                               </span>
                             )}
                           </div>
@@ -325,27 +366,42 @@ export default function AdminAnnouncementsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-zinc-900">{formatDate(a.createdAt)}</span>
-                          <span className="text-[11px] text-zinc-400">{formatTime(a.createdAt)}</span>
+                          <span className="text-sm font-medium text-zinc-900">
+                            {formatDate(a.createdAt)}
+                          </span>
+                          <span className="text-[11px] text-zinc-400">
+                            {formatTime(a.createdAt)}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-start">
+                      <td className="px-6 py-4 text-end">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            onClick={() => { setSelectedAnnouncement(a); setIsEditing(false); }}
+                            onClick={() => {
+                              setSelectedAnnouncement(a);
+                              setIsEditing(false);
+                            }}
                             className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-400 hover:text-blue-600 hover:border-blue-200 transition-all"
+                            title={t("view")}
                           >
                             <Eye size={14} />
                           </button>
                           <button
-                            onClick={() => { setSelectedAnnouncement(a); setIsEditing(true); setTitle(a.title); setContent(a.content); }}
+                            onClick={() => {
+                              setSelectedAnnouncement(a);
+                              setIsEditing(true);
+                              setTitle(a.title);
+                              setContent(a.content);
+                            }}
                             className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-400 hover:text-amber-600 hover:border-amber-200 transition-all"
+                            title={t("edit")}
                           >
                             <Edit3 size={14} />
                           </button>
                           <button
                             onClick={() => handleDelete(a.id)}
                             className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-400 hover:text-red-600 hover:border-red-200 transition-all"
+                            title={t("delete")}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -361,19 +417,19 @@ export default function AdminAnnouncementsPage() {
             {!loading && totalPages > 1 && (
               <div className="px-6 py-3 border-t border-zinc-100 bg-zinc-50 flex items-center justify-between">
                 <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                  Page {currentPage} of {totalPages}
+                  {t("pageOf", { current: currentPage, total: totalPages })}
                 </p>
                 <div className="flex items-center gap-1">
                   <button
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
                     className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-500 disabled:opacity-40 transition-all"
                   >
                     <ChevronLeft size={14} />
                   </button>
                   <button
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
                     className="h-8 w-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-zinc-500 disabled:opacity-40 transition-all"
                   >
                     <ChevronRight size={14} />
@@ -391,9 +447,15 @@ export default function AdminAnnouncementsPage() {
           <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden border border-zinc-200">
             <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
               <h3 className="text-sm font-black text-zinc-900 uppercase tracking-widest">
-                {isEditing ? "Edit Broadcast" : "View Announcement"}
+                {isEditing ? t("editBroadcast") : t("viewAnnouncement")}
               </h3>
-              <button onClick={() => { setSelectedAnnouncement(null); setIsEditing(false); }} className="p-2 hover:bg-zinc-200 rounded-full transition-all">
+              <button
+                onClick={() => {
+                  setSelectedAnnouncement(null);
+                  setIsEditing(false);
+                }}
+                className="p-2 hover:bg-zinc-200 rounded-full transition-all"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -402,7 +464,9 @@ export default function AdminAnnouncementsPage() {
               {isEditing ? (
                 <form onSubmit={handleUpdate} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Title</label>
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                      {t("titleLabel")}
+                    </label>
                     <input
                       type="text"
                       value={title}
@@ -411,7 +475,9 @@ export default function AdminAnnouncementsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Content</label>
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                      {t("contentLabel")}
+                    </label>
                     <textarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
@@ -419,17 +485,29 @@ export default function AdminAnnouncementsPage() {
                       className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#800000] resize-none"
                     />
                   </div>
-                  <button type="submit" className="w-full h-11 bg-[#800000] text-white rounded-lg text-sm font-bold hover:bg-[#600000] transition-all">
-                    Save Changes
+                  <button
+                    type="submit"
+                    className="w-full h-11 bg-[#800000] text-white rounded-lg text-sm font-bold hover:bg-[#600000] transition-all"
+                  >
+                    {t("saveChanges")}
                   </button>
                 </form>
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <h4 className="text-xl font-bold text-zinc-900 mb-2">{selectedAnnouncement.title}</h4>
+                    <h4 className="text-xl font-bold text-zinc-900 mb-2">
+                      {selectedAnnouncement.title}
+                    </h4>
                     <div className="flex items-center gap-4 text-[11px] text-zinc-400 font-bold uppercase tracking-widest">
-                      <span className="flex items-center gap-1.5"><Calendar size={14} /> {formatDate(selectedAnnouncement.createdAt)}</span>
-                      {selectedAnnouncement.editedAt && <span className="text-amber-600 flex items-center gap-1"><Clock size={14} /> Edited: {formatDate(selectedAnnouncement.editedAt)}</span>}
+                      <span className="flex items-center gap-1.5">
+                        <Calendar size={14} /> {formatDate(selectedAnnouncement.createdAt)}
+                      </span>
+                      {selectedAnnouncement.editedAt && (
+                        <span className="text-amber-600 flex items-center gap-1">
+                          <Clock size={14} /> {t("edited")}:{" "}
+                          {formatDate(selectedAnnouncement.editedAt)}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="prose prose-sm max-w-none text-zinc-700 whitespace-pre-wrap text-[15px] leading-relaxed border-t border-zinc-50 pt-4">
@@ -438,25 +516,40 @@ export default function AdminAnnouncementsPage() {
 
                   {/* Event Log */}
                   <div className="mt-8 pt-6 border-t border-zinc-100">
-                    <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">Activity Log</h5>
+                    <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">
+                      {t("activityLog")}
+                    </h5>
                     <div className="space-y-3">
                       {selectedAnnouncement.events?.map((ev, i) => (
                         <div key={i} className="flex items-start gap-3">
-                          <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${ev.type === 'created' ? 'bg-blue-500' : 'bg-amber-500'}`} />
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${ev.type === "created" ? "bg-blue-500" : "bg-amber-500"
+                              }`}
+                          />
                           <div className="flex flex-col gap-1">
                             <div className="flex flex-col">
-                              <span className="text-xs font-bold text-zinc-800">{ev.description}</span>
-                              <span className="text-[10px] text-zinc-400">{formatDate(ev.timestamp)} at {formatTime(ev.timestamp)}</span>
+                              <span className="text-xs font-bold text-zinc-800">
+                                {ev.description}
+                              </span>
+                              <span className="text-[10px] text-zinc-400">
+                                {formatDate(ev.timestamp)} {t("at")} {formatTime(ev.timestamp)}
+                              </span>
                             </div>
 
                             {ev.from && ev.to && (
                               <div className="mt-1 p-2 bg-zinc-50 border border-zinc-100 rounded-lg text-[11px] space-y-1.5">
                                 <div className="flex flex-col">
-                                  <span className="text-zinc-400 font-bold uppercase text-[9px] tracking-widest">From:</span>
-                                  <span className="text-zinc-500 line-through italic">{ev.from}</span>
+                                  <span className="text-zinc-400 font-bold uppercase text-[9px] tracking-widest">
+                                    {t("from")}:
+                                  </span>
+                                  <span className="text-zinc-500 line-through italic">
+                                    {ev.from}
+                                  </span>
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-[#800000] font-bold uppercase text-[9px] tracking-widest">To:</span>
+                                  <span className="text-[#800000] font-bold uppercase text-[9px] tracking-widest">
+                                    {t("to")}:
+                                  </span>
                                   <span className="text-zinc-900 font-medium">{ev.to}</span>
                                 </div>
                               </div>

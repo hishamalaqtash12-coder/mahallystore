@@ -134,7 +134,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
     // Deduplicate list by comment & name
     const combined = [...curatedFormatted];
     userSubmitted.forEach(f => {
-      const isDuplicate = combined.some(c => 
+      const isDuplicate = combined.some(c =>
         c.comment.trim().toLowerCase() === f.comment.trim().toLowerCase() ||
         c.userName.trim().toLowerCase() === f.userName.trim().toLowerCase()
       );
@@ -151,7 +151,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
     const maxScroll = scrollWidth - clientWidth;
     const isRtl = document.documentElement.dir === 'rtl' || isAr;
-    
+
     if (maxScroll <= 5) {
       setCanScrollStart(false);
       setCanScrollEnd(false);
@@ -191,96 +191,104 @@ const Testimonials = memo(({ feedbacks = [] }) => {
   };
 
   return (
-    <section className="w-full bg-gradient-to-b from-white via-zinc-50/40 to-white py-4">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* ─── Header ─── */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b border-zinc-100 pb-6">
-          <div className="flex flex-col gap-2">
-            {/* Badge */}
-            <div className="flex items-center gap-2 w-fit px-3.5 py-1 rounded-full bg-amber-500/10 text-amber-700 border border-amber-500/20 text-xs font-black uppercase tracking-wider">
-              <Star size={13} className="fill-amber-500 text-amber-500" />
-              <span>4.9 / 5.0 — {isAr ? "تقييمات ممتازة من العملاء" : "Top Customer Reviews"}</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 tracking-tight flex items-center gap-3">
-              {isAr ? "ماذا يقول عملاؤنا" : "What Our Customers Say"}
-            </h2>
-
-            <p className="text-xs sm:text-sm text-zinc-500 font-semibold max-w-xl">
-              {isAr 
-                ? "آراء حقيقية وتجارب مميزة من عملاء تسوقوا ودعموا التجار المحليين عبر منصة محلي."
-                : "Real experiences and verified feedback from customers supporting local merchants on Mahally."}
-            </p>
+    <section className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 my-8">
+      {/* ── Section Header (Made in Jordan style) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20">
+              <Star size={20} className="fill-amber-500 text-amber-500" />
+            </span>
+            <span className="text-sm font-black uppercase tracking-wider text-amber-600">
+              {isAr ? "4.9 / 5.0 — تقييمات العملاء" : "4.9 / 5.0 — Customer Reviews"}
+            </span>
           </div>
-
-          {/* Action button */}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="h-11 px-6 bg-zinc-900 hover:bg-zinc-800 text-white rounded-2xl text-xs sm:text-sm font-extrabold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95 shrink-0"
-          >
-            <MessageSquare size={16} />
-            <span>{isAr ? "شارك تجربتك الآن" : "Share Your Experience"}</span>
-          </button>
+          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
+            {isAr ? "ماذا يقول عملاؤنا" : "What Our Customers Say"}
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-medium">
+            {isAr
+              ? "آراء حقيقية وتجارب مميزة من عملاء تسوقوا ودعموا التجار المحليين عبر منصة محلي"
+              : "Real experiences and verified feedback from customers supporting local merchants on Mahally"}
+          </p>
         </div>
 
-        {/* ─── Reviews Carousel Grid ─── */}
-        <div className="relative group/reviews">
-          {/* Scroll Forward Button (Left in RTL, Right in LTR) */}
-          <button
-            onClick={scrollForward}
-            className={`flex absolute end-0 md:-end-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white border border-zinc-200 text-zinc-800 rounded-full items-center justify-center z-30 transition-all shadow-lg hover:scale-110 active:scale-95 ${!canScrollEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-            aria-label={isAr ? "تمرير لليسار" : "Scroll Next"}
-          >
-            {isAr ? <ChevronLeft className="w-6 h-6 text-zinc-800" /> : <ChevronRight className="w-6 h-6 text-zinc-800" />}
-          </button>
+        <div className="flex items-center gap-2.5 self-end sm:self-auto">
+          {displayFeedbacks.length > 0 && (
+            <div className="hidden sm:flex items-center gap-2 me-1">
+              {canScrollStart && (
+                <button
+                  onClick={scrollBack}
+                  aria-label="Previous"
+                  className="p-2 rounded-lg border-2 border-zinc-400 text-zinc-800 hover:border-zinc-900 hover:bg-zinc-50 transition-all active:scale-95"
+                >
+                  {isAr ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                </button>
+              )}
+              {canScrollEnd && (
+                <button
+                  onClick={scrollForward}
+                  aria-label="Next"
+                  className="p-2 rounded-lg border-2 border-zinc-400 text-zinc-800 hover:border-zinc-900 hover:bg-zinc-50 transition-all active:scale-95"
+                >
+                  {isAr ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+                </button>
+              )}
+            </div>
+          )}
 
-          {/* Scroll Back Button (Right in RTL, Left in LTR) */}
           <button
-            onClick={scrollBack}
-            className={`flex absolute start-0 md:-start-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white border border-zinc-200 text-zinc-800 rounded-full items-center justify-center z-30 transition-all shadow-lg hover:scale-110 active:scale-95 ${!canScrollStart ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-            aria-label={isAr ? "تمرير لليمين" : "Scroll Previous"}
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-amber-700 transition-colors bg-zinc-100/80 hover:bg-amber-50 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-amber-600/60 w-fit shrink-0"
           >
-            {isAr ? <ChevronRight className="w-6 h-6 text-zinc-800" /> : <ChevronLeft className="w-6 h-6 text-zinc-800" />}
+            <MessageSquare size={16} />
+            <span>{isAr ? "شارك تجربتك" : "Share Your Experience"}</span>
           </button>
+        </div>
+      </div>
 
+      {/* ── Reviews Carousel ── */}
+      {displayFeedbacks.length > 0 ? (
+        <div className="relative">
           <div
             ref={scrollRef}
             onScroll={checkScroll}
-            className="flex gap-5 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1"
+            className="flex items-stretch gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1"
           >
             {displayFeedbacks.map((f, i) => (
-              <div 
-                key={f.id || i} 
-                className="flex flex-col shrink-0 w-[300px] sm:w-[350px] bg-white border border-zinc-200/80 hover:border-brand/40 rounded-3xl p-6 relative shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group/card"
+              <div
+                key={f.id || i}
+                className="flex flex-col shrink-0 w-[280px] sm:w-[320px] bg-white border border-zinc-200/80 hover:border-amber-400/50 rounded-2xl p-5 relative shadow-sm hover:shadow-lg transition-all duration-300 group/card"
               >
                 {/* Background Quote Accent */}
-                <Quote size={56} className="absolute end-4 top-4 text-zinc-100 group-hover/card:text-brand/10 transition-colors pointer-events-none" />
+                <Quote size={48} className="absolute end-3 top-3 text-zinc-100 group-hover/card:text-amber-500/10 transition-colors pointer-events-none" />
 
                 {/* Rating */}
-                <div className="flex items-center gap-1 mb-4 relative z-10">
+                <div className="flex items-center gap-1 mb-3 relative z-10">
                   {[1, 2, 3, 4, 5].map(s => (
                     <Star
                       key={s}
-                      size={16}
+                      size={15}
                       className={s <= (f.rating || 5) ? "fill-amber-400 text-amber-400" : "text-zinc-200"}
                     />
                   ))}
-                  <span className="text-xs font-black text-zinc-900 ms-1">{(f.rating || 5).toFixed(1)}</span>
+                  <span className="text-xs font-black text-zinc-900 ms-1">
+                    {(f.rating || 5).toFixed(1)}
+                  </span>
                 </div>
 
                 {/* Comment Text */}
-                <p className="text-xs sm:text-sm text-zinc-700 font-medium leading-relaxed mb-6 flex-1 relative z-10 italic">
+                <p className="text-xs sm:text-sm text-zinc-700 font-medium leading-relaxed mb-5 flex-1 relative z-10 italic">
                   "{f.comment}"
                 </p>
 
-                {/* Customer Profile Footer with User Icon Placeholder */}
-                <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 relative z-10">
+                {/* Customer Profile Footer */}
+                <div className="flex items-center gap-3 pt-3 border-t border-zinc-100 relative z-10">
                   <div className="relative">
                     {(() => {
                       if (f.avatarUrl) {
                         return (
-                          <div className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md shrink-0">
+                          <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden shadow-md shrink-0">
                             <img src={f.avatarUrl} alt={f.userName} className="w-full h-full object-cover" />
                           </div>
                         );
@@ -292,21 +300,25 @@ const Testimonials = memo(({ feedbacks = [] }) => {
                       const colorClass = colors[i % colors.length];
                       const initial = (f.userName || "?")[0].toUpperCase();
                       return (
-                        <div className={`w-11 h-11 rounded-full ${colorClass} border-2 border-white flex items-center justify-center text-white font-black text-base shrink-0 shadow-md`}>
+                        <div className={`w-10 h-10 rounded-full ${colorClass} border-2 border-white flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md`}>
                           {initial}
                         </div>
                       );
                     })()}
-                    <ShieldCheck size={14} className="absolute -bottom-1 -end-1 text-emerald-600 bg-white rounded-full shadow-xs" />
+                    <ShieldCheck size={13} className="absolute -bottom-0.5 -end-0.5 text-emerald-600 bg-white rounded-full" />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-xs sm:text-sm text-zinc-900 leading-snug">{f.userName}</h4>
-                    <div className="text-[11px] font-bold text-zinc-400 flex items-center gap-2 mt-1">
+                    <h4 className="font-extrabold text-xs sm:text-sm text-zinc-900 leading-snug">
+                      {f.userName}
+                    </h4>
+                    <div className="text-[11px] font-bold text-zinc-400 flex items-center gap-2 mt-0.5">
                       <span>{f.location || (isAr ? "الأردن" : "Jordan")}</span>
                       {f.verified && (
                         <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm border border-emerald-200">
                           <CheckCircle2 size={10} className="text-emerald-600" />
-                          {f.role === 'seller' || f.role === 'vendor' ? (isAr ? "بائع موثق" : "Verified Merchant") : (isAr ? "مشتري موثق" : "Verified Buyer")}
+                          {f.role === "seller" || f.role === "vendor"
+                            ? (isAr ? "بائع موثق" : "Verified Merchant")
+                            : (isAr ? "مشتري موثق" : "Verified Buyer")}
                         </span>
                       )}
                     </div>
@@ -316,7 +328,17 @@ const Testimonials = memo(({ feedbacks = [] }) => {
             ))}
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="py-12 bg-amber-50/50 border-2 border-amber-200 rounded-xl flex flex-col items-center justify-center text-center px-4">
+          <Star size={36} className="text-amber-400 mb-2" />
+          <h3 className="text-base font-bold text-zinc-900 mb-1">
+            {isAr ? "لا توجد تقييمات حالياً" : "No reviews yet"}
+          </h3>
+          <p className="text-xs text-zinc-500">
+            {isAr ? "كن أول من يشارك تجربته معنا." : "Be the first to share your experience."}
+          </p>
+        </div>
+      )}
 
       <FeedbackModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>

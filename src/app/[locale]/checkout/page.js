@@ -2,7 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "@/i18n/routing";
 import { useLocation } from "@/context/LocationContext";
@@ -14,8 +14,11 @@ import Loader from "@/components/Loader";
 
 export default function CheckoutPage() {
   const t = useTranslations("Checkout");
+  const tGov = useTranslations("Governorates");
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
   const { cart, clearCart } = useCart();
-  const { user, loading: authLoading, wooId, customerName, email: authEmail, phone: authPhone, address: authAddress, city: authCity, isVendor } = useAuth();
+  const { user, loading: authLoading, wooId, customerName, email: authEmail, phone: authPhone, address: authAddress, city: authCity, isVendor, isAdmin } = useAuth();
   const { governorate, updateGovernorate } = useLocation();
   const router = useRouter();
 
@@ -23,8 +26,11 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace("/login?redirect=/checkout");
+    } else if (!authLoading && user && isAdmin) {
+      // Admins cannot shop
+      router.replace("/admin");
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, isAdmin, router]);
 
   // Redirect to home if vendor/admin (except for allowed admin email)
   // Vendor restriction removed
@@ -122,7 +128,7 @@ export default function CheckoutPage() {
             }
           }
 
-          const vendorId = liveProduct.vendorId 
+          const vendorId = liveProduct.vendorId
             || liveProduct.meta_data?.find(m => m.key === "_vendor_id" || m.key === "mahally_owner_id")?.value
             || String(liveProduct.author || "");
 
@@ -298,7 +304,7 @@ export default function CheckoutPage() {
             <CheckCircle2 size={32} />
             <h1 className="text-[21px] font-bold">{t("orderSuccessTitle")}</h1>
           </div>
-          <div className="bg-zinc-50 border border-zinc-200 rounded-md p-8 text-start mb-8" dir="rtl">
+          <div className="bg-zinc-50 border border-zinc-200 rounded-md p-8 text-start mb-8" dir={dir}>
             <div className="flex items-start gap-4">
               <div className="bg-white border border-zinc-200 p-2 rounded">
                 <Package size={24} className="text-zinc-400" />
@@ -323,16 +329,33 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#f3f3f3] pb-20">
       {/* Simple Header */}
-      <div className="bg-zinc-100 border-b border-zinc-200 h-[60px] flex items-center shadow-sm">
+      <header className="bg-white border-b border-zinc-200 h-[64px] flex items-center shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 max-w-5xl flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1">
-            <span className="text-2xl font-black italic tracking-tighter text-zinc-900">{t("mahally")}</span>
+          {/* Logo — always LTR, never translated */}
+          <Link href="/" className="flex items-center gap-1.5 shrink-0" dir="ltr">
+            <span className="text-2xl font-black italic tracking-tighter text-zinc-900">
+              Mahally
+            </span>
             <span className="text-brand font-bold text-xl">.jo</span>
           </Link>
-          <h1 className="text-[28px] font-normal text-zinc-600 hidden md:block">{t("checkoutTitle")}</h1>
-          <Lock size={20} className="text-zinc-400" />
+
+          {/* Page context, separated with a divider for clearer hierarchy */}
+          <div className="hidden md:flex items-center gap-3">
+            <div className="h-5 w-px bg-zinc-200" />
+            <h1 className="text-[18px] font-medium text-zinc-600">
+              {t("checkoutTitle")}
+            </h1>
+          </div>
+
+          {/* Trust signal — icon + label reads more professional than a bare lock */}
+          <div className="flex items-center gap-1.5 text-zinc-500">
+            <Lock size={16} className="text-zinc-400 shrink-0" />
+            <span className="hidden sm:inline text-[12px] font-medium tracking-wide">
+              {t("secureCheckout")}
+            </span>
+          </div>
         </div>
-      </div>
+      </header>
 
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -341,7 +364,7 @@ export default function CheckoutPage() {
           <div className="lg:col-span-8 space-y-4">
 
             {/* Step 1: Shipping Address */}
-            <div className="bg-white border border-zinc-200 rounded-md overflow-hidden" dir="rtl">
+            <div className="bg-white border border-zinc-200 rounded-md overflow-hidden" dir={dir}>
               <div className="p-6">
                 <div className="flex items-start gap-6">
                   <span className="text-[18px] font-bold text-zinc-900 shrink-0">1</span>
@@ -349,33 +372,48 @@ export default function CheckoutPage() {
                     <h3 className="text-[18px] font-bold text-zinc-900 mb-4">{t("shippingAddress")}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex flex-col">
-                        <input type="text" name="firstName" placeholder={t("firstNamePlaceholder")} value={formData.firstName} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[13px] md:text-[13px] text-[16px] outline-none shadow-inner w-full`} />
+                        <label htmlFor="firstName" className="text-[12px] font-medium text-zinc-600 mb-1">{t("labelFirstName")}</label>
+                        <input id="firstName" type="text" name="firstName" placeholder={t("firstNamePlaceholder")} value={formData.firstName} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[13px] md:text-[13px] text-[16px] outline-none shadow-inner w-full`} />
                         {validationErrors.firstName && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.firstName}</span>}
                       </div>
+
                       <div className="flex flex-col">
-                        <input type="text" name="lastName" placeholder={t("lastNamePlaceholder")} value={formData.lastName} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-3 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-inner w-full" />
+                        <label htmlFor="lastName" className="text-[12px] font-medium text-zinc-600 mb-1">{t("labelLastName")}</label>
+                        <input id="lastName" type="text" name="lastName" placeholder={t("lastNamePlaceholder")} value={formData.lastName} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-3 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-inner w-full" />
                       </div>
+
                       <div className="flex flex-col md:col-span-2">
-                        <input type="email" name="email" placeholder={t("emailPlaceholder")} value={formData.email} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <label htmlFor="email" className="text-[12px] font-medium text-zinc-600 mb-1">{t("labelEmail")}</label>
+                        <input id="email" type="email" name="email" placeholder={t("emailPlaceholder")} value={formData.email} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.email && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.email}</span>}
                       </div>
+
                       <div className="flex flex-col md:col-span-2">
-                        <input type="tel" name="phone" placeholder={t("phonePlaceholder")} value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <label htmlFor="phone" className="text-[12px] font-medium text-zinc-600 mb-1">{t("labelPhone")}</label>
+                        <input id="phone" type="tel" name="phone" placeholder={t("phonePlaceholder")} value={formData.phone} onChange={handleInputChange} dir="ltr" className={`text-start h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.phone && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.phone}</span>}
                       </div>
+
                       <div className="flex flex-col md:col-span-2">
-                        <input type="text" name="address" placeholder={t("addressPlaceholder")} value={formData.address} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
+                        <label htmlFor="address" className="text-[12px] font-medium text-zinc-600 mb-1">{t("labelAddress")}</label>
+                        <input id="address" type="text" name="address" placeholder={t("addressPlaceholder")} value={formData.address} onChange={handleInputChange} className={`h-[44px] md:h-[31px] px-3 bg-white border ${validationErrors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-300 focus:border-brand'} rounded-md text-[16px] md:text-[13px] outline-none shadow-inner w-full`} />
                         {validationErrors.address && <span className="text-[11px] text-red-600 mt-1 font-medium pe-0.5">{validationErrors.address}</span>}
                       </div>
+
+                      {/* Country first in DOM: renders on the LEFT in LTR (English), RIGHT in RTL (Arabic) */}
                       <div className="flex flex-col">
-                        <select name="city" value={city} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-2 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-sm cursor-pointer w-full">
+                        <label htmlFor="country" className="text-[12px] font-medium text-zinc-600 mb-1">{t("labelCountry")}</label>
+                        <input id="country" readOnly value={t("countryJordan")} className="h-[44px] md:h-[31px] px-3 bg-zinc-50 border border-zinc-200 rounded-md text-[16px] md:text-[13px] text-zinc-500 w-full" />
+                      </div>
+
+                      {/* City second in DOM: renders on the RIGHT in LTR (English), LEFT in RTL (Arabic) */}
+                      <div className="flex flex-col">
+                        <label htmlFor="city" className="text-[12px] font-medium text-zinc-600 mb-1">{t("labelCity")}</label>
+                        <select id="city" name="city" value={city} onChange={handleInputChange} className="h-[44px] md:h-[31px] px-2 bg-white border border-zinc-300 rounded-md text-[16px] md:text-[13px] focus:border-brand outline-none shadow-sm cursor-pointer w-full">
                           {JORDAN_GOVERNORATES.map(gov => (
-                            <option key={gov} value={gov}>{gov}</option>
+                            <option key={gov} value={gov}>{tGov(gov)}</option>
                           ))}
                         </select>
-                      </div>
-                      <div className="flex flex-col">
-                        <input readOnly value={t("countryJordan")} className="h-[44px] md:h-[31px] px-3 bg-zinc-50 border border-zinc-200 rounded-md text-[16px] md:text-[13px] text-zinc-500 w-full" />
                       </div>
                     </div>
                   </div>
@@ -384,7 +422,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Step 2: Payment Method */}
-            <div className="bg-white border border-zinc-200 rounded-md overflow-hidden opacity-100 transition-all" dir="rtl">
+            <div className="bg-white border border-zinc-200 rounded-md overflow-hidden opacity-100 transition-all" dir={dir}>
               <div className="p-6">
                 <div className="flex items-start gap-6">
                   <span className="text-[18px] font-bold text-zinc-900 shrink-0">2</span>
@@ -403,7 +441,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Step 3: Items Review */}
-            <div className="bg-white border border-zinc-200 rounded-md overflow-hidden" dir="rtl">
+            <div className="bg-white border border-zinc-200 rounded-md overflow-hidden" dir={dir}>
               <div className="p-6">
                 <div className="flex items-start gap-6">
                   <span className="text-[18px] font-bold text-zinc-900 shrink-0">3</span>
@@ -441,7 +479,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* RIGHT: Order Summary Sidebar */}
-          <div className="lg:col-span-4" dir="rtl">
+          <div className="lg:col-span-4" dir={dir}>
             <div className="bg-white border border-zinc-200 rounded-md p-5 sticky top-4">
               <button
                 onClick={handleSubmit}

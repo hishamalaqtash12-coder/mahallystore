@@ -274,9 +274,21 @@ function MessagesContent() {
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       setHighlightedMessageId(replyMsgId);
-      setTimeout(() => setHighlightedMessageId(null), 1500);
     }
   };
+
+  // Automatically clear message highlight after 3 seconds of being rendered
+  useEffect(() => {
+    if (highlightedMessageId && messages.length > 0) {
+      const el = document.getElementById(`message-${highlightedMessageId}`);
+      if (el) {
+        const timer = setTimeout(() => {
+          setHighlightedMessageId(null);
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [highlightedMessageId, messages]);
 
   // Load user preference for Enter to send
   useEffect(() => {
@@ -323,6 +335,14 @@ function MessagesContent() {
   }, [showReactionPicker]);
 
   const scrollToBottom = (behavior = "smooth") => {
+    if (highlightedMessageId) {
+      const el = document.getElementById(`message-${highlightedMessageId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+    }
+
     const container = messagesEndRef.current?.parentElement;
     if (container) {
       container.scrollTo({
@@ -505,7 +525,7 @@ function MessagesContent() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { router.push("/login?redirect=/messages"); return; }
+    if (!user) { router.replace("/login?redirect=/messages"); return; }
     const init = async () => {
       setLoading(true);
       await fetchData();
@@ -516,9 +536,9 @@ function MessagesContent() {
 
   useEffect(() => {
     if (!vendorId || !wooId) return;
-    if (String(vendorId) === String(wooId)) { router.push("/messages"); return; }
-    if ((vendorId === "admin" || String(vendorId) === "1") && isDesignatedAdmin) {
-      router.push("/messages");
+    if (String(vendorId) === String(wooId)) { router.replace("/messages"); return; }
+    if ((vendorId === "admin" || String(vendorId) === "1") && (isDesignatedAdmin || isAdmin)) {
+      router.replace("/messages");
       return;
     }
     const switchConv = async () => {
@@ -817,22 +837,36 @@ function MessagesContent() {
               </button>
             </div>
           </div>
-          <div className="relative">
-            <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+          <div className="relative group">
+            <div className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 flex items-center gap-1.5 transition-colors ${searchQuery ? "text-[#be374f]" : "text-zinc-400 group-focus-within:text-[#be374f]"}`}>
+              <Search size={15} />
+            </div>
+            
             <input
               type="text"
-              placeholder={isAr ? "ابحث في المحادثات…" : "Search conversations…"}
+              dir={isAr ? "rtl" : "ltr"}
+              placeholder={isAr ? "ابحث في المحادثات أو الرسائل..." : "Search conversations or messages..."}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full h-[31px] pe-9 ps-3 bg-zinc-50 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-[#be374f] transition-all"
+              className={`w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-[13px] rounded-xl py-2.5 ${isAr ? 'pr-9 pl-10' : 'pl-9 pr-10'} focus:outline-none focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f]/30 transition-all placeholder:text-zinc-400 shadow-sm group-hover:border-zinc-300`}
             />
+
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className={`absolute ${isAr ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#be374f] hover:bg-zinc-200/50 p-1 rounded-full transition-all`}
+                title={isAr ? "مسح البحث" : "Clear search"}
+              >
+                <X size={13} strokeWidth={2.5} />
+              </button>
+            )}
           </div>
           <div className="flex items-center mt-3 px-0.5 select-none">
             <button
               onClick={() => setShowUnreadOnly(!showUnreadOnly)}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border transition-all ${showUnreadOnly
-                  ? "bg-amber-50 border-amber-300 text-amber-700 shadow-sm"
-                  : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                ? "bg-amber-50 border-amber-300 text-amber-700 shadow-sm"
+                : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
                 }`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${showUnreadOnly ? "bg-[#be374f] animate-pulse" : "bg-zinc-300"}`} />
@@ -851,7 +885,7 @@ function MessagesContent() {
           )}
 
           {/* Support thread */}
-          {!isDesignatedAdmin && (!showUnreadOnly || adminUnreadCount > 0) && (
+          {!searchQuery && !isDesignatedAdmin && (!showUnreadOnly || adminUnreadCount > 0) && (
             <div
               onClick={() => {
                 const subtract = adminUnreadCount;
@@ -911,20 +945,54 @@ function MessagesContent() {
               }
             }
 
-            return uniqueList
+            // Build the base filtered list
+            const baseList = uniqueList
               .filter(c => {
                 if (String(c.id) === String(wooId)) return false;
                 // If the pinned support thread is shown, exclude it from the Recent list to prevent duplicate listing
-                if (!isDesignatedAdmin && (String(c.id) === "1" || String(c.id) === "admin" || c.role === "admin")) return false;
+                if (!searchQuery && !isDesignatedAdmin && (String(c.id) === "1" || String(c.id) === "admin" || c.role === "admin")) return false;
                 return true;
               })
-              .filter(c => c.name?.toLowerCase().includes(searchQuery.toLowerCase()))
-              .filter(c => !showUnreadOnly || (c.unreadCount && c.unreadCount > 0) || String(c.id) === String(vendorId))
-              .map((conv, index) => {
-                const isActive = String(conv.id) === String(vendorId);
-                return (
+              .filter(c => !showUnreadOnly || (c.unreadCount && c.unreadCount > 0) || String(c.id) === String(vendorId));
+
+            // Apply search and flat map results
+            let finalRenderList = [];
+            
+            if (searchQuery) {
+               const q = searchQuery.toLowerCase();
+               baseList.forEach(conv => {
+                 const nameMatch = conv.name?.toLowerCase().includes(q);
+                 const msgs = conv.messages || [];
+                 const matchedMsgs = msgs.filter(m => m.text?.toLowerCase().includes(q));
+                 
+                 if (nameMatch && matchedMsgs.length === 0) {
+                    finalRenderList.push({ type: 'conv', conv });
+                 } else {
+                    matchedMsgs.forEach(m => {
+                       finalRenderList.push({ type: 'msg', conv, message: m });
+                    });
+                    if (nameMatch && matchedMsgs.length > 0) {
+                       finalRenderList.push({ type: 'conv', conv });
+                    }
+                 }
+               });
+               // Sort matches by time descending
+               finalRenderList.sort((a, b) => {
+                 const tA = a.type === 'msg' ? a.message.timestamp : a.conv.lastTimestamp;
+                 const tB = b.type === 'msg' ? b.message.timestamp : b.conv.lastTimestamp;
+                 return tB - tA;
+               });
+            } else {
+               finalRenderList = baseList.map(c => ({ type: 'conv', conv: c }));
+            }
+
+            return finalRenderList.map((item, index) => {
+               const { type, conv, message } = item;
+               const isActive = String(conv.id) === String(vendorId);
+               
+               return (
                   <div
-                    key={conv.id || `conv-${index}`}
+                    key={`${conv.id}-${type === 'msg' ? message.id : 'c'}-${index}`}
                     onClick={() => {
                       const subtract = conv.unreadCount || 0;
                       // Immediately clear unread badge (optimistic)
@@ -935,9 +1003,23 @@ function MessagesContent() {
                       const now = Date.now().toString();
                       localStorage.setItem(`mahally_read_${wooId}_${conv.id}`, now);
                       window.dispatchEvent(new CustomEvent("mahally_read_updated", { detail: { subtract } }));
-                      router.push(`/messages?to=${conv.id}`);
+                      
+                      // Highlight and navigate
+                      if (type === 'msg') {
+                        setHighlightedMessageId(message.id);
+                      }
+                      
+                      if (!isActive) {
+                        router.push(`/messages?to=${conv.id}`);
+                      } else if (type === 'msg') {
+                        // Already in this conversation, scroll immediately
+                        setTimeout(() => {
+                          const el = document.getElementById(`message-${message.id}`);
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                      }
                     }}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all border ${isActive ? "bg-[#fde7ee] border-[#b2d8dc]" : "border-transparent hover:bg-zinc-50 hover:border-zinc-200"}`}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all border ${isActive && type === 'conv' ? "bg-[#fde7ee] border-[#b2d8dc]" : "border-transparent hover:bg-zinc-50 hover:border-zinc-200"}`}
                   >
                     <div className="w-9 h-9 rounded-md overflow-hidden border border-zinc-200 bg-white shrink-0 relative">
                       {conv.logo ? (
@@ -950,14 +1032,21 @@ function MessagesContent() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
-                        <p className={`text-[13px] font-medium truncate ${isActive ? "text-[#be374f]" : "text-zinc-900"}`}>{conv.name}</p>
-                        <span className="text-[11px] text-zinc-400 shrink-0 me-2">{conv.lastTimestamp ? formatDateTime(conv.lastTimestamp, isAr) : conv.time}</span>
+                        <p className={`text-[13px] font-medium truncate ${isActive && type === 'conv' ? "text-[#be374f]" : "text-zinc-900"}`}>{conv.name}</p>
+                        <span className="text-[11px] text-zinc-400 shrink-0 me-2">
+                          {type === 'msg' ? (message.timestamp ? formatDateTime(message.timestamp, isAr) : message.time) : (conv.lastTimestamp ? formatDateTime(conv.lastTimestamp, isAr) : conv.time)}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between mt-0.5">
                         <p className={`text-[12px] truncate ${conv.unreadCount > 0 && !isActive ? "text-zinc-900 font-bold" : "text-zinc-500"}`}>
-                          {conv.lastMessage}
+                          {type === 'msg' ? (
+                            <>
+                              <span className="text-[10px] bg-zinc-100 text-zinc-600 px-1 rounded inline-block me-1">{isAr ? "رسالة:" : "Match:"}</span>
+                              {message.text}
+                            </>
+                          ) : conv.lastMessage}
                         </p>
-                        {conv.unreadCount > 0 && (
+                        {conv.unreadCount > 0 && type === 'conv' && (
                           <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 me-2">
                             {conv.unreadCount}
                           </span>
@@ -965,8 +1054,8 @@ function MessagesContent() {
                       </div>
                     </div>
                   </div>
-                );
-              });
+               );
+            });
           })()}
         </div>
       </aside>
@@ -1051,7 +1140,7 @@ function MessagesContent() {
                         <div
                           onClick={() => setSelectedMessageId(isSelected ? null : msg.id)}
                           className={`message-bubble-wrapper max-w-[75%] lg:max-w-[65%] px-4 py-2.5 rounded-lg text-[13px] leading-relaxed border relative transition-all duration-500 ${isSelected ? "ring-2 ring-[#be374f] ring-offset-1" : ""} ${highlightedMessageId === msg.id ? "bg-amber-100 border-amber-300 ring-2 ring-amber-400 shadow-md transform scale-[1.02]" :
-                              isMe ? "bg-[#be374f] text-white border-[#be374f]" : "bg-white text-zinc-800 border-zinc-200 shadow-sm"
+                            isMe ? "bg-[#be374f] text-white border-[#be374f]" : "bg-white text-zinc-800 border-zinc-200 shadow-sm"
                             }`}
                         >
                           {msg.replyTo && (
@@ -1259,7 +1348,7 @@ function MessagesContent() {
                   <textarea
                     ref={textareaRef}
                     rows={1}
-                    dir="auto"
+                    dir={newMessage ? "auto" : (isAr ? "rtl" : "ltr")}
                     value={newMessage}
                     onChange={e => setNewMessage(e.target.value)}
                     onKeyDown={e => {
@@ -1501,6 +1590,7 @@ function MessagesContent() {
                 <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
                 <input
                   type="text"
+                  dir={isAr ? "rtl" : "ltr"}
                   placeholder={isAr ? "ابحث عن البائعين…" : "Search sellers…"}
                   value={vendorSearch}
                   onChange={e => setVendorSearch(e.target.value)}

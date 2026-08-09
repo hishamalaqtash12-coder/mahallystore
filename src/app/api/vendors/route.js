@@ -28,7 +28,8 @@ export async function GET(request) {
     if (!includeRestricted) {
       filteredVendors = filteredVendors.filter(v => {
         const showInDirectory = v.meta_data?.find(m => m.key === 'mahally_show_in_directory')?.value;
-        return showInDirectory !== 'no';
+        const isApproved = v.meta_data?.find(m => m.key === 'dokan_enable_selling')?.value === 'yes';
+        return showInDirectory !== 'no' && isApproved;
       });
     }
 

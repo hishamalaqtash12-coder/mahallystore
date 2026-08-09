@@ -14,10 +14,13 @@ import {
   Loader2,
   AlertCircle
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function WhatsAppBroadcaster() {
   const t = useTranslations("AdminWhatsApp");
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
+
   // Campaign Form States
   const [recipientType, setRecipientType] = useState("all");
   const [message, setMessage] = useState("");
@@ -69,7 +72,7 @@ export default function WhatsAppBroadcaster() {
   // Enhance copy with AI
   const handleEnhanceWithAI = async () => {
     if (!message.trim()) {
-      alert("Please write a draft message first, then click enhance!");
+      alert(t("writeDraftFirst"));
       return;
     }
     try {
@@ -97,11 +100,11 @@ export default function WhatsAppBroadcaster() {
   const handleDispatch = async (e) => {
     e.preventDefault();
     if (!message.trim()) {
-      setError("Message content cannot be empty.");
+      setError(t("messageEmpty"));
       return;
     }
     if (recipientType === "specific" && !customNumbers.trim()) {
-      setError("Please supply at least one recipient phone number.");
+      setError(t("phoneRequired"));
       return;
     }
 
@@ -118,14 +121,14 @@ export default function WhatsAppBroadcaster() {
       const contentType = res.headers.get("content-type") || "";
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        setError(`Server error: ${res.status}`);
+        setError(t("serverError", { status: res.status }));
         console.error("Dispatch failed:", res.status, text);
         return;
       }
 
       if (!contentType.includes("application/json")) {
         const text = await res.text().catch(() => "");
-        setError("Unexpected server response");
+        setError(t("unexpectedResponse"));
         console.error("Unexpected non-JSON response from dispatch:", text);
         return;
       }
@@ -139,19 +142,28 @@ export default function WhatsAppBroadcaster() {
         });
         setMessage("");
         setCustomNumbers("");
-        fetchHistory(); // Refresh history
+        fetchHistory();
       } else {
-        setError(data.error || "Failed to dispatch broadcast");
+        setError(data.error || t("dispatchFailed"));
       }
     } catch (err) {
-      setError("An unexpected server error occurred during dispatch.");
+      setError(t("unexpectedError"));
     } finally {
       setDispatching(false);
     }
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString(locale === "ar" ? "ar-JO" : "en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+  };
+
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 max-w-6xl mx-auto" dir={dir}>
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -164,18 +176,23 @@ export default function WhatsAppBroadcaster() {
       </div>
 
       {/* Feature Under Development Notice */}
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3.5 shadow-sm">
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3.5 shadow-sm">
         <AlertCircle className="text-amber-600 shrink-0 mt-0.5" size={20} />
         <div>
           <h3 className="text-sm font-bold text-amber-800">{t("featureUnderDevelopmentTitle")}</h3>
-          <p className="text-xs text-amber-700 mt-1 leading-relaxed">{t("featureUnderDevelopmentDesc")}</p>
+          <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+            {t("featureUnderDevelopmentDesc")}
+          </p>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Composer Form */}
         <div className="lg:col-span-2 space-y-6">
-          <form onSubmit={handleDispatch} className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-5">
+          <form
+            onSubmit={handleDispatch}
+            className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-5"
+          >
             <h2 className="font-semibold text-zinc-900 text-[16px] flex items-center gap-2">
               <Smartphone size={18} className="text-zinc-500" />
               {t("campaignComposer")}
@@ -183,24 +200,28 @@ export default function WhatsAppBroadcaster() {
 
             {/* Recipient Selector */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t("recipientsLabel")}</label>
+              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                {t("recipientsLabel")}
+              </label>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
                   { id: "all", label: t("allUsers"), icon: Users },
                   { id: "vendors", label: t("merchants"), icon: Users },
                   { id: "customers", label: t("customers"), icon: Users },
-                  { id: "specific", label: t("customPhone"), icon: Smartphone },
+                  { id: "specific", label: t("customPhone"), icon: Smartphone }
                 ].map((type) => (
                   <div
                     key={type.id}
                     onClick={() => setRecipientType(type.id)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all text-center select-none ${
-                      recipientType === type.id
+                    className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all text-center select-none ${recipientType === type.id
                         ? "bg-emerald-50/50 border-emerald-500 text-emerald-800"
                         : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300"
-                    }`}
+                      }`}
                   >
-                    <type.icon size={16} className={recipientType === type.id ? "text-emerald-600" : "text-zinc-400"} />
+                    <type.icon
+                      size={16}
+                      className={recipientType === type.id ? "text-emerald-600" : "text-zinc-400"}
+                    />
                     <span className="text-[12px] font-bold mt-1">{type.label}</span>
                   </div>
                 ))}
@@ -208,9 +229,11 @@ export default function WhatsAppBroadcaster() {
             </div>
 
             {/* Custom Numbers list */}
-                {recipientType === "specific" && (
+            {recipientType === "specific" && (
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t("phoneNumbersPlaceholder")}</label>
+                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  {t("phoneNumbersLabel")}
+                </label>
                 <input
                   type="text"
                   placeholder={t("phoneNumbersPlaceholder")}
@@ -224,7 +247,9 @@ export default function WhatsAppBroadcaster() {
             {/* Message drafting */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Message Content</label>
+                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  {t("messageContent")}
+                </label>
                 <button
                   type="button"
                   onClick={handleEnhanceWithAI}
@@ -236,19 +261,19 @@ export default function WhatsAppBroadcaster() {
                   ) : (
                     <Sparkles size={12} />
                   )}
-                  {enhancing ? "Enhancing draft..." : "Enhance with Gemini"}
+                  {enhancing ? t("enhancing") : t("enhanceWithGemini")}
                 </button>
               </div>
               <div className="relative">
                 <textarea
                   rows={6}
-                  placeholder="Draft your campaign details... Use *bold text* or _italics_ to format for WhatsApp."
+                  placeholder={t("messagePlaceholder")}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="w-full p-4 border border-zinc-300 rounded-md text-[13px] outline-none focus:border-emerald-500 transition-all font-sans leading-relaxed resize-none"
                 />
                 <span className="absolute bottom-3 start-3 text-[10px] text-zinc-400 font-bold bg-zinc-50 px-1.5 py-0.5 rounded border border-zinc-200">
-                  {message.length} chars
+                  {t("charsCount", { count: message.length })}
                 </span>
               </div>
             </div>
@@ -258,9 +283,9 @@ export default function WhatsAppBroadcaster() {
               <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-2.5">
                 <CheckCircle size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs font-bold text-emerald-800">Broadcast Dispatched Successfully!</h4>
+                  <h4 className="text-xs font-bold text-emerald-800">{t("dispatchSuccessTitle")}</h4>
                   <p className="text-[11px] text-emerald-700 mt-0.5">
-                    Your campaign was successfully delivered to **{dispatchedInfo.count}** registered recipients.
+                    {t("dispatchSuccessDesc", { count: dispatchedInfo.count })}
                   </p>
                 </div>
               </div>
@@ -270,7 +295,7 @@ export default function WhatsAppBroadcaster() {
               <div className="p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2.5">
                 <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs font-bold text-red-800">Broadcast Dispatch Failed</h4>
+                  <h4 className="text-xs font-bold text-red-800">{t("dispatchFailedTitle")}</h4>
                   <p className="text-[11px] text-red-700 mt-0.5">{error}</p>
                 </div>
               </div>
@@ -288,14 +313,14 @@ export default function WhatsAppBroadcaster() {
                 ) : (
                   <Send size={16} />
                 )}
-                {dispatching ? "Dispatching Broadcast..." : "Send WhatsApp Campaign"}
+                {dispatching ? t("dispatching") : t("sendCampaign")}
               </button>
             </div>
           </form>
 
-          {/* Form formatting tips */}
+          {/* Formatting tips */}
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-[12px] text-zinc-500 space-y-2">
-            <p className="font-bold text-zinc-700">💡 WhatsApp Formatting Tips:</p>
+            <p className="font-bold text-zinc-700">{t("formattingTips")}</p>
             <div className="grid grid-cols-3 gap-2 font-mono bg-white p-2.5 rounded border border-zinc-200 text-[11px]">
               <div>*your text* ➡️ <b>your text</b></div>
               <div>_your text_ ➡️ <i>your text</i></div>
@@ -310,7 +335,7 @@ export default function WhatsAppBroadcaster() {
             <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
               <div className="flex items-center gap-2">
                 <History size={16} className="text-zinc-400" />
-                <h3 className="font-semibold text-zinc-900 text-[14px]">Campaign History</h3>
+                <h3 className="font-semibold text-zinc-900 text-[14px]">{t("campaignHistory")}</h3>
               </div>
               <button
                 onClick={fetchHistory}
@@ -325,7 +350,7 @@ export default function WhatsAppBroadcaster() {
               {loadingHistory ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <Loader2 className="w-5 h-5 animate-spin text-zinc-400 mb-2" />
-                  <p className="text-[11px] text-zinc-400 font-medium">Loading history...</p>
+                  <p className="text-[11px] text-zinc-400 font-medium">{t("loadingHistory")}</p>
                 </div>
               ) : history.length > 0 ? (
                 history.map((campaign) => (
@@ -335,26 +360,28 @@ export default function WhatsAppBroadcaster() {
                   >
                     <div className="flex justify-between items-start">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                        {campaign.recipientType}
+                        {t(`recipientType_${campaign.recipientType}`) || campaign.recipientType}
                       </span>
                       <span className="text-[10px] text-zinc-400 flex items-center gap-1">
                         <Calendar size={10} />
-                        {new Date(campaign.date).toLocaleDateString()}
+                        {formatDate(campaign.date)}
                       </span>
                     </div>
                     <p className="text-zinc-700 line-clamp-3 leading-relaxed whitespace-pre-wrap">
                       {campaign.message}
                     </p>
                     <div className="border-t border-zinc-200/60 pt-2 flex items-center justify-between text-[11px] text-zinc-500 font-medium">
-                      <span>Recipients: <b>{campaign.recipientCount}</b></span>
-                      <span className="text-emerald-600 font-bold">✔ Sent</span>
+                      <span>
+                        {t("recipients")}: <b>{campaign.recipientCount}</b>
+                      </span>
+                      <span className="text-emerald-600 font-bold">{t("sent")}</span>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <MessageSquare className="h-8 w-8 text-zinc-300 mb-2" />
-                  <p className="text-[12px] text-zinc-500 italic">No broadcast campaigns sent yet.</p>
+                  <p className="text-[12px] text-zinc-500 italic">{t("noCampaigns")}</p>
                 </div>
               )}
             </div>

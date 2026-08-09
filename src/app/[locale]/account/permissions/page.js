@@ -3,8 +3,11 @@
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect } from "react";
 import { ShieldCheck, Loader2 } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default function AccountPermissionsPage() {
+  redirect("/account");
+
   const { user, wooId, loading } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [permissions, setPermissions] = useState([

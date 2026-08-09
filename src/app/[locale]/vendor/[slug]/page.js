@@ -9,6 +9,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import ProductCard from "@/components/ProductCard";
+import { getProductUrl } from "@/lib/product-utils";
 import {
   ArrowLeft, Star, MapPin, Mail, Phone as PhoneIcon, ShoppingCart,
   Heart, Package, CheckCircle, ChevronRight, Store, Grid3X3, List,
@@ -578,7 +579,7 @@ export default function VendorProfilePage() {
                             {filteredProducts.map(p => (
                               <tr key={p.id} className="hover:bg-[#f6f7f7] group transition-colors">
                                 <td className="px-4 py-3">
-                                  <Link href={`/product/${p.id}`}>
+                                  <Link href={getProductUrl(p)}>
                                     <div className="w-[50px] h-[50px] border border-zinc-200 bg-[#F7F7F7] rounded-sm overflow-hidden relative mx-auto">
                                       {p.images?.[0]?.src ? (
                                         <Image src={p.images[0].src} alt={p.name || t("productImageAlt")} fill className="object-contain p-1" sizes="50px" />
@@ -589,7 +590,7 @@ export default function VendorProfilePage() {
                                   </Link>
                                 </td>
                                 <td className="px-4 py-3 align-top pt-4">
-                                  <Link href={`/product/${p.id}`} className="font-bold text-brand hover:text-brand-dark text-[14px] leading-tight line-clamp-2">
+                                  <Link href={getProductUrl(p)} className="font-bold text-brand hover:text-brand-dark text-[14px] leading-tight line-clamp-2">
                                     {p.name}
                                   </Link>
                                   <div className="flex items-center gap-0.5 mt-1">
@@ -628,7 +629,7 @@ export default function VendorProfilePage() {
                                       {t("quickLook")}
                                     </button>
                                     <Link
-                                      href={`/product/${p.id}`}
+                                      href={getProductUrl(p)}
                                       className="inline-flex items-center justify-center h-8 px-4 bg-brand hover:bg-brand-dark border border-brand text-white text-[12px] font-medium rounded-full shadow-sm transition-colors"
                                     >
                                       {t("viewOptions")}

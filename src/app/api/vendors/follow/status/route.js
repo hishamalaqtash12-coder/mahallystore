@@ -11,6 +11,7 @@ export async function GET(request) {
       return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
 
+
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
     const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
     
@@ -18,7 +19,10 @@ export async function GET(request) {
       headers: { Authorization: `Basic ${auth}` }
     });
     
+    console.log("Follow Status API fetch result:", res.status, res.statusText);
+    
     if (!res.ok) {
+      console.log("Returning 404 NextResponse");
       return NextResponse.json({ error: "Failed to fetch user" }, { status: 404 });
     }
     

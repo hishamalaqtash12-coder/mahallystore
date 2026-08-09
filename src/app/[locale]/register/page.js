@@ -27,7 +27,7 @@ function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const t = useTranslations("Register");
 
   const [step, setStep] = useState("role");     // "role" | "form" | "vendor_store" | "verify_method" | "phone_otp" | "email_sent" | "success"
@@ -65,9 +65,17 @@ function RegisterContent() {
   const otpRefs = useRef([]);
 
   useEffect(() => {
-    if (user && step === "role") router.replace(redirectTo);
+    if (user && !authLoading) router.replace(redirectTo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, redirectTo]);
+  }, [user, authLoading, redirectTo]);
+
+  if (authLoading || user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f6f6f6]">
+        <Loader2 className="w-10 h-10 animate-spin text-brand" />
+      </div>
+    );
+  }
 
   // Read ?role parameter on mount
   useEffect(() => {

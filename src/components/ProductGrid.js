@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { usePathname } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import ProductCard from "./ProductCard";
@@ -54,6 +54,35 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
     searchQuery: q || "",
   });
 
+  const router = useRouter();
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (newFilters.category && newFilters.category !== "All") {
+      const matchedCat = categories.find(c =>
+        c.id === newFilters.category ||
+        decodeURIComponent(c.slug) === decodeURIComponent(newFilters.category)
+      );
+      if (matchedCat) params.set("cat", decodeURIComponent(matchedCat.slug));
+      else params.set("cat", newFilters.category);
+    } else {
+      params.delete("cat");
+    }
+
+    if (newFilters.searchQuery) params.set("q", newFilters.searchQuery);
+    else params.delete("q");
+
+    if (newFilters.onSale) params.set("onDiscount", "true");
+    else params.delete("onDiscount");
+
+    if (newFilters.madeInJordan) params.set("madeInJordan", "true");
+    else params.delete("madeInJordan");
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   // ── Fetch categories (Bulletproof) ──
   useEffect(() => {
     fetch('/api/categories')
@@ -67,6 +96,17 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
         setCategories([]);
       });
   }, []);
+
+  // ── Sync URL Params to Local State ──
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      category: cat ? Number(cat) || cat : null,
+      searchQuery: q || "",
+      onSale: onDiscount,
+      madeInJordan: madeInJordanOnly
+    }));
+  }, [cat, q, onDiscount, madeInJordanOnly]);
 
   // ── Re-fetch products when URL params change ──
   useEffect(() => {
@@ -157,7 +197,9 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
       // Category
       if (filters.category !== null) {
         const matched = p.categories?.some(
-          c => c.id === filters.category || c.id.toString() === filters.category?.toString() || c.slug === filters.category
+          c => c.id === filters.category ||
+            c.id.toString() === filters.category?.toString() ||
+            decodeURIComponent(c.slug) === decodeURIComponent(filters.category)
         );
         if (!matched) return false;
       }
@@ -226,31 +268,53 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
     filters.inStockOnly,
     (filters.tags || []).length > 0,
     filters.priceRange !== null,
-    filters.merchant !== null,    filters.madeInJordan,  ].filter(Boolean).length;
+    filters.merchant !== null, filters.madeInJordan,].filter(Boolean).length;
 
   if (!isBrowse && !isFeaturedPage) {
     return (
-      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 border-b border-zinc-100 pb-4">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/20 text-xs font-black uppercase tracking-wider">
-              <Compass size={13} className="text-blue-600" />
-              <span>{isAr ? "اكتشف منتجاتنا" : "Explore Products"}</span>
+      <section className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 my-8">
+        {/* ── Section Header (Made in Jordan style) ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="p-2 rounded-lg bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                <Compass size={20} className="text-blue-600" />
+              </span>
+              <span className="text-sm font-black uppercase tracking-wider text-blue-600">
+                {isAr ? "اكتشف منتجاتنا" : "Explore Products"}
+              </span>
             </div>
-
-            <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
               {t("title")}
             </h2>
+            <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-medium">
+              {isAr
+                ? "تصفح أحدث المنتجات المختارة بعناية من متاجر محلية موثوقة"
+                : "Browse the latest carefully selected products from trusted local stores"}
+            </p>
           </div>
-          <Link href="/browse" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-zinc-700 hover:text-brand transition-colors bg-zinc-100 hover:bg-brand/10 px-4 py-2 rounded-full border border-zinc-200/80 w-fit">
-            <span>{t("viewAll")}</span>
-            <ChevronLeft size={16} className="rtl:rotate-0 rotate-180" />
-          </Link>
+
+          <div className="flex items-center gap-2.5 self-end sm:self-auto">
+            <Link
+              href="/browse"
+              className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-blue-700 transition-colors bg-zinc-100/80 hover:bg-blue-50 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-blue-600/60 w-fit shrink-0"
+            >
+              <span>{t("viewAll")}</span>
+              {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            </Link>
+          </div>
         </div>
+
+        {/* ── Products ── */}
         {products.length === 0 ? (
-          <div className="py-12 bg-[#F7F7F7] border border-zinc-200 rounded-lg flex flex-col items-center justify-center text-center px-4 mt-4">
-            <h3 className="text-lg font-bold text-zinc-900 mb-1">{t("noProducts")}</h3>
-            <p className="text-sm text-zinc-500">{t("noProductsDesc")}</p>
+          <div className="py-12 bg-blue-50/50 border-2 border-blue-200 rounded-xl flex flex-col items-center justify-center text-center px-4">
+            <Compass size={36} className="text-blue-400 mb-2" />
+            <h3 className="text-base font-bold text-zinc-900 mb-1">
+              {t("noProducts")}
+            </h3>
+            <p className="text-xs text-zinc-500">
+              {t("noProductsDesc")}
+            </p>
           </div>
         ) : (
           <>
@@ -259,7 +323,8 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-            <div className="mt-12 flex justify-center select-none">
+
+            {/* <div className="mt-12 flex justify-center select-none">
               <Link
                 href="/browse"
                 className="h-10 px-8 bg-white hover:bg-zinc-50 border border-zinc-400 text-zinc-900 rounded-full text-[14px] font-medium transition-all flex items-center gap-1.5 cursor-pointer"
@@ -267,10 +332,10 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 <span>{t("viewAllProducts")}</span>
                 <ChevronRight size={16} className="text-zinc-600 rtl:-scale-x-100" />
               </Link>
-            </div>
+            </div> */}
           </>
         )}
-      </div>
+      </section>
     );
   }
 
@@ -286,7 +351,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
             <>
               <span>{t("showingResults", { end: sortedProducts.length, total: totalPages * 20 })}</span>
               <span className="font-bold text-brand me-1">
-                &quot;{filters.searchQuery ? filters.searchQuery : (cat ? <span dangerouslySetInnerHTML={{ __html: categories.find(c => c.id === filters.category || c.slug === filters.category)?.name || t("category") }} /> : t("allProducts"))}&quot;
+                &quot;{filters.searchQuery ? filters.searchQuery : (cat ? <span dangerouslySetInnerHTML={{ __html: categories.find(c => c.id === filters.category || decodeURIComponent(c.slug) === decodeURIComponent(filters.category))?.name || t("category") }} /> : t("allProducts"))}&quot;
               </span>
             </>
           )}
@@ -357,7 +422,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
               categories={categories}
               products={products}
               filters={filters}
-              onFiltersChange={setFilters}
+              onFiltersChange={handleFiltersChange}
               priceBounds={priceBounds}
             />
           </div>
@@ -376,7 +441,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 categories={categories}
                 products={products}
                 filters={filters}
-                onFiltersChange={(f) => { setFilters(f); }}
+                onFiltersChange={(f) => { handleFiltersChange(f); }}
                 priceBounds={priceBounds}
               />
             </div>
@@ -409,7 +474,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
           {activeFilterCount > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-4 select-none">
               {filters.category !== null && (() => {
-                const catObj = categories.find(c => c.id === filters.category || c.slug === filters.category);
+                const catObj = categories.find(c => c.id === filters.category || decodeURIComponent(c.slug) === decodeURIComponent(filters.category));
                 return catObj ? (
                   <span key="cat" className="inline-flex items-center gap-1 h-6 pe-2.5 ps-1 bg-[#F0F2F2] text-[#0F1111] text-[11px] font-normal rounded-md border border-[#D5D9D9] hover:bg-[#E3E6E6] transition-colors shadow-sm">
                     <span dangerouslySetInnerHTML={{ __html: catObj.name }} />
@@ -479,7 +544,7 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
                 <p className="text-zinc-950 text-[16px] font-bold mb-1">{t("noProducts")}</p>
                 <p className="text-[#565959] text-[13px] mb-5">{t("noProductsDesc")}</p>
                 <button
-                  onClick={() => setFilters(f => ({ ...f, category: null, minRating: null, priceRange: null, onSale: false, freeShipping: false, inStockOnly: false, minDiscount: null, tags: [], merchant: null }))}
+                  onClick={() => handleFiltersChange({ category: null, minRating: null, priceRange: null, onSale: false, freeShipping: false, inStockOnly: false, minDiscount: null, tags: [], merchant: null, madeInJordan: false, searchQuery: "" })}
                   className="h-8 px-6 bg-brand hover:bg-brand-dark border border-brand text-white rounded-lg text-[12px] font-medium shadow-sm transition-all active:scale-98"
                 >
                   {t("clearAllFilters")}

@@ -1,56 +1,114 @@
 "use client";
 
 import { useState } from "react";
-import { Star, ChevronDown, ThumbsUp, CheckCircle2, User, MessageSquare } from "lucide-react";
+import {
+  Star,
+  ChevronDown,
+  ThumbsUp,
+  CheckCircle2,
+  User,
+  MessageSquare,
+} from "lucide-react";
 import Image from "next/image";
 import ProductReviewForm from "./ProductReviewForm";
+import { useLocale, useTranslations } from "next-intl";
 
-export default function ProductReviews({ reviews = [], productName = "", productId, vendorId }) {
-  const [filter, setFilter] = useState("Top");
+export default function ProductReviews({
+  reviews = [],
+  productName = "",
+  productId,
+  vendorId,
+}) {
+  const t = useTranslations("ProductReviews");
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
+  const [filter, setFilter] = useState("top");
 
   // Calculate stats
   const totalReviews = reviews.length;
-  const avgRating = totalReviews > 0 
-    ? (reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0) / totalReviews).toFixed(1)
-    : 0;
+  const avgRating =
+    totalReviews > 0
+      ? (
+        reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0) /
+        totalReviews
+      ).toFixed(1)
+      : 0;
 
-  const distribution = [5, 4, 3, 2, 1].map(stars => {
-    const count = reviews.filter(r => (Number(r.rating) || 0) === stars).length;
-    const percentage = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
+  const distribution = [5, 4, 3, 2, 1].map((stars) => {
+    const count = reviews.filter(
+      (r) => (Number(r.rating) || 0) === stars
+    ).length;
+    const percentage =
+      totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
     return { stars, count, percentage };
   });
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return t("unknownDate");
+    return new Date(dateStr).toLocaleDateString(
+      locale === "ar" ? "ar-JO" : "en-GB",
+      { month: "long", day: "numeric", year: "numeric" }
+    );
+  };
+
   return (
-    <div id="reviews" className="mt-16 pt-10 border-t border-zinc-200">
+    <div
+      id="reviews"
+      className="mt-16 pt-10 border-t border-zinc-200"
+      dir={dir}
+    >
       <div className="flex flex-col lg:flex-row gap-12">
-        
-        {/* RIGHT: Summary (RTL) */}
+        {/* Summary */}
         <div className="lg:w-[300px] shrink-0">
-          <h2 className="text-[21px] font-bold text-[#0F1111] mb-2">تقييمات العملاء</h2>
-          
+          <h2 className="text-[21px] font-bold text-[#0F1111] mb-2">
+            {t("customerReviews")}
+          </h2>
+
           <div className="flex items-center gap-2 mb-1">
             <div className="flex">
               {[1, 2, 3, 4, 5].map((i) => (
-                <Star key={i} size={18} className={`${i <= Math.round(Number(avgRating)) ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'}`} />
+                <Star
+                  key={i}
+                  size={18}
+                  className={`${i <= Math.round(Number(avgRating))
+                      ? "text-[#FFA41C] fill-[#FFA41C]"
+                      : "text-zinc-200 fill-zinc-200"
+                    }`}
+                />
               ))}
             </div>
-            <span className="text-[18px] font-bold text-[#0F1111]">{avgRating} من 5</span>
+            <span className="text-[18px] font-bold text-[#0F1111]">
+              {t("outOfFive", { rating: avgRating })}
+            </span>
           </div>
-          
-          <p className="text-[14px] text-[#565959] mb-4">{totalReviews.toLocaleString()} تقييم</p>
-          
+
+          <p className="text-[14px] text-[#565959] mb-4">
+            {t("ratingsCount", {
+              count: totalReviews.toLocaleString(
+                locale === "ar" ? "ar-JO" : "en-US"
+              ),
+            })}
+          </p>
+
           {/* Distribution Bars */}
           <div className="space-y-2 mb-8">
             {distribution.map((item) => (
-              <div key={item.stars} className="flex items-center gap-3 group cursor-pointer">
-                <span className="text-[13px] text-[#be374f] group-hover:underline w-12 shrink-0">{item.stars} نجوم</span>
+              <div
+                key={item.stars}
+                className="flex items-center gap-3 group cursor-pointer"
+              >
+                <span className="text-[13px] text-[#be374f] group-hover:underline w-14 shrink-0">
+                  {t("stars", { count: item.stars })}
+                </span>
                 <div className="flex-1 h-5 bg-[#F0F2F2] rounded-sm overflow-hidden border border-[#D5D9D9]">
-                  <div 
-                    className="h-full bg-[#FFA41C]" 
+                  <div
+                    className="h-full bg-[#FFA41C]"
                     style={{ width: `${item.percentage}%` }}
                   />
                 </div>
-                <span className="text-[13px] text-[#be374f] group-hover:underline w-8 shrink-0">{item.percentage}%</span>
+                <span className="text-[13px] text-[#be374f] group-hover:underline w-8 shrink-0">
+                  {item.percentage}%
+                </span>
               </div>
             ))}
           </div>
@@ -60,59 +118,80 @@ export default function ProductReviews({ reviews = [], productName = "", product
           </div>
         </div>
 
-        {/* LEFT: List (RTL) */}
+        {/* List */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-6">
-             <h3 className="text-[21px] font-bold text-[#0F1111]">أهم التقييمات من الأردن</h3>
-             <div className="relative">
-                <select 
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="h-8 pe-3 ps-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[12px] text-[#0F1111] appearance-none cursor-pointer hover:bg-[#E3E6E6] shadow-sm outline-none"
-                >
-                   <option>الأهم</option>
-                   <option>الأحدث</option>
-                </select>
-                <ChevronDown size={12} className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none" />
-             </div>
+            <h3 className="text-[21px] font-bold text-[#0F1111]">
+              {t("topReviews")}
+            </h3>
+            <div className="relative">
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="h-8 pe-3 ps-8 bg-[#F0F2F2] border border-[#D5D9D9] rounded-md text-[12px] text-[#0F1111] appearance-none cursor-pointer hover:bg-[#E3E6E6] shadow-sm outline-none"
+              >
+                <option value="top">{t("filterTop")}</option>
+                <option value="recent">{t("filterRecent")}</option>
+              </select>
+              <ChevronDown
+                size={12}
+                className="absolute start-2 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none"
+              />
+            </div>
           </div>
 
           {reviews.length === 0 ? (
             <div className="py-10 text-center bg-zinc-50 rounded-lg border border-dashed border-zinc-300">
-               <MessageSquare size={32} className="mx-auto text-zinc-300 mb-3" />
-               <p className="text-[14px] text-zinc-500 font-medium">لا توجد تقييمات لهذا المنتج حتى الآن.</p>
+              <MessageSquare size={32} className="mx-auto text-zinc-300 mb-3" />
+              <p className="text-[14px] text-zinc-500 font-medium">
+                {t("noReviews")}
+              </p>
             </div>
           ) : (
             <div className="space-y-8">
               {reviews.map((review, idx) => (
-                <div key={review.id || idx} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div
+                  key={review.id || idx}
+                  className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+                >
                   {/* Reviewer Header */}
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200">
                       <User size={16} className="text-zinc-400" />
                     </div>
-                    <span className="text-[13px] text-[#0F1111] font-medium">{review.reviewer || "مستخدم غير معروف"}</span>
+                    <span className="text-[13px] text-[#0F1111] font-medium">
+                      {review.reviewer || t("anonymousUser")}
+                    </span>
                   </div>
 
-                  {/* Rating & Title */}
+                  {/* Rating */}
                   <div className="flex items-center gap-2 mb-1">
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((i) => (
-                        <Star key={i} size={14} className={`${i <= (Number(review.rating) || 0) ? 'text-[#FFA41C] fill-[#FFA41C]' : 'text-zinc-200 fill-zinc-200'}`} />
+                        <Star
+                          key={i}
+                          size={14}
+                          className={`${i <= (Number(review.rating) || 0)
+                              ? "text-[#FFA41C] fill-[#FFA41C]"
+                              : "text-zinc-200 fill-zinc-200"
+                            }`}
+                        />
                       ))}
                     </div>
                   </div>
 
                   {/* Meta */}
                   <div className="text-[14px] text-[#565959] mb-1">
-                    تم التقييم في الأردن في {review.date_created ? new Date(review.date_created).toLocaleDateString('ar-JO', { month: 'long', day: 'numeric', year: 'numeric' }) : "تاريخ غير معروف"}
+                    {t("reviewedIn", { date: formatDate(review.date_created) })}
                   </div>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[12px] font-bold text-[#C45500]">شراء مؤكد</span>
+                    <span className="text-[12px] font-bold text-[#C45500]">
+                      {t("verifiedPurchase")}
+                    </span>
                   </div>
 
                   {/* Body */}
-                  <div 
+                  <div
                     className="text-[14px] text-[#0F1111] leading-relaxed mb-4"
                     dangerouslySetInnerHTML={{ __html: review.review || "" }}
                   />
@@ -120,9 +199,11 @@ export default function ProductReviews({ reviews = [], productName = "", product
                   {/* Actions */}
                   <div className="flex items-center gap-4">
                     <button className="h-8 px-6 border border-[#D5D9D9] rounded-lg text-[13px] text-[#0F1111] hover:bg-[#F7FAFA] shadow-sm">
-                      مفيد
+                      {t("helpful")}
                     </button>
-                    <span className="text-[12px] text-[#565959] border-r border-zinc-200 ps-4">إبلاغ</span>
+                    <span className="text-[12px] text-[#565959] border-s border-zinc-200 ps-4">
+                      {t("report")}
+                    </span>
                   </div>
                 </div>
               ))}

@@ -1,24 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  AlertTriangle, 
-  Search, 
-  Store, 
-  Package, 
-  CheckCircle2, 
+import {
+  AlertTriangle,
+  Search,
+  Store,
+  Package,
+  CheckCircle2,
   XCircle,
   Loader2,
   Save
 } from "lucide-react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const getMetaValue = (meta_data, key) => {
   return meta_data?.find(m => m.key === key)?.value || "";
 };
 
-const ControlRow = ({ item, type, updatingId, onUpdate }) => {
+const ControlRow = ({ item, type, updatingId, onUpdate, t }) => {
   const isRestricted = getMetaValue(item.meta_data, 'mahally_is_restricted') === 'yes';
   const currentReason = getMetaValue(item.meta_data, 'mahally_restriction_reason') || "";
   const showInCarousel = getMetaValue(item.meta_data, 'mahally_show_in_carousel') !== 'no';
@@ -38,12 +38,22 @@ const ControlRow = ({ item, type, updatingId, onUpdate }) => {
   }, [isRestricted, currentReason, showInCarousel, showInDirectory]);
 
   const isDirty = localRestricted !== isRestricted || localReason !== currentReason ||
-                  (type === 'vendor' && (localCarousel !== showInCarousel || localDirectory !== showInDirectory));
-  
-  const name = type === 'vendor' 
-    ? (getMetaValue(item.meta_data, 'dokan_store_name') || item.username) 
+    (type === 'vendor' && (localCarousel !== showInCarousel || localDirectory !== showInDirectory));
+
+  const name = type === 'vendor'
+    ? (getMetaValue(item.meta_data, 'dokan_store_name') || getMetaValue(item.meta_data, 'mahally_store_name') || item.username)
     : item.name;
-  const image = type === 'vendor' ? item.avatar_url : item.images?.[0]?.src;
+  const WP_BASE = process.env.NEXT_PUBLIC_WORDPRESS_URL || '';
+  const resolveImage = (src) => {
+    if (!src) return null;
+    if (src.startsWith('http')) return src;
+    // Relative path from WordPress — prepend the WP base URL
+    return `${WP_BASE}${src}`;
+  };
+  const image = type === 'vendor'
+    ? resolveImage(getMetaValue(item.meta_data, 'mahally_store_logo') || getMetaValue(item.meta_data, 'mahally_avatar_url') || item.avatar_url)
+    : item.images?.[0]?.src;
+
 
   return (
     <div className={`bg-white border rounded-lg p-5 mb-4 shadow-sm transition-colors ${localRestricted ? 'border-amber-300 bg-amber-50/10' : 'border-zinc-200'}`}>
@@ -52,7 +62,7 @@ const ControlRow = ({ item, type, updatingId, onUpdate }) => {
         <div className="flex items-center gap-4 w-full md:w-1/3">
           <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center shrink-0 border border-zinc-200">
             {image ? (
-              <Image src={image} alt={name || (type === 'vendor' ? 'Vendor' : 'Product')} width={48} height={48} className="object-cover w-full h-full" />
+              <Image src={image} alt={name || (type === 'vendor' ? t("vendor") : t("product"))} width={48} height={48} className="object-cover w-full h-full" />
             ) : type === 'vendor' ? <Store className="text-zinc-400" /> : <Package className="text-zinc-400" />}
           </div>
           <div>
@@ -65,29 +75,29 @@ const ControlRow = ({ item, type, updatingId, onUpdate }) => {
         <div className="flex-1 flex flex-col gap-3">
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 className="w-4 h-4 rounded border-zinc-300 text-brand focus:ring-brand"
                 checked={localRestricted}
                 onChange={(e) => setLocalRestricted(e.target.checked)}
               />
-              <span className="text-sm font-medium text-zinc-700">Restrict from Public View</span>
+              <span className="text-sm font-medium text-zinc-700">{t("restrictFromPublic")}</span>
             </label>
             {localRestricted && (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                <AlertTriangle size={10} /> Hidden on Homepage/Browse
+                <AlertTriangle size={10} /> {t("hiddenBadge")}
               </span>
             )}
           </div>
 
           {localRestricted && (
             <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-semibold text-zinc-600">Reason for Restriction (Visible to Vendor)</label>
-              <input 
-                type="text" 
+              <label className="text-[11px] font-semibold text-zinc-600">{t("restrictionReasonLabel")}</label>
+              <input
+                type="text"
                 value={localReason}
                 onChange={(e) => setLocalReason(e.target.value)}
-                placeholder="e.g., Incomplete store profile, violating terms..."
+                placeholder={t("restrictionReasonPlaceholder")}
                 className="w-full text-sm border border-zinc-300 rounded-md px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
               />
             </div>
@@ -96,22 +106,22 @@ const ControlRow = ({ item, type, updatingId, onUpdate }) => {
           {type === 'vendor' && !localRestricted && (
             <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-zinc-100">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   className="w-4 h-4 rounded border-zinc-300 text-brand focus:ring-brand"
                   checked={localCarousel}
                   onChange={(e) => setLocalCarousel(e.target.checked)}
                 />
-                <span className="text-sm font-medium text-zinc-700">Show in "Our Verified Merchants" Carousel</span>
+                <span className="text-sm font-medium text-zinc-700">{t("showInCarousel")}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   className="w-4 h-4 rounded border-zinc-300 text-brand focus:ring-brand"
                   checked={localDirectory}
                   onChange={(e) => setLocalDirectory(e.target.checked)}
                 />
-                <span className="text-sm font-medium text-zinc-700">Show in Store Directory (/vendors)</span>
+                <span className="text-sm font-medium text-zinc-700">{t("showInDirectory")}</span>
               </label>
             </div>
           )}
@@ -119,19 +129,18 @@ const ControlRow = ({ item, type, updatingId, onUpdate }) => {
 
         {/* Action */}
         <div className="shrink-0 pt-2 md:pt-0">
-          <button 
+          <button
             onClick={() => onUpdate(item.id, type, localRestricted, localReason, localCarousel, localDirectory)}
             disabled={!isDirty || updatingId === item.id}
-            className={`w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              updatingId === item.id 
-                ? 'bg-zinc-100 text-zinc-400' 
-                : isDirty 
-                  ? 'bg-brand text-white hover:bg-brand-dark shadow-md' 
-                  : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-            }`}
+            className={`w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${updatingId === item.id
+              ? 'bg-zinc-100 text-zinc-400'
+              : isDirty
+                ? 'bg-brand text-white hover:bg-brand-dark shadow-md'
+                : 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+              }`}
           >
             {updatingId === item.id ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-            Save
+            {t("save")}
           </button>
         </div>
       </div>
@@ -139,11 +148,14 @@ const ControlRow = ({ item, type, updatingId, onUpdate }) => {
   );
 };
 
-export default function VisibilityControlPage() {
+export default function VisibilityControlTab() {
   const t = useTranslations("AdminVisibility");
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
+
   const [activeTab, setActiveTab] = useState('vendors');
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const [vendors, setVendors] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -159,7 +171,7 @@ export default function VisibilityControlPage() {
           fetch('/api/vendors?includeRestricted=true&per_page=100'),
           fetch('/api/products?includeRestricted=true&per_page=100')
         ]);
-        
+
         if (vRes.ok) {
           const vData = await vRes.json();
           setVendors(vData);
@@ -216,8 +228,11 @@ export default function VisibilityControlPage() {
   };
 
   const filteredVendors = vendors.filter(v => {
+    const isApproved = getMetaValue(v.meta_data, 'dokan_enable_selling') === 'yes';
+    if (!isApproved) return false;
+
     const q = searchQuery.toLowerCase();
-    const name = getMetaValue(v.meta_data, 'dokan_store_name') || v.username || "";
+    const name = getMetaValue(v.meta_data, 'dokan_store_name') || getMetaValue(v.meta_data, 'mahally_store_name') || v.username || "";
     return name.toLowerCase().includes(q) || v.id.toString().includes(q);
   });
 
@@ -227,11 +242,8 @@ export default function VisibilityControlPage() {
   });
 
   return (
-    <div className="max-w-5xl mx-auto pb-12">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">{t("pageTitle")}</h1>
-        <p className="text-sm text-zinc-600">{t("pageSubtitle")}</p>
-      </div>
+    <div className="mx-auto pb-12" dir={dir}>
+
 
       {/* Tabs & Search */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
@@ -277,7 +289,16 @@ export default function VisibilityControlPage() {
                   <p className="text-zinc-500">{t("noItemsFound")}</p>
                 </div>
               ) : (
-                filteredVendors.map(vendor => <ControlRow key={vendor.id} item={vendor} type="vendor" updatingId={updatingId} onUpdate={handleUpdate} />)
+                filteredVendors.map(vendor => (
+                  <ControlRow
+                    key={vendor.id}
+                    item={vendor}
+                    type="vendor"
+                    updatingId={updatingId}
+                    onUpdate={handleUpdate}
+                    t={t}
+                  />
+                ))
               )}
             </>
           )}
@@ -289,7 +310,16 @@ export default function VisibilityControlPage() {
                   <p className="text-zinc-500">{t("noItemsFound")}</p>
                 </div>
               ) : (
-                filteredProducts.map(product => <ControlRow key={product.id} item={product} type="product" updatingId={updatingId} onUpdate={handleUpdate} />)
+                filteredProducts.map(product => (
+                  <ControlRow
+                    key={product.id}
+                    item={product}
+                    type="product"
+                    updatingId={updatingId}
+                    onUpdate={handleUpdate}
+                    t={t}
+                  />
+                ))
               )}
             </>
           )}

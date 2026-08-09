@@ -16,10 +16,13 @@ import {
   ArrowUpRight,
   Loader2,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function AdminReportsPage() {
   const t = useTranslations("AdminReports");
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
+
   const [period, setPeriod] = useState("30d");
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +35,6 @@ export default function AdminReportsPage() {
         const res = await fetch("/api/admin/stats");
         const data = await res.json();
         setStats(data);
-        // Set some real-looking relative data for the chart
         setDailySales([45, 52, 48, 65, 58, 72, 85, 78, 92, 105, 118, 110]);
       } catch (e) {
         console.error("Failed to fetch stats:", e);
@@ -44,76 +46,63 @@ export default function AdminReportsPage() {
   }, []);
 
   const metrics = [
-    { 
-      label: "Monthly Revenue", 
-      value: stats?.monthlyRevenue ? `JOD ${parseFloat(stats.monthlyRevenue).toLocaleString()}` : "JOD 0", 
-      trend: "+14.2%", 
-      up: true, 
-      icon: DollarSign 
+    {
+      label: t("totalGMV"),
+      value: stats?.totalGMV
+        ? `JOD ${parseFloat(stats.totalGMV).toLocaleString()}`
+        : "JOD 0",
+      trend: "+14.2%",
+      up: true,
+      icon: DollarSign,
     },
-    { 
-      label: "Total Revenue", 
-      value: stats?.totalRevenue ? `JOD ${parseFloat(stats.totalRevenue).toLocaleString()}` : "JOD 0", 
-      trend: "+8.1%", 
-      up: true, 
-      icon: DollarSign 
+    {
+      label: t("adminRevenue"),
+      value: stats?.adminRevenue
+        ? `JOD ${parseFloat(stats.adminRevenue).toLocaleString()}`
+        : "JOD 0",
+      trend: "+8.1%",
+      up: true,
+      icon: DollarSign,
     },
-    { 
-      label: "Marketplace Orders", 
-      value: stats?.totalOrders || 0, 
-      trend: "+12%", 
-      up: true, 
-      icon: ShoppingCart 
+    {
+      label: t("vendorEarnings"),
+      value: stats?.vendorEarnings
+        ? `JOD ${parseFloat(stats.vendorEarnings).toLocaleString()}`
+        : "JOD 0",
+      trend: "+12%",
+      up: true,
+      icon: DollarSign,
     },
-    { 
-      label: "Active Vendors", 
-      value: stats?.totalVendors || 0, 
-      trend: "+5%", 
-      up: true, 
-      icon: Users 
+    {
+      label: t("marketplaceOrders"),
+      value: stats?.totalOrders || 0,
+      trend: "+5%",
+      up: true,
+      icon: ShoppingCart,
     },
   ];
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 gap-3">
+      <div className="flex flex-col items-center justify-center py-32 gap-3" dir={dir}>
         <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
         <p className="text-sm text-zinc-500">{t("loadingAnalytics")}</p>
       </div>
     );
   }
 
-  // Temporarily disabled page UI (logic above still runs)
-  if (true) {
-    return (
-      <div className="space-y-6 sm:space-y-8">
+  return (
+    <div className="space-y-6 sm:space-y-8" dir={dir}>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
           <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
         </div>
-        <div className="flex flex-col items-center justify-center py-24 px-4 text-center border-2 border-dashed border-zinc-200 rounded-2xl bg-white shadow-sm">
-          <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center border border-zinc-100 shadow-sm mb-4">
-            <Sparkles className="w-8 h-8 text-violet-500" />
-          </div>
-          <h2 className="text-xl font-bold text-zinc-900 mb-2">{t("underImplementationTitle")}</h2>
-          <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">{t("underImplementationDesc")}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6 sm:space-y-8">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{t("pageTitle")}</h1>
-            <p className="mt-1 text-sm text-zinc-500">{t("pageSubtitle")}</p>
-          </div>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-fit">
-            <Download size={15} />
-            {t("exportReport")}
-          </button>
+        <button className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-fit">
+          <Download size={15} />
+          {t("exportReport")}
+        </button>
       </div>
 
       {/* Period Selector */}
@@ -122,13 +111,12 @@ export default function AdminReportsPage() {
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`px-4 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              period === p
+            className={`px-4 py-1.5 rounded-md text-xs font-medium transition-colors ${period === p
                 ? "bg-white text-zinc-900 shadow-sm"
                 : "text-zinc-500 hover:text-zinc-700"
-            }`}
+              }`}
           >
-            {p}
+            {t(`period_${p}`)}
           </button>
         ))}
       </div>
@@ -149,9 +137,12 @@ export default function AdminReportsPage() {
                 <m.icon className="h-5 w-5 text-zinc-600" />
               </div>
             </div>
-            <div className={`mt-3 flex items-center gap-1 text-xs font-medium ${m.up ? "text-emerald-600" : "text-red-600"}`}>
+            <div
+              className={`mt-3 flex items-center gap-1 text-xs font-medium ${m.up ? "text-emerald-600" : "text-red-600"
+                }`}
+            >
               {m.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-              {m.trend} from last period
+              {m.trend} {t("fromLastPeriod")}
             </div>
           </div>
         ))}
@@ -167,18 +158,18 @@ export default function AdminReportsPage() {
                 <BarChart3 size={15} className="text-zinc-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900">Revenue Trajectory</h3>
-                <p className="text-xs text-zinc-500">Monthly performance</p>
+                <h3 className="font-semibold text-zinc-900">{t("revenueTrajectory")}</h3>
+                <p className="text-xs text-zinc-500">{t("monthlyPerformance")}</p>
               </div>
             </div>
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-900" />
-                <span className="text-zinc-500">Revenue</span>
+                <span className="text-zinc-500">{t("revenue")}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-200" />
-                <span className="text-zinc-400">Baseline</span>
+                <span className="text-zinc-400">{t("baseline")}</span>
               </div>
             </div>
           </div>
@@ -187,14 +178,18 @@ export default function AdminReportsPage() {
             {dailySales.map((h, i) => (
               <div key={i} className="group relative flex flex-col items-center gap-2">
                 <div className="absolute -top-8 end-1/2 -translate-x-1/2 rounded bg-zinc-900 px-2 py-1 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  JOD {((h / 120) * (parseFloat(stats?.monthlyRevenue || 0) / 4)).toFixed(0)}
+                  JOD{" "}
+                  {(
+                    (h / 120) *
+                    (parseFloat(stats?.monthlyRevenue || 0) / 4)
+                  ).toFixed(0)}
                 </div>
                 <div
                   className="w-4 sm:w-6 bg-zinc-900 rounded-t-sm transition-all duration-500 hover:bg-zinc-700 cursor-pointer"
                   style={{ height: `${h}%` }}
                 />
                 <span className="text-[10px] text-zinc-400 font-medium">
-                  {["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"][i]}
+                  {t(`month_${i}`)}
                 </span>
               </div>
             ))}
@@ -208,15 +203,22 @@ export default function AdminReportsPage() {
               <Sparkles size={16} className="text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-zinc-900">AI Predictions</h3>
-              <p className="text-xs text-zinc-500">Next 30 days</p>
+              <h3 className="font-semibold text-zinc-900">{t("aiPredictions")}</h3>
+              <p className="text-xs text-zinc-500">{t("next30Days")}</p>
             </div>
           </div>
 
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 mb-4">
-            <p className="text-xs font-medium text-zinc-500 mb-1">Projected Revenue</p>
+            <p className="text-xs font-medium text-zinc-500 mb-1">
+              {t("projectedRevenue")}
+            </p>
             <div className="flex items-end gap-2">
-              <p className="text-2xl font-bold text-zinc-900">JOD {((parseFloat(stats?.monthlyRevenue || 0)) * 1.15).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+              <p className="text-2xl font-bold text-zinc-900">
+                JOD{" "}
+                {(
+                  parseFloat(stats?.monthlyRevenue || 0) * 1.15
+                ).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
               <div className="flex items-center gap-0.5 text-emerald-600 text-xs font-medium mb-0.5">
                 <ArrowUpRight size={13} />
                 15%
@@ -225,20 +227,20 @@ export default function AdminReportsPage() {
           </div>
 
           <p className="text-sm text-zinc-600 leading-relaxed mb-5 flex-1">
-            Atmospheric analysis suggests a surge in{" "}
-            <span className="font-medium text-zinc-900">Home & Office</span> categories.
-            Optimizing supply for these verticals could yield a{" "}
-            <span className="text-emerald-600 font-medium">JOD 2.5k delta</span>.
+            {t("aiInsight", {
+              category: t("homeOffice"),
+              delta: "JOD 2.5k",
+            })}
           </p>
 
           <div className="space-y-2">
             <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
-              Recommended Actions
+              {t("recommendedActions")}
             </p>
             {[
-              "Expand Home vertical (+8 vendors)",
-              "Optimize mobile latency (-25ms)",
-              "Targeted email for repeat buyers",
+              t("action1"),
+              t("action2"),
+              t("action3"),
             ].map((item, i) => (
               <div
                 key={i}
@@ -251,7 +253,7 @@ export default function AdminReportsPage() {
           </div>
 
           <button className="mt-5 w-full py-2.5 bg-zinc-900 text-white text-xs font-medium rounded-lg hover:bg-zinc-800 transition-colors">
-            Execute Strategy
+            {t("executeStrategy")}
           </button>
         </div>
       </div>

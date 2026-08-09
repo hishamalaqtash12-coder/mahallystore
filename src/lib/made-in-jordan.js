@@ -37,6 +37,14 @@ function containsExplicitSignal(value) {
 export function isMadeInJordanProduct(product) {
   if (!product) return false;
 
+  // 1. Explicit override from Merchant Dashboard
+  if (Array.isArray(product.meta_data)) {
+    const explicitMeta = product.meta_data.find(m => m.key === "mahally_made_in_jordan");
+    if (explicitMeta) {
+      return explicitMeta.value === "yes";
+    }
+  }
+
   const haystack = [
     product.name,
     product.description,

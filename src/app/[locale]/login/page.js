@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, supportEmail } = useAuth();
+  const { user, supportEmail, loading: authLoading } = useAuth();
   const accountRemoved = searchParams.get("reason") === "account_removed";
   const redirectTo = searchParams.get("redirect") || "/";
   const t = useTranslations("LoginPage");
@@ -40,11 +40,18 @@ function LoginContent() {
 
   const otpRefs = useRef([]);
 
-  // Redirect if already logged in
   useEffect(() => {
-    if (user) router.replace(redirectTo);
+    if (user && !authLoading) router.replace(redirectTo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, authLoading, redirectTo]);
+
+  if (authLoading || user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f6f6f6]">
+        <Loader2 className="w-10 h-10 animate-spin text-brand" />
+      </div>
+    );
+  }
 
   // Countdown timer for resend
   useEffect(() => {

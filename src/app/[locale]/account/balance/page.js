@@ -4,7 +4,11 @@ import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, Wallet, History, Plus } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
+import { redirect } from "next/navigation";
+
 export default function AccountBalancePage() {
+  redirect("/account");
+  
   const { loading } = useAuth();
   if (loading) return null;
 

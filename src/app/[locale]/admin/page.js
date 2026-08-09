@@ -98,10 +98,26 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      label: t("totalRevenue"),
-      value: stats?.totalRevenue ? `JOD ${parseFloat(stats.totalRevenue).toLocaleString()}` : "JOD 0",
+      label: t("totalGMV"),
+      value: stats?.totalGMV ? `JOD ${parseFloat(stats.totalGMV).toLocaleString()}` : "JOD 0",
+      icon: TrendingUp,
+      trend: "+10.5%",
+      up: true,
+      href: "/admin/reports",
+    },
+    {
+      label: t("adminRevenue"),
+      value: stats?.adminRevenue ? `JOD ${parseFloat(stats.adminRevenue).toLocaleString()}` : "JOD 0",
       icon: TrendingUp,
       trend: "+14.2%",
+      up: true,
+      href: "/admin/reports",
+    },
+    {
+      label: t("vendorEarnings"),
+      value: stats?.vendorEarnings ? `JOD ${parseFloat(stats.vendorEarnings).toLocaleString()}` : "JOD 0",
+      icon: TrendingUp,
+      trend: "+8.4%",
       up: true,
       href: "/admin/reports",
     },
@@ -160,7 +176,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((s, idx) => (
           <Link
             key={idx}
