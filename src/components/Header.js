@@ -469,6 +469,19 @@ export default function Header() {
                 <UserCircle size={22} className={isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : 'text-zinc-900')} />
               </div>
 
+              {messagingEnabled && user && (
+                <Link href="/messages" className="flex items-center justify-center p-1 relative shrink-0 text-zinc-900">
+                  <div className="relative flex items-center justify-center w-[26px] h-[30px]">
+                    {unreadMessages > 0 && (
+                      <span className="absolute top-0 -end-1 bg-brand text-white text-[10px] font-bold px-1 py-0.5 rounded-full ring-1 ring-white min-w-[16px] text-center leading-none z-10">
+                        {unreadMessages}
+                      </span>
+                    )}
+                    <MessageSquare size={20} className="mt-1" />
+                  </div>
+                </Link>
+              )}
+
               <button onClick={() => setIsCartOpen(true)} className="flex items-center justify-center p-1 relative shrink-0 text-zinc-900">
                 <div className="relative flex items-center justify-center w-[32px] h-[30px]">
                   <span className="absolute top-0 end-1/2 -translate-x-1/2 text-brand text-[14px] font-bold z-10 leading-none">{cartItemsCount}</span>

@@ -190,7 +190,7 @@ export default function ProductCard({ product }) {
         {!outOfStock && (
           <button
             onClick={(e) => { e.preventDefault(); setIsQuickLookOpen(true); }}
-            className="absolute inset-0 bg-black/10 opacity-0 group-hover/img:opacity-100 transition-all duration-300 flex items-center justify-center pointer-events-none"
+            className="absolute inset-0 bg-transparent md:bg-black/10 opacity-100 md:opacity-0 group-hover/img:opacity-100 transition-all duration-300 flex items-center justify-center pointer-events-none"
           >
             <div className="bg-white px-3 py-1.5 rounded-md shadow-md pointer-events-auto hover:scale-105 active:scale-95 transition-all border-[1.5px] border-zinc-900">
               <span className="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><Eye size={14} className="text-brand" /> {t("quickLook")}</span>

@@ -1337,7 +1337,7 @@ function MessagesContent() {
                       <Smile size={16} />
                     </button>
                     {showEmoji && (
-                      <div className="absolute bottom-full end-0 bg-white border border-zinc-200 shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[240px] rounded-md z-50">
+                      <div className="absolute bottom-full start-0 bg-white border border-zinc-200 shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[240px] rounded-md z-50 mb-2">
                         {ALL_EMOJIS.map(e => (
                           <button key={e} onClick={() => { setNewMessage(p => p + e); setShowEmoji(false); }} className="text-[20px] hover:scale-125 transition-all p-0.5">{e}</button>
                         ))}

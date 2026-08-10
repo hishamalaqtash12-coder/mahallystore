@@ -190,7 +190,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
       />
 
       {/* Modal Content */}
-      <div className="relative bg-white w-full max-w-[900px] shadow-2xl flex flex-col md:flex-row animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-200 rounded-t-3xl md:rounded-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto md:overflow-hidden z-[100000] border-t md:border border-zinc-200">
+      <div className="relative bg-white w-full max-w-[900px] shadow-2xl flex flex-col md:flex-row animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-200 rounded-t-3xl md:rounded-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto no-scrollbar md:overflow-hidden z-[100000] border-t md:border border-zinc-200">
         
         {/* Mobile Pull Handle & Close Header */}
         <div className="w-full flex items-center justify-between px-4 py-2.5 md:hidden bg-white sticky top-0 z-50 border-b border-zinc-100 shrink-0">
