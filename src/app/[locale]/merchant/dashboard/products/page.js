@@ -590,7 +590,17 @@ export default function MerchantProductsPage() {
                             <span className="text-zinc-200">•</span>
                             <button onClick={() => handleDelete(product.id)} className="text-rose-600 hover:underline">{t.table.actions.trash}</button>
                             <span className="text-zinc-200">•</span>
-                            <Link href={getProductUrl(product)} target="_blank" className="text-gray-400 hover:text-[#be374f]" title={t.viewProduct}>{t.table.actions.preview}</Link>
+                            <Link 
+                              href={getProductUrl(product, { 
+                                storeName: product.store?.shop_name || product.store?.name || customerName || user?.display_name || user?.displayName, 
+                                storeId: wooId 
+                              })} 
+                              target="_blank" 
+                              className="text-gray-400 hover:text-[#be374f]" 
+                              title={t.viewProduct}
+                            >
+                              {t.table.actions.preview}
+                            </Link>
                           </>
                         )}
                       </div>

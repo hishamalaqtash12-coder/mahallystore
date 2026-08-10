@@ -8,15 +8,22 @@ export async function GET() {
     const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
     const headers = { Authorization: `Basic ${auth}` };
 
-    const [productsRes, ordersRes, vendorsRes] = await Promise.all([
+    const [productsRes, ordersRes] = await Promise.all([
       fetch(`${WP_URL}/wp-json/wc/v3/products?per_page=1`, { headers }),
-      fetch(`${WP_URL}/wp-json/wc/v3/orders?per_page=100`, { headers }),
-      fetch(`${WP_URL}/wp-json/wc/v3/customers?role=seller&per_page=1`, { headers })
+      fetch(`${WP_URL}/wp-json/wc/v3/orders?per_page=100`, { headers })
     ]);
 
     const totalProducts = parseInt(productsRes.headers.get('x-wp-total') || '0');
     const totalOrders = parseInt(ordersRes.headers.get('x-wp-total') || '0');
-    const totalVendors = parseInt(vendorsRes.headers.get('x-wp-total') || '0');
+    
+    // To get accurate active vendors, use the same logic as the Vendors page
+    const { getAllVendorApplications } = require("@/lib/woocommerce");
+    const vendorApps = await getAllVendorApplications();
+    const approvedVendors = vendorApps.filter(v => {
+      const dokanEnable = v.meta_data?.find(m => m.key === "dokan_enable_selling")?.value;
+      return dokanEnable === "yes";
+    });
+    const totalVendors = approvedVendors.length;
 
     const allOrders = await ordersRes.json();
     

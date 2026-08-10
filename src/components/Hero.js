@@ -318,18 +318,14 @@ const CategoryCarousel = memo(({ categories }) => {
 
       {/* ─── Header Section ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-2 rounded-lg bg-brand/10 text-brand border border-brand/20">
-              <FolderTree size={20} />
-            </span>
-            <span className="text-sm font-black uppercase tracking-wider text-brand">
-              {isAr ? "تشكيلاتنا المميزة" : "Featured Collections"}
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-black text-zinc-900 tracking-tight">
             {t("exploreCategories")}
           </h2>
+          <div className="h-1.5 w-20 bg-brand rounded-full"></div>
+          <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-medium">
+            {t("exploreCategoriesSubtitle")}
+          </p>
         </div>
 
         <Link

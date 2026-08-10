@@ -50,10 +50,25 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus }) {
   const isMissingInventory = Boolean(order.hasMissingInventoryItems || (order.missingProductIds?.length > 0));
   const isViewOnly = isReadOnly || isMissingInventory;
 
+  const fetchNotes = async () => {
+    setLoadingNotes(true);
+    try {
+      const res = await fetch(`/api/merchant/orders/notes?id=${order.id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Failed to load notes");
+      setNotes(normalizeNotes(data));
+    } catch (err) {
+      console.error("Error fetching notes:", err);
+      setNotes([]);
+    } finally {
+      setLoadingNotes(false);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
-    const fetchNotes = async () => {
+    const loadNotes = async () => {
       setLoadingNotes(true);
       try {
         const res = await fetch(`/api/merchant/orders/notes?id=${order.id}`);
@@ -80,7 +95,7 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus }) {
       }
     };
 
-    fetchNotes();
+    loadNotes();
     if (order.customer_id && order.customer_id !== 0) {
       fetchCustomerStats();
     }

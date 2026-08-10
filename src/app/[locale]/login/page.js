@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import { Phone, ShieldCheck, ArrowRight, RotateCcw, Loader2, CheckCircle2, Info, Clock, Mail, Store, ChevronDown, Eye, EyeOff, KeyRound } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import Loader from "@/components/Loader";
 import { Suspense } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 function LoginContent() {
   const router = useRouter();
@@ -18,11 +18,18 @@ function LoginContent() {
   const accountRemoved = searchParams.get("reason") === "account_removed";
   const redirectTo = searchParams.get("redirect") || "/";
   const t = useTranslations("LoginPage");
+  const locale = useLocale();
+  const isAr = locale === "ar";
+  const pathname = usePathname();
 
-  // mode: "login" | "reset"  — determines what happens after OTP succeeds
+  const handleLanguageSwitch = () => {
+    const nextLocale = locale === 'ar' ? 'en' : 'ar';
+    router.replace(pathname, { locale: nextLocale });
+  };
+
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const [mode, setMode] = useState("login");
-
-  const [step, setStep] = useState("phone"); // "phone" | "email" | "otp" | "set_password" | "success" | "pending"
+  const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("+962");
   const [email, setEmail] = useState("");
   const [pendingVendorName, setPendingVendorName] = useState("");
@@ -40,18 +47,10 @@ function LoginContent() {
 
   const otpRefs = useRef([]);
 
+  // All useEffect hooks must be called unconditionally
   useEffect(() => {
     if (user && !authLoading) router.replace(redirectTo);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading, redirectTo]);
-
-  if (authLoading || user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f6f6f6]">
-        <Loader2 className="w-10 h-10 animate-spin text-brand" />
-      </div>
-    );
-  }
+  }, [user, authLoading, redirectTo, router]);
 
   // Countdown timer for resend
   useEffect(() => {
@@ -70,12 +69,21 @@ function LoginContent() {
     }
   }, [step]);
 
+  // ── EARLY RETURN AFTER ALL HOOKS ──
+  if (authLoading || user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f6f6f6]">
+        <Loader2 className="w-10 h-10 animate-spin text-brand" />
+      </div>
+    );
+  }
+
   // ── SEND OTP (login mode) ──
   const handleSendOTP = async (e) => {
     e.preventDefault();
     setError("");
     if (phone.replace(/\D/g, "").length < 10) {
-      setError("Please enter a valid phone number.");
+      setError(t("validPhoneError"));
       return;
     }
     setLoading(true);
@@ -87,14 +95,14 @@ function LoginContent() {
       });
 
       if (!checkRes.ok) {
-        if (checkRes.status === 503) throw new Error("Our store servers are currently undergoing maintenance. Please try again in a few minutes.");
-        throw new Error(`Authentication service unavailable (${checkRes.status})`);
+        if (checkRes.status === 503) throw new Error(t("maintenanceError"));
+        throw new Error(t("authUnavailableError", { status: checkRes.status }));
       }
 
       const checkData = await checkRes.json();
 
       if (!checkData.exists) {
-        setError("This phone number is not registered. Please create an account first.");
+        setError(t("notRegisteredError"));
         setLoading(false);
         return;
       }
@@ -118,11 +126,11 @@ function LoginContent() {
         setStep("otp");
         setCountdown(60);
       } else {
-        throw new Error(data.error || "Failed to send code.");
+        throw new Error(data.error || t("sendCodeError"));
       }
     } catch (err) {
       console.error(err);
-      setError(err.message || "Failed to send OTP. Please try again.");
+      setError(err.message || t("sendCodeError"));
     } finally {
       setLoading(false);
     }
@@ -133,12 +141,11 @@ function LoginContent() {
     e.preventDefault();
     setError("");
     if (phone.replace(/\D/g, "").length < 10) {
-      setError("Please enter a valid phone number.");
+      setError(t("validPhoneError"));
       return;
     }
     setLoading(true);
     try {
-      // Verify the phone is registered
       const checkRes = await fetch("/api/auth/check-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,12 +154,11 @@ function LoginContent() {
       const checkData = await checkRes.json();
 
       if (!checkData.exists) {
-        setError("This phone number is not registered.");
+        setError(t("notRegisteredError"));
         setLoading(false);
         return;
       }
 
-      // Send OTP
       const res = await fetch("/api/auth/phone-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,10 +170,10 @@ function LoginContent() {
         setStep("otp");
         setCountdown(60);
       } else {
-        throw new Error(data.error || "Failed to send code.");
+        throw new Error(data.error || t("sendCodeError"));
       }
     } catch (err) {
-      setError(err.message || "Failed to send verification code.");
+      setError(err.message || t("sendCodeError"));
     } finally {
       setLoading(false);
     }
@@ -192,7 +198,7 @@ function LoginContent() {
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     const code = otp.join("");
-    if (code.length < 6) { setError("Please enter the full 6-digit code."); return; }
+    if (code.length < 6) { setError(t("fullCodeError")); return; }
     setError("");
     setLoading(true);
     try {
@@ -205,19 +211,17 @@ function LoginContent() {
 
       if (res.ok) {
         if (mode === "reset") {
-          // ✅ PASSWORD RESET: go to set new password screen
           setNewPassword("");
           setConfirmPassword("");
           setStep("set_password");
         } else {
-          // ✅ LOGIN: authenticate and redirect
           await completeLogin();
         }
       } else {
-        setError(data.error || "Invalid verification code.");
+        setError(data.error || t("invalidCodeError"));
       }
     } catch (err) {
-      setError(err.message || "Invalid code. Please check and try again.");
+      setError(err.message || t("invalidCodeError"));
     } finally {
       setLoading(false);
     }
@@ -231,7 +235,7 @@ function LoginContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: phone, password: "otp_login" })
       });
-    } catch {}
+    } catch { }
 
     try {
       const checkRes = await fetch("/api/auth/check-user", {
@@ -279,7 +283,7 @@ function LoginContent() {
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("passwordMismatch"));
       return;
     }
 
@@ -293,13 +297,12 @@ function LoginContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to reset password.");
+        throw new Error(data.error || t("resetPasswordError"));
       }
 
-      // Password updated — now log the user in
       await completeLogin();
     } catch (err) {
-      setError(err.message || "Failed to update password. Please try again.");
+      setError(err.message || t("resetPasswordError"));
     } finally {
       setLoading(false);
     }
@@ -319,7 +322,7 @@ function LoginContent() {
 
       if (!wpRes.ok) {
         const wpData = await wpRes.json();
-        throw new Error(wpData.error || "Invalid credentials");
+        throw new Error(wpData.error || t("invalidCredentials"));
       }
 
       const wpData = await wpRes.json();
@@ -364,7 +367,7 @@ function LoginContent() {
       }, 1500);
     } catch (err) {
       console.warn("Login validation failed:", err.message);
-      setError(err.message || "Invalid email or password.");
+      setError(err.message || t("invalidCredentials"));
     } finally {
       setLoading(false);
     }
@@ -373,7 +376,7 @@ function LoginContent() {
   const handleResend = async () => {
     setOtp(["", "", "", "", "", ""]);
     setError("");
-    const fakeEvent = { preventDefault: () => {} };
+    const fakeEvent = { preventDefault: () => { } };
     if (mode === "reset") {
       await handleSendResetOTP(fakeEvent);
     } else {
@@ -381,7 +384,6 @@ function LoginContent() {
     }
   };
 
-  // ── Switch to Forgot Password mode ──
   const enterForgotPassword = () => {
     setMode("reset");
     setStep("phone");
@@ -398,7 +400,16 @@ function LoginContent() {
     setError("");
   };
 
+  const toggleLoginMethod = () => {
+    setStep(step === "phone" ? "email" : "phone");
+    setError("");
+    setPassword("");
+    setEmail("");
+    setPhone("+962");
+  };
+
   return (
+    // Remove the inline font class - let the global layout handle fonts
     <div className="min-h-screen bg-white flex flex-col items-center pt-8">
 
       <div className="w-full max-w-[350px]">
@@ -436,7 +447,9 @@ function LoginContent() {
           {/* ── STEP 1A: Phone Input (Login) ── */}
           {(step === "phone" || step === "email") && mode === "login" && (
             <form onSubmit={step === "phone" ? handleSendOTP : handleEmailLogin} className="space-y-4">
-              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">{step === "phone" ? t("loginPhone") : t("login")}</h1>
+              <h1 className="text-[28px] font-medium text-zinc-900 mb-4">
+                {step === "phone" ? t("loginPhone") : t("login")}
+              </h1>
 
               <div className="space-y-1">
                 <label className="text-[13px] font-bold text-zinc-900 block pe-0.5">
@@ -516,8 +529,15 @@ function LoginContent() {
                   {t("agreeTerms")} <Link href="/conditions" className="text-[#0066c0] hover:text-[#8f2d4a] hover:underline">{t("termsLink")}</Link>
                 </p>
 
-                <div className="border-t border-zinc-100 pt-3">
-                  {/* Forgot password link */}
+                {/* <div className="border-t border-zinc-100 pt-3 space-y-2">
+                  <button
+                    type="button"
+                    onClick={toggleLoginMethod}
+                    className="cursor-pointer text-[13px] text-[#0066c0] hover:text-[#8f2d4a] hover:underline flex items-center gap-1"
+                  >
+                    {step === "phone" ? t("loginWithEmail") : t("loginWithPhone")}
+                  </button>
+
                   <button
                     type="button"
                     onClick={enterForgotPassword}
@@ -525,7 +545,7 @@ function LoginContent() {
                   >
                     <KeyRound size={13} /> {t("forgotPassword")}
                   </button>
-                </div>
+                </div> */}
               </div>
             </form>
           )}
@@ -535,7 +555,7 @@ function LoginContent() {
             <form onSubmit={handleSendResetOTP} className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
                 <button type="button" onClick={backToLogin} className="text-zinc-400 hover:text-zinc-700">
-                  <ArrowRight size={18} className="rtl:rotate-180" />
+                  <ArrowRight size={18} className={`${isAr ? 'rotate-180' : ''}`} />
                 </button>
                 <h1 className="text-[24px] font-medium text-zinc-900">{t("resetPasswordTitle")}</h1>
               </div>
@@ -648,7 +668,6 @@ function LoginContent() {
                 {t("newPasswordDesc")}
               </p>
 
-              {/* New Password */}
               <div className="space-y-1">
                 <label className="text-[13px] font-bold text-zinc-900 block">{t("newPasswordLabel")}</label>
                 <div className="relative" dir="ltr">
@@ -667,7 +686,6 @@ function LoginContent() {
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div className="space-y-1">
                 <label className="text-[13px] font-bold text-zinc-900 block">{t("confirmPasswordLabel")}</label>
                 <div className="relative" dir="ltr">
@@ -685,21 +703,19 @@ function LoginContent() {
                 </div>
               </div>
 
-              {/* Password strength indicator */}
               {newPassword.length > 0 && (
                 <div className="space-y-1">
                   <div className="flex gap-1">
                     {[1, 2, 3, 4].map(level => (
                       <div
                         key={level}
-                        className={`h-1 flex-1 rounded-full transition-colors ${
-                          newPassword.length >= level * 2
-                            ? level <= 1 ? "bg-red-400"
+                        className={`h-1 flex-1 rounded-full transition-colors ${newPassword.length >= level * 2
+                          ? level <= 1 ? "bg-red-400"
                             : level <= 2 ? "bg-amber-400"
-                            : level <= 3 ? "bg-yellow-400"
-                            : "bg-emerald-400"
-                            : "bg-zinc-200"
-                        }`}
+                              : level <= 3 ? "bg-yellow-400"
+                                : "bg-emerald-400"
+                          : "bg-zinc-200"
+                          }`}
                       />
                     ))}
                   </div>
@@ -809,7 +825,9 @@ function LoginContent() {
         <div className="mt-12 pt-4 border-t border-zinc-100 text-center space-y-2">
           <div className="flex justify-center gap-6 text-[11px] text-[#0066c0]">
             <Link href="/conditions" className="hover:text-[#8f2d4a] hover:underline">{t("termsLink")}</Link>
-            <Link href="/help" className="hover:text-[#8f2d4a] hover:underline">{t("help")}</Link>
+            <button type="button" onClick={handleLanguageSwitch} className="hover:text-[#8f2d4a] hover:underline font-bold">
+              {locale === 'ar' ? 'English' : 'العربية'}
+            </button>
           </div>
           <p className="text-[11px] text-zinc-500" suppressHydrationWarning>&copy; {new Date().getFullYear()} Mahally.jo</p>
         </div>

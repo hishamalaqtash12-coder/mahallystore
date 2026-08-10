@@ -26,40 +26,47 @@ export async function POST(request) {
       console.log(`Generated OTP Code: ${generatedCode}`);
       console.log(`-------------------------\n`);
 
+      const isDev = process.env.NODE_ENV !== "production";
+
       try {
-        // 3. Normalize phone number for NGT SMS Gateway (Jordan format 9627XXXXXXXX)
-        let formattedPhone = phone.trim().replace(/[\s\-\+\(\)]/g, "");
-        if (formattedPhone.startsWith("07")) {
-          formattedPhone = "962" + formattedPhone.substring(1);
-        } else if (formattedPhone.startsWith("7")) {
-          formattedPhone = "962" + formattedPhone;
-        }
-
-        console.log(`Sending SMS via NGT to: ${formattedPhone}`);
-        
-        const payload = new URLSearchParams();
-        payload.append('login_name', process.env.NGT_LOGIN_NAME);
-        payload.append('login_password', process.env.NGT_PASSWORD);
-        payload.append('from', process.env.NGT_SENDER_ID || "Mahally");
-        payload.append('mobile_number', formattedPhone);
-        payload.append('msg', `Your Mahally verification code is: ${generatedCode}`);
-        payload.append('charset', 'UTF-8');
-        payload.append('response', 'JSON');
-
-        // 4. Call NGT API
-        const ngtResponse = await fetch('https://sendsms.ngt.jo/http/send_sms_http.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: payload.toString()
-        });
-
-        if (ngtResponse.ok) {
-          const resultText = await ngtResponse.text();
-          console.log("NGT API Response:", resultText);
+        if (isDev) {
+          console.log(`[DEV/TESTING OTP] Skipping NGT SMS Gateway in dev mode.`);
+          console.log(`[DEV/TESTING OTP] You can use the static bypass code: 123456`);
         } else {
-          console.warn("NGT SMS Gateway returned non-ok status code:", ngtResponse.status);
+          // 3. Normalize phone number for NGT SMS Gateway (Jordan format 9627XXXXXXXX)
+          let formattedPhone = phone.trim().replace(/[\s\-\+\(\)]/g, "");
+          if (formattedPhone.startsWith("07")) {
+            formattedPhone = "962" + formattedPhone.substring(1);
+          } else if (formattedPhone.startsWith("7")) {
+            formattedPhone = "962" + formattedPhone;
+          }
+
+          console.log(`Sending SMS via NGT to: ${formattedPhone}`);
+          
+          const payload = new URLSearchParams();
+          payload.append('login_name', process.env.NGT_LOGIN_NAME);
+          payload.append('login_password', process.env.NGT_PASSWORD);
+          payload.append('from', process.env.NGT_SENDER_ID || "Mahally");
+          payload.append('mobile_number', formattedPhone);
+          payload.append('msg', `Your Mahally verification code is: ${generatedCode}`);
+          payload.append('charset', 'UTF-8');
+          payload.append('response', 'JSON');
+
+          // 4. Call NGT API
+          const ngtResponse = await fetch('https://sendsms.ngt.jo/http/send_sms_http.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: payload.toString()
+          });
+
+          if (ngtResponse.ok) {
+            const resultText = await ngtResponse.text();
+            console.log("NGT API Response:", resultText);
+          } else {
+            console.warn("NGT SMS Gateway returned non-ok status code:", ngtResponse.status);
+          }
         }
       } catch (smsErr) {
         console.warn("Could not dispatch NGT SMS:", smsErr.message);

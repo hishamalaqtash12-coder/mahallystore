@@ -3,13 +3,13 @@
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { usePathname } from "@/i18n/routing";
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  BarChart3, 
-  Settings, 
-  User, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  BarChart3,
+  Settings,
+  User,
   MessageSquare,
   Undo2,
   Bell,
@@ -26,30 +26,38 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "next-intl";
 
 const menuItems = [
-  { group: "MAIN", arGroup: "الرئيسية", items: [
-    { name: "Dashboard", arName: "لوحة التحكم", href: "/merchant/dashboard", icon: LayoutDashboard },
-    { name: "Products", arName: "المنتجات", href: "/merchant/dashboard/products", icon: Package },
-    { name: "Inventory", arName: "المخزون", href: "/merchant/dashboard/inventory", icon: BarChart3 },
-    { name: "Orders", arName: "الطلبات", href: "/merchant/dashboard/orders", icon: ShoppingCart },
-    { name: "Coupons", arName: "الكوبونات", href: "/merchant/dashboard/coupons", icon: Database },
-    { name: "Promotions", arName: "العروض الترويجية", href: "/merchant/dashboard/advertising", icon: Megaphone },
-  ]},
-  { group: "FINANCE", arGroup: "المالية", items: [
-    { name: "Reports", arName: "التقارير", href: "/merchant/dashboard/reports", icon: BarChart3 },
-    { name: "Withdraw", arName: "السحب والتحصيل", href: "/merchant/dashboard/withdraw", icon: RefreshCw },
-    { name: "Refunds", arName: "الاسترجاع", href: "/merchant/dashboard/refunds", icon: Undo2 },
-  ]},
-  { group: "FEEDBACK", arGroup: "الآراء والملاحظات", items: [
-    { name: "Inbox", arName: "الرسائل", href: "/messages", icon: MessageSquare },
-    { name: "Reviews", arName: "التقييمات", href: "/merchant/dashboard/reviews", icon: Clock },
-    { name: "Website Evaluation", arName: "تقييم الموقع", href: "/admin/feedback", icon: BarChart3 },
-    { name: "Announcements", arName: "الإعلانات والتعاميم", href: "/merchant/dashboard/announcements", icon: Bell },
-  ]},
-  { group: "STORE", arGroup: "المتجر", items: [
-    { name: "Settings", arName: "الإعدادات", href: "/merchant/dashboard/settings", icon: Settings },
-    { name: "Shipping", arName: "الشحن والتوصيل", href: "/merchant/dashboard/shipping", icon: Truck },
-    { name: "Help Center", arName: "مركز المساعدة", href: "/help", icon: HelpCircle },
-  ]}
+  {
+    group: "MAIN", arGroup: "الرئيسية", items: [
+      { name: "Dashboard", arName: "لوحة التحكم", href: "/merchant/dashboard", icon: LayoutDashboard },
+      { name: "Products", arName: "المنتجات", href: "/merchant/dashboard/products", icon: Package },
+      { name: "Inventory", arName: "المخزون", href: "/merchant/dashboard/inventory", icon: BarChart3 },
+      { name: "Orders", arName: "الطلبات", href: "/merchant/dashboard/orders", icon: ShoppingCart },
+      { name: "Coupons", arName: "الكوبونات", href: "/merchant/dashboard/coupons", icon: Database },
+      { name: "Promotions", arName: "العروض الترويجية", href: "/merchant/dashboard/advertising", icon: Megaphone },
+    ]
+  },
+  {
+    group: "FINANCE", arGroup: "المالية", items: [
+      { name: "Reports", arName: "التقارير", href: "/merchant/dashboard/reports", icon: BarChart3 },
+      { name: "Withdraw", arName: "السحب والتحصيل", href: "/merchant/dashboard/withdraw", icon: RefreshCw },
+      { name: "Refunds", arName: "الاسترجاع", href: "/merchant/dashboard/refunds", icon: Undo2 },
+    ]
+  },
+  {
+    group: "FEEDBACK", arGroup: "الآراء والملاحظات", items: [
+      { name: "Inbox", arName: "الرسائل", href: "/messages", icon: MessageSquare },
+      { name: "Reviews", arName: "التقييمات", href: "/merchant/dashboard/reviews", icon: Clock },
+      { name: "Website Evaluation", arName: "تقييم الموقع", href: "/admin/feedback", icon: BarChart3 },
+      { name: "Announcements", arName: "الإعلانات والتعاميم", href: "/merchant/dashboard/announcements", icon: Bell },
+    ]
+  },
+  {
+    group: "STORE", arGroup: "المتجر", items: [
+      { name: "Settings", arName: "الإعدادات", href: "/merchant/dashboard/settings", icon: Settings },
+      { name: "Shipping", arName: "الشحن والتوصيل", href: "/merchant/dashboard/shipping", icon: Truck },
+      { name: "Help Center", arName: "مركز المساعدة", href: "/help", icon: HelpCircle },
+    ]
+  }
 ];
 
 export default function DashboardSidebar() {
@@ -62,16 +70,16 @@ export default function DashboardSidebar() {
     <aside className={`fixed top-0 z-40 h-screen w-64 bg-white text-zinc-900 flex flex-col border-zinc-200 shadow-sm ${isAr ? 'right-0 border-l' : 'left-0 border-r'}`}>
       {/* Logo Area */}
       <div className="p-6 border-b border-zinc-200 h-[60px] flex items-center">
-              <Link href="/">
-                <Image 
-                  src="/mahally-logo.webp" 
-                  alt="Mahally.jo Logo" 
-                  width={140} 
-                  height={45} 
-                  className="object-contain h-auto max-w-[120px]"
-                  priority
-                />
-              </Link>
+        <Link href="/">
+          <Image
+            src="/mahally-logo.webp"
+            alt="Mahally.jo Logo"
+            width={140}
+            height={45}
+            className="object-contain h-auto max-w-[120px]"
+            priority
+          />
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -87,10 +95,10 @@ export default function DashboardSidebar() {
                 if (item.href === "/admin/feedback" && !isAdmin) return null;
                 if (item.href === "/messages" && !messagingEnabled) return null;
                 if (item.href === "/merchant/dashboard/reviews" && !messagingEnabled) return null;
-                
+
                 return (
-                  <Link 
-                    key={item.name} 
+                  <Link
+                    key={item.name}
                     href={item.href}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${isActive ? 'bg-zinc-100 text-[#be374f] font-semibold' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'}`}
                   >
@@ -106,7 +114,7 @@ export default function DashboardSidebar() {
 
       {/* User Area */}
       <div className="p-4 border-t border-zinc-100">
-        <div className="flex items-center gap-3 px-2 mb-2">
+        {/* <div className="flex items-center gap-3 px-2 mb-2">
           <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-[11px] font-bold uppercase">
             {customerName ? customerName[0].toUpperCase() : (user?.displayName ? user.displayName[0].toUpperCase() : (user?.email ? user.email[0].toUpperCase() : "U"))}
           </div>
@@ -121,7 +129,7 @@ export default function DashboardSidebar() {
               )}
             </div>
           </div>
-        </div>
+        </div> */}
         {isVendor && !isApprovedVendor && (
           <div className="px-2 py-2 mb-2 bg-amber-50 border border-amber-100 rounded-md">
             <p className="text-[10px] text-amber-700 leading-tight">
@@ -129,7 +137,7 @@ export default function DashboardSidebar() {
             </p>
           </div>
         )}
-        <button 
+        <button
           onClick={logout}
           className="w-full flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 hover:bg-red-50 hover:text-red-600 transition-colors"
         >

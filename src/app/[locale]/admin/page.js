@@ -101,32 +101,24 @@ export default function AdminDashboard() {
       label: t("totalGMV"),
       value: stats?.totalGMV ? `JOD ${parseFloat(stats.totalGMV).toLocaleString()}` : "JOD 0",
       icon: TrendingUp,
-      trend: "+10.5%",
-      up: true,
       href: "/admin/reports",
     },
     {
       label: t("adminRevenue"),
       value: stats?.adminRevenue ? `JOD ${parseFloat(stats.adminRevenue).toLocaleString()}` : "JOD 0",
       icon: TrendingUp,
-      trend: "+14.2%",
-      up: true,
       href: "/admin/reports",
     },
     {
       label: t("vendorEarnings"),
       value: stats?.vendorEarnings ? `JOD ${parseFloat(stats.vendorEarnings).toLocaleString()}` : "JOD 0",
       icon: TrendingUp,
-      trend: "+8.4%",
-      up: true,
       href: "/admin/reports",
     },
     {
       label: t("activeVendors"),
       value: stats?.totalVendors ?? 0,
       icon: Store,
-      trend: "+5%",
-      up: true,
       href: "/admin/vendors",
     },
   ];
@@ -193,10 +185,6 @@ export default function AdminDashboard() {
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
                 <s.icon className="h-5 w-5 text-[#be374f]" />
               </div>
-            </div>
-            <div className={`mt-3 flex items-center gap-1 text-xs font-medium ${s.up ? "text-emerald-600" : "text-red-600"}`}>
-              {s.up ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
-              {s.trend} {t("fromLastMonth")}
             </div>
           </Link>
         ))}

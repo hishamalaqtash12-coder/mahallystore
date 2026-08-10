@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.js');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: false,
+  serverExternalPackages: ['pdfkit', 'pdfmake', 'arabic-reshaper', 'bidi', 'bidi-js'],
 
   sassOptions: {
     includePaths: ['./src/styles'],

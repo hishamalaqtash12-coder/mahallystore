@@ -1,9 +1,58 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
+import { generateInvoicePdf } from '@/lib/pdf-generator';
+import { NotificationService } from '@/lib/notifications';
+import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+
+const api = new WooCommerceRestApi({
+  url: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://fallback.mahally.local',
+  consumerKey: process.env.WC_CONSUMER_KEY,
+  consumerSecret: process.env.WC_CONSUMER_SECRET,
+  version: "wc/v3"
+});
 
 export async function POST(req) {
   try {
     const order = await req.json();
+
+    // --- Invoice Email Automation ---
+    if (order.status === 'completed') {
+      const isInvoiceSent = order.meta_data?.some(m => m.key === 'mahally_invoice_sent' && m.value === 'yes');
+      
+      if (!isInvoiceSent && order.billing?.email) {
+        try {
+          const pdfBuffer = await generateInvoicePdf(order);
+          
+          await NotificationService.notify({
+            userId: order.customer_id || 1,
+            title: `Your Invoice for Order #${order.id}`,
+            message: `Dear ${order.billing.first_name || 'Customer'},<br/><br/>Your order <strong>#${order.id}</strong> is now complete! Attached is your official invoice for your records.<br/><br/>Thank you for shopping with Mahally!`,
+            channel: ['email'],
+            metadata: {
+              email: order.billing.email,
+              attachments: [
+                {
+                  filename: `Invoice_${order.id}.pdf`,
+                  content: pdfBuffer,
+                  contentType: 'application/pdf'
+                }
+              ]
+            }
+          });
+          
+          // Mark as sent in WooCommerce
+          await api.put(`orders/${order.id}`, {
+            meta_data: [
+              { key: 'mahally_invoice_sent', value: 'yes' }
+            ]
+          });
+          console.log(`[Webhook] Invoice sent for order ${order.id}`);
+        } catch (err) {
+          console.error("[Webhook] Failed to send invoice email:", err);
+        }
+      }
+    }
+    // --------------------------------
 
     // 1. Calculate Delivery Fee automatically based on City/Governorate
     const city = (order.shipping?.city || order.billing?.city || "").trim().toLowerCase();
@@ -44,7 +93,8 @@ export async function POST(req) {
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
     if (!clientEmail || !privateKey || !spreadsheetId) {
-      return NextResponse.json({ success: false, error: "Configuration missing" }, { status: 500 });
+      // Return success if sheets isn't configured so webhook doesn't retry infinitely
+      return NextResponse.json({ success: true, warning: "Sheets not configured, but other automations ran" });
     }
 
     const auth = new google.auth.GoogleAuth({
@@ -90,10 +140,11 @@ export async function POST(req) {
       requestBody: { values: [rowData] },
     });
 
-    return NextResponse.json({ success: true, message: "Order pushed to Google Sheets successfully!" });
+    return NextResponse.json({ success: true, message: "Order processed successfully!" });
 
   } catch (error) {
-    console.error("Error pushing to Google Sheets:", error);
+    console.error("Error pushing to Google Sheets / Webhook:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+

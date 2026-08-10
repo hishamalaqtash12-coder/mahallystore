@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { Star, ShoppingCart, Check, Eye, BadgeCheck, Heart, AlertCircle, Clock, Zap, Settings, TrendingDown } from "lucide-react";
+import { Star, ShoppingCart, Check, Eye, BadgeCheck, Heart, AlertCircle, Clock, Zap, Settings, TrendingDown, ChevronDown } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
 import { useWishlist } from "@/context/WishlistContext";
 import { useState } from "react";
 import QuickLookModal from "./QuickLookModal";
+import ReviewTooltip from "./ReviewTooltip";
 import { useAuth } from "@/context/AuthContext";
 
 import { isProductOutOfStock, getProductMerchant, getProductUrl } from "@/lib/product-utils";
@@ -247,14 +248,22 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Rating */}
-        <div className="flex items-center gap-1 mt-0.5">
-          <div className="flex gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={11} className={`${i < Math.round(avgRating) ? "text-amber-400 fill-amber-400" : "text-zinc-200 fill-zinc-200"}`} />
-            ))}
+        <ReviewTooltip 
+          productId={product.id} 
+          ratingCount={ratingCount} 
+          averageRating={avgRating} 
+          productUrl={`${getProductUrl(product)}#reviews`}
+        >
+          <div className="flex items-center gap-1 mt-0.5">
+            <div className="flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={11} className={`${i < Math.round(avgRating) ? "text-amber-400 fill-amber-400" : "text-zinc-200 fill-zinc-200"}`} />
+              ))}
+            </div>
+            <ChevronDown size={12} className="text-zinc-400 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            <span className="text-[11px] font-bold text-zinc-400">({ratingCount.toLocaleString()})</span>
           </div>
-          <span className="text-[11px] font-bold text-zinc-400">({ratingCount.toLocaleString()})</span>
-        </div>
+        </ReviewTooltip>
 
         <div className="mt-1.5">
           {outOfStock ? (

@@ -45,8 +45,21 @@ export default function TrackingModal({ order, isOpen, onClose }) {
   if (order.status === "cancelled" || order.status === "refunded") {
     cfg = STATUS_CONFIG[order.status];
   } else {
-    const metaStep = order.meta_data?.find(m => m.key === 'mahally_tracking_step')?.value || '1';
-    step = parseInt(metaStep, 10);
+    // Determine step from status as a fallback
+    let fallbackStep = 1;
+    if (order.status === "processing") fallbackStep = 2;
+    else if (order.status === "ready" || order.status === "ready-shipment" || order.status === "ready-for-shipping") fallbackStep = 3;
+    else if (order.status === "shipped" || order.status === "out-for-delivery") fallbackStep = 4;
+    else if (order.status === "completed") fallbackStep = 5;
+
+    const metaStep = order.meta_data?.find(m => m.key === 'mahally_tracking_step')?.value;
+    
+    // Use the highest valid step between explicit meta and status fallback
+    step = Math.max(metaStep ? parseInt(metaStep, 10) : 1, fallbackStep);
+    
+    // Ensure we don't go backwards if order is completed
+    if (order.status === "completed") step = 5;
+    
     cfg = TRACKING_CONTENT[step] || TRACKING_CONTENT[1];
   }
 

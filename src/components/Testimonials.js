@@ -150,7 +150,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
     if (!scrollRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
     const maxScroll = scrollWidth - clientWidth;
-    const isRtl = document.documentElement.dir === 'rtl' || isAr;
+    const isRtl = document.documentElement.dir === "rtl" || isAr;
 
     if (maxScroll <= 5) {
       setCanScrollStart(false);
@@ -192,24 +192,15 @@ const Testimonials = memo(({ feedbacks = [] }) => {
 
   return (
     <section className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 my-8">
-      {/* ── Section Header (Made in Jordan style) ── */}
+      {/* ── Section Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20">
-              <Star size={20} className="fill-amber-500 text-amber-500" />
-            </span>
-            <span className="text-sm font-black uppercase tracking-wider text-amber-600">
-              {isAr ? "4.9 / 5.0 — تقييمات العملاء" : "4.9 / 5.0 — Customer Reviews"}
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
-            {isAr ? "ماذا يقول عملاؤنا" : "What Our Customers Say"}
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-black text-zinc-900 tracking-tight">
+            {t("title")}
           </h2>
+          <div className="h-1.5 w-20 bg-brand rounded-full"></div>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-medium">
-            {isAr
-              ? "آراء حقيقية وتجارب مميزة من عملاء تسوقوا ودعموا التجار المحليين عبر منصة محلي"
-              : "Real experiences and verified feedback from customers supporting local merchants on Mahally"}
+            {t("subtitle")}
           </p>
         </div>
 
@@ -242,7 +233,7 @@ const Testimonials = memo(({ feedbacks = [] }) => {
             className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-amber-700 transition-colors bg-zinc-100/80 hover:bg-amber-50 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-amber-600/60 w-fit shrink-0"
           >
             <MessageSquare size={16} />
-            <span>{isAr ? "شارك تجربتك" : "Share Your Experience"}</span>
+            <span>{t("shareExperience")}</span>
           </button>
         </div>
       </div>
@@ -312,13 +303,13 @@ const Testimonials = memo(({ feedbacks = [] }) => {
                       {f.userName}
                     </h4>
                     <div className="text-[11px] font-bold text-zinc-400 flex items-center gap-2 mt-0.5">
-                      <span>{f.location || (isAr ? "الأردن" : "Jordan")}</span>
+                      <span>{f.location || t("jordan")}</span>
                       {f.verified && (
                         <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm border border-emerald-200">
                           <CheckCircle2 size={10} className="text-emerald-600" />
                           {f.role === "seller" || f.role === "vendor"
-                            ? (isAr ? "بائع موثق" : "Verified Merchant")
-                            : (isAr ? "مشتري موثق" : "Verified Buyer")}
+                            ? t("verifiedMerchant")
+                            : t("verifiedBuyer")}
                         </span>
                       )}
                     </div>
@@ -332,10 +323,10 @@ const Testimonials = memo(({ feedbacks = [] }) => {
         <div className="py-12 bg-amber-50/50 border-2 border-amber-200 rounded-xl flex flex-col items-center justify-center text-center px-4">
           <Star size={36} className="text-amber-400 mb-2" />
           <h3 className="text-base font-bold text-zinc-900 mb-1">
-            {isAr ? "لا توجد تقييمات حالياً" : "No reviews yet"}
+            {t("noReviews")}
           </h3>
           <p className="text-xs text-zinc-500">
-            {isAr ? "كن أول من يشارك تجربته معنا." : "Be the first to share your experience."}
+            {t("noReviewsDesc")}
           </p>
         </div>
       )}

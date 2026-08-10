@@ -61,26 +61,21 @@ export default function VideoPromo({
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 border-b border-zinc-100 pb-4">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-brand/10 text-brand border border-brand/20 text-xs font-black uppercase tracking-wider">
-                <Play size={12} className="fill-brand text-brand" />
-                <span>{locale === "ar" ? "قصتنا ورؤيتنا" : "Our Story & Vision"}</span>
-              </div>
+          <div className="flex flex-col items-center text-center gap-3 mb-10">
+            <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 tracking-tight">
+              {t("title")}
+            </h2>
 
-              <h2 className="text-3xl sm:text-4xl font-black text-zinc-900 tracking-tight">
-                {t("title")}
-              </h2>
+            <div className="h-1.5 w-16 bg-brand rounded-full"></div>
 
-              <p className="text-xs sm:text-sm text-zinc-500 font-semibold max-w-xl">
-                {t("subtitle")}
-              </p>
-            </div>
+            <p className="text-sm sm:text-base text-zinc-500 font-medium max-w-lg leading-relaxed">
+              {t("subtitle")}
+            </p>
 
             {isAdmin && (
               <Link
                 href="/admin/settings"
-                className="group flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-700 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 transition-all shrink-0"
+                className="group mt-2 flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-700 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 transition-all"
               >
                 <Settings size={14} className="transition-transform group-hover:rotate-90" />
                 {t("editVideo")}

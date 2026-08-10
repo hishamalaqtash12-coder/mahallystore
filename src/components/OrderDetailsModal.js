@@ -173,10 +173,21 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
             .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
             .summary-total { font-weight: 700; font-size: 15px; }
             .note { font-size: 11px; color: #71717a; margin-top: 12px; }
+            .no-print { display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; }
+            .print-btn { background: #16a34a; color: white; border: none; padding: 6px 14px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+            .print-btn:hover { background: #15803d; }
+            @media print { .no-print { display: none !important; } }
           </style>
         </head>
         <body>
           <div class="page">
+            <div class="no-print">
+              <div>
+                <strong>Want to download as PDF?</strong> Change the printer destination to "Save as PDF" in the print dialog.
+              </div>
+              <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+            </div>
+
             <div class="brand">
               <div>
                 <div class="tag">Tax Invoice</div>
@@ -231,7 +242,9 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
                       <tr>
                         <td>
                           <div style="font-weight: 700;">${item.name || 'Item'}</div>
-                          ${item.sku ? `<div class="muted" style="font-size: 11px;">SKU: ${item.sku}</div>` : ''}
+                          <div class="muted" style="font-size: 11px;">
+                            ${item.sku ? `SKU: ${item.sku} &bull; ` : ''}Product ID: ${item.product_id}
+                          </div>
                         </td>
                         <td class="text-center">${item.quantity || 1}</td>
                         <td class="text-start">${formatCurrency(item.price || 0)}</td>
@@ -410,8 +423,15 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
               { step: 5, label: "تم تسليم الطلب" }
             ];
 
-            const currentStepStr = order.meta_data?.find(m => m.key === 'mahally_tracking_step')?.value || '1';
-            const currentStep = parseInt(currentStepStr, 10);
+            let fallbackStep = 1;
+            if (order.status === "processing") fallbackStep = 2;
+            else if (order.status === "ready" || order.status === "ready-shipment" || order.status === "ready-for-shipping") fallbackStep = 3;
+            else if (order.status === "shipped" || order.status === "out-for-delivery") fallbackStep = 4;
+            else if (order.status === "completed") fallbackStep = 5;
+
+            const metaStep = order.meta_data?.find(m => m.key === 'mahally_tracking_step')?.value;
+            let currentStep = Math.max(metaStep ? parseInt(metaStep, 10) : 1, fallbackStep);
+            if (order.status === "completed") currentStep = 5;
 
             return (
               <div className="bg-white border border-zinc-200 rounded-lg p-6 shadow-sm">
@@ -654,9 +674,11 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
 
                           {/* Actions */}
                           <div className="flex flex-wrap gap-2 mt-3">
-                            <Link href={getProductUrl(item)} className="h-[28px] px-4 bg-brand hover:bg-brand-dark border border-brand text-white rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center">
-                              شراء مرة أخرى
-                            </Link>
+                            {order.status === "completed" && (
+                              <Link href={getProductUrl(item)} className="h-[28px] px-4 bg-brand hover:bg-brand-dark border border-brand text-white rounded-md text-[12px] font-bold shadow-sm transition-all flex items-center">
+                                شراء مرة أخرى
+                              </Link>
+                            )}
                             {order.status === "completed" && (
                               <button className="h-[28px] px-4 bg-white hover:bg-zinc-50 border border-zinc-300 rounded-md text-[12px] font-bold shadow-sm transition-all">
                                 إرجاع المنتجات

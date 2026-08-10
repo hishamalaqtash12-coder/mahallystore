@@ -76,18 +76,14 @@ export default function LimitedTimeOffers({ products }) {
 
       {/* ─── Header ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-2 rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/20">
-              <Clock size={20} className="text-rose-600" />
-            </span>
-            <span className="text-sm font-black uppercase tracking-wider text-rose-600">
-              {isAr ? "عروض لفترة محدودة" : "Limited Time Deals"}
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-black text-zinc-900 tracking-tight">
             {t("title")}
           </h2>
+          <div className="h-1.5 w-20 bg-brand rounded-full"></div>
+          <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-medium">
+            {t("subtitle")}
+          </p>
         </div>
 
         <Link
@@ -131,7 +127,7 @@ export default function LimitedTimeOffers({ products }) {
           <div
             ref={scrollRef}
             onScroll={checkScroll}
-            className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-11 snap-x snap-mandatory"
+            className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1 snap-x snap-mandatory"
           >
             {deals.map((product) => (
               <div key={product.id} className="shrink-0 mahally-carousel-card snap-start">

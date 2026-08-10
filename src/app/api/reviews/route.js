@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
 const api = new WooCommerceRestApi({
@@ -26,6 +27,14 @@ export async function POST(request) {
       rating: rating,
       status: "approved"
     });
+
+    // 2. Clear API cache for products to reflect the new rating immediately
+    if (globalThis.apiProductsCache) {
+      globalThis.apiProductsCache.clear();
+    }
+    
+    // 3. Invalidate Next.js cache for products and home page
+    revalidatePath('/', 'layout');
 
     // Note: average_rating is a read-only computed field in WooCommerce.
     // Live ratings are enriched server-side when products are fetched via /api/products.

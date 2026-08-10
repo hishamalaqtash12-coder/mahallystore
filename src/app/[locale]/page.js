@@ -33,14 +33,14 @@ export default async function Home() {
       promoData.title = siteSettings.promoVideoTitle || '';
       promoData.description = siteSettings.promoVideoDescription || '';
     }
-  } catch (e) {}
+  } catch (e) { }
 
   try {
     const FEEDBACK_FILE_PATH = join(process.cwd(), "src/data/feedback.json");
     if (existsSync(FEEDBACK_FILE_PATH)) {
       feedback = JSON.parse(readFileSync(FEEDBACK_FILE_PATH, "utf8"));
     }
-  } catch (e) {}
+  } catch (e) { }
 
   // 2. Determine userIds for avatar lookup
   const userIds = feedback && feedback.length > 0
@@ -126,7 +126,17 @@ export default async function Home() {
   const hasLimitedOffers = products.some(p => p.on_sale && (p.date_on_sale_to || p.date_on_sale_to_gmt));
 
   return (
-    <div className="flex flex-col pb-20 bg-white">
+    <div
+      className="flex flex-col pb-20 relative"
+      style={{
+        backgroundColor: "#faf9f6",
+        backgroundImage: `
+          linear-gradient(to right, rgba(15,15,15,0.035) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(15,15,15,0.035) 1px, transparent 1px)
+        `,
+        backgroundSize: "28px 28px",
+      }}
+    >
       {/* 1. HERO (Amazon/Ebay Style Mix) */}
       <div className="mb-8">
         <Hero products={products} categories={categories} vendors={vendors} />
@@ -134,49 +144,49 @@ export default async function Home() {
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
 
-      <div className="py-5 bg-white">
+      <div className="py-5">
         <LightningDeals products={products} />
       </div>
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
 
       {/* 3. SUPER BUYER SECTION (AliExpress Style) */}
-      <div className="py-5 bg-white">
+      <div className="py-5">
         <SuperBuyerSection products={products} vendors={vendors} advertisingEnabled={advertisingEnabled} />
       </div>
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
 
       {/* 4. TODAY'S DEALS (Ebay Style with Timers) */}
-      <div className="py-5 bg-white">
+      <div className="py-5">
         <LimitedTimeOffers products={products} />
       </div>
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
 
       {/* 5.5 MADE IN JORDAN SECTION */}
-      <div className="py-5 bg-white">
+      <div className="py-5">
         <MadeInJordan products={products} />
       </div>
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
 
       {/* 6. MAIN PRODUCT GRID */}
-      <div className="py-5 bg-white">
+      <div className="py-5">
         <ProductGrid initialProducts={products} totalPages={totalPages} />
       </div>
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
 
       {/* 5. COMMUNITY TESTIMONIALS (Google Reviews Style) */}
-      <div className="py-5 bg-white">
+      <div className="py-5">
         <Testimonials feedbacks={feedback} />
       </div>
 
       <div className="w-full h-5 bg-[#f4f4f5] border-y border-zinc-200 shadow-[inset_0px_4px_8px_rgba(0,0,0,0.04),inset_0px_-4px_8px_rgba(0,0,0,0.02)]"></div>
 
       {/* 7. PROMO VIDEO */}
-      <div className="py-5 bg-white">
+      <div className="py-5">
         <VideoPromo
           videoUrl={promoData.url}
           thumbnail={promoData.thumbnail}

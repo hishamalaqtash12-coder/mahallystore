@@ -1,8 +1,9 @@
 import { getProduct, getProducts, getProductReviews, getProductVariations, getCustomerById } from "@/lib/woocommerce";
 import ProductCard from "@/components/ProductCard";
-import { getProductMerchant, getProductIdentifier } from "@/lib/product-utils";
+import { getProductMerchant, getProductIdentifier, getProductUrl } from "@/lib/product-utils";
 import ProductActions from "@/components/ProductActions";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import {
   Star,
@@ -28,6 +29,7 @@ import ProductGallery from "@/components/ProductGallery";
 import ProductShare from "@/components/ProductShare";
 import RecentlyViewedTracker from "@/components/RecentlyViewedTracker";
 import ProductReviews from "@/components/ProductReviews";
+import ReviewTooltip from "@/components/ReviewTooltip";
 import ShippingInfoDisplay from "@/components/ShippingInfoDisplay";
 import ProductCountdown from "@/components/ProductCountdown";
 import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
@@ -40,14 +42,24 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const t = await getTranslations("ProductPage");
   try {
+    // URL format: /product/[ID]-[slug], e.g. /product/8965-محفظة-فاااخرة
+    // Extract the trailing numeric product ID from the slug (e.g. MAH-AMM-35-محفظة-فاااخرة-8965)
     let fetchId = slug;
-    const match =
-      slug.match(/^MAH-[A-Z0-9]+-\d+-(\d+)-(.+)$/i) ||
-      slug.match(/^MAH-V\d+-P(\d+)-(.+)$/i);
-    if (match) {
-      fetchId = match[1];
+    const idMatch = slug.match(/-(\d+)$/);
+    if (idMatch) {
+      fetchId = idMatch[1];
     }
-    const product = await getProduct(fetchId);
+    let product = await getProduct(fetchId);
+    
+    if (product) {
+      const canonicalSlug = getProductUrl(product).split('/').pop();
+      const decodedSlug = decodeURIComponent(slug);
+      const decodedCanonical = decodeURIComponent(canonicalSlug);
+      if (decodedSlug !== decodedCanonical) {
+        product = null;
+      }
+    }
+    
     if (!product) return { title: t("notFoundTitle") };
 
     const description =
@@ -91,24 +103,35 @@ export default async function ProductPage({ params }) {
   let displayedId = null;
 
   try {
+    // URL format: /product/MAH-[vendor]-[id]-[slug]-[PRODUCT_ID]
+    // Extract the trailing numeric product ID — this is the ONLY thing that determines which product loads
     let fetchId = slug;
-    const match =
-      slug.match(/^MAH-[A-Z0-9]+-\d+-(\d+)-(.+)$/i) ||
-      slug.match(/^MAH-V\d+-P(\d+)-(.+)$/i);
-    if (match) {
-      fetchId = match[1];
+    const idMatch = slug.match(/-(\d+)$/);
+    if (idMatch) {
+      fetchId = idMatch[1];
     }
     product = await getProduct(fetchId);
 
     if (product) {
       displayedId = getProductIdentifier(product);
+      
+      const canonicalSlug = getProductUrl(product).split('/').pop();
+      const decodedSlug = decodeURIComponent(slug);
+      const decodedCanonical = decodeURIComponent(canonicalSlug);
+      
+      // If the URL has been tampered with, treat the product as not found
+      // This will automatically show the "Product Not Found" UI
+      if (decodedSlug !== decodedCanonical) {
+        product = null;
+      }
     }
+    
     if (product) {
       const vendorId = product.meta_data?.find(
         (m) => m.key === "_vendor_id" || m.key === "mahally_owner_id"
       )?.value;
       const fetchPromises = [
-        getProducts({ per_page: 12, category: product.categories?.[0]?.id }),
+        getProducts({ per_page: 12, category: product.categories?.[0]?.id }, true),
         getProductReviews(product.id),
       ];
       if (
@@ -332,32 +355,39 @@ export default async function ProductPage({ params }) {
               })()}
 
               <div className="flex flex-wrap items-center gap-4 text-[14px]">
-                <div className="flex items-center gap-1">
-                  <span className="font-bold text-[#0F1111]">{avgRating}</span>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        className={`${i < Math.round(avgRating)
-                            ? "text-[#FFA41C] fill-[#FFA41C]"
-                            : "text-zinc-300 fill-zinc-300"
-                          }`}
-                      />
-                    ))}
+                <ReviewTooltip 
+                  productId={product.id} 
+                  ratingCount={ratingCount} 
+                  averageRating={avgRating} 
+                  productUrl="#reviews"
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-[#0F1111]">{avgRating}</span>
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={16}
+                          className={`${i < Math.round(avgRating)
+                              ? "text-[#FFA41C] fill-[#FFA41C]"
+                              : "text-zinc-300 fill-zinc-300"
+                            }`}
+                        />
+                      ))}
+                    </div>
+                    <ChevronDown size={14} className="text-zinc-500 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    <a
+                      href="#reviews"
+                      className="text-[#be374f] hover:text-[#9b2c41] hover:underline me-2"
+                    >
+                      {t("reviewsCount", {
+                        count: ratingCount.toLocaleString(
+                          locale === "ar" ? "ar-JO" : "en-US"
+                        ),
+                      })}
+                    </a>
                   </div>
-                  <ChevronDown size={14} className="text-zinc-500" />
-                  <a
-                    href="#reviews"
-                    className="text-[#be374f] hover:text-[#9b2c41] hover:underline me-2"
-                  >
-                    {t("reviewsCount", {
-                      count: ratingCount.toLocaleString(
-                        locale === "ar" ? "ar-JO" : "en-US"
-                      ),
-                    })}
-                  </a>
-                </div>
+                </ReviewTooltip>
                 {soldCount > 0 && (
                   <div className="text-[14px] text-[#0F1111] font-medium">
                     {soldCount > 100
