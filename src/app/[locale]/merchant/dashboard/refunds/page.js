@@ -56,18 +56,18 @@ export default function RefundsPage() {
 
       <div className="bg-white border border-zinc-200 rounded-md shadow-sm overflow-hidden">
         <div className="p-6 border-b border-zinc-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-zinc-50/50">
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
               <input
                 type="text"
                 placeholder={t("Search order ID or reason...", "ابحث برقم الطلب أو السبب...")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
+                className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-full sm:w-64 shadow-sm"
               />
             </div>
-            <select className="h-[36px] px-4 bg-white border border-zinc-300 rounded-md text-[13px] outline-none shadow-sm cursor-pointer">
+            <select className="h-[36px] w-full sm:w-auto px-4 bg-white border border-zinc-300 rounded-md text-[13px] outline-none shadow-sm cursor-pointer">
               <option>{t("All Statuses", "جميع الحالات")}</option>
               <option>{t("Pending", "قيد الانتظار")}</option>
               <option>{t("Completed", "مكتمل")}</option>

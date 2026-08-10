@@ -6,7 +6,7 @@ import DashboardHeader from "@/components/merchant/DashboardHeader";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/i18n/routing";
 import { useLocale } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Loader from "@/components/Loader";
 
 export default function MerchantLayout({ children }) {
@@ -14,6 +14,7 @@ export default function MerchantLayout({ children }) {
   const locale = useLocale();
   const isAr = locale === "ar";
   const router = useRouter();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -42,9 +43,9 @@ export default function MerchantLayout({ children }) {
 
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="min-h-screen bg-zinc-50 flex font-sans">
-      <DashboardSidebar />
-      <div className={`flex-1 flex flex-col min-w-0 min-h-screen relative ${isAr ? "pr-64" : "pl-64"}`}>
-        <DashboardHeader />
+      <DashboardSidebar isMobileOpen={isMobileSidebarOpen} setIsMobileOpen={setIsMobileSidebarOpen} />
+      <div className={`flex-1 flex flex-col min-w-0 min-h-screen relative ${isAr ? "lg:pr-64" : "lg:pl-64"}`}>
+        <DashboardHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
         <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8 xl:px-10 bg-white overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1700px]">{children}</div>
         </main>

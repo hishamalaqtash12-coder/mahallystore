@@ -271,10 +271,10 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus }) {
             {isAr ? 'هذا الطلب يحتوي على منتج غير موجود في المخزون بعد الآن. جميع وظائف التحرير مقفلة للحماية.' : 'This order contains a product that is no longer available in inventory. Editing is locked for protection.'}
           </div>
         )}
-        <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
+        <div className="flex-1 overflow-y-auto md:overflow-hidden flex flex-col md:flex-row">
           
           {/* Main Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50/50">
+          <div className="flex-1 overflow-visible md:overflow-y-auto p-4 space-y-4 bg-zinc-50/50">
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                {/* General */}
@@ -454,7 +454,7 @@ export default function OrderDetailsModal({ order, onClose, onUpdateStatus }) {
           </div>
 
           {/* Sidebar */}
-          <div className="w-full md:w-80 bg-[#f0f0f1] border-l border-zinc-300 overflow-y-auto p-4 space-y-4">
+          <div className="w-full md:w-80 bg-[#f0f0f1] border-t md:border-t-0 md:border-l border-zinc-300 overflow-visible md:overflow-y-auto p-4 space-y-4">
             
             {/* Master Update Box */}
             <div className="bg-white rounded border border-zinc-200 shadow-sm overflow-hidden">

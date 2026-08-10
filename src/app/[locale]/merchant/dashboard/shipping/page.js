@@ -66,8 +66,8 @@ export default function MerchantShippingPage() {
   }
 
   return (
-    <div className="p-6 mx-auto" dir={dir}>
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 md:p-6 mx-auto" dir={dir}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">{t("pageTitle")}</h1>
           <p className="text-zinc-500 text-sm">{t("pageSubtitle")}</p>
@@ -75,7 +75,7 @@ export default function MerchantShippingPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-brand hover:bg-brand-dark border-brand px-6 py-2 rounded-md font-bold text-sm shadow-sm flex items-center gap-2 transition-all disabled:opacity-50"
+          className="bg-brand hover:bg-brand-dark border border-brand text-white px-6 py-2 rounded-md font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 shrink-0 w-full md:w-auto"
         >
           {saving ? (
             <Loader2 size={16} className="animate-spin" />
@@ -93,10 +93,11 @@ export default function MerchantShippingPage() {
         </p>
       </div>
 
-      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
-        <table className="w-full text-start border-collapse">
-          <thead className="bg-zinc-50 border-b border-zinc-200">
-            <tr>
+      <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden w-full max-w-full">
+        <div className="overflow-x-auto">
+          <table className="w-full text-start border-collapse min-w-[600px]">
+            <thead className="bg-zinc-50 border-b border-zinc-200">
+              <tr>
               <th className="text-start px-6 py-4 text-[13px] font-bold text-zinc-600 uppercase">
                 {t("governorate")}
               </th>
@@ -164,6 +165,7 @@ export default function MerchantShippingPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {success && (

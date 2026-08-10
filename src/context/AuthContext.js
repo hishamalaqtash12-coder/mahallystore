@@ -102,6 +102,16 @@ export function AuthProvider({ children }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- router causes spurious re-runs on every navigation (new reference), triggering loading flicker
 
+  // Safety fallback: ensure loading never gets stuck indefinitely
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
   const syncWithBackend = async (parsedUser) => {
     try {
       const cacheKey = parsedUser.email || parsedUser.phone;
@@ -195,7 +205,9 @@ export function AuthProvider({ children }) {
     setAvatarBgColor("#9b8676");
     setEmail(null);
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
-    router.push("/login");
+    const localeMatch = window.location.pathname.match(/^\/(en|ar)(\/|$)/);
+    const currentLocale = localeMatch ? localeMatch[1] : 'ar';
+    window.location.replace(`/${currentLocale}/login`);
   };
 
   const refreshAuth = async () => {

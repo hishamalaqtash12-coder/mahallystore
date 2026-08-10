@@ -7,7 +7,7 @@ import { appendOrderToSheet } from "@/lib/google-sheets";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { items, customer, customerId, shippingFee = 0 } = body;
+    const { items, customer, customerId, shippingFee = 0, locale = 'en' } = body;
 
     const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
     const WC_KEY = process.env.WC_CONSUMER_KEY;
@@ -262,8 +262,8 @@ export async function POST(request) {
         await NotificationService.notify({
           userId: customerId || customer.email,
           senderId: String(primaryVendorId || "1"),
-          title: `Order Confirmation #${createdOrderId} — Mahally`,
-          message: `Your order #${createdOrderId} has been created successfully!`,
+          title: locale === 'ar' ? `تأكيد الطلب #${createdOrderId} — محلي` : `Order Confirmation #${createdOrderId} — Mahally`,
+          message: locale === 'ar' ? `تم إنشاء طلبك #${createdOrderId} بنجاح!` : `Your order #${createdOrderId} has been created successfully!`,
           channel: ['internal', 'email'],
           type: 'order_confirmation',
           metadata: {

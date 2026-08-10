@@ -21,7 +21,7 @@ const MERCHANT_PAGE_KEYS = [
   { key: "settingsPage", path: "/merchant/dashboard/settings" },
 ];
 
-export default function DashboardHeader() {
+export default function DashboardHeader({ onMenuClick }) {
   const t = useTranslations("DashboardHeader");
   const locale = useLocale();
   const isAr = locale === "ar";
@@ -87,22 +87,32 @@ export default function DashboardHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-30 h-[60px] bg-white border-b border-zinc-200 px-8 flex items-center justify-between">
-      {/* Search Area */}
-      <div ref={searchRef} className="relative w-96 group">
-        <div className="absolute inset-y-0 end-3 flex items-center pointer-events-none text-zinc-400">
-          <Search size={14} />
-        </div>
-        <input
-          ref={searchInputRef}
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsSearchFocused(true)}
-          placeholder={t("searchPlaceholder")}
-          className="w-full h-[31px] bg-white border border-zinc-300 rounded-md pe-9 ps-8 text-[13px] focus:border-[#be374f] transition-all outline-none shadow-inner"
-        />
-        {searchQuery.length > 0 && (
+    <header className="sticky top-0 z-30 h-[60px] bg-white border-b border-zinc-200 px-4 lg:px-8 flex items-center justify-between gap-4">
+      
+      {/* Right Side in RTL (Hamburger + Search) */}
+      <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
+        <button 
+          onClick={onMenuClick}
+          className="lg:hidden p-1.5 sm:p-2 -mx-1.5 sm:-mx-2 rounded-md hover:bg-zinc-50 text-zinc-600 transition-colors shrink-0"
+        >
+          <Menu size={22} />
+        </button>
+
+        {/* Search Area */}
+        <div ref={searchRef} className="relative block flex-1 max-w-[16rem] lg:max-w-sm group">
+          <div className="absolute inset-y-0 end-3 flex items-center pointer-events-none text-zinc-400">
+            <Search size={14} />
+          </div>
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
+            placeholder={t("searchPlaceholder")}
+            className="w-full h-[34px] bg-white border border-zinc-300 rounded-md pe-9 ps-8 text-[13px] focus:border-[#be374f] transition-all outline-none shadow-inner"
+          />
+          {searchQuery.length > 0 && (
           <button
             type="button"
             onClick={clearSearch}
@@ -152,45 +162,46 @@ export default function DashboardHeader() {
           </div>
         )}
       </div>
+      </div>
 
-      {/* Right Actions */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1">
+      {/* Left Side in RTL (Actions + Account) */}
+      <div className="flex items-center gap-1 sm:gap-4 shrink-0">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <button
             onClick={handleReload}
             title={t("reloadData")}
-            className="p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600 shrink-0"
           >
             <RefreshCw size={18} />
           </button>
-          <button onClick={() => router.push('/merchant/dashboard/settings')} className="p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600">
+          <button onClick={() => router.push('/merchant/dashboard/settings')} className="hidden sm:block p-1.5 sm:p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600 shrink-0">
             <Settings size={18} />
           </button>
           <button
             onClick={() => router.replace(pathname, { locale: isAr ? 'en' : 'ar' })}
             title={t("switchLanguage")}
-            className="p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-zinc-50 transition-colors text-zinc-600 shrink-0"
           >
             <Globe size={18} />
             <span className="sr-only">{isAr ? 'EN' : 'AR'}</span>
           </button>
         </div>
 
-        <div className="w-px h-6 bg-zinc-200 mx-2" />
+        <div className="w-px h-6 bg-zinc-200 mx-1 sm:mx-2 shrink-0" />
 
         <div className="relative" ref={accountMenuRef}>
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center gap-2 px-3 h-[36px] rounded-md hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-200"
+            className="flex items-center gap-2 px-1 sm:px-3 h-[36px] rounded-md hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-200 shrink-0"
           >
-            <div className="w-8 h-8 rounded-full bg-[#febd69] flex items-center justify-center font-bold text-[12px] text-zinc-900 border border-zinc-200">
+            <div className="w-8 h-8 rounded-full bg-[#febd69] flex items-center justify-center font-bold text-[12px] text-zinc-900 border border-zinc-200 shrink-0">
               {customerName ? customerName[0].toUpperCase() : (user?.displayName ? user.displayName[0].toUpperCase() : (user?.email ? user.email[0].toUpperCase() : "U"))}
             </div>
-            <div className="flex flex-col items-start">
-              <span className="text-[13px] font-bold text-zinc-700 leading-tight">{customerName || user?.displayName || (user?.phoneNumber ? t("merchantFallback") : t("userFallback"))}</span>
-              <span className="text-[10px] text-zinc-400 font-medium">{t("sellerAccount")}</span>
+            <div className="hidden sm:flex flex-col items-start min-w-0">
+              <span className="text-[13px] font-bold text-zinc-700 leading-tight truncate max-w-[100px] lg:max-w-[150px]">{customerName || user?.displayName || (user?.phoneNumber ? t("merchantFallback") : t("userFallback"))}</span>
+              <span className="text-[10px] text-zinc-400 font-medium truncate">{t("sellerAccount")}</span>
             </div>
-            <ChevronDown size={12} className={`text-zinc-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={12} className={`hidden sm:block text-zinc-400 transition-transform shrink-0 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {isUserMenuOpen && (

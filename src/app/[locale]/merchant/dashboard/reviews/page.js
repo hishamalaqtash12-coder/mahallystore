@@ -126,21 +126,21 @@ export default function MerchantReviewsPage() {
           <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">{isAr ? 'تقييمات العملاء' : 'Customer Reviews'}</h1>
           <p className="text-[13px] text-zinc-500 font-medium">{isAr ? 'ادِر وردّ على آراء عملائك' : 'Manage and respond to feedback from your buyers'}</p>
         </div>
-        <div className="flex items-center gap-3">
-           <div className="relative">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3">
+           <div className="relative w-full sm:w-auto">
               <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
               <input 
                 type="text" 
                 placeholder={isAr ? "ابحث في التقييمات..." : "Search reviews..."} 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
+                className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-full sm:w-64 shadow-sm"
               />
            </div>
            <select 
              value={ratingFilter}
              onChange={(e) => setRatingFilter(e.target.value)}
-             className="h-[36px] px-4 bg-white border border-zinc-300 rounded-md text-[13px] outline-none shadow-sm cursor-pointer"
+             className="h-[36px] w-full sm:w-auto px-4 bg-white border border-zinc-300 rounded-md text-[13px] outline-none shadow-sm cursor-pointer"
            >
               <option value="all">{isAr ? 'كل التقييمات' : 'All Ratings'}</option>
               <option value="5">{isAr ? '5 نجوم' : '5 Stars'}</option>

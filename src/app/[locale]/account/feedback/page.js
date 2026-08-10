@@ -3,11 +3,13 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { Star, MessageSquare } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function WebsiteFeedbackPage() {
   const { wooId, loading } = useAuth();
   const [feedbacks, setFeedbacks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const t = useTranslations("FeedbackPage");
 
   useEffect(() => {
     if (wooId) {
@@ -27,6 +29,18 @@ export default function WebsiteFeedbackPage() {
     }
   }, [wooId, loading]);
 
+  // Function to get rating label
+  const getRatingLabel = (rating) => {
+    const labels = {
+      5: t("excellent"),
+      4: t("veryGood"),
+      3: t("average"),
+      2: t("belowAverage"),
+      1: t("poor")
+    };
+    return labels[rating] || "";
+  };
+
   if (loading || isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -37,7 +51,7 @@ export default function WebsiteFeedbackPage() {
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold mb-8 text-gray-900">Your Feedback History</h2>
+      <h2 className="text-2xl font-bold mb-8 text-gray-900">{t("title")}</h2>
 
       {feedbacks.length > 0 ? (
         <div className="space-y-4">
@@ -51,7 +65,7 @@ export default function WebsiteFeedbackPage() {
                     ))}
                   </div>
                   <span className="text-[13px] font-bold text-orange-600 uppercase tracking-wide">
-                    {item.rating === 5 ? "Excellent" : item.rating === 4 ? "Very Good" : item.rating === 3 ? "Average" : item.rating === 2 ? "Below Average" : "Poor"}
+                    {getRatingLabel(item.rating)}
                   </span>
                 </div>
                 <span className="text-[12px] text-gray-400 font-medium">
@@ -64,7 +78,7 @@ export default function WebsiteFeedbackPage() {
                   })}
                 </span>
               </div>
-              
+
               {item.categories && item.categories.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {item.categories.map((cat, idx) => (
@@ -77,7 +91,7 @@ export default function WebsiteFeedbackPage() {
 
               {item.specificIssue && (
                 <div className="text-[12px] text-zinc-500 font-medium mb-2 bg-zinc-50 border border-zinc-100 px-2.5 py-1 rounded inline-block">
-                  Topic/Page: <span className="text-zinc-700">{item.specificIssue}</span>
+                  {t("topicPage")}: <span className="text-zinc-700">{item.specificIssue}</span>
                 </div>
               )}
 
@@ -90,9 +104,9 @@ export default function WebsiteFeedbackPage() {
       ) : (
         <div className="bg-white rounded-md border border-gray-100 p-16 flex flex-col items-center justify-center text-center">
           <MessageSquare size={48} className="text-gray-100 mb-4" />
-          <h3 className="text-[16px] font-bold mb-2">No feedback submitted yet</h3>
+          <h3 className="text-[16px] font-bold mb-2">{t("noFeedbackTitle")}</h3>
           <p className="text-gray-500 text-[14px] max-w-sm">
-            We value your suggestions! You can submit your website evaluation anytime by clicking the orange feedback button in the bottom right corner of the page.
+            {t("noFeedbackDesc")}
           </p>
         </div>
       )}

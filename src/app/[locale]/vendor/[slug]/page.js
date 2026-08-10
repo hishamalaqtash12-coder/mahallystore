@@ -14,7 +14,7 @@ import {
   ArrowLeft, Star, MapPin, Mail, Phone as PhoneIcon, ShoppingCart,
   Heart, Package, CheckCircle, ChevronRight, Store, Grid3X3, List,
   Camera, MessageSquare, UserPlus, Settings, Share2, Users, Loader2,
-  Search, Info, ShieldCheck, User, ShieldAlert
+  Search, Info, ShieldCheck, User, ShieldAlert, Check
 } from "lucide-react";
 import ReportModal from "@/components/ReportModal";
 import QuickLookModal from "@/components/QuickLookModal";
@@ -777,15 +777,25 @@ export default function VendorProfilePage() {
             {v.followers?.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {v.followers.map((f) => (
-                  <div key={f.id} className="bg-white border border-zinc-200 rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                    <div className="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-400">
-                      <User size={20} />
+                  <Link 
+                    key={f.id} 
+                    href={`/messages?compose=${f.id}`} 
+                    className="bg-white border border-zinc-200 hover:border-brand/30 rounded-lg p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all group cursor-pointer"
+                  >
+                    <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-400 shrink-0 group-hover:bg-brand/5 group-hover:text-brand transition-colors">
+                      <User size={24} />
                     </div>
-                    <div>
-                      <p className="text-[14px] font-bold text-zinc-900">{f.name}</p>
-                      <p className="text-[12px] text-zinc-500">{t("trustedMember")}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-bold text-zinc-900 truncate group-hover:text-brand transition-colors">{f.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          <Check size={10} /> {t("trustedMember")}
+                        </span>
+                        <span className="text-[11px] text-zinc-400">#{f.id}</span>
+                      </div>
                     </div>
-                  </div>
+                    <ChevronRight size={18} className="text-zinc-300 group-hover:text-brand rtl:rotate-180 shrink-0 transition-colors" />
+                  </Link>
                 ))}
               </div>
             ) : (

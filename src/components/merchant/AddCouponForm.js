@@ -68,20 +68,20 @@ export default function AddCouponForm({ wooId, onClose, onCouponAdded }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[600px] overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[600px] flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50 shrink-0">
            <div className="flex items-center gap-3">
               <div className="p-2 bg-[#be374f]/10 rounded-lg text-[#be374f]">
                  <Percent size={20} />
               </div>
               <h2 className="text-[18px] font-bold text-zinc-900">Create New Coupon</h2>
            </div>
-           <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-colors text-zinc-400">
+           <button type="button" onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-colors text-zinc-400">
               <X size={20} />
            </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                  <label className="text-[13px] font-bold text-zinc-700">Coupon Code</label>

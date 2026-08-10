@@ -242,7 +242,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
   });
 
   return (
-    <aside className="w-[240px] shrink-0 pe-4 pb-10 border-l border-[#E5E5E5] min-h-[500px]">
+    <aside className="w-full lg:w-[240px] shrink-0 pe-4 pb-10 lg:border-l border-[#E5E5E5] min-h-[500px]">
       
       {/* ── Shortcut (Clean View All Button) ── */}
       {pathname !== "/browse" && (

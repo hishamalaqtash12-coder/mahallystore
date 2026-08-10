@@ -108,13 +108,6 @@ export default function MadeInJordan({ products = [] }) {
             </div>
           )}
 
-          <Link
-            href="/browse?tag=made-in-jordan"
-            className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-emerald-700 transition-colors bg-zinc-100/80 hover:bg-emerald-50 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-emerald-600/60 w-fit shrink-0"
-          >
-            <span>{t("viewAll")}</span>
-            {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-          </Link>
         </div>
       </div>
 
@@ -131,6 +124,16 @@ export default function MadeInJordan({ products = [] }) {
                 <ProductCard product={product} />
               </div>
             ))}
+          </div>
+          
+          <div className="flex justify-center mt-6">
+            <Link
+              href="/browse?tag=made-in-jordan"
+              className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-emerald-700 transition-colors bg-zinc-100/80 hover:bg-emerald-50 px-6 py-3 rounded-full border-2 border-zinc-300 hover:border-emerald-600/60 w-fit"
+            >
+              <span>{t("viewAll")}</span>
+              {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            </Link>
           </div>
         </div>
       ) : (
