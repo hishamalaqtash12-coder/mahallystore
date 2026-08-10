@@ -89,8 +89,8 @@ const mapProduct = (node) => {
     description: node.description,
     short_description: node.shortDescription,
     reviews_allowed: node.reviewsAllowed,
-    average_rating: node.averageRating || '0',
-    rating_count: node.reviewCount || 0,
+    average_rating: node.averageRating || meta_data.find(m => m.key === '_wc_average_rating')?.value || '0',
+    rating_count: node.reviewCount || parseInt(meta_data.find(m => m.key === '_wc_review_count')?.value) || 0,
     price: node.price ? node.price.replace(/[^\d.-]/g, '') : '',
     regular_price: node.regularPrice ? node.regularPrice.replace(/[^\d.-]/g, '') : '',
     sale_price: node.salePrice ? node.salePrice.replace(/[^\d.-]/g, '') : '',
@@ -253,6 +253,43 @@ export async function getProducts(options = {}, withRealRatings = false, retries
     
     let products = (data?.products?.nodes || []).map(mapProduct);
 
+    if (withRealRatings && products.length > 0) {
+      try {
+        const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+        const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
+        const includeIds = products.map(p => p.id).join(',');
+        const restRes = await fetch(`${WP_URL}/wp-json/wc/v3/products/reviews?product=${includeIds}&status=approved&per_page=100`, { 
+          headers: { Authorization: `Basic ${auth}` } 
+        });
+        
+        if (restRes.ok) {
+          const allReviews = await restRes.json();
+          const productReviewsMap = {};
+          
+          if (Array.isArray(allReviews)) {
+            allReviews.forEach(r => {
+              const pid = r.product_id;
+              if (!productReviewsMap[pid]) productReviewsMap[pid] = [];
+              productReviewsMap[pid].push(r);
+            });
+            
+            products = products.map(p => {
+              const pReviews = productReviewsMap[p.id] || [];
+              const count = pReviews.length;
+              if (count > 0) {
+                const avg = parseFloat((pReviews.reduce((sum, r) => sum + r.rating, 0) / count).toFixed(1));
+                p.average_rating = avg.toString();
+                p.rating_count = count;
+              }
+              return p;
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch real ratings", e);
+      }
+    }
+
     if (!includeRestricted) {
       products = products.filter(p => 
         !p.meta_data?.some(m => m.key === "mahally_is_restricted" && m.value === "yes")
@@ -295,7 +332,7 @@ export async function getProduct(id, retries = 3) {
       const data = await fetchGraphQL(GET_PRODUCT_BY_SLUG, { id: id });
       return mapProduct(data?.product);
     }
-    
+
     const data = await fetchGraphQL(GET_PRODUCT, { id: parseInt(id) });
     return mapProduct(data?.product);
   } catch (e) {
@@ -425,9 +462,20 @@ export async function createProduct(productData) {
 
 export async function getProductReviews(productId) {
   try {
-    const data = await fetchGraphQL(GET_PRODUCT_REVIEWS, { id: String(productId) });
-    return data?.product?.reviews?.nodes || [];
+    const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+    const auth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString("base64");
+    
+    const res = await fetch(`${WP_URL}/wp-json/wc/v3/products/reviews?product=${productId}&status=approved`, {
+      headers: { Authorization: `Basic ${auth}` },
+      next: { revalidate: 60, tags: [`product-reviews-${productId}`] }
+    });
+    
+    if (!res.ok) return [];
+    
+    const reviews = await res.json();
+    return Array.isArray(reviews) ? reviews : [];
   } catch (e) {
+    console.error(`Error fetching reviews for product ${productId}:`, e);
     return [];
   }
 }
@@ -1037,16 +1085,22 @@ export const wcApi = {
       return { data: result?.updateProduct?.product || null };
     }
     if (endpoint.startsWith('orders/')) {
-      const id = endpoint.split('/')[1];
-      const input = {
-        id,
-        status: data.status,
-        billing: data.billing,
-        shipping: data.shipping,
-        metaData: data.meta_data || data.metaData
-      };
-      const result = await fetchGraphQL(UPDATE_ORDER, { input }, getAuthHeaders());
-      return { data: result?.updateOrder?.order || null };
+      try {
+        const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+        const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
+        const id = endpoint.split('/')[1];
+        const res = await fetch(`${WP_URL}/wp-json/wc/v3/orders/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Basic ${wcAuth}` },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (!res.ok) console.warn(`wcApi.put orders/${id} failed:`, result.message);
+        return { data: result };
+      } catch (e) {
+        console.error('wcApi.put orders/ error:', e.message);
+        return { data: null };
+      }
     }
     if (endpoint.startsWith('customers/')) {
       // Use direct WC REST API for reliable meta_data persistence (GraphQL+AppPassword is broken)

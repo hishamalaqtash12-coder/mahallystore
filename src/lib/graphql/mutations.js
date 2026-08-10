@@ -77,7 +77,9 @@ export const UPDATE_ORDER = `
           key
           value
         }
-        customerId
+        customer {
+          databaseId
+        }
       }
     }
   }

@@ -2,12 +2,13 @@
 
 import { Link } from "@/i18n/routing";
 import { useState, useEffect, useRef } from "react";
-import { useLocale } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { ChevronRight, ChevronLeft, Award, Sparkles, MapPin } from "lucide-react";
 import ProductCard from "./ProductCard";
 import { getMadeInJordanProducts } from "@/lib/made-in-jordan";
 
 export default function MadeInJordan({ products = [] }) {
+  const t = useTranslations("MadeInJordan");
   const locale = useLocale();
   const isAr = locale === "ar";
   const scrollRef = useRef(null);
@@ -16,14 +17,13 @@ export default function MadeInJordan({ products = [] }) {
   const [canScrollEnd, setCanScrollEnd] = useState(true);
 
   const jordanianProducts = getMadeInJordanProducts(products || []);
-
   const displayProducts = jordanianProducts.slice(0, 10);
 
   const checkScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       const maxScroll = scrollWidth - clientWidth;
-      const isRtl = document.documentElement.dir === 'rtl' || isAr;
+      const isRtl = document.documentElement.dir === "rtl" || isAr;
 
       if (maxScroll <= 5) {
         setCanScrollStart(false);
@@ -74,20 +74,13 @@ export default function MadeInJordan({ products = [] }) {
     <section className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 my-8">
       {/* ── Section Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              <Award size={20} className="text-emerald-600" />
-            </span>
-            <span className="text-sm font-black uppercase tracking-wider text-emerald-600">
-              {isAr ? "صُنِع بأيادٍ أردنية 🇯🇴" : "Made in Jordan 🇯🇴"}
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
-            {isAr ? "منتجات صنع في الأردن" : "Made in Jordan Products"}
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-black text-zinc-900 tracking-tight">
+            {t("title")}
           </h2>
+          <div className="h-1.5 w-20 bg-brand rounded-full"></div>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-medium">
-            {isAr ? "دعم المشاريع والأيدي الحرفية والمصانع المحلية في جميع المحافظات" : "Supporting local artisans, projects, and factories across all Jordan governorates"}
+            {t("subtitle")}
           </p>
         </div>
 
@@ -119,7 +112,7 @@ export default function MadeInJordan({ products = [] }) {
             href="/browse?tag=made-in-jordan"
             className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-emerald-700 transition-colors bg-zinc-100/80 hover:bg-emerald-50 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-emerald-600/60 w-fit shrink-0"
           >
-            <span>{isAr ? "عرض الكل" : "View All"}</span>
+            <span>{t("viewAll")}</span>
             {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </Link>
         </div>
@@ -144,10 +137,10 @@ export default function MadeInJordan({ products = [] }) {
         <div className="py-12 bg-emerald-50/50 border-2 border-emerald-200 rounded-xl flex flex-col items-center justify-center text-center px-4">
           <MapPin size={36} className="text-emerald-400 mb-2" />
           <h3 className="text-base font-bold text-zinc-900 mb-1">
-            {isAr ? "لا توجد منتجات صادرة حالياً" : "No products available"}
+            {t("noProducts")}
           </h3>
           <p className="text-xs text-zinc-500">
-            {isAr ? "سيتم إضافة تشكيلة جديدة من المنتجات الأردنية قريباً." : "New Jordanian products will be added shortly."}
+            {t("noProductsDesc")}
           </p>
         </div>
       )}

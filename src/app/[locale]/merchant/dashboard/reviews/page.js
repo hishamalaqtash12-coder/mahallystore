@@ -24,7 +24,7 @@ import { getProductUrl } from "@/lib/product-utils";
 export default function MerchantReviewsPage() {
   const locale = useLocale();
   const isAr = locale === "ar";
-  const { wooId } = useAuth();
+  const { wooId, customerName } = useAuth();
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [search, setSearch] = useState("");
@@ -176,7 +176,7 @@ export default function MerchantReviewsPage() {
                           {new Date(review.date_created).toLocaleDateString()}
                        </div>
                         <a 
-                           href={getProductUrl(review)}
+                           href={getProductUrl(review, { storeName: customerName, storeId: wooId })}
                            target="_blank"
                            rel="noopener noreferrer"
                            className="flex items-center gap-2 text-[11px] text-[#be374f] font-bold hover:text-[#8f2d4a] transition-colors"

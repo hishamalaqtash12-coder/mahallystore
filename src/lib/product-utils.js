@@ -34,22 +34,65 @@ export function getProductMerchant(product) {
   return { name, id, slug };
 }
 
-export function getProductIdentifier(product) {
+export function getProductIdentifier(product, merchantOverride = null) {
   if (!product) return "";
-  const { name: storeName, id: storeId } = getProductMerchant(product);
-  const cleanStoreName = (storeName || "MAH").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-  const storePrefix = cleanStoreName.substring(0, 3).padEnd(3, "X");
-  const vendorIdStr = storeId || "0";
-  const productId = product.id || product.product_id || 0;
-  return `MAH-${storePrefix}-${vendorIdStr}-${productId}`;
+  let storeName = "";
+  let storeId = "";
+
+  if (merchantOverride) {
+    storeName = merchantOverride.storeName || "";
+    storeId = merchantOverride.storeId || "";
+  } else if (product.store) {
+    storeName = product.store.shop_name || product.store.name || "";
+    storeId = product.store.id || "";
+  } else if (product.meta_data) {
+    const mName = product.meta_data.find((m) => m.key === "merchant_name" || m.key === "mahally_owner_name");
+    const mId = product.meta_data.find((m) => m.key === "_vendor_id" || m.key === "mahally_owner_id");
+    if (mName) storeName = mName.value;
+    if (mId) storeId = mId.value;
+  }
+  if (!storeName && product.author) {
+    storeId = product.author;
+  }
+
+  const cleanStoreName = (storeName || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
+  const storePrefix = cleanStoreName ? cleanStoreName.substring(0, 3).padEnd(3, "X") : "";
+  const vendorIdStr = storeId || "";
+  const productId = product.product_id || product.databaseId || product.id || 0;
+  
+  // Use the WooCommerce SKU if it follows the MAH-... registered format
+  if (product.sku && /^MAH-/i.test(product.sku)) {
+    return product.sku.toUpperCase();
+  }
+  
+  if (storePrefix && vendorIdStr) {
+    return `MAH-${storePrefix}-${vendorIdStr}-${productId}`;
+  } else {
+    return `MAH-${productId}`;
+  }
 }
 
-export function getProductUrl(product) {
+export function getProductUrl(product, merchantOverride = null) {
   if (!product) return "/";
-  const productId = product.id || product.product_id || 0;
-  const slug = product.slug || productId || "product";
-  const identifier = getProductIdentifier(product);
-  return `/product/${identifier}-${slug}`;
+  const productId = product.product_id || product.databaseId || product.id || 0;
+  const wpSlug = product.slug
+    ? product.slug
+    : (product.name || product.product_name || "product")
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
+        .replace(/^-|-$/g, "");
+        
+  // If SKU is MAH-AMM-35-8965, the base identifier is MAH-AMM-35
+  const identifier = getProductIdentifier(product, merchantOverride);
+  
+  // They requested MAH-[vendor]-[vendorid]-[productName]-[serialnumber]
+  // We remove the trailing -[productId] from identifier to insert the productName before it
+  let baseIdentifier = identifier;
+  if (baseIdentifier.endsWith(`-${productId}`)) {
+    baseIdentifier = baseIdentifier.substring(0, baseIdentifier.lastIndexOf(`-${productId}`));
+  }
+  
+  return `/product/${baseIdentifier}-${wpSlug}-${productId}`;
 }
 
 // Complete Exhaustive English Category Translations Dictionary

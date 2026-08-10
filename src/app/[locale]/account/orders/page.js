@@ -199,10 +199,19 @@ function AccountOrdersContent() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <button onClick={() => { setSelectedOrder(order); setIsDetailsOpen(true); }} className="cursor-pointer text-gray-900 hover:text-[#be374f] font-medium flex items-center gap-1">
+                  {order.status === 'completed' && (
+                    <a
+                      href={`/api/orders/invoice?orderId=${order.id}&email=${encodeURIComponent(user?.email || email || '')}`}
+                      target="_blank"
+                      className="cursor-pointer text-[12px] font-bold px-3 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 flex items-center gap-1 text-gray-700"
+                    >
+                      تنزيل الفاتورة
+                    </a>
+                  )}
+                  {/* <button onClick={() => { setSelectedOrder(order); setIsDetailsOpen(true); }} className="cursor-pointer text-gray-900 hover:text-[#be374f] font-medium flex items-center gap-1">
                     {order.status === 'completed' ? "عرض التفاصيل" : "عرض/تعديل التفاصيل"}
                     <ChevronRight size={12} className="rotate-180" />
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <div className="p-6">
@@ -244,8 +253,10 @@ function AccountOrdersContent() {
                                 <div className="flex-1">
                                   <Link href={getProductUrl(item)} className="text-[14px] text-gray-800 hover:text-[#be374f] font-medium line-clamp-1 mb-1">{item.name}</Link>
                                   <p className="text-[12px] text-gray-500 mb-2">الكمية: {item.quantity}</p>
-                                  <div className="flex items-center gap-3">
-                                    <Link href={getProductUrl(item)} className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors flex items-center">شراء مرة أخرى</Link>
+                                  <div className="flex flex-wrap items-center gap-3">
+                                    {order.status === 'completed' && (
+                                      <Link href={getProductUrl(item)} className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors flex items-center">شراء مرة أخرى</Link>
+                                    )}
                                     {!isDelivered && (
                                       <button onClick={() => { setSelectedOrder(order); setIsTrackingOpen(true); }} className="cursor-pointer h-8 px-4 border border-gray-200 rounded-full text-[12px] font-bold hover:bg-gray-50 transition-colors">تتبع الشحنة</button>
                                     )}

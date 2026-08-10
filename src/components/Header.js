@@ -547,6 +547,7 @@ export default function Header() {
 
           <div className="order-2 lg:order-4 me-auto lg:me-0 relative flex items-center gap-1 sm:gap-2 lg:gap-4">
             <div
+              ref={accountMenuRef}
               className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-200/50' : (isVendor ? 'bg-brand-light/40 border-brand-light/30 ring-1 ring-brand-light/20' : '')}`}
               onMouseEnter={() => { if (user && window.innerWidth >= 640) setIsAccountMenuOpen(true); }}
               onMouseLeave={() => setIsAccountMenuOpen(false)}
@@ -572,7 +573,7 @@ export default function Header() {
                   </span>
                   <div className="hidden sm:flex items-center gap-1 leading-none mt-1 text-zinc-900">
                     <span className={`text-[14px] font-bold ${isAdmin ? 'text-blue-800' : (isApprovedVendor ? 'text-brand' : '')}`}>{isVendor ? t('dashboard') : t('ordersAndAccount')}</span>
-                    {user && <ChevronDown size={12} className={`mt-1 ${isAdmin ? 'text-blue-800' : (isApprovedVendor ? 'text-brand' : 'text-zinc-500')}`} />}
+                    {user && <ChevronDown size={12} className={`mt-1 transition-transform duration-200 ${isAccountMenuOpen ? 'rotate-180' : ''} ${isAdmin ? 'text-blue-800' : (isApprovedVendor ? 'text-brand' : 'text-zinc-500')}`} />}
                   </div>
                   <div className="sm:hidden flex items-center justify-center text-zinc-900 p-0.5">
                     <UserCircle size={24} className={isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : 'text-zinc-900')} />
@@ -582,112 +583,95 @@ export default function Header() {
               {isAccountMenuOpen && user && !authLoading && (
                 <div className="absolute top-[100%] end-0 pt-2 z-[200]">
                   <div className="absolute top-[4px] end-4 sm:end-10 w-4 h-4 bg-white rotate-45 border-r border-t border-zinc-200 z-[201]"></div>
-                  <div className="w-[300px] sm:w-[580px] h-auto max-h-[calc(100vh-80px)] bg-white text-zinc-900 shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-md border border-zinc-200 flex flex-col sm:flex-row animate-in fade-in zoom-in-95 duration-200 overflow-hidden relative z-[200]">
+                  <div className="w-[300px] sm:w-[600px] h-[420px] bg-white text-zinc-900 shadow-[0_12px_40px_rgba(0,0,0,0.18)] rounded-lg border border-zinc-200 flex flex-col sm:flex-row animate-in fade-in zoom-in-95 duration-150 overflow-hidden relative z-[200]">
                     {/* Right Side: Account Menu */}
-                    <div className="flex-1 h-full min-h-0 bg-white p-5 flex flex-col relative z-10 overflow-hidden">
-                      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-zinc-100 shrink-0">
+                    <div className="flex-1 h-full min-h-0 bg-white flex flex-col relative z-10">
+                      <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 shrink-0">
                         <UserAvatar
                           user={user}
                           customerName={customerName}
                           avatarUrl={avatarUrl}
                           avatarBgColor={avatarBgColor}
-                          className="w-12 h-12 rounded-full text-[22px] border border-zinc-200"
+                          className="w-9 h-9 rounded-full text-[16px] border border-zinc-200"
                         />
-                        <h3 className="font-medium text-[20px] text-zinc-900 truncate">
+                        <h3 className="font-semibold text-[15px] text-zinc-900 truncate">
                           {customerName || user.displayName || "Customer"}
                         </h3>
                       </div>
-                      <ul className="space-y-1 text-[15px] text-zinc-700 flex-1 overflow-y-auto ps-1.5 custom-scrollbar pb-2">
+                      <ul className="text-[13.5px] text-zinc-700 flex-1 overflow-y-auto custom-scrollbar py-1.5">
                         {isAdmin && (
-                          <div className="space-y-0.5 mb-2">
-                            <li><Link href="/admin" className="flex items-center gap-3 hover:bg-blue-50/50 text-blue-600 font-bold py-1.5 px-2 rounded-md transition-colors text-[13px]"><ShieldCheck size={16} strokeWidth={1.5} className="text-blue-600" /> {t('adminDashboardMenu')}</Link></li>
-                            <li><Link href="/admin/vendors" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Store size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('manageVendors')}</Link></li>
-                            <li><Link href="/admin/feedback" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><MessageSquare size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('siteFeedback')}</Link></li>
-                            <li><Link href="/admin/settings" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Settings size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('generalSettings')}</Link></li>
+                          <div className="pb-1.5 mb-1.5 border-b border-zinc-100">
+                            <li><Link href="/admin" className="flex items-center gap-2.5 hover:bg-blue-50/60 text-blue-600 font-semibold py-2 px-4 transition-colors"><ShieldCheck size={15} strokeWidth={1.75} className="text-blue-600 shrink-0" /> {t('adminDashboardMenu')}</Link></li>
+                            <li><Link href="/admin/vendors" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Store size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('manageVendors')}</Link></li>
+                            <li><Link href="/admin/feedback" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><MessageSquare size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('siteFeedback')}</Link></li>
+                            <li><Link href="/admin/settings" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Settings size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('generalSettings')}</Link></li>
                           </div>
                         )}
                         {(isApprovedVendor && !isAdmin) && (
-                          <div className="space-y-0.5 mb-2 pb-2 border-b border-zinc-100">
-                            <li><Link href="/merchant/dashboard" className="flex items-center gap-3 hover:bg-brand-light/50 text-brand font-bold py-1.5 px-2 rounded-md transition-colors text-[13px]"><Store size={16} strokeWidth={1.5} className="text-brand" /> {t('vendorDashboard')}</Link></li>
-                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><PlusCircle size={16} strokeWidth={1.5} className="text-emerald-500" /> {t('addNewProduct')}</Link></li>
-                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Package size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('products')}</Link></li>
-                            <li><Link href="/merchant/dashboard/inventory" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Boxes size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('inventory')}</Link></li>
-                            <li><Link href="/merchant/dashboard/orders" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><ShoppingCart size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('orders')}</Link></li>
-                            <li><Link href="/merchant/dashboard/reviews" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Star size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('reviews')}</Link></li>
-                            <li><Link href="/merchant/dashboard/reports" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><BarChart3 size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('reports')}</Link></li>
-                            <li><Link href="/merchant/dashboard/settings" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Settings size={16} strokeWidth={1.5} className="text-zinc-500" /> {t('storeSettings')}</Link></li>
+                          <div className="pb-1.5 mb-1.5 border-b border-zinc-100">
+                            <li><Link href="/merchant/dashboard" className="flex items-center gap-2.5 hover:bg-brand-light/50 text-brand font-semibold py-2 px-4 transition-colors"><Store size={15} strokeWidth={1.75} className="text-brand shrink-0" /> {t('vendorDashboard')}</Link></li>
+                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><PlusCircle size={15} strokeWidth={1.75} className="text-emerald-500 shrink-0" /> {t('addNewProduct')}</Link></li>
+                            <li><Link href="/merchant/dashboard/products" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Package size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('products')}</Link></li>
+                            <li><Link href="/merchant/dashboard/inventory" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Boxes size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('inventory')}</Link></li>
+                            <li><Link href="/merchant/dashboard/orders" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><ShoppingCart size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('orders')}</Link></li>
+                            <li><Link href="/merchant/dashboard/reviews" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Star size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('reviews')}</Link></li>
+                            <li><Link href="/merchant/dashboard/reports" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><BarChart3 size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('reports')}</Link></li>
+                            <li><Link href="/merchant/dashboard/settings" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Settings size={15} strokeWidth={1.75} className="text-zinc-500 shrink-0" /> {t('storeSettings')}</Link></li>
                           </div>
                         )}
                         {!isAdmin && (
-                          <div className="space-y-0.5 mb-2">
-                            <li><Link href="/account" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><UserCircle size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
-                            <li><Link href="/account/security" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><ShieldCheck size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('accountSecurity')}</Link></li>
-                            <li><Link href="/account/orders" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Package size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('yourOrders')}</Link></li>
+                          <div className="pb-1.5 mb-1.5 border-b border-zinc-100">
+                            <li><Link href="/account" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><UserCircle size={15} strokeWidth={1.75} className="text-zinc-600 shrink-0" /> {t('yourProfile')}</Link></li>
+                            <li><Link href="/account/security" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><ShieldCheck size={15} strokeWidth={1.75} className="text-zinc-600 shrink-0" /> {t('accountSecurity')}</Link></li>
+                            <li><Link href="/account/orders" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Package size={15} strokeWidth={1.75} className="text-zinc-600 shrink-0" /> {t('yourOrders')}</Link></li>
                             {messagingEnabled && (
-                              <li><Link href="/account/reviews" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><MessageSquare size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('yourReviews')}</Link></li>
+                              <li><Link href="/account/reviews" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><MessageSquare size={15} strokeWidth={1.75} className="text-zinc-600 shrink-0" /> {t('yourReviews')}</Link></li>
                             )}
-                            <li><Link href="/account/addresses" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><MapPin size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('addresses')}</Link></li>
-                            <li><Link href="/account/coupons" className="flex items-center gap-3 hover:bg-zinc-50 py-1.5 px-2 rounded-md transition-colors text-[13px]"><Tag size={16} strokeWidth={1.5} className="text-zinc-600" /> {t('couponsAndOffers')}</Link></li>
+                            <li><Link href="/account/addresses" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><MapPin size={15} strokeWidth={1.75} className="text-zinc-600 shrink-0" /> {t('addresses')}</Link></li>
+                            <li><Link href="/account/coupons" className="flex items-center gap-2.5 hover:bg-zinc-50 py-2 px-4 transition-colors"><Tag size={15} strokeWidth={1.75} className="text-zinc-600 shrink-0" /> {t('couponsAndOffers')}</Link></li>
                           </div>
                         )}
-                        <li className="pt-2 border-t border-zinc-100"><button onClick={logout} className="cursor-pointer w-full flex items-center gap-3 hover:bg-red-50 text-red-600 py-1.5 px-2 rounded-md transition-colors text-[13px] font-medium"><LogOut className="cursor-pointer" size={16} strokeWidth={1.5} /> {t('logout')}</button></li>
                       </ul>
+                      <div className="shrink-0 border-t border-zinc-100 p-2">
+                        <button onClick={logout} className="cursor-pointer w-full flex items-center gap-2.5 hover:bg-red-50 text-red-600 py-2 px-3 rounded-md transition-colors text-[13.5px] font-medium"><LogOut className="cursor-pointer shrink-0" size={15} strokeWidth={1.75} /> {t('logout')}</button>
+                      </div>
                     </div>
                     {/* Left Side: Browsing History */}
-                    <div className="hidden sm:flex w-[280px] h-full min-h-0 bg-white border-r border-zinc-100 p-5 flex-col relative z-10 overflow-hidden">
-                      <div className="flex justify-between items-center mb-4 shrink-0">
-                        <Link href="/account/recently-viewed" className="font-medium text-[16px] flex items-center gap-1 hover:text-brand transition-colors">{t('browsingHistory')} <ChevronLeft size={16} /></Link>
+                    <div className="hidden sm:flex w-[260px] h-full min-h-0 bg-zinc-50/60 border-r border-zinc-100 flex-col relative z-10">
+                      <div className="flex justify-between items-center px-4 py-3 border-b border-zinc-100 shrink-0">
+                        <Link href="/account/recently-viewed" className="font-semibold text-[14px] flex items-center gap-1 hover:text-brand transition-colors">{t('browsingHistory')} <ChevronLeft size={14} /></Link>
                       </div>
                       {recentViews.length > 0 ? (
-                        <div className="space-y-4 flex-1 overflow-y-auto ps-1.5 custom-scrollbar pb-2">
-                          {recentViews.slice(0, 10).map((p) => {
+                        <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar px-4 py-3">
+                          {recentViews.slice(0, 5).map((p) => {
                             const isChecked = p.availability_checked !== false;
                             const ItemWrapper = p.is_deleted ? 'div' : Link;
                             const wrapperProps = p.is_deleted
-                              ? { className: "flex items-center gap-3 group relative block opacity-60 cursor-default" }
-                              : { href: getProductUrl(p), className: "flex items-center gap-3 group relative block" };
+                              ? { className: "flex items-center gap-2.5 group relative block opacity-60 cursor-default" }
+                              : { href: getProductUrl(p), className: "flex items-center gap-2.5 group relative block" };
                             return (
                               <ItemWrapper key={p.id} {...wrapperProps}>
-                                <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded relative shrink-0 overflow-hidden">
+                                <div className="w-11 h-11 bg-white border border-zinc-100 rounded relative shrink-0 overflow-hidden">
                                   <Image src={p.image || p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name || "Recently viewed product"} fill className={`object-cover ${p.is_deleted ? 'grayscale' : ''}`} />
                                 </div>
-                                <div className="flex flex-col flex-1 overflow-hidden">
-                                  <p className={`text-[13px] line-clamp-1 leading-tight mb-1 ${p.is_deleted ? 'text-zinc-400 line-through' : 'text-zinc-800 group-hover:underline transition-colors'}`}>{p.name}</p>
+                                <div className="flex flex-col flex-1 overflow-hidden min-w-0">
+                                  <p className={`text-[12px] line-clamp-1 leading-tight mb-0.5 ${p.is_deleted ? 'text-zinc-400 line-through' : 'text-zinc-800 group-hover:underline transition-colors'}`}>{p.name}</p>
                                   {p.is_deleted ? (
-                                    <p className="text-[11px] text-zinc-400 font-medium mb-0.5">{locale === "ar" ? "غير متوفر / تمت إزالته" : "Unavailable / Removed"}</p>
+                                    <p className="text-[10px] text-zinc-400 font-medium">{locale === "ar" ? "غير متوفر" : "Unavailable"}</p>
                                   ) : !isChecked ? (
-                                    <p className="text-[11px] text-zinc-400 mb-0.5 animate-pulse">{locale === "ar" ? "جارٍ التحقق..." : "Checking..."}</p>
+                                    <p className="text-[10px] text-zinc-400 animate-pulse">{locale === "ar" ? "جارٍ التحقق..." : "Checking..."}</p>
                                   ) : p.stock_status === 'outofstock' ? (
-                                    <p className="text-[11px] text-red-600 font-medium mb-0.5">{t("outOfStock")}</p>
-                                  ) : (p.stock_quantity > 0 && p.stock_quantity <= 5) ? (
-                                    <p className="text-[11px] text-brand-dark font-medium mb-0.5">{t('almostOutOfStock')} ({t('onlyLeft')} {p.stock_quantity})</p>
+                                    <p className="text-[10px] text-red-600 font-medium">{t("outOfStock")}</p>
                                   ) : (
-                                    <p className="text-[11px] text-green-600 font-medium mb-0.5">{t("inStock")}</p>
+                                    <p className={`text-[12px] font-bold ${p.is_deleted ? 'text-zinc-300' : ''}`}>{p.price || "0.00"} {t('jod')}</p>
                                   )}
-                                  <div className="flex items-center justify-between">
-                                    <p className={`text-[16px] font-bold ${p.is_deleted ? 'text-zinc-300' : ''}`}>{p.price || "0.00"} {t('jod')}</p>
-                                    {!p.is_deleted && isChecked && p.stock_status !== 'outofstock' && !isAdmin && !isVendor && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          addToCart(p, 1);
-                                          setIsCartOpen(true);
-                                        }}
-                                        className="w-7 h-7 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors cursor-pointer animate-fade-in"
-                                        title={t("addToCart")}
-                                      >
-                                        <ShoppingCart size={14} className="text-zinc-700" />
-                                      </button>
-                                    )}
-                                  </div>
                                 </div>
                               </ItemWrapper>
                             );
                           })}
                         </div>
                       ) : (
-                        <p className="text-[13px] text-zinc-500 py-4 text-center">{t("noRecentItems")}</p>
+                        <p className="text-[12.5px] text-zinc-500 flex-1 flex items-center justify-center text-center px-6">{t("noRecentItems")}</p>
                       )}
                     </div>
                   </div>

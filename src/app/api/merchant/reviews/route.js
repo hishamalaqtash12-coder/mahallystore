@@ -75,9 +75,13 @@ export async function GET(request) {
       const productIds = new Set(filteredProducts.map(p => p.id));
 
       if (productIds.size > 0) {
-        const wcReviews = await wcApi.get("products/reviews", { per_page: 100 });
-        const allReviews = Array.isArray(wcReviews.data) ? wcReviews.data : [];
-        reviews = allReviews.filter(r => productIds.has(r.product_id));
+        const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+        const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
+        const revRes = await fetch(`${WP_URL}/wp-json/wc/v3/products/reviews?per_page=100`, {
+          headers: { Authorization: `Basic ${wcAuth}` }
+        });
+        const allReviews = await revRes.json().catch(() => []);
+        reviews = (Array.isArray(allReviews) ? allReviews : []).filter(r => productIds.has(r.product_id));
       }
     }
 
@@ -137,8 +141,26 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     const { id } = await request.json();
-    const res = await wcApi.delete(`products/reviews/${id}`, { force: true });
-    return NextResponse.json(res.data);
+    const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+    const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
+    
+    const res = await fetch(`${WP_URL}/wp-json/wc/v3/products/reviews/${id}?force=true`, {
+      method: 'DELETE',
+      headers: { Authorization: `Basic ${wcAuth}` }
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to delete review");
+    
+    // Clear API cache for products to reflect the removed rating immediately
+    if (globalThis.apiProductsCache) {
+      globalThis.apiProductsCache.clear();
+    }
+    
+    const { revalidatePath } = require('next/cache');
+    revalidatePath('/', 'layout');
+    
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Review delete error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -57,6 +57,17 @@ export async function PUT(req) {
     if (shipping) updatePayload.shipping = shipping;
     if (meta_data) updatePayload.meta_data = meta_data;
 
+    let oldStatus = 'unknown';
+    try {
+      const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+      const wcAuth = Buffer.from(`${process.env.WC_CONSUMER_KEY}:${process.env.WC_CONSUMER_SECRET}`).toString('base64');
+      const oldOrderRes = await fetch(`${WP_URL}/wp-json/wc/v3/orders/${id}`, {
+        headers: { Authorization: `Basic ${wcAuth}` }
+      });
+      const oldOrderData = await oldOrderRes.json();
+      if (oldOrderData?.status) oldStatus = oldOrderData.status.toLowerCase();
+    } catch(e){}
+
     const wcRes = await wcApi.put(`orders/${id}`, updatePayload);
     const updatedOrder = wcRes.data;
 
@@ -121,7 +132,7 @@ export async function PUT(req) {
       const reqUrl = new URL(req.url);
       const baseUrl = `${reqUrl.protocol}//${reqUrl.host}`;
 
-      let richMessage = `Your order #ORD-${id} is now ${label}. Thank you for shopping with ${storeName}!\n\n` +
+      let richMessage = `Your order #ORD-${id} has changed from ${statusLabels[oldStatus] || oldStatus} to ${label}. Thank you for shopping with ${storeName}!\n\n` +
         `🛒 *Order Summary:*\n${itemsList}\n\n` +
         `💳 *Product Total:* ${currency} ${subtotal}\n` +
         `🚚 *Shipping:* ${currency} ${shipping}\n` +
@@ -145,6 +156,72 @@ export async function PUT(req) {
       if (storePhone) richMessage += `► Call / WhatsApp us: ${storePhone}\n`;
       if (storeEmail) richMessage += `► Email us: ${storeEmail}\n`;
 
+      const orderDateStr = new Date().toLocaleString('en-JO', { timeZone: 'Asia/Amman', dateStyle: 'medium', timeStyle: 'short' });
+      const itemsHtml = (notificationOrder.line_items || []).map(item => `
+        <tr style="border-bottom: 1px solid #f4f4f5;">
+          <td style="padding: 10px 0; color: #18181b; font-size: 14px; font-weight: 600;">${item.name}</td>
+          <td style="padding: 10px 0; color: #71717a; font-size: 14px; text-align: center;">x${item.quantity}</td>
+          <td style="padding: 10px 0; color: #18181b; font-size: 14px; font-weight: 700; text-align: right;">${currency} ${parseFloat(item.total || 0).toFixed(2)}</td>
+        </tr>
+      `).join("");
+
+      const htmlMessage = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; background: #ffffff;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #be374f; font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -0.5px;">Mahally</h1>
+            <p style="color: #71717a; font-size: 12px; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">Order Update</p>
+          </div>
+
+          <div style="background: #fdf2f4; border: 1px solid #fecdd3; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+            <p style="color: #9f1239; font-size: 15px; font-weight: 700; margin: 0;">📦 Your order has changed from <strong>${statusLabels[oldStatus] || oldStatus}</strong> to <strong>${label}</strong>!</p>
+            <p style="color: #be123c; font-size: 13px; margin-top: 4px; margin-bottom: 0;">Order ID: <strong>#${id}</strong></p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; background: #fafafa; border: 1px solid #f4f4f5; border-radius: 12px; padding: 16px;">
+            <div>
+              <p style="color: #71717a; font-size: 11px; text-transform: uppercase; margin: 0 0 4px 0; font-weight: 700;">Date Updated</p>
+              <p style="color: #18181b; font-size: 13px; margin: 0; font-weight: 600;">${orderDateStr}</p>
+            </div>
+            <div>
+              <p style="color: #71717a; font-size: 11px; text-transform: uppercase; margin: 0 0 4px 0; font-weight: 700;">Merchant / Store</p>
+              <p style="color: #18181b; font-size: 13px; margin: 0; font-weight: 600;">${storeName}</p>
+            </div>
+          </div>
+
+          <h3 style="color: #18181b; font-size: 14px; font-weight: 700; margin-bottom: 12px; border-bottom: 2px solid #18181b; padding-bottom: 8px;">Order Details</h3>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+              <tr style="border-bottom: 1px solid #e4e4e7; text-align: left; color: #a1a1aa; font-size: 11px; text-transform: uppercase;">
+                <th style="padding-bottom: 8px;">Item</th>
+                <th style="padding-bottom: 8px; text-align: center;">Qty</th>
+                <th style="padding-bottom: 8px; text-align: right;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div style="border-top: 2px dashed #e4e4e7; padding-top: 16px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; color: #71717a; font-size: 13px; margin-bottom: 6px;">
+              <span>Shipping Fee:</span>
+              <span>${currency} ${shipping}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #18181b; font-size: 18px; font-weight: 900; margin-top: 8px;">
+              <span>Total Amount:</span>
+              <span style="color: #be374f;">${currency} ${total}</span>
+            </div>
+          </div>
+
+          <div style="text-align: center;">
+            <a href="${reviewUrl}" style="display: inline-block; background: #be374f; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 28px; border-radius: 12px;">
+              View Order Details &rarr;
+            </a>
+          </div>
+        </div>
+      `;
+
       const channels = ['internal', 'email'];
       if (customerPhone && customerPhone.length > 5) {
         channels.push('whatsapp');
@@ -161,7 +238,8 @@ export async function PUT(req) {
           orderId: id,
           email: customerEmail,
           phone: customerPhone,
-          actionUrl: `${baseUrl}/account/orders/${id}`
+          actionUrl: reviewUrl,
+          html: htmlMessage
         }
       }).catch(err => console.warn("Notification delay/fail:", err.message));
     }

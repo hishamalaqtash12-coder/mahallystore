@@ -64,6 +64,7 @@ export const NotificationService = {
               to: userEmail,
               subject: title,
               html: emailBody,
+              attachments: metadata.attachments || [],
             });
             results.push({ channel: 'email', status: 'success' });
           }

@@ -154,6 +154,12 @@ function buildDataMap({ orderId, mahallyId, items, customer, shippingFee, orderT
     // ---- Status ----
     "الحالة":                "قيد الانتظار",
     "status":                "on-hold",
+
+    // ---- Fulfillment & Delivery Defaults ----
+    "تاريخ استلام الطلب":    now,
+    "حالة الاستلام":         "جديد",
+    "حالة التوصيل":          "قيد التجهيز",
+    "موعد التسليم المتوقع":  new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString("en-JO", { timeZone: "Asia/Amman", dateStyle: "short" }),
   };
 }
 

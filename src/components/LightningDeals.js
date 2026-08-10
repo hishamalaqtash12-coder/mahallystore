@@ -76,18 +76,14 @@ export default function LightningDeals({ products }) {
 
       {/* ─── Header ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20">
-              <Zap size={20} className="fill-amber-500 text-amber-500" />
-            </span>
-            <span className="text-sm font-black uppercase tracking-wider text-amber-600">
-              {isAr ? "تخفيضات سريعة حصرياً" : "Flash Deals Exclusive"}
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl font-black text-zinc-900 tracking-tight">
             {t("title")}
           </h2>
+          <div className="h-1.5 w-20 bg-brand rounded-full"></div>
+          <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 font-medium">
+            {t("subtitle")}
+          </p>
         </div>
 
         <Link

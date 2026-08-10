@@ -7,7 +7,7 @@ export const revalidate = 0;
 
 const SETTINGS_PATH = path.join(process.cwd(), "src/data/settings.json");
 
-export async function GET() {
+export async function GET(request) {
   try {
     const fileContent = await fs.readFile(SETTINGS_PATH, "utf8");
     const settings = JSON.parse(fileContent);
