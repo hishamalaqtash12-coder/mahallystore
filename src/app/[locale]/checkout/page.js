@@ -261,7 +261,8 @@ export default function CheckoutPage() {
           items: enrichedCartItems,
           customer: { ...formData, city },   // Merge city state into customer
           customerId: wooId,
-          shippingFee: shippingFee
+          shippingFee: shippingFee,
+          locale: locale
         })
       });
 

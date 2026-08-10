@@ -25,6 +25,7 @@ import {
   ChevronDown,
   ChevronUp,
   LogOut,
+  X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -36,6 +37,8 @@ export default function AccountSidebar({
   vendorLogo,
   avatarUrl,
   avatarBgColor,
+  isMobileOpen,
+  setIsMobileOpen,
 }) {
   const t = useTranslations("AccountSidebar");
   const locale = useLocale();
@@ -148,19 +151,40 @@ export default function AccountSidebar({
   };
 
   return (
-    <aside
-      className={`w-full md:w-72 bg-white md:min-h-screen py-6 px-4 shrink-0 sticky top-0 h-fit ${dir === "rtl" ? "border-s border-gray-100" : "border-e border-gray-100"
-        }`}
-      dir={dir}
-    >
-      <div className="mb-8 px-3">
-        <div className="flex items-center gap-3 mb-6">
+    <>
+      {/* Mobile overlay */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 z-[90] md:hidden" 
+          onClick={() => setIsMobileOpen(false)} 
+        />
+      )}
+
+      <aside
+        className={`w-72 bg-white md:min-h-screen pt-6 pb-6 shrink-0 flex flex-col
+          md:sticky md:top-0 md:block md:h-fit md:z-0
+          fixed top-0 bottom-0 z-[100] transition-transform duration-300
+          ${dir === "rtl" ? "border-s border-gray-100" : "border-e border-gray-100"}
+          ${isMobileOpen 
+            ? (dir === "rtl" ? "right-0" : "left-0") 
+            : (dir === "rtl" ? "-right-full hidden md:block md:right-auto" : "-left-full hidden md:block md:left-auto")
+          }
+        `}
+        dir={dir}
+      >
+        <div className="flex justify-end md:hidden mb-2 px-4 shrink-0">
+          <button onClick={() => setIsMobileOpen(false)} className="p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded-md">
+            <X size={20} />
+          </button>
+        </div>
+      <div className="mb-6 px-7 shrink-0">
+        <div className="flex items-center gap-3">
           <UserAvatar
             user={user}
             customerName={customerName}
             avatarUrl={vendorLogo || avatarUrl}
             avatarBgColor={avatarBgColor}
-            className="w-11 h-11 rounded-md text-[16px] border border-gray-100/20 shadow-sm"
+            className="w-11 h-11 rounded-md text-[16px] border border-gray-100/20 shadow-sm shrink-0"
           />
           <div className="flex flex-col">
             <span className="text-[15px] font-bold leading-tight text-gray-900">
@@ -170,7 +194,7 @@ export default function AccountSidebar({
         </div>
       </div>
 
-      <nav className="space-y-0.5">
+      <nav className="space-y-0.5 overflow-y-auto flex-1 px-4 hide-scrollbar">
         {isVendor && (
           <div className="mb-2 pb-2 border-b border-gray-100">
             <Link
@@ -279,5 +303,6 @@ export default function AccountSidebar({
         </div>
       </nav>
     </aside>
+    </>
   );
 }

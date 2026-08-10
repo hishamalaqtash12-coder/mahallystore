@@ -265,7 +265,8 @@ export default function ProductCard({ product }) {
           </div>
         </ReviewTooltip>
 
-        <div className="mt-1.5">
+        <div className="mt-auto pt-1.5 flex items-end justify-between gap-2">
+          <div className="flex-1 min-w-0">
           {outOfStock ? (
             <div className="flex items-center gap-1.5 text-rose-600">
               <AlertCircle size={13} />
@@ -292,15 +293,13 @@ export default function ProductCard({ product }) {
           {isLimitedOffer && !outOfStock && <CountdownTimer expiryDate={saleEndDate} discountAmount={regularPrice > price ? regularPrice - price : 0} product={product} />}
         </div>
 
-        <div className="mt-auto"></div>
-
         {(() => {
           const isOwner = user && String(wooId) === String(merchantId);
 
           if (outOfStock) {
             return (
               <div
-                className="absolute bottom-2.5 end-2.5 w-8 h-8 rounded-md bg-zinc-100 text-zinc-400 border-[1.5px] border-zinc-300 flex items-center justify-center cursor-not-allowed"
+                className="shrink-0 w-8 h-8 rounded-md bg-zinc-100 text-zinc-400 border-[1.5px] border-zinc-300 flex items-center justify-center cursor-not-allowed"
                 title={t("outOfStock")}
               >
                 <AlertCircle size={15} />
@@ -312,7 +311,7 @@ export default function ProductCard({ product }) {
             return (
               <Link
                 href="/merchant/dashboard/products"
-                className="absolute bottom-2.5 end-2.5 w-8 h-8 rounded-md bg-white text-zinc-900 border-[1.5px] border-zinc-400 flex items-center justify-center hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all active:scale-90"
+                className="shrink-0 w-8 h-8 rounded-md bg-white text-zinc-900 border-[1.5px] border-zinc-400 flex items-center justify-center hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all active:scale-90"
                 title={t("manageProduct")}
               >
                 <Settings size={14} />
@@ -323,7 +322,7 @@ export default function ProductCard({ product }) {
           if (isVendor || isAdmin) {
             return (
               <div
-                className="absolute bottom-2.5 end-2.5 w-8 h-8 rounded-md bg-zinc-100 text-zinc-300 border-[1.5px] border-zinc-200 flex items-center justify-center cursor-not-allowed"
+                className="shrink-0 w-8 h-8 rounded-md bg-zinc-100 text-zinc-300 border-[1.5px] border-zinc-200 flex items-center justify-center cursor-not-allowed"
                 title={t("purchaseDisabled")}
               >
                 <ShoppingCart size={14} />
@@ -334,7 +333,7 @@ export default function ProductCard({ product }) {
           return (
             <button
               onClick={handleCartToggle}
-              className={`absolute bottom-2.5 end-2.5 w-8 h-8 rounded-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-[1.5px]
+              className={`shrink-0 w-8 h-8 rounded-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-[1.5px]
                 ${alreadyInCart ? "bg-brand text-white border-brand hover:bg-brand-dark" : "bg-zinc-900 text-white border-zinc-900 hover:bg-brand hover:border-brand"}`}
               title={alreadyInCart ? t("removeFromCart") : t("addToCart")}
             >
@@ -344,6 +343,7 @@ export default function ProductCard({ product }) {
             </button>
           );
         })()}
+        </div>
       </div>
 
       <QuickLookModal

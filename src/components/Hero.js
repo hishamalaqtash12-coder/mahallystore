@@ -328,12 +328,6 @@ const CategoryCarousel = memo(({ categories }) => {
           </p>
         </div>
 
-        <Link
-          href="/browse"
-          className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-brand transition-colors bg-zinc-100/80 hover:bg-brand/10 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-brand/60 w-fit"
-        >
-          {t("viewAll")} <ChevronLeft size={18} className="rtl:rotate-0 rotate-180" />
-        </Link>
       </div>
 
       {/* ─── Parent Categories Scroll Container ─── */}
@@ -494,6 +488,14 @@ const CategoryCarousel = memo(({ categories }) => {
         </div>
       )}
 
+      <div className="flex justify-center mt-6">
+        <Link
+          href="/browse"
+          className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-brand transition-colors bg-zinc-100/80 hover:bg-brand/10 px-6 py-3 rounded-full border-2 border-zinc-300 hover:border-brand/60 w-fit"
+        >
+          {t("viewAll")} <ChevronLeft size={18} className="rtl:rotate-0 rotate-180" />
+        </Link>
+      </div>
     </div>
   );
 });

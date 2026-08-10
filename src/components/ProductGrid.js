@@ -285,15 +285,6 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 self-end sm:self-auto">
-            <Link
-              href="/browse"
-              className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-blue-700 transition-colors bg-zinc-100/80 hover:bg-blue-50 px-5 py-2.5 rounded-lg border-2 border-zinc-300 hover:border-blue-600/60 w-fit shrink-0"
-            >
-              <span>{t("viewAll")}</span>
-              {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-            </Link>
-          </div>
         </div>
 
         {/* ── Products ── */}
@@ -315,15 +306,15 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
               ))}
             </div>
 
-            {/* <div className="mt-12 flex justify-center select-none">
+            <div className="flex justify-center mt-6">
               <Link
                 href="/browse"
-                className="h-10 px-8 bg-white hover:bg-zinc-50 border border-zinc-400 text-zinc-900 rounded-full text-[14px] font-medium transition-all flex items-center gap-1.5 cursor-pointer"
+                className="inline-flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-blue-700 transition-colors bg-zinc-100/80 hover:bg-blue-50 px-6 py-3 rounded-full border-2 border-zinc-300 hover:border-blue-600/60 w-fit"
               >
-                <span>{t("viewAllProducts")}</span>
-                <ChevronRight size={16} className="text-zinc-600 rtl:-scale-x-100" />
+                <span>{t("viewAll")}</span>
+                {isAr ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
               </Link>
-            </div> */}
+            </div>
           </>
         )}
       </section>
@@ -422,19 +413,26 @@ export default function ProductGrid({ initialProducts, totalPages: initialTotalP
         {/* ── Mobile Sidebar Drawer ── */}
         {mobileSidebarOpen && (
           <>
-            <div className="fixed inset-0 bg-black/40 z-50 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
-            <div className="fixed end-0 top-0 bottom-0 w-72 bg-white z-50 overflow-y-auto p-5 shadow-2xl lg:hidden animate-in slide-in-from-left duration-300">
-              {/* Close button */}
-              <button onClick={() => setMobileSidebarOpen(false)} className="absolute top-3 start-3 p-1.5 hover:bg-zinc-100 rounded-lg z-10 text-zinc-500 hover:text-black">
-                <X size={16} />
-              </button>
-              <SidebarFilter
+            <div className="fixed inset-0 bg-black/40 z-[110] lg:hidden animate-in fade-in duration-300" onClick={() => setMobileSidebarOpen(false)} />
+            <div className={`fixed end-0 top-0 bottom-0 w-[85vw] sm:w-[350px] bg-white z-[120] shadow-2xl lg:hidden animate-in duration-300 flex flex-col ${isAr ? 'slide-in-from-left' : 'slide-in-from-right'}`}>
+              {/* Mobile Drawer Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+                <h3 className="font-bold text-lg">{t("filters")}</h3>
+                <button onClick={() => setMobileSidebarOpen(false)} className="p-2 hover:bg-zinc-100 rounded-full text-zinc-500 hover:text-black transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              {/* Filter Content */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar">
+                <SidebarFilter
                 categories={categories}
                 products={products}
                 filters={filters}
                 onFiltersChange={(f) => { handleFiltersChange(f); }}
                 priceBounds={priceBounds}
               />
+              </div>
             </div>
           </>
         )}

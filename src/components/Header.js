@@ -95,6 +95,17 @@ export default function Header() {
   // Accordion state for Shop by Category
   const [openAccordionId, setOpenAccordionId] = useState(null);
 
+  // Fallback to force hide auth spinner if Next.js router transitions freeze the context state
+  const [forceHideSpinner, setForceHideSpinner] = useState(false);
+  useEffect(() => {
+    if (authLoading) {
+      const timer = setTimeout(() => setForceHideSpinner(true), 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setForceHideSpinner(false);
+    }
+  }, [authLoading, pathname]);
+
   useEffect(() => {
     const saved = localStorage.getItem('mahally_recent_searches');
     if (saved) {
@@ -402,31 +413,74 @@ export default function Header() {
       <header className="z-[90] sticky top-0 font-sans shadow-md">
 
         {/* 1. TOP MAIN HEADER */}
-        <div className="bg-white px-2 py-2 flex flex-wrap lg:flex-nowrap items-center gap-2 min-h-[50px] border-b border-zinc-200">
-          <Link href="/" className="order-1 p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm transition-all flex items-center shrink-0">
-            <Image
-              src="/mahally-logo.webp"
-              alt="Mahally.jo Logo"
-              width={120}
-              height={40}
-              className="object-contain"
-              priority
-            />
-          </Link>
+        <div className="bg-white px-2 py-2 flex flex-wrap lg:flex-nowrap items-center min-h-[50px] border-b border-zinc-200 gap-y-2">
+          
+          {/* Top Row for Mobile (Hamburger + Logo + Icons) */}
+          <div className="w-full lg:w-auto flex items-center justify-between order-1">
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Mobile Hamburger - Amazon Style */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="flex lg:hidden items-center justify-center p-1 border border-transparent rounded-sm text-zinc-900 shrink-0"
+              >
+                <Menu size={26} strokeWidth={2.5} />
+              </button>
 
-          <div
-            onClick={() => setShowLocationModal(true)}
-            className="hidden lg:flex order-2 flex-col p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer me-2 shrink-0"
-          >
-            <span className="text-zinc-500 text-[12px] leading-none me-5">{t("deliveryTo")}</span>
-            <div className="flex items-center gap-1 leading-none mt-1 text-zinc-900">
-              <MapPin size={15} className="text-zinc-900" />
-              <span className="text-[14px] font-bold">{locale === 'ar' ? (GOVERNORATES_MAP_AR[governorate] || governorate) : governorate}</span>
+              <Link href="/" className="p-1 border border-transparent rounded-sm transition-all flex items-center shrink-0">
+                <Image
+                  src="/mahally-logo.webp"
+                  alt="Mahally.jo Logo"
+                  width={100}
+                  height={35}
+                  className="object-contain"
+                  priority
+                />
+              </Link>
+            </div>
+
+            <div
+              onClick={() => setShowLocationModal(true)}
+              className="hidden lg:flex flex-col p-2 border border-transparent hover:border-zinc-300 rounded-sm cursor-pointer mx-2 shrink-0"
+            >
+              <span className="text-zinc-500 text-[12px] leading-none me-5">{t("deliveryTo")}</span>
+              <div className="flex items-center gap-1 leading-none mt-1 text-zinc-900">
+                <MapPin size={15} className="text-zinc-900" />
+                <span className="text-[14px] font-bold">{locale === 'ar' ? (GOVERNORATES_MAP_AR[governorate] || governorate) : governorate}</span>
+              </div>
+            </div>
+
+            {/* Icons container - moved into the top row for mobile */}
+            <div className="flex lg:hidden items-center gap-1">
+              <button
+                onClick={() => router.replace(pathname, { locale: locale === 'ar' ? 'en' : 'ar' })}
+                className="flex items-center justify-center p-1 font-bold text-[13px] text-zinc-900 shrink-0"
+              >
+                <Globe size={18} className="me-0.5" />
+                {locale === 'ar' ? 'EN' : 'AR'}
+              </button>
+              
+              <div
+                className="relative flex items-center justify-center p-1 shrink-0 cursor-pointer text-zinc-900"
+                onClick={() => {
+                  if (!user) router.push('/login');
+                  else setIsMobileAccountMenuOpen(true);
+                }}
+              >
+                <UserCircle size={22} className={isAdmin ? 'text-blue-600' : (isApprovedVendor ? 'text-brand' : 'text-zinc-900')} />
+              </div>
+
+              <button onClick={() => setIsCartOpen(true)} className="flex items-center justify-center p-1 relative shrink-0 text-zinc-900">
+                <div className="relative flex items-center justify-center w-[32px] h-[30px]">
+                  <span className="absolute top-0 end-1/2 -translate-x-1/2 text-brand text-[14px] font-bold z-10 leading-none">{cartItemsCount}</span>
+                  <ShoppingCart size={22} className="mt-2" strokeWidth={2.2} />
+                </div>
+              </button>
             </div>
           </div>
 
-          <div ref={searchRef} className="order-last lg:order-3 w-full lg:w-auto lg:flex-1 flex flex-col relative lg:me-2 group z-[100]">
-            <form onSubmit={handleSearch} className={`flex h-10 w-full rounded-md transition-shadow relative bg-white border border-zinc-300 ${showSuggestions ? 'ring-[3px] ring-brand/30 border-brand' : ''}`}>
+          {/* Search container - Mobile 2nd row, Desktop inline */}
+          <div ref={searchRef} className="w-full lg:w-auto lg:flex-1 flex flex-col relative lg:mx-2 group z-[100] order-last lg:order-2">
+            <form onSubmit={handleSearch} className={`flex h-[42px] lg:h-10 w-full rounded-lg lg:rounded-md transition-shadow relative bg-white border border-zinc-300 ${showSuggestions ? 'ring-[3px] ring-brand/30 border-brand' : ''}`}>
               <input type="text" placeholder={t("searchPlaceholder")} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }} onFocus={() => { setShowSuggestions(true); setIsCategoryOpen(false); }} className="flex-1 px-3 sm:px-4 pe-10 text-zinc-900 outline-none h-full text-[14px] sm:text-[15px] bg-transparent w-0 min-w-0 rounded-s-md" />
               {searchQuery && (
                 <button
@@ -436,14 +490,14 @@ export default function Header() {
                     setSuggestions([]);
                     setShowSuggestions(false);
                   }}
-                  className="absolute end-[50px] top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 flex items-center justify-center"
+                  className="absolute end-[45px] top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 flex items-center justify-center"
                   aria-label="Clear search"
                 >
                   <X size={16} />
                 </button>
               )}
-              <button type="submit" className="bg-brand hover:bg-brand-dark w-[45px] flex items-center justify-center text-white transition-colors shrink-0 rounded-e-md">
-                {isSearching ? <div className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" /> : <Search size={24} />}
+              <button type="submit" className="bg-[#f0c14b] hover:bg-[#e2b036] lg:bg-brand lg:hover:bg-brand-dark w-[45px] flex items-center justify-center text-zinc-900 lg:text-white transition-colors shrink-0 rounded-e-lg lg:rounded-e-md border border-[#a88734] lg:border-transparent">
+                {isSearching ? <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Search size={22} />}
               </button>
             </form>
             {showSuggestions && (
@@ -545,7 +599,7 @@ export default function Header() {
             )}
           </div>
 
-          <div className="order-2 lg:order-4 me-auto lg:me-0 relative flex items-center gap-1 sm:gap-2 lg:gap-4">
+          <div className="hidden lg:flex order-2 lg:order-4 me-auto lg:me-0 relative items-center gap-1 sm:gap-2 lg:gap-4">
             <div
               ref={accountMenuRef}
               className={`relative flex flex-col p-1 sm:p-2 border border-transparent hover:border-zinc-300 rounded-sm shrink-0 cursor-pointer ${isAdmin ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-200/50' : (isVendor ? 'bg-brand-light/40 border-brand-light/30 ring-1 ring-brand-light/20' : '')}`}
@@ -559,7 +613,7 @@ export default function Header() {
                 }
               }}
             >
-              {authLoading ? (
+              {authLoading && !forceHideSpinner ? (
                 <div className="flex items-center justify-center h-[34px] px-2 sm:px-6">
                   <div className="w-5 h-5 border-2 border-[#ccc] border-t-transparent rounded-full animate-spin" />
                 </div>
@@ -580,7 +634,7 @@ export default function Header() {
                   </div>
                 </>
               )}
-              {isAccountMenuOpen && user && !authLoading && (
+              {isAccountMenuOpen && user && (!authLoading || forceHideSpinner) && (
                 <div className="absolute top-[100%] end-0 pt-2 z-[200]">
                   <div className="absolute top-[4px] end-4 sm:end-10 w-4 h-4 bg-white rotate-45 border-r border-t border-zinc-200 z-[201]"></div>
                   <div className="w-[300px] sm:w-[600px] h-[420px] bg-white text-zinc-900 shadow-[0_12px_40px_rgba(0,0,0,0.18)] rounded-lg border border-zinc-200 flex flex-col sm:flex-row animate-in fade-in zoom-in-95 duration-150 overflow-hidden relative z-[200]">

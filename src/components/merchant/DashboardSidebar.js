@@ -60,14 +60,26 @@ const menuItems = [
   }
 ];
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ isMobileOpen, setIsMobileOpen }) {
   const pathname = usePathname();
   const { user, customerName, isVendor, isApprovedVendor, isAdmin, logout, messagingEnabled } = useAuth();
   const locale = useLocale();
   const isAr = locale === "ar";
 
   return (
-    <aside className={`fixed top-0 z-40 h-screen w-64 bg-white text-zinc-900 flex flex-col border-zinc-200 shadow-sm ${isAr ? 'right-0 border-l' : 'left-0 border-r'}`}>
+    <>
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 z-[90] lg:hidden animate-in fade-in duration-300" 
+          onClick={() => setIsMobileOpen(false)} 
+        />
+      )}
+      <aside className={`
+        fixed top-0 z-[100] h-screen w-64 bg-white text-zinc-900 flex flex-col border-zinc-200 shadow-sm
+        transition-transform duration-300 ease-in-out lg:translate-x-0
+        ${isAr ? 'right-0 border-l' : 'left-0 border-r'}
+        ${isMobileOpen ? 'translate-x-0' : (isAr ? 'translate-x-full' : '-translate-x-full')}
+      `}>
       {/* Logo Area */}
       <div className="p-6 border-b border-zinc-200 h-[60px] flex items-center">
         <Link href="/">
@@ -145,5 +157,6 @@ export default function DashboardSidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

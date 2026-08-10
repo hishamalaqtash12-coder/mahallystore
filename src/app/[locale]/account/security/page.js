@@ -14,6 +14,8 @@ import {
   Mail,
   Eye,
   EyeOff,
+  CheckCircle,
+  ChevronDown,
 } from "lucide-react";
 import Loader from "@/components/Loader";
 import { useLocale, useTranslations } from "next-intl";
@@ -30,6 +32,7 @@ export default function AccountSecurityPage() {
     phone: wooPhone,
     wooId,
     refreshAuth,
+    logout,
     loading,
   } = useAuth();
 
@@ -47,20 +50,36 @@ export default function AccountSecurityPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [newPhone, setNewPhone] = useState("+962");
 
-  // Password States
+  // Password States (Required for Email Change)
   const [currentPassword, setCurrentPassword] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const hasPassword = true;
 
   // Email Verification States
   const [emailStep, setEmailStep] = useState("enter_new");
   const [emailOtp, setEmailOtp] = useState(["", "", "", "", "", ""]);
   const [confirmNewEmail, setConfirmNewEmail] = useState("");
   const emailOtpRefs = useRef([]);
+  const phoneOtpRefs = useRef([]);
 
-  const hasPassword = true;
+  const handleOtpPaste = (e, setOtpFn, refs) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
+    if (!/^\d+$/.test(pastedData)) return;
+
+    const digits = pastedData.slice(0, 6).split("");
+    const newOtp = ["", "", "", "", "", ""];
+    digits.forEach((digit, index) => {
+      newOtp[index] = digit;
+    });
+
+    setOtpFn(newOtp);
+
+    const nextEmptyIndex = newOtp.findIndex((val) => val === "");
+    const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
+    refs.current[focusIndex]?.focus();
+  };
 
   const handleSaveName = async () => {
     setIsSaving(true);
@@ -81,7 +100,7 @@ export default function AccountSecurityPage() {
         setEditingField(null);
       }
     } catch (err) {
-      setMessage({ type: "error", text: err.message });
+      setMessage({ type: "error", text: err.message || t("updateFailed") });
     } finally {
       setIsSaving(false);
     }
@@ -89,16 +108,13 @@ export default function AccountSecurityPage() {
 
   const handleCancelEdit = () => {
     setEditingField(null);
-    setCurrentPassword("");
     setEmailStep("enter_new");
-    setPhoneStep("verify_current");
+    setPhoneStep("verify_email_send_otp");
     setOtp(["", "", "", "", "", ""]);
     setEmailOtp(["", "", "", "", "", ""]);
-    setNewPassword("");
-    setConfirmPassword("");
-    setMessage(null);
+    setCurrentPassword("");
     setShowCurrentPassword(false);
-    setShowNewPassword(false);
+    setMessage(null);
   };
 
   const verifyPasswordWithBackend = async (pass) => {
@@ -212,15 +228,17 @@ export default function AccountSecurityPage() {
 
       await refreshAuth();
       setMessage({ type: "success", text: t("emailUpdated") });
-      setEditingField(null);
-      setCurrentPassword("");
-      setEmailStep("enter_new");
+      setTimeout(() => {
+        setEditingField(null);
+        setCurrentPassword("");
+        setEmailStep("enter_new");
+        setIsSaving(false);
+      }, 1500);
     } catch (err) {
       setMessage({
         type: "error",
         text: err.message || t("failedUpdateEmail"),
       });
-    } finally {
       setIsSaving(false);
     }
   };
@@ -242,109 +260,74 @@ export default function AccountSecurityPage() {
   // --- PHONE WIZARD LOGIC ---
   const handleEditPhone = () => {
     setEditingField("phone");
-    if (!wooPhone) {
-      setPhoneStep("enter_new");
-    } else {
-      setPhoneStep("verify_current");
-    }
+    setPhoneStep("verify_email_send_otp");
     setOtp(["", "", "", "", "", ""]);
     setNewPhone("+962");
     setCurrentPassword("");
     setMessage(null);
   };
 
-  const handleVerifyPasswordForPhone = async () => {
-    if (!currentPassword) {
-      setMessage({ type: "error", text: t("passwordRequired") });
+  const sendEmailOTPForPhone = async () => {
+    setIsSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/auth/email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: wooEmail || user?.email, action: "send" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || t("failedSendCode"));
+      setPhoneStep("verify_email_otp");
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || t("failedSendCode") });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const verifyEmailOTPForPhone = async () => {
+    const code = otp.join("");
+    if (code.length < 6) {
+      setMessage({ type: "error", text: t("enterFullCode") });
       return;
     }
     setIsSaving(true);
     setMessage(null);
     try {
-      await verifyPasswordWithBackend(currentPassword);
-      setPhoneStep("enter_new");
-      setCurrentPassword("");
-    } catch (err) {
-      setMessage({ type: "error", text: err.message });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const sendOTPToCurrent = async () => {
-    setIsSaving(true);
-    setMessage(null);
-    try {
-      const res = await fetch("/api/auth/phone-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: wooPhone, action: "send" }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      setPhoneStep("otp_current");
-    } catch (err) {
-      setMessage({ type: "error", text: t("failedSendOtpCurrent") });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const verifyCurrentOTP = async () => {
-    setIsSaving(true);
-    setMessage(null);
-    try {
-      const res = await fetch("/api/auth/phone-otp", {
+      const res = await fetch("/api/auth/email-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phone: wooPhone,
-          code: otp.join(""),
+          email: wooEmail || user?.email,
+          code,
           action: "verify",
         }),
       });
-      if (!res.ok) throw new Error("Invalid code");
-      setPhoneStep("enter_new");
-      setOtp(["", "", "", "", "", ""]);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || t("invalidCode"));
+
+      setMessage({ type: "success", text: t("codeVerifiedSuccess", { defaultValue: "Code verified successfully!" }) });
+      setTimeout(() => {
+        setPhoneStep("enter_new");
+        setOtp(["", "", "", "", "", ""]);
+        setMessage(null);
+        setIsSaving(false);
+      }, 1500);
     } catch (err) {
-      setMessage({ type: "error", text: t("invalidCode") });
-    } finally {
+      setMessage({ type: "error", text: err.message || t("invalidCode") });
       setIsSaving(false);
     }
   };
 
-  const sendOTPToNew = async () => {
-    setIsSaving(true);
-    setMessage(null);
-    try {
-      const res = await fetch("/api/auth/phone-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: newPhone, action: "send" }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      setPhoneStep("otp_new");
-    } catch (err) {
-      setMessage({ type: "error", text: t("failedSendOtpNew") });
-    } finally {
-      setIsSaving(false);
+  const saveNewPhoneDirectly = async () => {
+    if (!newPhone || newPhone.trim() === "") {
+      setMessage({ type: "error", text: t("validPhoneRequired") });
+      return;
     }
-  };
-
-  const verifyNewOTPAndSave = async () => {
     setIsSaving(true);
     setMessage(null);
     try {
-      const verifyRes = await fetch("/api/auth/phone-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: newPhone,
-          code: otp.join(""),
-          action: "verify",
-        }),
-      });
-      if (!verifyRes.ok) throw new Error(t("invalidCode"));
-
       const res = await fetch("/api/auth/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -358,62 +341,19 @@ export default function AccountSecurityPage() {
       });
 
       if (res.ok) {
-        await refreshAuth();
         setMessage({ type: "success", text: t("phoneUpdated") });
         setEditingField(null);
+        setTimeout(() => {
+          logout();
+        }, 1500);
+      } else {
+        const data = await res.json();
+        throw new Error(data.error || t("updateFailed"));
       }
     } catch (err) {
       setMessage({
         type: "error",
-        text: t("verificationFailed", { error: err.message }),
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // --- PASSWORD UPDATE LOGIC ---
-  const handleSavePassword = async () => {
-    if (!currentPassword) {
-      setMessage({ type: "error", text: t("passwordRequired") });
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setMessage({ type: "error", text: t("passwordsDoNotMatch") });
-      return;
-    }
-    if (newPassword.length < 6) {
-      setMessage({ type: "error", text: t("passwordMinLength") });
-      return;
-    }
-    setIsSaving(true);
-    setMessage(null);
-    try {
-      await verifyPasswordWithBackend(currentPassword);
-
-      const res = await fetch("/api/auth/update-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wooId,
-          updates: { password: newPassword },
-        }),
-      });
-
-      if (!res.ok) {
-        const resData = await res.json();
-        throw new Error(resData.error || t("failedSyncPassword"));
-      }
-
-      setMessage({ type: "success", text: t("passwordUpdated") });
-      setEditingField(null);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      setMessage({
-        type: "error",
-        text: err.message || t("failedUpdatePassword"),
+        text: err.message || t("updateFailed"),
       });
     } finally {
       setIsSaving(false);
@@ -601,10 +541,10 @@ export default function AccountSecurityPage() {
 
                   {emailStep === "otp_new" && (
                     <div className="space-y-4">
-                      <p className="text-[14px] text-gray-500">
+                      <p className="text-[14px] text-gray-500 mb-2">
                         {t("otpSentTo", { email: confirmNewEmail })}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-center sm:justify-start" dir="ltr">
                         {emailOtp.map((d, i) => (
                           <input
                             key={i}
@@ -612,6 +552,8 @@ export default function AccountSecurityPage() {
                             type="text"
                             maxLength={1}
                             value={d}
+                            autoFocus={i === 0}
+                            onPaste={(e) => handleOtpPaste(e, setEmailOtp, emailOtpRefs)}
                             onChange={(e) =>
                               handleEmailOtpChange(e.target.value, i)
                             }
@@ -685,50 +627,21 @@ export default function AccountSecurityPage() {
                     {t("changeMobile")}
                   </h3>
 
-                  {phoneStep === "verify_password_phone" && (
+                  {phoneStep === "verify_email_send_otp" && (
                     <div className="space-y-4">
                       <p className="text-[14px] text-gray-500 mb-2">
-                        {t("verifyPasswordContinue")}
+                        {t("verifyEmailContinue")}
                       </p>
-                      <div>
-                        <label className="text-[13px] font-bold text-zinc-900 block mb-1">
-                          {t("currentPassword")}
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={showCurrentPassword ? "text" : "password"}
-                            value={currentPassword}
-                            onChange={(e) =>
-                              setCurrentPassword(e.target.value)
-                            }
-                            placeholder={t("confirmPasswordPlaceholder")}
-                            className="w-full h-10 px-4 pe-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black"
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowCurrentPassword(!showCurrentPassword)
-                            }
-                            className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                          >
-                            {showCurrentPassword ? (
-                              <EyeOff size={16} />
-                            ) : (
-                              <Eye size={16} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
                       <div className="flex gap-3">
                         <button
-                          onClick={handleVerifyPasswordForPhone}
+                          onClick={sendEmailOTPForPhone}
                           disabled={isSaving}
                           className="h-10 px-8 bg-black text-white rounded-md text-[14px] font-bold flex items-center gap-2"
                         >
                           {isSaving ? (
                             <Loader size="sm" text="" />
                           ) : (
-                            t("continue")
+                            t("sendCode")
                           )}
                         </button>
                         <button
@@ -741,90 +654,88 @@ export default function AccountSecurityPage() {
                     </div>
                   )}
 
-                  {phoneStep === "verify_current" && (
+                  {phoneStep === "verify_email_otp" && (
                     <div className="space-y-4">
-                      <p className="text-[14px] text-gray-500">
-                        {t("verifyCurrentNumber")}{" "}
-                        <span className="font-bold text-black">
-                          {wooPhone || user?.phone}
-                        </span>
+                      <div className="p-3 bg-green-50 border border-green-100 rounded-md text-[13px] text-green-700 font-medium flex items-center gap-2">
+                        <CheckCircle size={16} className="text-green-600 shrink-0" />
+                        <span>{t("otpSentTo", { email: wooEmail || user?.email })}</span>
+                      </div>
+                      <p className="text-[14px] font-bold">
+                        {t("enter6DigitCode")}
                       </p>
+                      <div className="flex gap-2 justify-center sm:justify-start" dir="ltr">
+                        {otp.map((d, i) => (
+                          <input
+                            key={i}
+                            ref={(el) => (phoneOtpRefs.current[i] = el)}
+                            type="text"
+                            maxLength={1}
+                            value={d}
+                            autoFocus={i === 0}
+                            onPaste={(e) => handleOtpPaste(e, setOtp, phoneOtpRefs)}
+                            onChange={(e) => {
+                              const next = [...otp];
+                              next[i] = e.target.value;
+                              setOtp(next);
+                              if (e.target.value && i < 5)
+                                phoneOtpRefs.current[i + 1]?.focus();
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Backspace" && !otp[i] && i > 0) {
+                                phoneOtpRefs.current[i - 1]?.focus();
+                              }
+                            }}
+                            className="w-10 h-10 text-center border border-gray-200 rounded-md text-[18px] font-bold focus:border-black outline-none"
+                          />
+                        ))}
+                      </div>
                       <button
-                        onClick={sendOTPToCurrent}
-                        disabled={isSaving}
-                        className="h-10 px-8 bg-black text-white rounded-md text-[14px] font-bold flex items-center gap-2"
+                        onClick={verifyEmailOTPForPhone}
+                        disabled={isSaving || otp.join("").length < 6}
+                        className="h-10 px-8 bg-black text-white rounded-md text-[14px] font-bold"
                       >
                         {isSaving ? (
                           <Loader size="sm" text="" />
                         ) : (
-                          t("sendCode")
+                          t("verify")
                         )}
                       </button>
                     </div>
                   )}
-
-                  {(phoneStep === "otp_current" ||
-                    phoneStep === "otp_new") && (
-                      <div className="space-y-4">
-                        <p className="text-[14px] font-bold">
-                          {t("enter6DigitCode")}
-                        </p>
-                        <div className="flex gap-2">
-                          {otp.map((d, i) => (
-                            <input
-                              key={i}
-                              type="text"
-                              maxLength={1}
-                              value={d}
-                              onChange={(e) => {
-                                const next = [...otp];
-                                next[i] = e.target.value;
-                                setOtp(next);
-                                if (e.target.value && e.target.nextSibling)
-                                  e.target.nextSibling.focus();
-                              }}
-                              className="w-10 h-10 text-center border border-gray-200 rounded-md text-[18px] font-bold focus:border-black outline-none"
-                            />
-                          ))}
-                        </div>
-                        <button
-                          onClick={
-                            phoneStep === "otp_current"
-                              ? verifyCurrentOTP
-                              : verifyNewOTPAndSave
-                          }
-                          disabled={isSaving || otp.join("").length < 6}
-                          className="h-10 px-8 bg-black text-white rounded-md text-[14px] font-bold"
-                        >
-                          {isSaving ? (
-                            <Loader size="sm" text="" />
-                          ) : (
-                            t("verify")
-                          )}
-                        </button>
-                      </div>
-                    )}
 
                   {phoneStep === "enter_new" && (
                     <div className="space-y-4">
                       <p className="text-[14px] font-bold">
                         {t("newMobileNumber")}
                       </p>
-                      <input
-                        type="tel"
-                        value={newPhone}
-                        onChange={(e) => setNewPhone(e.target.value)}
-                        className="w-full h-10 px-4 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black"
-                      />
+                      <div dir="ltr" className="flex h-10 rounded-[3px] border border-gray-300 focus-within:border-[#be374f] focus-within:ring-1 focus-within:ring-[#be374f] overflow-hidden transition-all bg-white">
+                        <div className="flex items-center gap-1 bg-gray-50 border-r border-gray-300 px-3 text-[14px] text-gray-700 select-none">
+                          <span>+962</span>
+                          <ChevronDown size={14} className="text-gray-500" />
+                        </div>
+                        <input
+                          type="tel"
+                          dir="ltr"
+                          value={newPhone.replace(/^\+962/, "")}
+                          onChange={(e) => {
+                            let val = e.target.value.replace(/[^\d\s-]/g, "");
+                            if (val.startsWith("0")) val = val.substring(1);
+                            setNewPhone("+962" + val);
+                          }}
+                          placeholder="7X XXX XXXX"
+                          className="flex-1 h-full bg-transparent px-3 text-[14px] outline-none min-w-0"
+                          autoFocus
+                        />
+                      </div>
                       <button
-                        onClick={sendOTPToNew}
+                        onClick={saveNewPhoneDirectly}
                         disabled={isSaving}
                         className="h-10 px-8 bg-black text-white rounded-md text-[14px] font-bold"
                       >
                         {isSaving ? (
                           <Loader size="sm" text="" />
                         ) : (
-                          t("verifyNewNumber")
+                          t("save")
                         )}
                       </button>
                     </div>
@@ -852,126 +763,6 @@ export default function AccountSecurityPage() {
           </div>
         </div>
 
-        {/* PASSWORD SECTION */}
-        <div className="p-8 flex flex-col gap-4 hover:bg-gray-50/5 transition-colors">
-          <div className="flex items-start justify-between">
-            <div className="flex gap-4 w-full">
-              <div className="w-10 h-10 bg-gray-50 rounded-md flex items-center justify-center text-gray-400 border border-gray-100 border-none shrink-0">
-                <Lock size={20} />
-              </div>
-              {!editingField || editingField !== "password" ? (
-                <div>
-                  <h3 className="text-[16px] font-bold text-gray-900">
-                    {t("password")}
-                  </h3>
-                  <p className="text-[14px] text-gray-500 mt-1">********</p>
-                </div>
-              ) : (
-                <div className="flex-1 min-w-[300px]">
-                  <h3 className="text-[16px] font-bold text-gray-900 mb-6">
-                    {t("changePassword")}
-                  </h3>
-                  <div className="space-y-4 mb-6">
-                    <div>
-                      <label className="text-[13px] font-bold text-zinc-900 block mb-1">
-                        {t("currentPassword")}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showCurrentPassword ? "text" : "password"}
-                          value={currentPassword}
-                          onChange={(e) =>
-                            setCurrentPassword(e.target.value)
-                          }
-                          placeholder={t("enterCurrentPassword")}
-                          className="w-full h-10 px-4 pe-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowCurrentPassword(!showCurrentPassword)
-                          }
-                          className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                        >
-                          {showCurrentPassword ? (
-                            <EyeOff size={16} />
-                          ) : (
-                            <Eye size={16} />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-[13px] font-bold text-zinc-900 block mb-1">
-                        {t("newPassword")}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showNewPassword ? "text" : "password"}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder={t("newPasswordPlaceholder")}
-                          className="w-full h-10 px-4 pe-10 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowNewPassword(!showNewPassword)
-                          }
-                          className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                        >
-                          {showNewPassword ? (
-                            <EyeOff size={16} />
-                          ) : (
-                            <Eye size={16} />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-[13px] font-bold text-zinc-900 block mb-1">
-                        {t("confirmNewPassword")}
-                      </label>
-                      <input
-                        type="password"
-                        placeholder={t("confirmNewPasswordPlaceholder")}
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full h-10 px-4 border border-gray-200 rounded-md text-[14px] outline-none focus:border-black"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleSavePassword}
-                      disabled={isSaving}
-                      className="h-10 px-8 bg-black text-white rounded-md text-[14px] font-bold flex items-center gap-2"
-                    >
-                      {isSaving ? <Loader size="sm" text="" /> : t("save")}
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="h-10 px-8 bg-white border border-gray-200 rounded-md text-[14px] font-bold hover:bg-gray-50 transition-all"
-                    >
-                      {t("cancel")}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            {!editingField && hasPassword && (
-              <button
-                onClick={() => {
-                  handleCancelEdit();
-                  setEditingField("password");
-                }}
-                className="h-10 px-8 bg-white border border-gray-200 rounded-md text-[14px] font-bold hover:bg-gray-50 transition-all shrink-0"
-              >
-                {t("edit")}
-              </button>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

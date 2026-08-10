@@ -147,26 +147,29 @@ function AccountOrdersContent() {
 
   return (
     <div className="w-full">
-      {/* Orders Header Tabs */}
-      <div className="flex items-center gap-8 mb-6 border-b border-gray-100 pb-0.5 overflow-x-auto">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.id}
-            href={tab.id === 'all' ? '/account/orders' : `/account/orders?status=${tab.id}`}
-            className={`pb-3 text-[15px] whitespace-nowrap font-medium relative ${activeStatus === tab.id ? 'text-black' : 'text-gray-500 hover:text-black transition-colors'}`}
-          >
-            {tab.label}
-            {activeStatus === tab.id && <div className="absolute bottom-0 end-0 w-full h-[2px] bg-black"></div>}
-          </Link>
-        ))}
+      {/* Orders Header Tabs & Search */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-gray-100 pb-2 md:pb-0">
+        
+        <div className="flex items-center gap-8 overflow-x-auto w-full md:w-auto hide-scrollbar">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.id}
+              href={tab.id === 'all' ? '/account/orders' : `/account/orders?status=${tab.id}`}
+              className={`pb-3 text-[15px] whitespace-nowrap font-medium relative ${activeStatus === tab.id ? 'text-black' : 'text-gray-500 hover:text-black transition-colors'}`}
+            >
+              {tab.label}
+              {activeStatus === tab.id && <div className="absolute bottom-0 end-0 w-full h-[2px] bg-black"></div>}
+            </Link>
+          ))}
+        </div>
 
-        <div className="me-auto relative mb-2">
+        <div className="relative shrink-0 w-full md:w-auto mb-2 md:mb-1.5">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="اسم المنتج / رقم الطلب"
-            className="w-72 h-9 bg-gray-50 border border-gray-200 rounded-md pe-4 ps-10 text-[13px] outline-none focus:border-[#be374f] focus:bg-white transition-all text-start"
+            className="w-full md:w-72 h-9 bg-gray-50 border border-gray-200 rounded-md pe-4 ps-10 text-[13px] outline-none focus:border-[#be374f] focus:bg-white transition-all text-start"
             dir="rtl"
           />
           <Search size={16} className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400" />

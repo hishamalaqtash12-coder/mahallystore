@@ -49,8 +49,10 @@ function LoginContent() {
 
   // All useEffect hooks must be called unconditionally
   useEffect(() => {
-    if (user && !authLoading) router.replace(redirectTo);
-  }, [user, authLoading, redirectTo, router]);
+    if (user && !authLoading) {
+      window.location.replace(redirectTo || '/');
+    }
+  }, [user, authLoading, redirectTo]);
 
   // Countdown timer for resend
   useEffect(() => {

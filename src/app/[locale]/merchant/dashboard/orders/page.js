@@ -95,23 +95,23 @@ export default function MerchantOrdersPage() {
           <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">{isAr ? 'الطلبات' : 'Manage Orders'}</h1>
           <p className="text-[13px] text-zinc-500 font-medium">{isAr ? 'تتبع ومعالجة مبيعات العملاء في الوقت الفعلي' : 'Track and process your customer sales in real-time'}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <input 
               type="text" 
               placeholder={isAr ? 'ابحث في الطلبات...' : 'Search orders...'} 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-64 shadow-sm"
+              className="h-[36px] bg-white border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-[#be374f] transition-all w-full sm:w-64 shadow-sm"
             />
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Filter className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-[36px] pe-9 ps-8 bg-white border border-zinc-300 rounded-md text-[13px] outline-none hover:bg-zinc-50 shadow-sm appearance-none cursor-pointer"
+              className="h-[36px] w-full sm:w-auto pe-9 ps-8 bg-white border border-zinc-300 rounded-md text-[13px] outline-none hover:bg-zinc-50 shadow-sm appearance-none cursor-pointer"
             >
               <option value="all">{isAr ? 'جميع الحالات' : 'All Statuses'}</option>
               <option value="pending">{isAr ? 'قيد الانتظار' : 'Pending'}</option>

@@ -1,4 +1,4 @@
-import { updateCustomer } from "@/lib/woocommerce";
+import { wcApi } from "@/lib/woocommerce";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
@@ -9,8 +9,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "WooCommerce ID is required" }, { status: 400 });
     }
 
-    const updatedCustomer = await updateCustomer(wooId, updates);
+    const { data: updatedCustomer } = await wcApi.put(`customers/${wooId}`, updates);
     
+    if (!updatedCustomer || updatedCustomer.code) {
+      throw new Error(updatedCustomer?.message || "Failed to update profile via REST API");
+    }
+
     return NextResponse.json({ 
       success: true, 
       customer: {
