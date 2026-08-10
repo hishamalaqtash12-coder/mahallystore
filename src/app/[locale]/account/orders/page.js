@@ -42,6 +42,18 @@ function AccountOrdersContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [reviewedProducts, setReviewedProducts] = useState(new Set());
 
+  const formatOrderDate = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).toUpperCase();
+  };
+
   // Modal State
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -187,11 +199,29 @@ function AccountOrdersContent() {
           {filteredOrders.map(order => (
             <div key={order.id} className="bg-white border border-gray-100 rounded-md overflow-hidden hover:shadow-sm transition-shadow" dir="rtl">
               <div className="bg-gray-50/50 px-6 py-3 flex items-center justify-between border-b border-gray-50 text-[12px] text-gray-500">
-                <div className="flex gap-8">
+                <div className="flex flex-wrap gap-8 gap-y-4">
                   <div>
                     <p className="uppercase tracking-tight mb-0.5">تاريخ الطلب</p>
-                    <p className="text-gray-900 font-medium">{new Date(order.date_created).toLocaleDateString()}</p>
+                    <p className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_created)}</p>
                   </div>
+                  {order.status === 'completed' && order.date_completed && (
+                    <div>
+                      <p className="uppercase tracking-tight mb-0.5">تاريخ الاكتمال</p>
+                      <p className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_completed)}</p>
+                    </div>
+                  )}
+                  {['cancelled', 'failed'].includes(order.status) && (
+                    <div>
+                      <p className="uppercase tracking-tight mb-0.5">تاريخ الإلغاء</p>
+                      <p className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_modified)}</p>
+                    </div>
+                  )}
+                  {['processing'].includes(order.status) && (
+                    <div>
+                      <p className="uppercase tracking-tight mb-0.5">تاريخ المعالجة</p>
+                      <p className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_paid || order.date_modified)}</p>
+                    </div>
+                  )}
                   <div>
                     <p className="uppercase tracking-tight mb-0.5">المجموع</p>
                     <p className="text-gray-900 font-bold" dir="ltr">JOD {parseFloat(order.total).toFixed(2)}</p>
@@ -254,13 +284,13 @@ function AccountOrdersContent() {
                                   {item.image?.src ? <img src={item.image.src} alt={item.name} className="w-full h-full object-contain" /> : <Package size={24} className="text-gray-200" />}
                                 </div>
                                 <div className="flex-1">
-                                  <Link href={getProductUrl(item)} className="text-[14px] text-gray-800 hover:text-[#be374f] font-medium line-clamp-1 mb-1">{item.name}</Link>
+                                  <Link href={getProductUrl(item, { storeName: vendor.name, storeId: vendor.id === "mahally" ? "" : vendor.id })} className="text-[14px] text-gray-800 hover:text-[#be374f] font-medium line-clamp-1 mb-1">{item.name}</Link>
                                   <p className="text-[12px] text-gray-500 mb-2">الكمية: {item.quantity}</p>
                                   <div className="flex flex-wrap items-center gap-3">
                                     {order.status === 'completed' && (
-                                      <Link href={getProductUrl(item)} className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors flex items-center">شراء مرة أخرى</Link>
+                                      <Link href={getProductUrl(item, { storeName: vendor.name, storeId: vendor.id === "mahally" ? "" : vendor.id })} className="h-8 px-4 bg-[#be374f] text-white rounded-full text-[12px] font-bold hover:bg-[#8f2d4a] transition-colors flex items-center">شراء مرة أخرى</Link>
                                     )}
-                                    {!isDelivered && (
+                                    {!isDelivered && !['cancelled', 'failed', 'refunded'].includes(order.status) && (
                                       <button onClick={() => { setSelectedOrder(order); setIsTrackingOpen(true); }} className="cursor-pointer h-8 px-4 border border-gray-200 rounded-full text-[12px] font-bold hover:bg-gray-50 transition-colors">تتبع الشحنة</button>
                                     )}
                                   </div>

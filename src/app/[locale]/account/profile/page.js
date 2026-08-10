@@ -238,8 +238,8 @@ export default function AccountProfilePage() {
                 key={color}
                 onClick={() => handleColorClick(color)}
                 className={`w-5 h-5 rounded-full border-2 transition-all ${!currentProfilePic && avatarBgColor === color
-                    ? "border-black scale-110"
-                    : "border-transparent hover:scale-110 shadow-sm"
+                  ? "border-black scale-110"
+                  : "border-transparent hover:scale-110 shadow-sm"
                   }`}
                 style={{ backgroundColor: color }}
                 title={t("useColorTitle")}
@@ -273,10 +273,10 @@ export default function AccountProfilePage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-[13px] text-emerald-600 mb-8 font-medium bg-emerald-50 p-3 rounded-md border border-emerald-100">
+      {/* <div className="flex items-center gap-2 text-[13px] text-emerald-600 mb-8 font-medium bg-emerald-50 p-3 rounded-md border border-emerald-100">
         <ShieldCheck size={16} />
         <span>{t("privacyNote")}</span>
-      </div>
+      </div> */}
 
       <div className="bg-white rounded-md border border-gray-100 p-10 flex flex-col items-center justify-center">
         <div className="w-16 h-16 bg-gray-50 rounded-md flex items-center justify-center mb-6 border border-gray-100">

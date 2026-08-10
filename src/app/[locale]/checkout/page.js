@@ -11,10 +11,12 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Lock, ChevronRight, CheckCircle2, ChevronDown, Package, ShieldCheck } from "lucide-react";
 import Loader from "@/components/Loader";
+import { getProductMerchant } from "@/lib/product-utils";
 
 export default function CheckoutPage() {
   const t = useTranslations("Checkout");
   const tGov = useTranslations("Governorates");
+  const tProduct = useTranslations("ProductCard");
   const locale = useLocale();
   const dir = locale === "ar" ? "rtl" : "ltr";
   const { cart, clearCart } = useCart();
@@ -131,13 +133,17 @@ export default function CheckoutPage() {
           const vendorId = liveProduct.vendorId
             || liveProduct.meta_data?.find(m => m.key === "_vendor_id" || m.key === "mahally_owner_id")?.value
             || String(liveProduct.author || "");
+            
+          const { name: merchantName } = getProductMerchant(liveProduct);
 
           return {
             ...item,
             name: liveName,
             price: livePrice || item.price,
             image: liveImage,
-            vendorId: vendorId || item.vendorId
+            vendorId: vendorId || item.vendorId,
+            merchantName: merchantName || null,
+            sku: liveProduct.sku || null
           };
         });
 
@@ -329,36 +335,8 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] pb-20">
-      {/* Simple Header */}
-      <header className="bg-white border-b border-zinc-200 h-[64px] flex items-center shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 max-w-5xl flex items-center justify-between">
-          {/* Logo — always LTR, never translated */}
-          <Link href="/" className="flex items-center gap-1.5 shrink-0" dir="ltr">
-            <span className="text-2xl font-black italic tracking-tighter text-zinc-900">
-              Mahally
-            </span>
-            <span className="text-brand font-bold text-xl">.jo</span>
-          </Link>
 
-          {/* Page context, separated with a divider for clearer hierarchy */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="h-5 w-px bg-zinc-200" />
-            <h1 className="text-[18px] font-medium text-zinc-600">
-              {t("checkoutTitle")}
-            </h1>
-          </div>
-
-          {/* Trust signal — icon + label reads more professional than a bare lock */}
-          <div className="flex items-center gap-1.5 text-zinc-500">
-            <Lock size={16} className="text-zinc-400 shrink-0" />
-            <span className="hidden sm:inline text-[12px] font-medium tracking-wide">
-              {t("secureCheckout")}
-            </span>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-4 pt-8 mat-8x-w-5xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
           {/* LEFT: Step-by-Step Sections */}
@@ -450,14 +428,40 @@ export default function CheckoutPage() {
                     <h3 className="text-[18px] font-bold text-zinc-900 mb-4">{t("reviewItems")}</h3>
                     <div className="space-y-4">
                       {(enrichedCartItems.length > 0 ? enrichedCartItems : cart).map((item, i) => (
-                        <div key={i} className="flex gap-4 border border-zinc-200 rounded-md p-3">
-                          <div className="w-16 h-16 relative bg-white shrink-0 border border-zinc-100 rounded">
-                            <Image src={item.image} alt={item.name || "Cart item"} fill className="object-contain" />
+                        <div key={i} className="flex gap-4 border border-zinc-200 rounded-md p-3 bg-zinc-50/50">
+                          <div className="w-16 h-16 relative bg-white shrink-0 border border-zinc-200 rounded-md overflow-hidden">
+                            <Image src={item.image} alt={item.name || "Cart item"} fill className="object-contain p-1" />
                           </div>
-                          <div className="flex-1">
-                            <p className="text-[13px] font-bold text-zinc-900 line-clamp-1">{item.name}</p>
-                            <p className="text-[12px] text-[#007600] font-bold">{t("qty", { quantity: item.quantity })}</p>
-                            <p className="text-[12px] font-bold text-brand" dir="ltr">JOD {parseFloat(item.price).toFixed(2)}</p>
+                          <div className="flex-1 flex flex-col justify-center min-w-0">
+                            <p className="text-[13px] font-bold text-zinc-900 line-clamp-2 leading-snug">{item.name}</p>
+                            
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                              {item.sku && (
+                                  <p className="text-[11px] text-zinc-500 font-medium">
+                                    <span className="text-zinc-400">SKU:</span> {item.sku}
+                                  </p>
+                              )}
+                              {item.merchantName && (
+                                  <p className="text-[11px] text-zinc-500 font-medium">
+                                    {tProduct("soldBy", { name: item.merchantName })}
+                                  </p>
+                              )}
+                              {item.variation_name && (
+                                  <p className="text-[11px] text-zinc-500 font-medium">{item.variation_name}</p>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between mt-3 bg-white border border-zinc-200/60 shadow-sm rounded px-3 py-2">
+                              <p className="text-[12px] text-[#007600] font-bold">{t("qty", { quantity: item.quantity })}</p>
+                              <div className="flex items-center gap-2">
+                                {item.regular_price && parseFloat(item.regular_price) > parseFloat(item.price) && (
+                                    <span className="text-[11px] text-zinc-400 line-through" dir="ltr">
+                                      JOD {parseFloat(item.regular_price).toFixed(2)}
+                                    </span>
+                                )}
+                                <p className="text-[13px] font-bold text-brand" dir="ltr">JOD {parseFloat(item.price).toFixed(2)}</p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -481,21 +485,7 @@ export default function CheckoutPage() {
 
           {/* RIGHT: Order Summary Sidebar */}
           <div className="lg:col-span-4" dir={dir}>
-            <div className="bg-white border border-zinc-200 rounded-md p-5 sticky top-4">
-              <button
-                onClick={handleSubmit}
-                disabled={loading || cart.length === 0}
-                className="cursor-pointer w-full h-[29px] bg-brand hover:bg-brand-dark text-white border border-brand rounded-md text-[12px] font-bold shadow-sm transition-all mb-4"
-              >
-                {loading ? t("processing") : t("confirmOrder")}
-              </button>
-
-              <p className="text-[11px] text-zinc-500 text-center mb-4 leading-snug">
-                {t("agreeToConditions")} <Link href="/conditions" aria-label="conditions" target="_blank" className="text-brand hover:underline cursor-pointer">{t("termsOfUse")}</Link> {t("termsSuffix")}
-              </p>
-
-              <div className="h-px bg-zinc-200 w-full mb-4" />
-
+            <div className="bg-white border border-zinc-200 rounded-md p-5 sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar">
               <h3 className="text-[14px] font-bold text-zinc-900 mb-4">{t("orderSummary")}</h3>
               <div className="space-y-2 text-[12px]">
                 <div className="flex justify-between">
@@ -537,6 +527,20 @@ export default function CheckoutPage() {
                   {error}
                 </div>
               )}
+
+              <div className="h-px bg-zinc-200 w-full my-4 hidden lg:block" />
+
+              <p className="text-[11px] text-zinc-500 text-center mb-4 leading-snug hidden lg:block">
+                {t("agreeToConditions")} <Link href="/conditions" aria-label="conditions" target="_blank" className="text-brand hover:underline cursor-pointer">{t("termsOfUse")}</Link> {t("termsSuffix")}
+              </p>
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading || cart.length === 0}
+                className="hidden lg:block cursor-pointer w-full h-[40px] bg-brand hover:bg-brand-dark text-white border border-brand rounded-md text-[14px] font-bold shadow-sm transition-all"
+              >
+                {loading ? t("processing") : t("confirmOrder")}
+              </button>
             </div>
 
             {/* <div className="mt-4 p-4 bg-zinc-100 border border-zinc-200 rounded-md flex items-center gap-3">

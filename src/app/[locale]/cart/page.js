@@ -187,22 +187,6 @@ export default function CartPage() {
    // ── Cart with items ─────────────────────────────────────────
    return (
       <div className="bg-zinc-50 min-h-screen" dir={dir}>
-         {/* Trust bar */}
-         <div className="bg-white border-b border-zinc-100 py-2.5">
-            <div className="max-w-6xl mx-auto px-4 flex items-center justify-between text-[12px] font-medium">
-               <div className="flex items-center gap-5">
-                  <span className="flex items-center gap-1.5 text-emerald-600">
-                     <Truck size={14} /> {t("freeShipping")}
-                  </span>
-                  <span className="flex items-center gap-1.5 text-zinc-500">
-                     <ShieldCheck size={14} /> {t("freeReturns")}
-                  </span>
-               </div>
-               <span className="flex items-center gap-1.5 text-brand">
-                  <Lock size={13} /> {t("dataProtected")}
-               </span>
-            </div>
-         </div>
 
          <div className="max-w-6xl mx-auto px-4 py-6">
             <div className="flex flex-col lg:flex-row gap-6">

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
+import { getProductUrl } from "@/lib/product-utils";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 const ALL_EMOJIS = ["😊", "😂", "❤️", "👍", "🙏", "🔥", "✨", "🙌", "😍", "🤔", "😎", "🚀", "😢", "😅", "🥳", "😤", "🫡", "💯", "👀", "🎉", "😬", "🤝", "💪", "🫶", "😮", "🥰", "😑", "🙃", "😏", "🤩", "😴", "🫠", "👏", "🌟", "💀", "🤯"];
@@ -254,6 +255,7 @@ function MessagesContent() {
   const [refreshingConvs, setRefreshingConvs] = useState(false);
   const [refreshingMsgs, setRefreshingMsgs] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [productSearchQuery, setProductSearchQuery] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
   const [showReactionPicker, setShowReactionPicker] = useState(null);
@@ -333,6 +335,14 @@ function MessagesContent() {
     el.addEventListener("scroll", close, { passive: true });
     return () => el.removeEventListener("scroll", close);
   }, [showReactionPicker]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [newMessage]);
 
   const scrollToBottom = (behavior = "smooth") => {
     if (highlightedMessageId) {
@@ -841,7 +851,7 @@ function MessagesContent() {
             <div className={`absolute ${isAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 flex items-center gap-1.5 transition-colors ${searchQuery ? "text-[#be374f]" : "text-zinc-400 group-focus-within:text-[#be374f]"}`}>
               <Search size={15} />
             </div>
-            
+
             <input
               type="text"
               dir={isAr ? "rtl" : "ltr"}
@@ -852,7 +862,7 @@ function MessagesContent() {
             />
 
             {searchQuery && (
-              <button 
+              <button
                 onClick={() => setSearchQuery("")}
                 className={`absolute ${isAr ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#be374f] hover:bg-zinc-200/50 p-1 rounded-full transition-all`}
                 title={isAr ? "مسح البحث" : "Clear search"}
@@ -957,104 +967,104 @@ function MessagesContent() {
 
             // Apply search and flat map results
             let finalRenderList = [];
-            
+
             if (searchQuery) {
-               const q = searchQuery.toLowerCase();
-               baseList.forEach(conv => {
-                 const nameMatch = conv.name?.toLowerCase().includes(q);
-                 const msgs = conv.messages || [];
-                 const matchedMsgs = msgs.filter(m => m.text?.toLowerCase().includes(q));
-                 
-                 if (nameMatch && matchedMsgs.length === 0) {
+              const q = searchQuery.toLowerCase();
+              baseList.forEach(conv => {
+                const nameMatch = conv.name?.toLowerCase().includes(q);
+                const msgs = conv.messages || [];
+                const matchedMsgs = msgs.filter(m => m.text?.toLowerCase().includes(q));
+
+                if (nameMatch && matchedMsgs.length === 0) {
+                  finalRenderList.push({ type: 'conv', conv });
+                } else {
+                  matchedMsgs.forEach(m => {
+                    finalRenderList.push({ type: 'msg', conv, message: m });
+                  });
+                  if (nameMatch && matchedMsgs.length > 0) {
                     finalRenderList.push({ type: 'conv', conv });
-                 } else {
-                    matchedMsgs.forEach(m => {
-                       finalRenderList.push({ type: 'msg', conv, message: m });
-                    });
-                    if (nameMatch && matchedMsgs.length > 0) {
-                       finalRenderList.push({ type: 'conv', conv });
-                    }
-                 }
-               });
-               // Sort matches by time descending
-               finalRenderList.sort((a, b) => {
-                 const tA = a.type === 'msg' ? a.message.timestamp : a.conv.lastTimestamp;
-                 const tB = b.type === 'msg' ? b.message.timestamp : b.conv.lastTimestamp;
-                 return tB - tA;
-               });
+                  }
+                }
+              });
+              // Sort matches by time descending
+              finalRenderList.sort((a, b) => {
+                const tA = a.type === 'msg' ? a.message.timestamp : a.conv.lastTimestamp;
+                const tB = b.type === 'msg' ? b.message.timestamp : b.conv.lastTimestamp;
+                return tB - tA;
+              });
             } else {
-               finalRenderList = baseList.map(c => ({ type: 'conv', conv: c }));
+              finalRenderList = baseList.map(c => ({ type: 'conv', conv: c }));
             }
 
             return finalRenderList.map((item, index) => {
-               const { type, conv, message } = item;
-               const isActive = String(conv.id) === String(vendorId);
-               
-               return (
-                  <div
-                    key={`${conv.id}-${type === 'msg' ? message.id : 'c'}-${index}`}
-                    onClick={() => {
-                      const subtract = conv.unreadCount || 0;
-                      // Immediately clear unread badge (optimistic)
-                      setConversations(prev => prev.map(c =>
-                        String(c.id) === String(conv.id) ? { ...c, unreadCount: 0 } : c
-                      ));
-                      // Write read stamp immediately and notify header
-                      const now = Date.now().toString();
-                      localStorage.setItem(`mahally_read_${wooId}_${conv.id}`, now);
-                      window.dispatchEvent(new CustomEvent("mahally_read_updated", { detail: { subtract } }));
-                      
-                      // Highlight and navigate
-                      if (type === 'msg') {
-                        setHighlightedMessageId(message.id);
-                      }
-                      
-                      if (!isActive) {
-                        router.push(`/messages?to=${conv.id}`);
-                      } else if (type === 'msg') {
-                        // Already in this conversation, scroll immediately
-                        setTimeout(() => {
-                          const el = document.getElementById(`message-${message.id}`);
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 100);
-                      }
-                    }}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all border ${isActive && type === 'conv' ? "bg-[#fde7ee] border-[#b2d8dc]" : "border-transparent hover:bg-zinc-50 hover:border-zinc-200"}`}
-                  >
-                    <div className="w-9 h-9 rounded-md overflow-hidden border border-zinc-200 bg-white shrink-0 relative">
-                      {conv.logo ? (
-                        <Image src={conv.logo} alt="logo" fill className="object-contain p-1" />
-                      ) : (
-                        <div className="w-full h-full bg-zinc-50 flex items-center justify-center text-zinc-300">
-                          <Store size={16} />
-                        </div>
+              const { type, conv, message } = item;
+              const isActive = String(conv.id) === String(vendorId);
+
+              return (
+                <div
+                  key={`${conv.id}-${type === 'msg' ? message.id : 'c'}-${index}`}
+                  onClick={() => {
+                    const subtract = conv.unreadCount || 0;
+                    // Immediately clear unread badge (optimistic)
+                    setConversations(prev => prev.map(c =>
+                      String(c.id) === String(conv.id) ? { ...c, unreadCount: 0 } : c
+                    ));
+                    // Write read stamp immediately and notify header
+                    const now = Date.now().toString();
+                    localStorage.setItem(`mahally_read_${wooId}_${conv.id}`, now);
+                    window.dispatchEvent(new CustomEvent("mahally_read_updated", { detail: { subtract } }));
+
+                    // Highlight and navigate
+                    if (type === 'msg') {
+                      setHighlightedMessageId(message.id);
+                    }
+
+                    if (!isActive) {
+                      router.push(`/messages?to=${conv.id}`);
+                    } else if (type === 'msg') {
+                      // Already in this conversation, scroll immediately
+                      setTimeout(() => {
+                        const el = document.getElementById(`message-${message.id}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 100);
+                    }
+                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all border ${isActive && type === 'conv' ? "bg-[#fde7ee] border-[#b2d8dc]" : "border-transparent hover:bg-zinc-50 hover:border-zinc-200"}`}
+                >
+                  <div className="w-9 h-9 rounded-md overflow-hidden border border-zinc-200 bg-white shrink-0 relative">
+                    {conv.logo ? (
+                      <Image src={conv.logo} alt="logo" fill className="object-contain p-1" />
+                    ) : (
+                      <div className="w-full h-full bg-zinc-50 flex items-center justify-center text-zinc-300">
+                        <Store size={16} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-baseline">
+                      <p className={`text-[13px] font-medium truncate ${isActive && type === 'conv' ? "text-[#be374f]" : "text-zinc-900"}`}>{conv.name}</p>
+                      <span className="text-[11px] text-zinc-400 shrink-0 me-2">
+                        {type === 'msg' ? (message.timestamp ? formatDateTime(message.timestamp, isAr) : message.time) : (conv.lastTimestamp ? formatDateTime(conv.lastTimestamp, isAr) : conv.time)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <p className={`text-[12px] truncate ${conv.unreadCount > 0 && !isActive ? "text-zinc-900 font-bold" : "text-zinc-500"}`}>
+                        {type === 'msg' ? (
+                          <>
+                            <span className="text-[10px] bg-zinc-100 text-zinc-600 px-1 rounded inline-block me-1">{isAr ? "رسالة:" : "Match:"}</span>
+                            {message.text}
+                          </>
+                        ) : conv.lastMessage}
+                      </p>
+                      {conv.unreadCount > 0 && type === 'conv' && (
+                        <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 me-2">
+                          {conv.unreadCount}
+                        </span>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline">
-                        <p className={`text-[13px] font-medium truncate ${isActive && type === 'conv' ? "text-[#be374f]" : "text-zinc-900"}`}>{conv.name}</p>
-                        <span className="text-[11px] text-zinc-400 shrink-0 me-2">
-                          {type === 'msg' ? (message.timestamp ? formatDateTime(message.timestamp, isAr) : message.time) : (conv.lastTimestamp ? formatDateTime(conv.lastTimestamp, isAr) : conv.time)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between mt-0.5">
-                        <p className={`text-[12px] truncate ${conv.unreadCount > 0 && !isActive ? "text-zinc-900 font-bold" : "text-zinc-500"}`}>
-                          {type === 'msg' ? (
-                            <>
-                              <span className="text-[10px] bg-zinc-100 text-zinc-600 px-1 rounded inline-block me-1">{isAr ? "رسالة:" : "Match:"}</span>
-                              {message.text}
-                            </>
-                          ) : conv.lastMessage}
-                        </p>
-                        {conv.unreadCount > 0 && type === 'conv' && (
-                          <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#be374f] text-white text-[10px] font-bold rounded-full shadow-sm animate-pulse shrink-0 me-2">
-                            {conv.unreadCount}
-                          </span>
-                        )}
-                      </div>
-                    </div>
                   </div>
-               );
+                </div>
+              );
             });
           })()}
         </div>
@@ -1078,7 +1088,7 @@ function MessagesContent() {
               <header className="h-[56px] flex items-center justify-between px-5 border-b border-zinc-200 bg-white shrink-0">
                 <div className="flex items-center gap-3">
                   <button onClick={() => router.push("/messages")} className="lg:hidden p-1 text-zinc-500">
-                    <ArrowLeft size={20} />
+                    {!isAr ? <ArrowLeft size={20} /> : <ArrowRight size={20} />}
                   </button>
                   <div className="w-8 h-8 rounded-md bg-zinc-50 border border-zinc-200 overflow-hidden relative flex items-center justify-center">
                     {isAdminAccount
@@ -1164,17 +1174,28 @@ function MessagesContent() {
                             </div>
                           )}
 
-                          {msg.customMeta?.type === "product" && !msg.isDeleted && (
-                            <div className={`mt-2 p-2.5 rounded-md border flex gap-2.5 ${isMe ? "bg-white/10 border-white/20" : "bg-zinc-50 border-zinc-200"}`}>
-                              <div className="w-10 h-10 bg-white rounded-md shrink-0 overflow-hidden relative border border-zinc-100">
-                                <Image src={msg.customMeta.image || "https://placehold.co/100"} alt="product" fill className="object-contain p-1" />
-                              </div>
-                              <div>
-                                <p className="text-[12px] font-medium leading-tight">{msg.customMeta.name}</p>
-                                <p className={`text-[12px] font-semibold mt-0.5 ${isMe ? "text-white" : "text-[#be374f]"}`}>د.أ {msg.customMeta.price}</p>
-                              </div>
-                            </div>
-                          )}
+                          {msg.customMeta?.type === "product" && !msg.isDeleted && (() => {
+                            const pUrl = msg.customMeta.url || getProductUrl({ id: msg.customMeta.id, name: msg.customMeta.name }, { storeName: vendor?.storeName || "", storeId: vendorId || "" });
+                            return (
+                              <Link href={pUrl} className={`group mt-3 p-3 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center gap-3.5 transition-all shadow-sm hover:shadow-md ${isMe ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-white border-zinc-200 hover:border-[#be374f]"}`}>
+                                <div className="w-16 h-16 sm:w-14 sm:h-14 bg-white rounded-lg shrink-0 overflow-hidden relative border border-zinc-100 shadow-sm">
+                                  <Image src={msg.customMeta.image || "https://placehold.co/100"} alt="product" fill className="object-cover" />
+                                </div>
+                                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                  <p className={`text-[13px] font-semibold leading-snug line-clamp-2 ${isMe ? "text-white" : "text-zinc-900 group-hover:text-[#be374f] transition-colors"}`}>{msg.customMeta.name}</p>
+                                  <div className="flex items-center gap-2 mt-1.5">
+                                    <p className={`text-[14px] font-bold ${isMe ? "text-white" : "text-[#be374f]"}`}>د.أ {msg.customMeta.price}</p>
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isMe ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-600"}`}>
+                                      {isAr ? "عرض المنتج" : "View Product"}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={`hidden sm:flex items-center justify-center w-8 h-8 rounded-full shrink-0 ${isMe ? "bg-white/20 text-white" : "bg-zinc-50 text-zinc-400 group-hover:bg-[#be374f] group-hover:text-white"} transition-colors`}>
+                                  <ChevronRight size={16} className={isAr ? "rotate-180" : ""} />
+                                </div>
+                              </Link>
+                            );
+                          })()}
 
                           <div className={`flex items-center gap-1 mt-1.5 justify-end ${isMe ? "text-white/50" : "text-zinc-400"}`}>
                             <span className="text-[10px]">{msg.timestamp ? formatDateTime(msg.timestamp, isAr) : msg.time}</span>
@@ -1363,7 +1384,7 @@ function MessagesContent() {
                       }
                     }}
                     placeholder={isAr ? "اكتب رسالة..." : "Write a message..."}
-                    className="flex-1 bg-transparent border-none py-1.5 px-1 text-[13px] outline-none resize-none text-zinc-800 placeholder:text-zinc-400 custom-scrollbar"
+                    className="flex-1 bg-transparent border-none py-1.5 px-1 text-[13px] outline-none resize-none text-zinc-800 placeholder:text-zinc-400 overflow-y-auto max-h-[96px] custom-scrollbar"
                   />
 
                   <button
@@ -1408,9 +1429,21 @@ function MessagesContent() {
 
         {/* ── INFO PANEL ── */}
         {showInfo && vendorId && (
-          <aside className="hidden xl:flex w-[260px] bg-white border-l border-zinc-200 flex-col shrink-0">
-            {/* Tabs */}
-            <div className={`flex border-b border-zinc-200 h-[56px] items-end px-4 shrink-0`}>
+          <>
+            {/* Mobile Backdrop */}
+            <div 
+              className="xl:hidden absolute inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity" 
+              onClick={() => setShowInfo(false)} 
+            />
+            <aside className={`absolute xl:static inset-y-0 ${isAr ? 'left-0 border-r' : 'right-0 border-l'} z-50 w-[280px] xl:w-[260px] bg-white border-zinc-200 flex flex-col shrink-0 shadow-2xl xl:shadow-none animate-in ${isAr ? 'slide-in-from-left-8' : 'slide-in-from-right-8'} xl:animate-none`}>
+              {/* Tabs */}
+              <div className={`flex border-b border-zinc-200 h-[56px] items-end px-4 shrink-0 relative`}>
+                <button 
+                  onClick={() => setShowInfo(false)} 
+                  className="xl:hidden absolute top-1/2 -translate-y-1/2 end-3 p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-full transition-all"
+                >
+                  <X size={18} />
+                </button>
               {isAdminAccount ? (
                 <div className="pb-2 text-[13px] font-medium text-zinc-900">{isAr ? "معلومات الدعم" : "Support Info"}</div>
               ) : (
@@ -1508,11 +1541,20 @@ function MessagesContent() {
 
                   {activeTab === "products" && (
                     <div className="space-y-2">
+                      <div className="relative mb-3">
+                        <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                        <input
+                          value={productSearchQuery}
+                          onChange={(e) => setProductSearchQuery(e.target.value)}
+                          placeholder={isAr ? "ابحث في منتجات المتجر..." : "Search store products..."}
+                          className="w-full h-9 border border-zinc-300 rounded-md ps-9 pe-3 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                        />
+                      </div>
                       {productsLoading ? (
                         <div className="flex justify-center py-8">
                           <div className="w-6 h-6 border-4 border-zinc-200 border-t-[#febd69] rounded-full animate-spin" />
                         </div>
-                      ) : vendorProducts.map((p, index) => (
+                      ) : vendorProducts.filter(p => (p.name || "").toLowerCase().includes(productSearchQuery.toLowerCase())).map((p, index) => (
                         <div key={p.id || `prod-${index}`} className="p-2.5 border border-zinc-200 rounded-md hover:border-[#be374f] transition-all bg-white">
                           <div className="flex gap-2.5 mb-2">
                             <div className="w-10 h-10 bg-white rounded-md border border-zinc-200 shrink-0 relative overflow-hidden">
@@ -1524,7 +1566,15 @@ function MessagesContent() {
                             </div>
                           </div>
                           <button
-                            onClick={() => handleSend(isAr ? `استفسار عن: ${p.name}` : `Inquiry about: ${p.name}`, { type: "product", id: p.id, name: p.name, price: p.price, image: p.images?.[0]?.src })}
+                            onClick={() => handleSend(isAr ? `استفسار عن: ${p.name}` : `Inquiry about: ${p.name}`, {
+                              type: "product",
+                              id: p.id,
+                              name: p.name,
+                              price: p.price,
+                              image: p.images?.[0]?.src,
+                              url: getProductUrl(p),
+                              slug: p.slug
+                            })}
                             className="w-full h-[26px] bg-brand hover:bg-brand-dark border-brand rounded-md text-[11px] font-medium transition-all"
                           >
                             {isAr ? "إرفاق بطاقة المنتج" : "Attach Product Card"}
@@ -1571,6 +1621,7 @@ function MessagesContent() {
               )}
             </div>
           </aside>
+          </>
         )}
       </div>
 

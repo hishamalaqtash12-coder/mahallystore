@@ -125,7 +125,7 @@ export async function GET(request, { params }) {
       showWhatsapp: meta.mahally_show_whatsapp !== "no",
       bannerPos: parseInt(meta.mahally_banner_pos || 50),
       logoPos: parseInt(meta.mahally_logo_pos || 50),
-      dateCreated: v.date_created,
+      dateCreated: v.date_created || v.registered_date || null,
       averageRating: meta.mahally_average_rating || "0.0",
       salesCount: meta.mahally_sales_count || "0",
       followerCount: meta.mahally_follower_count || "0",
