@@ -362,7 +362,7 @@ export default function VendorProfilePage() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
               {!isOwner && (
                 <>
                   <button
@@ -400,14 +400,14 @@ export default function VendorProfilePage() {
                     user ? (
                       <Link
                         href={`/messages?to=${v.id}`}
-                        className="h-9 px-4 rounded-md text-[13px] font-medium border border-zinc-300 text-zinc-700 flex items-center gap-2 hover:bg-zinc-50"
+                        className="h-9 px-4 rounded-md text-[13px] font-medium border border-zinc-300 text-zinc-700 flex items-center gap-2 hover:bg-zinc-50 shrink-0"
                       >
                         <Mail size={14} /> {t("message")}
                       </Link>
                     ) : (
                       <Link
                         href={`/login?redirect=/vendor/${slug}`}
-                        className="h-9 px-4 rounded-md text-[13px] font-medium border border-zinc-300 text-zinc-700 flex items-center gap-2 hover:bg-zinc-50"
+                        className="h-9 px-4 rounded-md text-[13px] font-medium border border-zinc-300 text-zinc-700 flex items-center gap-2 hover:bg-zinc-50 shrink-0"
                       >
                         <Mail size={14} /> {t("message")}
                       </Link>
@@ -427,7 +427,7 @@ export default function VendorProfilePage() {
               {!isOwner && (
                 <button
                   onClick={() => setIsReportOpen(true)}
-                  className="cursor-pointer p-2 border border-zinc-300 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                  className="cursor-pointer p-2 border border-zinc-300 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors shrink-0"
                   title={t("reportStore")}
                 >
                   <ShieldAlert size={16} />
@@ -437,7 +437,7 @@ export default function VendorProfilePage() {
           </div>
 
           {/* Store Navigation Tabs */}
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto no-scrollbar">
             {[
               { id: 'products', label: t("tabProducts"), icon: null },
               { id: 'about', label: t("tabAbout"), icon: null },
@@ -447,7 +447,7 @@ export default function VendorProfilePage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`cursor-pointer px-5 py-3 text-[14px] font-medium border-b-2 transition-all ${activeTab === tab.id ? "border-brand text-brand" : "border-transparent text-zinc-600 hover:text-zinc-950"}`}
+                className={`cursor-pointer px-5 py-3 text-[14px] font-medium border-b-2 transition-all whitespace-nowrap shrink-0 ${activeTab === tab.id ? "border-brand text-brand" : "border-transparent text-zinc-600 hover:text-zinc-950"}`}
               >
                 {tab.label} {tab.id === 'followers' && `(${v.followerCount || 0})`}
               </button>
