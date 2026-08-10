@@ -112,7 +112,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
               fetch(`/api/vendors/${vId}`).then(r => r.json()).then(v => {
                 if (v?.vendor) setVendorData(v.vendor);
               }).catch(() => { })
-              .finally(() => setVendorLoading(false));
+                .finally(() => setVendorLoading(false));
             }
           }
         } catch (e) {
@@ -191,7 +191,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
 
       {/* Modal Content */}
       <div className="relative bg-white w-full max-w-[900px] shadow-2xl flex flex-col md:flex-row animate-in slide-in-from-bottom-10 md:zoom-in-95 duration-200 rounded-t-3xl md:rounded-2xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto no-scrollbar md:overflow-hidden z-[100000] border-t md:border border-zinc-200">
-        
+
         {/* Mobile Pull Handle & Close Header */}
         <div className="w-full flex items-center justify-between px-4 py-2.5 md:hidden bg-white sticky top-0 z-50 border-b border-zinc-100 shrink-0">
           <div className="w-10 h-1 bg-zinc-300 rounded-full mx-auto absolute inset-x-0 top-2.5" />
@@ -306,7 +306,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                   productPrice={salePrice}
                   merchantName={merchantName}
                 />
-                
+
                 {!returnPolicyData.isReady ? (
                   <div className="flex items-center gap-3 text-[13px] pt-3 px-1">
                     <div className="w-4 h-4 rounded-full border-2 border-zinc-200 border-t-brand animate-spin" />
@@ -405,8 +405,9 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                   if (qtyInCart > 0) {
                     return (
                       <div className="space-y-3">
-                        <p className="text-[14px] font-bold text-emerald-600 flex items-center gap-2">
-                          <ShieldCheck size={16} /> {t("productInCart")}
+                        <p className="text-[14px] font-bold text-brand-600 flex items-center gap-2">
+                          {/* <ShieldCheck size={16} /> */}
+                          {t("productInCart")}
                         </p>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center bg-[#F0F2F2] border border-[#D5D9D9] rounded-lg h-[33px] px-1 shadow-sm">

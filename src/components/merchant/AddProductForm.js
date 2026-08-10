@@ -1101,7 +1101,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       <div className="space-y-2">
                         <label className="text-[11px] font-bold text-zinc-500">{l("From Date")}</label>
                         <input 
-                          type="date"
+                          type="datetime-local"
                           name="date_on_sale_from"
                           value={formData.date_on_sale_from || ""}
                           onChange={handleInputChange}
@@ -1111,7 +1111,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
                       <div className="space-y-2">
                         <label className="text-[11px] font-bold text-zinc-500">{l("To Date")}</label>
                         <input 
-                          type="date"
+                          type="datetime-local"
                           name="date_on_sale_to"
                           value={formData.date_on_sale_to || ""}
                           onChange={handleInputChange}

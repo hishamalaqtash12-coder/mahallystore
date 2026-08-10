@@ -414,7 +414,7 @@ export default function Header() {
 
         {/* 1. TOP MAIN HEADER */}
         <div className="bg-white px-2 py-2 flex flex-wrap lg:flex-nowrap items-center min-h-[50px] border-b border-zinc-200 gap-y-2">
-          
+
           {/* Top Row for Mobile (Hamburger + Logo + Icons) */}
           <div className="w-full lg:w-auto flex items-center justify-between order-1">
             <div className="flex items-center gap-1 sm:gap-2">
@@ -458,7 +458,7 @@ export default function Header() {
                 <Globe size={18} className="me-0.5" />
                 {locale === 'ar' ? 'EN' : 'AR'}
               </button>
-              
+
               <div
                 className="relative flex items-center justify-center p-1 shrink-0 cursor-pointer text-zinc-900"
                 onClick={() => {
@@ -829,9 +829,9 @@ export default function Header() {
             <div className="flex items-center gap-1 lg:gap-2 flex-nowrap shrink-0">
               {[
                 { label: t("vendors"), href: "/vendors" },
+                { label: t("browseAllProducts"), href: "/browse" },
                 { label: t("featuredProducts"), href: "/featured-products" },
                 { label: t("helpAndSupport"), href: "/help" },
-                { label: t("browseAllProducts"), href: "/browse" }
               ].map(link => (
                 <Link key={link.label} href={link.href} className="p-1.5 sm:p-2 border border-transparent hover:border-white rounded-sm shrink-0">{link.label}</Link>
               ))}
@@ -1063,13 +1063,18 @@ export default function Header() {
                 avatarBgColor={avatarBgColor}
                 className="w-12 h-12 rounded-full text-[20px] border border-white shrink-0"
               />
-              <span className="text-xl font-bold tracking-tight truncate">
-                {t('welcomePrefix')}{customerName || user?.displayName || t('customer')}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-xl font-bold tracking-tight truncate">
+                  {t('welcomePrefix')} {customerName || user?.displayName || t('customer')}
+                </span>
+                <span className="text-[12px] text-zinc-300 font-medium">
+                  {isAdmin ? t('adminBoard') : (isApprovedVendor ? t('vendorPortal') : t('customer'))}
+                </span>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto text-[#111] font-sans pb-10">
-              <ul className="text-[15px] text-zinc-700 py-2">
+            <div className="flex-1 overflow-hidden flex flex-col text-[#111] font-sans">
+              <ul className="text-[15px] text-zinc-700 py-2 flex-1 overflow-y-auto pb-6">
                 {isAdmin && (
                   <>
                     <li><Link href="/admin" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors text-blue-600 font-bold"><ShieldCheck size={20} className="text-blue-600" /> {t('adminDashboardMenu')}</Link></li>
@@ -1091,9 +1096,14 @@ export default function Header() {
                 {!isAdmin && (
                   <>
                     <li><Link href="/account" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><UserCircle size={20} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
+                    <li><Link href="/account/security" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><ShieldCheck size={20} className="text-zinc-600" /> {t('accountSecurity')}</Link></li>
                     <li><Link href="/account/orders" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Package size={20} className="text-zinc-600" /> {t('yourOrders')}</Link></li>
+                    <li><Link href="/wishlist" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Heart size={20} className="text-zinc-600" /> {t('wishlist')}</Link></li>
                     {messagingEnabled && (
-                      <li><Link href="/account/reviews" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><MessageSquare size={20} className="text-zinc-600" /> {t('yourReviews')}</Link></li>
+                      <>
+                        <li><Link href="/messages" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><MessageSquare size={20} className="text-zinc-600" /> {t('messages')}</Link></li>
+                        <li><Link href="/account/reviews" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Star size={20} className="text-zinc-600" /> {t('yourReviews')}</Link></li>
+                      </>
                     )}
                     <li><Link href="/account/addresses" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><MapPin size={20} className="text-zinc-600" /> {t('addresses')}</Link></li>
                     <li><Link href="/account/coupons" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Tag size={20} className="text-zinc-600" /> {t('couponsAndOffers')}</Link></li>
@@ -1101,10 +1111,12 @@ export default function Header() {
                   </>
                 )}
                 <li><Link href="/account/recently-viewed" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Clock size={20} className="text-zinc-600" /> {t('browsingHistory')}</Link></li>
-                <li className="pt-2 mt-2 border-t border-zinc-100">
-                  <button onClick={() => { logout(); setIsMobileAccountMenuOpen(false); }} className="w-full text-start flex items-center gap-3.5 hover:bg-red-50 text-red-600 py-3 px-6 transition-colors font-bold"><LogOut size={20} /> {t('logout')}</button>
-                </li>
               </ul>
+              <div className="p-4 border-t border-zinc-200 shrink-0 mt-auto bg-zinc-50">
+                <button onClick={() => { logout(); setIsMobileAccountMenuOpen(false); }} className="w-full flex items-center justify-center gap-2 hover:bg-red-50 text-red-600 py-3 px-4 transition-colors font-bold rounded-lg border border-red-200/50 bg-white shadow-sm">
+                  <LogOut size={20} /> {t('logout')}
+                </button>
+              </div>
             </div>
           </div>
           <button

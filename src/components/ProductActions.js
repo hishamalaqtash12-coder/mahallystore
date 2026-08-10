@@ -44,7 +44,7 @@ export default function ProductActions({
     setMounted(true);
   }, []);
 
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart, setIsCartOpen, cart, updateQuantity, removeFromCart, isInCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -271,8 +271,8 @@ export default function ProductActions({
       {/* Stock Status */}
       <div
         className={`text-[18px] font-medium mb-3 ${currentStockStatus === "outofstock"
-            ? "text-brand-dark"
-            : "text-[#007600]"
+          ? "text-brand-dark"
+          : "text-[#007600]"
           }`}
       >
         {currentStockStatus === "outofstock" ? t("outOfStock") : t("inStock")}
@@ -301,8 +301,8 @@ export default function ProductActions({
                         key={option}
                         onClick={() => handleOptionSelect(attr.name, option)}
                         className={`min-w-[40px] h-[32px] px-3 flex items-center justify-center rounded border text-[13px] font-medium transition-all shadow-sm ${isSelected
-                            ? "border-brand bg-brand-light ring-1 ring-brand text-zinc-900"
-                            : "border-[#D5D9D9] bg-white hover:bg-[#F7FAFA] text-zinc-700"
+                          ? "border-brand bg-brand-light ring-1 ring-brand text-zinc-900"
+                          : "border-[#D5D9D9] bg-white hover:bg-[#F7FAFA] text-zinc-700"
                           }`}
                       >
                         {option}
@@ -384,16 +384,44 @@ export default function ProductActions({
             );
           }
 
+          const alreadyInCart = isInCart(product.id, matchedVariation?.id);
+          const cartItem = cart.find(
+            (item) => item.id === product.id && item.variation_id === (matchedVariation?.id || null)
+          );
+          const qtyInCart = cartItem?.quantity || 0;
+
+          if (alreadyInCart) {
+            return (
+              <div className="w-full flex items-center justify-between bg-[#F8F9FA] border border-[#E5E7E8] rounded-xl px-4 py-2 mt-4">
+                <p className="text-[13px] font-bold text-zinc-700 flex items-center gap-2">
+                  <Check size={16} className="text-emerald-500" />
+                  {t("addedToCart")}
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center bg-[#F0F2F2] border border-[#D5D9D9] rounded-lg h-[33px] px-1 shadow-sm">
+                    <button onClick={() => updateQuantity(product.id, qtyInCart - 1, matchedVariation?.id)} className="w-8 h-full flex items-center justify-center text-zinc-600 hover:text-zinc-900 transition-colors">
+                      <Minus size={14} />
+                    </button>
+                    <span className="w-8 text-center text-[13px] font-bold text-zinc-900">{qtyInCart}</span>
+                    <button onClick={() => updateQuantity(product.id, qtyInCart + 1, matchedVariation?.id)} className="w-8 h-full flex items-center justify-center text-zinc-600 hover:text-zinc-900 transition-colors">
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <>
               <button
                 onClick={handleAddToCart}
                 disabled={added || currentStockStatus === "outofstock"}
                 className={`w-full h-[32px] rounded-full text-[13px] flex items-center justify-center transition-all ${currentStockStatus === "outofstock"
-                    ? "bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300"
-                    : added
-                      ? "bg-[#007600] text-white border border-[#007600]"
-                      : "bg-brand hover:bg-brand-dark text-white border border-brand font-bold"
+                  ? "bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300"
+                  : added
+                    ? "bg-[#007600] text-white border border-[#007600]"
+                    : "bg-brand hover:bg-brand-dark text-white border border-brand font-bold"
                   }`}
               >
                 {added ? t("addedToCart") : t("addToCart")}
@@ -405,8 +433,8 @@ export default function ProductActions({
                 }}
                 disabled={currentStockStatus === "outofstock"}
                 className={`w-full h-[32px] rounded-full text-[13px] flex items-center justify-center transition-all ${currentStockStatus === "outofstock"
-                    ? "bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300"
-                    : "bg-brand-light hover:bg-brand/20 text-brand-dark border border-brand-light font-bold"
+                  ? "bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300"
+                  : "bg-brand-light hover:bg-brand/20 text-brand-dark border border-brand-light font-bold"
                   }`}
               >
                 {t("buyNow")}
@@ -418,11 +446,11 @@ export default function ProductActions({
 
       {/* Ships from / Sold by */}
       <div className="grid grid-cols-[80px_1fr] gap-x-2 gap-y-1 text-[12px] mb-4 border-t border-zinc-100 pt-3">
-        <div className="text-[#565959]">{t("shipsFrom")}</div>
+        {/* <div className="text-[#565959]">{t("shipsFrom")}</div>
         <div className="text-[#0F1111]">
           {product.meta_data?.find((m) => m.key === "mahally_shipped_by")
             ?.value || t("noInfo")}
-        </div>
+        </div> */}
         <div className="text-[#565959]">{t("soldBy")}</div>
         {(() => {
           const {
@@ -446,8 +474,8 @@ export default function ProductActions({
         <div className="text-[#565959]">{t("returns")}</div>
         <div
           className={`text-[12px] font-medium ${displayReturnPolicy === t("noReturns")
-              ? "text-rose-600"
-              : "text-brand hover:text-brand-dark hover:underline cursor-pointer"
+            ? "text-rose-600"
+            : "text-brand hover:text-brand-dark hover:underline cursor-pointer"
             }`}
         >
           {displayReturnPolicy}

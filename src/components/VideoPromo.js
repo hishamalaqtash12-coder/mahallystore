@@ -57,7 +57,7 @@ export default function VideoPromo({
 
   return (
     <>
-      <section className="w-full bg-gradient-to-b from-white to-zinc-50/50 py-4">
+      <section className="w-full bg-gradient-to-b from-white-500 to-zinc-50/50 py-4">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Header */}

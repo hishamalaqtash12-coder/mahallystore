@@ -68,7 +68,8 @@ export async function GET(request) {
         storeCategory: meta.mahally_store_category || "",
         rating: rating,
         averageRating: rating.toFixed(1),
-        isVerified: true
+        isVerified: true,
+        dateCreated: v.date_created || v.registered_date || null
       };
     });
 

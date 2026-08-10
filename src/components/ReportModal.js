@@ -137,12 +137,12 @@ export default function ReportModal({ isOpen, onClose, reportedId, reportedName,
                   </div>
                 </div>
               </div>
-              <button
+              {/* <button
                 onClick={onClose}
                 className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all"
               >
                 {t("goBack")}
-              </button>
+              </button> */}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

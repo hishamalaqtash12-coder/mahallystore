@@ -7,20 +7,23 @@ import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import ProductCard from "@/components/ProductCard";
 import { getProductUrl } from "@/lib/product-utils";
 import {
   ArrowLeft, Star, MapPin, Mail, Phone as PhoneIcon, ShoppingCart,
   Heart, Package, CheckCircle, ChevronRight, Store, Grid3X3, List,
   Camera, MessageSquare, UserPlus, Settings, Share2, Users, Loader2,
-  Search, Info, ShieldCheck, User, ShieldAlert, Check
+  Search, Info, ShieldCheck, User, ShieldAlert, Check,
+  SlidersHorizontal, X, Filter
 } from "lucide-react";
 import ReportModal from "@/components/ReportModal";
 import QuickLookModal from "@/components/QuickLookModal";
 
 export default function VendorProfilePage() {
   const t = useTranslations("VendorProfile");
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const params = useParams();
   const slug = params?.slug;
   const { user, wooId, messagingEnabled } = useAuth();
@@ -43,6 +46,7 @@ export default function VendorProfilePage() {
   const [quickLookProduct, setQuickLookProduct] = useState(null);
   const [sortBy, setSortBy] = useState("default");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const decodeHtml = (html) => {
     if (!html) return "";
@@ -465,90 +469,135 @@ export default function VendorProfilePage() {
         {activeTab === "products" && (
           <div className="flex flex-col md:flex-row gap-8">
 
-            {/* Store Sidebar (Filtering) */}
-            <aside className="w-full md:w-[220px] shrink-0">
-              <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("searchStore")}</h3>
-                <div className="relative">
-                  <Search size={14} className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t("searchProductsPlaceholder")}
-                    className="w-full h-9 border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                  />
-                </div>
-              </div>
+            {/* Filter Content Helper */}
+            {(() => {
+              const filterContent = (
+                <>
+                  <div className="mb-6">
+                    <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("searchStore")}</h3>
+                    <div className="relative">
+                      <Search size={14} className="absolute end-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                      <input
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder={t("searchProductsPlaceholder")}
+                        className="w-full h-9 border border-zinc-300 rounded-md pe-9 ps-3 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                      />
+                    </div>
+                  </div>
 
-              <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("priceRange")}</h3>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    placeholder={t("minPrice")}
-                    value={priceRange.min}
-                    onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                    className="w-full h-8 border border-zinc-300 rounded-md px-2 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                  />
-                  <span className="text-zinc-400">-</span>
-                  <input
-                    type="number"
-                    placeholder={t("maxPrice")}
-                    value={priceRange.max}
-                    onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                    className="w-full h-8 border border-zinc-300 rounded-md px-2 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                  />
-                </div>
-              </div>
+                  <div className="mb-6">
+                    <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("priceRange")}</h3>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder={t("minPrice")}
+                        value={priceRange.min}
+                        onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                        className="w-full h-8 border border-zinc-300 rounded-md px-2 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                      />
+                      <span className="text-zinc-400">-</span>
+                      <input
+                        type="number"
+                        placeholder={t("maxPrice")}
+                        value={priceRange.max}
+                        onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                        className="w-full h-8 border border-zinc-300 rounded-md px-2 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                      />
+                    </div>
+                  </div>
 
-              <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("sortBy")}</h3>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full h-9 border border-zinc-300 rounded-md px-2 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                >
-                  <option value="default">{t("sortRelevant")}</option>
-                  <option value="price_asc">{t("sortPriceAsc")}</option>
-                  <option value="price_desc">{t("sortPriceDesc")}</option>
-                  <option value="newest">{t("sortNewest")}</option>
-                </select>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-4">{t("storeCategories")}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {productCategories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setCategoryFilter(cat)}
-                      className={`cursor-pointer h-8 px-4 rounded-full text-[12px] font-bold transition-all border ${categoryFilter === cat
-                        ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
-                        : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-400'
-                        }`}
+                  <div className="mb-6">
+                    <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("sortBy")}</h3>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full h-9 border border-zinc-300 rounded-md px-2 text-[13px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                     >
-                      {cat === "All" ? t("all") : cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                      <option value="default">{t("sortRelevant")}</option>
+                      <option value="price_asc">{t("sortPriceAsc")}</option>
+                      <option value="price_desc">{t("sortPriceDesc")}</option>
+                      <option value="newest">{t("sortNewest")}</option>
+                    </select>
+                  </div>
 
+                  <div className="mb-6">
+                    <h3 className="text-[14px] font-bold text-zinc-900 mb-4">{t("storeCategories")}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {productCategories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setCategoryFilter(cat)}
+                          className={`cursor-pointer h-8 px-4 rounded-full text-[12px] font-bold transition-all border ${categoryFilter === cat
+                            ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                            : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-400'
+                            }`}
+                        >
+                          {cat === "All" ? t("all") : cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              <div className="border-t border-zinc-100 pt-4">
-                <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("customerService")}</h3>
-                <p className="text-[12px] text-zinc-500 leading-relaxed">
-                  {t("customerServiceDesc")}
-                </p>
-              </div>
-            </aside>
+                  <div className="border-t border-zinc-100 pt-4">
+                    <h3 className="text-[14px] font-bold text-zinc-900 mb-3">{t("customerService")}</h3>
+                    <p className="text-[12px] text-zinc-500 leading-relaxed">
+                      {t("customerServiceDesc")}
+                    </p>
+                  </div>
+                </>
+              );
+
+              return (
+                <>
+                  {/* Store Sidebar (Filtering) Desktop */}
+                  <aside className="hidden md:block w-full md:w-[220px] shrink-0">
+                    {filterContent}
+                  </aside>
+
+                  {/* Mobile Filters Drawer */}
+                  {showMobileFilters && (
+                    <>
+                      <div
+                        className="fixed inset-0 bg-black/40 z-[110] lg:hidden animate-in fade-in duration-300"
+                        onClick={() => setShowMobileFilters(false)}
+                      />
+                      <div className={`fixed end-0 top-0 bottom-0 w-[85vw] sm:w-[350px] bg-white z-[120] shadow-2xl lg:hidden animate-in duration-300 flex flex-col ${isAr ? 'slide-in-from-left' : 'slide-in-from-right'}`}>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+                          <h3 className="font-bold text-lg">{t("filters") || "Filters"}</h3>
+                          <button
+                            onClick={() => setShowMobileFilters(false)}
+                            className="p-2 hover:bg-zinc-100 rounded-full text-zinc-500 hover:text-black transition-colors"
+                          >
+                            <X size={20} />
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar">
+                          {filterContent}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              );
+            })()}
 
             {/* Product Grid */}
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-4 md:mb-6">
                 <h2 className="text-[18px] font-bold text-zinc-900">{t("featuredProducts")}</h2>
+                
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] text-zinc-500">{t("viewLabel")}</span>
-                  <div className="flex border border-zinc-200 rounded-md overflow-hidden">
+                  {/* Mobile Filter Toggle */}
+                  <button
+                    onClick={() => setShowMobileFilters(true)}
+                    className="md:hidden flex items-center gap-1.5 h-8 px-3 rounded-full border border-zinc-300 text-[12px] font-medium text-zinc-700 bg-white hover:bg-zinc-50 transition-colors"
+                  >
+                    <SlidersHorizontal size={14} />
+                    {t("filters") || "Filters"}
+                  </button>
+                  <span className="hidden md:inline text-[12px] text-zinc-500">{t("viewLabel")}</span>
+                  <div className="flex border border-zinc-200 rounded-md overflow-hidden shrink-0">
                     <button onClick={() => setView("grid")} className={`p-1.5 ${view === 'grid' ? 'bg-zinc-100' : 'bg-white hover:bg-zinc-50'}`}><Grid3X3 size={14} /></button>
                     <button onClick={() => setView("list")} className={`p-1.5 ${view === 'list' ? 'bg-zinc-100' : 'bg-white hover:bg-zinc-50'}`}><List size={14} /></button>
                   </div>

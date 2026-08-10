@@ -24,13 +24,21 @@ export default function ProductCountdown({ endDate }) {
       const difference = targetDate.getTime() - new Date().getTime();
 
       if (difference > 0) {
-        const hours = Math.floor((difference / (1000 * 60 * 60)));
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((difference / 1000 / 60) % 60);
         const seconds = Math.floor((difference / 1000) % 60);
 
         const hStr = hours.toString().padStart(2, '0');
         const mStr = minutes.toString().padStart(2, '0');
         const sStr = seconds.toString().padStart(2, '0');
+
+        if (days > 0) {
+          if (isAr) {
+            return `${days} يوم و ${hStr}س : ${mStr}د : ${sStr}ث`;
+          }
+          return `${days} day${days > 1 ? 's' : ''} ${hStr}h : ${mStr}m : ${sStr}s`;
+        }
 
         if (isAr) {
           return `${hStr}س : ${mStr}د : ${sStr}ث`;

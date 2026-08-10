@@ -40,9 +40,9 @@ export function CartProvider({ children }) {
 
   const addToCart = (product, quantity = 1) => {
     setCart((prev) => {
-      // Find item that matches BOTH product ID and variation ID
+      const varId = product.variation_id || null;
       const existingItemIndex = prev.findIndex((item) => 
-        item.id === product.id && item.variation_id === product.variation_id
+        item.id === product.id && item.variation_id === varId
       );
       
       if (existingItemIndex >= 0) {
@@ -77,19 +77,21 @@ export function CartProvider({ children }) {
   };
 
   const removeFromCart = (productId, variationId = null) => {
+    const varId = variationId || null;
     setCart((prev) => prev.filter((item) => 
-      !(item.id === productId && item.variation_id === variationId)
+      !(item.id === productId && item.variation_id === varId)
     ));
   };
 
   const updateQuantity = (productId, newQty, variationId = null) => {
+    const varId = variationId || null;
     if (newQty <= 0) {
-      removeFromCart(productId, variationId);
+      removeFromCart(productId, varId);
       return;
     }
     setCart((prev) =>
       prev.map((item) => {
-        if (item.id === productId && item.variation_id === variationId) {
+        if (item.id === productId && item.variation_id === varId) {
           // Enforce stock limit
           let finalQty = newQty;
           if (item.manage_stock && item.stock_quantity !== null && finalQty > item.stock_quantity) {
@@ -109,7 +111,8 @@ export function CartProvider({ children }) {
   };
 
   const isInCart = (productId, variationId = null) => {
-    return cart.some((item) => item.id === productId && item.variation_id === variationId);
+    const varId = variationId || null;
+    return cart.some((item) => item.id === productId && item.variation_id === varId);
   };
 
   return (
