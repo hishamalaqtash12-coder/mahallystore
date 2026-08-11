@@ -45,22 +45,20 @@ function StarRow({ stars, selected, onClick }) {
 // ─── Amazon Checkbox Component ──────────────────────────────────────
 function AmazonCheckbox({ label, count, checked, onChange }) {
   return (
-    <div 
-      className="flex items-center gap-2 group cursor-pointer py-0.5 select-none animate-in fade-in duration-200" 
+    <div
+      className="flex items-center gap-2 group cursor-pointer py-0.5 select-none animate-in fade-in duration-200"
       onClick={onChange}
     >
-      <div className={`w-[14px] h-[14px] border rounded-[3px] flex items-center justify-center transition-all shrink-0 ${
-        checked 
-          ? 'bg-[#be374f] border-[#be374f] shadow-[0_1px_2px_rgba(0,0,0,0.15)]' 
-          : 'bg-white border-[#8D9096] group-hover:border-[#be374f] group-hover:shadow-[0_1px_2px_rgba(0,0,0,0.05)]'
-      }`}>
+      <div className={`w-[14px] h-[14px] border rounded-[3px] flex items-center justify-center transition-all shrink-0 ${checked
+        ? 'bg-[#be374f] border-[#be374f] shadow-[0_1px_2px_rgba(0,0,0,0.15)]'
+        : 'bg-white border-[#8D9096] group-hover:border-[#be374f] group-hover:shadow-[0_1px_2px_rgba(0,0,0,0.05)]'
+        }`}>
         {checked && (
           <Check size={10} className="text-white" strokeWidth={4.5} />
         )}
       </div>
-      <span className={`text-[13px] transition-colors flex-1 truncate ${
-        checked ? 'font-bold text-[#0F1111]' : 'text-[#0F1111] group-hover:text-[#be374f]'
-      }`}>
+      <span className={`text-[13px] transition-colors flex-1 truncate ${checked ? 'font-bold text-[#0F1111]' : 'text-[#0F1111] group-hover:text-[#be374f]'
+        }`}>
         {label}
       </span>
       {count !== undefined && count > 0 && (
@@ -80,8 +78,8 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
   const activeCategory = useMemo(() => {
     if (!filters.category) return null;
-    return categories.find(c => 
-      c.id === Number(filters.category) || 
+    return categories.find(c =>
+      c.id === Number(filters.category) ||
       decodeURIComponent(c.slug) === decodeURIComponent(filters.category)
     );
   }, [filters.category, categories]);
@@ -95,7 +93,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
     if (!activeCategory) {
       const rootCategories = categories.filter(c => c.parent === 0);
       const displayedCategories = showAllCategories ? rootCategories : rootCategories.slice(0, 10);
-      
+
       return (
         <div className="mb-4">
           <SectionTitle title={t("category")} />
@@ -107,9 +105,9 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                     onClick={() => updateCat(cat.id)}
                     className="flex items-center justify-between w-full group cursor-pointer py-0.5"
                   >
-                    <span 
+                    <span
                       className="text-[13px] font-normal text-[#0F1111] group-hover:text-[#9b2c41] transition-colors text-start truncate pe-2"
-                      dangerouslySetInnerHTML={{ __html: getCategoryName(cat, locale) }} 
+                      dangerouslySetInnerHTML={{ __html: getCategoryName(cat, locale) }}
                     />
                     <span className="text-[#565959] text-[11px] shrink-0 font-normal group-hover:text-[#9b2c41]">({cat.count || 0})</span>
                   </button>
@@ -168,16 +166,16 @@ export default function SidebarFilter({ categories = [], products = [], filters,
             </li>
             {displayedChildren.map(child => (
               <li key={child.id} className={`${parentCategory ? 'ps-8' : 'ps-6'}`}>
-                  <button
-                    onClick={() => updateCat(child.id)}
-                    className="flex items-center justify-between w-full group cursor-pointer py-0.5"
-                  >
-                    <span
-                      className="text-[13px] font-normal text-[#0F1111] group-hover:text-[#9b2c41] transition-colors text-start truncate pe-2"
-                      dangerouslySetInnerHTML={{ __html: getCategoryName(child, locale) }}
-                    />
-                    <span className="text-[#565959] text-[11px] shrink-0 font-normal group-hover:text-[#9b2c41]">({child.count || 0})</span>
-                  </button>
+                <button
+                  onClick={() => updateCat(child.id)}
+                  className="flex items-center justify-between w-full group cursor-pointer py-0.5"
+                >
+                  <span
+                    className="text-[13px] font-normal text-[#0F1111] group-hover:text-[#9b2c41] transition-colors text-start truncate pe-2"
+                    dangerouslySetInnerHTML={{ __html: getCategoryName(child, locale) }}
+                  />
+                  <span className="text-[#565959] text-[11px] shrink-0 font-normal group-hover:text-[#9b2c41]">({child.count || 0})</span>
+                </button>
               </li>
             ))}
           </ul>
@@ -210,10 +208,10 @@ export default function SidebarFilter({ categories = [], products = [], filters,
   const allMerchants = useMemo(() => {
     const merchantMap = new Map();
     products.forEach(p => {
-      const merchantMeta = p.meta_data?.find(m => m.key === "merchant_name")?.value || 
-                           p.meta_data?.find(m => m.key === "mahally_owner_name")?.value ||
-                           p.store?.shop_name || 
-                           p.store?.name;
+      const merchantMeta = p.meta_data?.find(m => m.key === "merchant_name")?.value ||
+        p.meta_data?.find(m => m.key === "mahally_owner_name")?.value ||
+        p.store?.shop_name ||
+        p.store?.name;
       const name = merchantMeta || "Mahally Jo";
       merchantMap.set(name, (merchantMap.get(name) || 0) + 1);
     });
@@ -243,7 +241,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
   return (
     <aside className="w-full lg:w-[240px] shrink-0 pe-4 pb-10 lg:border-l border-[#E5E5E5] min-h-[500px]">
-      
+
       {/* ── Shortcut (Clean View All Button) ── */}
       {pathname !== "/browse" && (
         <div className="mb-4">
@@ -309,13 +307,13 @@ export default function SidebarFilter({ categories = [], products = [], filters,
             })}
           </div>
           {allTags.length > 8 && (
-              <button
-                onClick={() => setShowAllTags(!showAllTags)}
-                className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
-              >
-                <span>{showAllTags ? t("showLess") : t("showMoreCount", { count: allTags.length })}</span>
-                <ChevronDown size={12} className={`transform transition-transform ${showAllTags ? 'rotate-180' : ''}`} />
-              </button>
+            <button
+              onClick={() => setShowAllTags(!showAllTags)}
+              className="mt-1.5 text-[12px] font-normal text-[#be374f] hover:text-[#9b2c41] transition-colors flex items-center gap-0.5 select-none cursor-pointer"
+            >
+              <span>{showAllTags ? t("showLess") : t("showMoreCount", { count: allTags.length })}</span>
+              <ChevronDown size={12} className={`transform transition-transform ${showAllTags ? 'rotate-180' : ''}`} />
+            </button>
           )}
         </div>
       )}
@@ -367,7 +365,7 @@ export default function SidebarFilter({ categories = [], products = [], filters,
       {/* ── Price ── */}
       <div className="mb-4">
         <SectionTitle title={t("price")} />
-        
+
         {/* Amazon Price Buckets */}
         <div className="space-y-1 mb-3">
           {[
@@ -379,13 +377,12 @@ export default function SidebarFilter({ categories = [], products = [], filters,
             const isSelected = filters.priceRange?.[0] === bucket.min && filters.priceRange?.[1] === bucket.max;
             return (
               <button
-                 key={i}
-                 onClick={() => update("priceRange", isSelected ? null : [bucket.min, bucket.max])}
-                 className={`block text-[13px] transition-colors w-full text-start font-normal select-none cursor-pointer ${
-                   isSelected 
-                     ? "text-[#9b2c41] font-bold" 
-                     : "text-[#0F1111] hover:text-[#9b2c41]"
-                 }`}
+                key={i}
+                onClick={() => update("priceRange", isSelected ? null : [bucket.min, bucket.max])}
+                className={`block text-[13px] transition-colors w-full text-start font-normal select-none cursor-pointer ${isSelected
+                  ? "text-[#9b2c41] font-bold"
+                  : "text-[#0F1111] hover:text-[#9b2c41]"
+                  }`}
               >
                 {bucket.label}
               </button>
@@ -395,75 +392,75 @@ export default function SidebarFilter({ categories = [], products = [], filters,
 
         {/* Dynamic Dual Slider (Sleek Orange-accented) */}
         <div className="px-1 py-1.5 mb-3">
-           <div className="relative w-full h-[3px] bg-zinc-200 rounded-full">
-              <div 
-                className="absolute h-full bg-[#E47911] rounded-full" 
-                style={{ 
-                  left: `${((filters.priceRange?.[0] || priceBounds.min) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}%`,
-                  right: `${100 - ((filters.priceRange?.[1] || priceBounds.max) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}%`
-                }}
-              />
-              <input
-                type="range"
-                min={priceBounds.min}
-                max={priceBounds.max}
-                value={filters.priceRange?.[0] || priceBounds.min}
-                onChange={(e) => {
-                  const val = Math.min(Number(e.target.value), (filters.priceRange?.[1] || priceBounds.max) - 1);
-                  update("priceRange", [val, filters.priceRange?.[1] || priceBounds.max]);
-                }}
-                className="absolute w-full h-1 opacity-0 cursor-pointer pointer-events-auto appearance-none z-30"
-              />
-              <input
-                type="range"
-                min={priceBounds.min}
-                max={priceBounds.max}
-                value={filters.priceRange?.[1] || priceBounds.max}
-                onChange={(e) => {
-                  const val = Math.max(Number(e.target.value), (filters.priceRange?.[0] || priceBounds.min) + 1);
-                  update("priceRange", [filters.priceRange?.[0] || priceBounds.min, val]);
-                }}
-                className="absolute w-full h-1 opacity-0 cursor-pointer pointer-events-auto appearance-none z-30"
-              />
-              <div 
-                className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-[#E47911] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.2)] pointer-events-none z-20"
-                style={{ left: `calc(${((filters.priceRange?.[0] || priceBounds.min) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}% - 7px)` }}
-              />
-           </div>
-           <div className="flex justify-between text-[11px] font-bold text-zinc-400 select-none">
-              <span>{filters.priceRange?.[0] || priceBounds.min} {t("currency")}</span>
-              <span>{filters.priceRange?.[1] || priceBounds.max} {t("currency")}</span>
-           </div>
+          <div className="relative w-full h-[3px] bg-zinc-200 rounded-full">
+            <div
+              className="absolute h-full bg-[#E47911] rounded-full"
+              style={{
+                left: `${((filters.priceRange?.[0] || priceBounds.min) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}%`,
+                right: `${100 - ((filters.priceRange?.[1] || priceBounds.max) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}%`
+              }}
+            />
+            <input
+              type="range"
+              min={priceBounds.min}
+              max={priceBounds.max}
+              value={filters.priceRange?.[0] || priceBounds.min}
+              onChange={(e) => {
+                const val = Math.min(Number(e.target.value), (filters.priceRange?.[1] || priceBounds.max) - 1);
+                update("priceRange", [val, filters.priceRange?.[1] || priceBounds.max]);
+              }}
+              className="absolute w-full h-1 opacity-0 cursor-pointer pointer-events-auto appearance-none z-30"
+            />
+            <input
+              type="range"
+              min={priceBounds.min}
+              max={priceBounds.max}
+              value={filters.priceRange?.[1] || priceBounds.max}
+              onChange={(e) => {
+                const val = Math.max(Number(e.target.value), (filters.priceRange?.[0] || priceBounds.min) + 1);
+                update("priceRange", [filters.priceRange?.[0] || priceBounds.min, val]);
+              }}
+              className="absolute w-full h-1 opacity-0 cursor-pointer pointer-events-auto appearance-none z-30"
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-[#E47911] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.2)] pointer-events-none z-20"
+              style={{ left: `calc(${((filters.priceRange?.[0] || priceBounds.min) - priceBounds.min) / (priceBounds.max - priceBounds.min) * 100}% - 7px)` }}
+            />
+          </div>
+          <div className="flex justify-between text-[11px] font-bold text-zinc-400 select-none">
+            <span>{filters.priceRange?.[0] || priceBounds.min} {t("currency")}</span>
+            <span>{filters.priceRange?.[1] || priceBounds.max} {t("currency")}</span>
+          </div>
         </div>
-        
+
         {/* Custom Min/Max Input Box Row */}
         <div className="flex items-center gap-1.5 mt-2">
-           <div className="relative flex-1">
-              <span className="absolute start-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">{t("currency")}</span>
-              <input 
-                type="number" 
-                placeholder={t("minPrice")}
-                value={filters.priceRange?.[0] || ""}
-                onChange={(e) => update("priceRange", [Number(e.target.value), filters.priceRange?.[1] || priceBounds.max])}
-                className="w-full h-7 ps-7 pe-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-start" 
-              />
-           </div>
-           <div className="relative flex-1">
-              <span className="absolute start-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">{t("currency")}</span>
-              <input 
-                type="number" 
-                placeholder={t("maxPrice")} 
-                value={filters.priceRange?.[1] || ""}
-                onChange={(e) => update("priceRange", [filters.priceRange?.[0] || priceBounds.min, Number(e.target.value)])}
-                className="w-full h-7 ps-7 pe-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-start"
-              />
-           </div>
-           <button 
-             onClick={() => update("priceRange", [filters.priceRange?.[0] || 0, filters.priceRange?.[1] || 10000])}
-             className="h-7 px-3 bg-white hover:bg-zinc-50 border border-[#D5D9D9] shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] text-[#0F1111] rounded-[4px] text-[12px] font-normal hover:border-[#B5B9B9] cursor-pointer active:bg-zinc-100 flex items-center justify-center shrink-0 select-none"
-           >
-             {t("apply")}
-           </button>
+          <div className="relative flex-1">
+            <span className="absolute start-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">{t("currency")}</span>
+            <input
+              type="number"
+              placeholder={t("minPrice")}
+              value={filters.priceRange?.[0] || ""}
+              onChange={(e) => update("priceRange", [Number(e.target.value), filters.priceRange?.[1] || priceBounds.max])}
+              className="w-full h-7 ps-7 pe-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-start"
+            />
+          </div>
+          <div className="relative flex-1">
+            <span className="absolute start-1.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] font-medium select-none">{t("currency")}</span>
+            <input
+              type="number"
+              placeholder={t("maxPrice")}
+              value={filters.priceRange?.[1] || ""}
+              onChange={(e) => update("priceRange", [filters.priceRange?.[0] || priceBounds.min, Number(e.target.value)])}
+              className="w-full h-7 ps-7 pe-1 bg-white border border-[#8D9096] rounded-[3px] text-[13px] outline-none focus:border-[#E47911] focus:ring-1 focus:ring-[#E47911] transition-all font-normal text-[#0F1111] text-start"
+            />
+          </div>
+          <button
+            onClick={() => update("priceRange", [filters.priceRange?.[0] || 0, filters.priceRange?.[1] || 10000])}
+            className="h-7 px-3 bg-white hover:bg-zinc-50 border border-[#D5D9D9] shadow-[0_2px_5px_0_rgba(213,219,219,0.3)] text-[#0F1111] rounded-[4px] text-[12px] font-normal hover:border-[#B5B9B9] cursor-pointer active:bg-zinc-100 flex items-center justify-center shrink-0 select-none"
+          >
+            {t("apply")}
+          </button>
         </div>
       </div>
 
@@ -483,11 +480,10 @@ export default function SidebarFilter({ categories = [], products = [], filters,
                 <button
                   key={discount}
                   onClick={() => update("minDiscount", isSelected ? null : discount)}
-                  className={`block text-[13px] text-start font-normal cursor-pointer transition-colors select-none ${
-                    isSelected 
-                      ? "text-[#9b2c41] font-bold" 
-                      : "text-[#0F1111] hover:text-[#9b2c41]"
-                  }`}
+                  className={`block text-[13px] text-start font-normal cursor-pointer transition-colors select-none ${isSelected
+                    ? "text-[#9b2c41] font-bold"
+                    : "text-[#0F1111] hover:text-[#9b2c41]"
+                    }`}
                 >
                   {discount}{t("discountOrMore")}
                 </button>

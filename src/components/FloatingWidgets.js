@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import FeedbackModal from './FeedbackModal';
 import { useAuth } from '@/context/AuthContext';
+import { usePathname } from 'next/navigation';
 
 export default function FloatingWidgets() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const { user } = useAuth();
+  const pathname = usePathname();
 
-  if (!user) return null;
+  if (!user || pathname?.startsWith('/messages')) return null;
 
   return (
     <>

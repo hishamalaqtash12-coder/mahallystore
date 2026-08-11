@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { getProductUrl } from "@/lib/product-utils";
 import { useLocale, useTranslations } from "next-intl";
+import ProductCard from "@/components/ProductCard";
 
 export default function AccountRecentlyViewedPage() {
   const t = useTranslations("AccountRecentlyViewed");
@@ -54,40 +55,11 @@ export default function AccountRecentlyViewedPage() {
       {recentViews.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {recentViews.map((item) => (
-            <div
-              key={item.id}
-              className="group relative flex flex-col bg-white border border-gray-100 rounded-md p-4 hover:shadow-lg transition-all hover:border-[#be374f]"
-            >
-              <div className="aspect-square relative mb-4 flex items-center justify-center overflow-hidden rounded-md border border-gray-50 bg-gray-50/20">
-                {item.image && (
-                  <Image
-                    src={item.image}
-                    alt={item.name || t("product")}
-                    fill
-                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
-              </div>
-              <Link
-                href={getProductUrl(item)}
-                className="text-[13px] font-medium text-gray-800 line-clamp-2 mb-3 h-10 hover:text-[#be374f] transition-colors leading-relaxed"
-              >
-                {item.name}
-              </Link>
-              <div className="mt-auto flex items-center justify-between">
-                <span className="text-[16px] font-bold text-gray-900">
-                  {parseFloat(item.price || 0).toFixed(2)} {t("currency")}
-                </span>
-                <Link
-                  href={getProductUrl(item)}
-                  className="w-9 h-9 rounded-md border border-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-pointer shadow-sm"
-                >
-                  <ShoppingBag size={16} />
-                </Link>
-              </div>
+            <div key={item.id} className="relative group">
+              <ProductCard product={item} />
               <button
                 onClick={() => removeItem(item.id)}
-                className="absolute top-2 start-2 p-2 text-gray-300 hover:text-rose-600 transition-colors bg-white/90 rounded-md backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 border border-gray-100"
+                className="absolute top-2 start-2 p-2 text-gray-300 hover:text-rose-600 transition-colors bg-white/90 rounded-md backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 border border-gray-100 z-30"
               >
                 <Trash2 size={14} />
               </button>

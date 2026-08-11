@@ -39,7 +39,13 @@ export async function POST(request) {
 
     // 2. Update order status to cancelled
     await api.put(`orders/${orderId}`, {
-      status: 'cancelled'
+      status: 'cancelled',
+      meta_data: [
+        {
+          key: '_cancelled_by_role',
+          value: 'customer'
+        }
+      ]
     });
 
     // 3. Add order note

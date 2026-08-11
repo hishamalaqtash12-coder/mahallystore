@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { Star, ShoppingCart, Check, Eye, BadgeCheck, Heart, AlertCircle, Clock, Zap, Settings, TrendingDown, ChevronDown } from "lucide-react";
+import { Star, ShoppingCart, Check, Eye, BadgeCheck, Heart, AlertCircle, Clock, Zap, Settings, TrendingDown, ChevronDown, Plus, Minus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
 import { useWishlist } from "@/context/WishlistContext";
@@ -52,7 +52,7 @@ function CountdownTimer({ expiryDate, discountAmount, product }) {
   const displayPercent = totalSales > 0 ? Math.max(claimedPercent, 15) : 5;
 
   return (
-    <div className="flex flex-col gap-1 mt-1.5 max-w-[calc(100%-40px)] select-none">
+    <div className="flex flex-col gap-1 mt-1.5 w-full select-none">
       {/* Save Extra Badge */}
       {discountAmount > 0 && (
         <div className="flex items-center gap-1 text-[10px] font-bold text-brand bg-brand-light border-[1.5px] border-brand/30 rounded px-1.5 py-0.5 w-fit">
@@ -89,7 +89,7 @@ export default function ProductCard({ product }) {
   const t = useTranslations("ProductCard");
   const locale = useLocale();
   const { user, wooId, isVendor, isAdmin } = useAuth();
-  const { addToCart, removeFromCart, isInCart } = useCart();
+  const { cart, addToCart, removeFromCart, isInCart, updateQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
 
@@ -104,7 +104,7 @@ export default function ProductCard({ product }) {
 
   // Schedule Logic
   const saleEndDate = product.date_on_sale_to || product.date_on_sale_to_gmt;
-  const isLimitedOffer = onSale && saleEndDate && new Date(saleEndDate) > new Date();
+  const isLimitedOffer = !!(saleEndDate && new Date(saleEndDate) > new Date());
 
   const soldCount = product.total_sales || 0;
   const avgRating = parseFloat(product.average_rating || 0);
@@ -265,6 +265,9 @@ export default function ProductCard({ product }) {
           </div>
         </ReviewTooltip>
 
+        {/* Countdown Timer for Limited Offers */}
+        {isLimitedOffer && !outOfStock && <CountdownTimer expiryDate={saleEndDate} discountAmount={regularPrice > price ? regularPrice - price : 0} product={product} />}
+
         <div className="mt-auto pt-1.5 flex items-end justify-between gap-2">
           <div className="flex-1 min-w-0">
           {outOfStock ? (
@@ -277,8 +280,10 @@ export default function ProductCard({ product }) {
               {onSale && <span className="text-rose-600 text-sm font-black">-{Math.round((1 - price / regularPrice) * 100)}%</span>}
               <div className="flex items-start text-zinc-900">
                 {product.type === "variable" && <span className="text-[11px] mt-0.5 font-medium text-zinc-500 me-1">{t("from")}</span>}
-                <span className="text-lg sm:text-xl font-black tracking-tight leading-none text-zinc-900">{whole}</span>
-                <span className="text-xs font-bold leading-none mt-0.5 ms-0.5 text-zinc-700">.{decimal}</span>
+                <div className="flex items-start" dir="ltr">
+                  <span className="text-lg sm:text-xl font-black tracking-tight leading-none text-zinc-900">{whole}</span>
+                  <span className="text-xs font-bold leading-none mt-0.5 ms-0.5 text-zinc-700">.{decimal}</span>
+                </div>
                 <span className="text-xs font-bold mt-0.5 ms-1 text-zinc-500">{t("jod")}</span>
               </div>
             </div>
@@ -288,9 +293,6 @@ export default function ProductCard({ product }) {
               {t("originalPrice", { price: regularPrice.toFixed(2) })}
             </p>
           )}
-
-          {/* Countdown Timer for Limited Offers */}
-          {isLimitedOffer && !outOfStock && <CountdownTimer expiryDate={saleEndDate} discountAmount={regularPrice > price ? regularPrice - price : 0} product={product} />}
         </div>
 
         {(() => {
@@ -330,16 +332,34 @@ export default function ProductCard({ product }) {
             );
           }
 
+          if (alreadyInCart) {
+            const cartItem = cart.find(item => item.id === product.id);
+            return (
+              <div className="shrink-0 flex items-center justify-between w-[80px] h-8 rounded-md bg-zinc-100 border-[1.5px] border-zinc-300">
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); updateQuantity(product.id, (cartItem?.quantity || 1) - 1); }}
+                  className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:text-brand"
+                >
+                  <Minus size={14} strokeWidth={2.5} />
+                </button>
+                <span className="text-[12px] font-bold text-zinc-900">{cartItem?.quantity || 1}</span>
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); updateQuantity(product.id, (cartItem?.quantity || 1) + 1); }}
+                  className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:text-brand"
+                >
+                  <Plus size={14} strokeWidth={2.5} />
+                </button>
+              </div>
+            );
+          }
+
           return (
             <button
               onClick={handleCartToggle}
-              className={`shrink-0 w-8 h-8 rounded-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-[1.5px]
-                ${alreadyInCart ? "bg-brand text-white border-brand hover:bg-brand-dark" : "bg-zinc-900 text-white border-zinc-900 hover:bg-brand hover:border-brand"}`}
-              title={alreadyInCart ? t("removeFromCart") : t("addToCart")}
+              className="shrink-0 w-8 h-8 rounded-md flex items-center justify-center transition-all hover:scale-105 active:scale-90 border-[1.5px] bg-zinc-900 text-white border-zinc-900 hover:bg-brand hover:border-brand"
+              title={t("addToCart")}
             >
-              {alreadyInCart ? <Check size={15} /> : (
-                <ShoppingCart size={14} strokeWidth={2.2} />
-              )}
+              <ShoppingCart size={14} strokeWidth={2.2} />
             </button>
           );
         })()}

@@ -334,16 +334,32 @@ function RegisterContent() {
 
 
 
-  const handleOtpChange = (val, idx) => {
+  const handleOtpChange = (val, idx, isEmail = false) => {
+    if (val.length > 1) return; // handled by paste
     if (!/^\d?$/.test(val)) return;
-    const next = [...otp];
+    const setter = isEmail ? setEmailOtp : setOtp;
+    const current = isEmail ? emailOtp : otp;
+    const next = [...current];
     next[idx] = val;
-    setOtp(next);
+    setter(next);
     if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
   };
 
-  const handleOtpKeyDown = (e, idx) => {
-    if (e.key === "Backspace" && !otp[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
+  const handleOtpKeyDown = (e, idx, isEmail = false) => {
+    const current = isEmail ? emailOtp : otp;
+    if (e.key === "Backspace" && !current[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
+  };
+
+  const handleOtpPaste = (e, isEmail = false) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted) {
+      const next = [...Array(6)].map((_, i) => pasted[i] || "");
+      const setter = isEmail ? setEmailOtp : setOtp;
+      setter(next);
+      const nextFocus = Math.min(pasted.length, 5);
+      otpRefs.current[nextFocus]?.focus();
+    }
   };
 
 
@@ -781,19 +797,11 @@ function RegisterContent() {
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
+                    className="w-12 h-12 text-center text-xl font-bold border border-zinc-300 rounded-md focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
                     value={digit}
-                    onChange={e => {
-                      const val = e.target.value;
-                      if (!/^\d?$/.test(val)) return;
-                      const next = [...emailOtp];
-                      next[i] = val;
-                      setEmailOtp(next);
-                      if (val && i < 5) otpRefs.current[i + 1]?.focus();
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === "Backspace" && !emailOtp[i] && i > 0) otpRefs.current[i - 1]?.focus();
-                    }}
-                    className="w-10 h-[31px] text-center text-lg font-bold border border-zinc-400 rounded-[3px] bg-white focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none"
+                    onChange={e => handleOtpChange(e.target.value, i, true)}
+                    onKeyDown={e => handleOtpKeyDown(e, i, true)}
+                    onPaste={e => handleOtpPaste(e, true)}
                   />
                 ))}
               </div>

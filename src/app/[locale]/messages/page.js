@@ -11,7 +11,7 @@ import {
   CheckCircle2, MessageCircle, Plus, ArrowRight, ShieldAlert,
   SendHorizontal, File, AlertCircle, Store, ShoppingBag,
   ChevronRight, Package, Copy, MoreVertical, Clock, Check, XCircle,
-  UserCog, Ban, Flag
+  UserCog, Ban, Flag, Home, Menu
 } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
@@ -260,7 +260,7 @@ function MessagesContent() {
   const [replyTo, setReplyTo] = useState(null);
   const [showReactionPicker, setShowReactionPicker] = useState(null);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
-  const [showInfo, setShowInfo] = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [error, setError] = useState(null);
@@ -268,6 +268,19 @@ function MessagesContent() {
   const [fileError, setFileError] = useState(null);   // inline file-type error
   const [uploadToast, setUploadToast] = useState(null); // { type: 'uploading'|'error'|'success', msg }
   const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+  const [lightboxMedia, setLightboxMedia] = useState(null);
+  const [showMainMenu, setShowMainMenu] = useState(false);
+  const mainMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (mainMenuRef.current && !mainMenuRef.current.contains(e.target)) {
+        setShowMainMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleReplyClick = (e, replyMsgId) => {
     e.stopPropagation();
@@ -819,7 +832,7 @@ function MessagesContent() {
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="mx-auto w-full h-[calc(100vh-140px)] bg-white flex font-sans text-zinc-900 border-x border-b border-zinc-200 shadow-sm overflow-hidden">
+    <div className="w-full flex-1 h-full bg-white flex font-sans text-zinc-900 overflow-hidden">
 
       {/* ── SIDEBAR ── */}
       <aside className={`${vendorId ? "hidden lg:flex" : "flex"} w-full lg:w-[300px] bg-white border-r border-zinc-200 flex-col shrink-0`}>
@@ -827,10 +840,42 @@ function MessagesContent() {
         {/* Sidebar Header */}
         <div className="px-5 py-4 border-b border-zinc-200">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-[18px] font-semibold text-zinc-900 flex items-center gap-2">
-              <MessageCircle size={18} className="text-[#be374f]" />
-              {isAr ? "الرسائل" : "Messages"}
-            </h1>
+            <div className="flex items-center gap-2">
+              <div className="relative" ref={mainMenuRef}>
+                <button
+                  onClick={() => setShowMainMenu(!showMainMenu)}
+                  className={`p-1.5 -ms-1.5 rounded-md transition-colors ${showMainMenu ? 'text-[#be374f] bg-[#be374f]/10' : 'text-zinc-400 hover:text-[#be374f] hover:bg-zinc-100'}`}
+                  title={isAr ? "القائمة" : "Menu"}
+                >
+                  <Menu size={18} />
+                </button>
+                {showMainMenu && (
+                  <div className={`absolute ${isAr ? 'right-0' : 'left-0'} top-full mt-2 w-48 bg-white border border-zinc-200 shadow-xl rounded-xl z-50 overflow-hidden`}>
+                    <div className="py-1">
+                      <Link href="/" className="flex items-center gap-2 px-4 py-2 text-[13px] text-zinc-700 hover:bg-zinc-50 hover:text-[#be374f]">
+                        <Home size={15} />
+                        {isAr ? "الرئيسية" : "Home"}
+                      </Link>
+                      <Link href="/vendors" className="flex items-center gap-2 px-4 py-2 text-[13px] text-zinc-700 hover:bg-zinc-50 hover:text-[#be374f]">
+                        <Store size={15} />
+                        {isAr ? "تصفح المتاجر" : "Browse Stores"}
+                      </Link>
+                      <Link href="/browse" className="flex items-center gap-2 px-4 py-2 text-[13px] text-zinc-700 hover:bg-zinc-50 hover:text-[#be374f]">
+                        <Package size={15} />
+                        {isAr ? "تصفح المنتجات" : "Browse Products"}
+                      </Link>
+                      <Link href="/account" className="flex items-center gap-2 px-4 py-2 text-[13px] text-zinc-700 hover:bg-zinc-50 hover:text-[#be374f]">
+                        <UserCog size={15} />
+                        {isAr ? "حسابي" : "My Profile"}
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <h1 className="text-[18px] font-semibold text-zinc-900 flex items-center gap-2">
+                {isAr ? "الرسائل" : "Messages"}
+              </h1>
+            </div>
             <div className="flex gap-1.5">
               <button
                 onClick={async () => { setRefreshingConvs(true); await fetchData(); setRefreshingConvs(false); }}
@@ -1123,7 +1168,7 @@ function MessagesContent() {
               </header>
 
               {/* Messages */}
-              <div ref={chatScrollRef} className="chat-background flex-1 overflow-y-auto px-5 pb-5 pt-20 bg-zinc-50 space-y-3 relative">
+              <div ref={chatScrollRef} className="chat-background flex-1 overflow-y-auto px-5 py-5 bg-zinc-50 space-y-3 relative">
                 <>
                   {messages.map((msg, index) => {
                     const isMe = String(msg.senderId) === String(wooId);
@@ -1161,17 +1206,26 @@ function MessagesContent() {
                             </div>
                           )}
 
-                          <p className={`whitespace-pre-wrap ${msg.isDeleted ? "italic text-zinc-400" : ""}`}>
-                            {msg.isDeleted ? msg.text : formatMessageText(msg.text, isMe)}
-                          </p>
-
                           {msg.mediaUrl && !msg.isDeleted && (
-                            <div className="mt-2 rounded-md overflow-hidden border border-white/20">
+                            <div className="mb-2 rounded-md overflow-hidden border border-white/20">
                               {msg.mediaType === "image"
-                                ? <img src={msg.mediaUrl} alt="media" className="max-w-full h-auto" />
-                                : <div className="flex items-center gap-2 p-2.5 text-[12px]"><File size={14} /><span>{isAr ? "عرض المستند" : "View Document"}</span></div>
+                                ? (
+                                  <img
+                                    src={msg.mediaUrl}
+                                    alt="media"
+                                    onClick={() => setLightboxMedia(msg.mediaUrl)}
+                                    className="max-w-full sm:max-w-[280px] max-h-[300px] object-cover cursor-pointer hover:opacity-90 transition-opacity rounded-sm bg-black/5"
+                                  />
+                                )
+                                : <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2.5 text-[12px] hover:bg-black/5 transition-colors"><File size={14} /><span>{isAr ? "عرض المستند" : "View Document"}</span></a>
                               }
                             </div>
+                          )}
+
+                          {msg.text && (
+                            <p className={`whitespace-pre-wrap ${msg.isDeleted ? "italic text-zinc-400" : ""}`}>
+                              {msg.isDeleted ? msg.text : formatMessageText(msg.text, isMe)}
+                            </p>
                           )}
 
                           {msg.customMeta?.type === "product" && !msg.isDeleted && (() => {
@@ -1317,27 +1371,14 @@ function MessagesContent() {
                     <button onClick={() => setReplyTo(null)} className="text-zinc-400 hover:text-rose-500"><X size={14} /></button>
                   </div>
                 )}
-                {/* File preview with allowed-types hint */}
-                {selectedFile ? (
-                  <div className="flex items-center justify-between px-3 py-2 bg-[#fde7ee] border border-b-0 border-[#b2d8dc] rounded-t-md">
-                    <div className="flex items-center gap-2">
-                      {previewUrl
-                        ? <img src={previewUrl} className="w-7 h-7 object-cover rounded border border-white" alt="preview" />
-                        : <File size={14} className="text-[#be374f]" />
-                      }
-                      <span className="text-[12px] text-[#be374f] truncate max-w-[200px]">{selectedFile.name}</span>
-                      <span className="text-[10px] text-zinc-400">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</span>
-                    </div>
-                    <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); setFileError(null); }} className="text-zinc-400 hover:text-rose-500"><X size={14} /></button>
-                  </div>
-                ) : fileError ? (
+                {fileError ? (
                   <div className="flex items-start gap-2 px-3 py-2 bg-red-50 border border-b-0 border-red-200 rounded-t-md">
                     <AlertCircle size={14} className="text-red-500 shrink-0 mt-0.5" />
                     <p className="text-[12px] text-red-600 leading-snug">{fileError}</p>
                     <button onClick={() => setFileError(null)} className="ms-auto text-zinc-400 hover:text-red-500"><X size={12} /></button>
                   </div>
                 ) : null}
-                <div className={`flex items-end gap-2 px-2 py-1.5 transition-colors ${replyTo ? "bg-[#fde7ee]/20 border border-[#be374f]/30 rounded-b-md" : selectedFile || fileError ? "bg-zinc-50 border border-zinc-300 rounded-b-md" : "bg-zinc-50 border border-zinc-300 rounded-md"}`}>
+                <div className={`flex items-end gap-2 px-2 py-1.5 transition-colors ${replyTo ? "bg-[#fde7ee]/20 border border-[#be374f]/30 rounded-b-md" : fileError ? "bg-zinc-50 border border-zinc-300 rounded-b-md" : "bg-zinc-50 border border-zinc-300 rounded-md"}`}>
                   <button
                     onClick={() => { setFileError(null); fileInputRef.current?.click(); }}
                     className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-[#be374f] transition-colors"
@@ -1386,7 +1427,6 @@ function MessagesContent() {
                     placeholder={isAr ? "اكتب رسالة..." : "Write a message..."}
                     className="flex-1 bg-transparent border-none py-1.5 px-1 text-[13px] outline-none resize-none text-zinc-800 placeholder:text-zinc-400 overflow-y-auto max-h-[96px] custom-scrollbar"
                   />
-
                   <button
                     onClick={() => handleSend()}
                     disabled={sending}
@@ -1431,196 +1471,196 @@ function MessagesContent() {
         {showInfo && vendorId && (
           <>
             {/* Mobile Backdrop */}
-            <div 
-              className="xl:hidden absolute inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity" 
-              onClick={() => setShowInfo(false)} 
+            <div
+              className="xl:hidden fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm transition-opacity"
+              onClick={() => setShowInfo(false)}
             />
-            <aside className={`absolute xl:static inset-y-0 ${isAr ? 'left-0 border-r' : 'right-0 border-l'} z-50 w-[280px] xl:w-[260px] bg-white border-zinc-200 flex flex-col shrink-0 shadow-2xl xl:shadow-none animate-in ${isAr ? 'slide-in-from-left-8' : 'slide-in-from-right-8'} xl:animate-none`}>
+            <aside className={`fixed xl:static inset-y-0 ${isAr ? 'left-0 border-r' : 'right-0 border-l'} z-[101] w-[280px] xl:w-[260px] bg-white border-zinc-200 flex flex-col shrink-0 shadow-2xl xl:shadow-none animate-in ${isAr ? 'slide-in-from-left-8' : 'slide-in-from-right-8'} xl:animate-none`}>
               {/* Tabs */}
               <div className={`flex border-b border-zinc-200 h-[56px] items-end px-4 shrink-0 relative`}>
-                <button 
-                  onClick={() => setShowInfo(false)} 
+                <button
+                  onClick={() => setShowInfo(false)}
                   className="xl:hidden absolute top-1/2 -translate-y-1/2 end-3 p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-full transition-all"
                 >
                   <X size={18} />
                 </button>
-              {isAdminAccount ? (
-                <div className="pb-2 text-[13px] font-medium text-zinc-900">{isAr ? "معلومات الدعم" : "Support Info"}</div>
-              ) : (
-                ["info", "products", "orders"].map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-3 py-2.5 text-[13px] font-medium capitalize border-b-2 transition-colors ${activeTab === tab ? "border-[#be374f] text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-800"} ${tab === "products" && (vendor?.role === "customer" || vendorProducts.length === 0) ? "hidden" : ""}`}
-                  >
-                    {tab === "info" ? (isAr ? "معلومات" : "Info") : tab === "products" ? (isAr ? "المنتجات" : "Products") : (isAr ? "الطلبات" : "Orders")}
-                  </button>
-                ))
-              )}
-            </div>
+                {isAdminAccount ? (
+                  <div className="pb-2 text-[13px] font-medium text-zinc-900">{isAr ? "معلومات الدعم" : "Support Info"}</div>
+                ) : (
+                  ["info", "products", "orders"].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-3 py-2.5 text-[13px] font-medium capitalize border-b-2 transition-colors ${activeTab === tab ? "border-[#be374f] text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-800"} ${tab === "products" && (vendor?.role === "customer" || vendorProducts.length === 0) ? "hidden" : ""}`}
+                    >
+                      {tab === "info" ? (isAr ? "معلومات" : "Info") : tab === "products" ? (isAr ? "المنتجات" : "Products") : (isAr ? "الطلبات" : "Orders")}
+                    </button>
+                  ))
+                )}
+              </div>
 
-            <div className="flex-1 overflow-y-auto p-5 space-y-5">
-              {isAdminAccount ? (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-zinc-900 rounded-lg flex items-center justify-center mx-auto mb-3 border border-zinc-800">
-                      <ShieldAlert size={28} className="text-[#be374f]" />
+              <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                {isAdminAccount ? (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-zinc-900 rounded-lg flex items-center justify-center mx-auto mb-3 border border-zinc-800">
+                        <ShieldAlert size={28} className="text-[#be374f]" />
+                      </div>
+                      <h3 className="text-[15px] font-semibold text-zinc-900">Mahally Support</h3>
+                      <span className="inline-flex items-center gap-1 mt-1.5 bg-[#fde7ee] text-[#be374f] text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-[#b2d8dc]">
+                        <BadgeCheck size={11} /> {isAr ? "فريق الدعم الرسمي" : "Verified Support Team"}
+                      </span>
                     </div>
-                    <h3 className="text-[15px] font-semibold text-zinc-900">Mahally Support</h3>
-                    <span className="inline-flex items-center gap-1 mt-1.5 bg-[#fde7ee] text-[#be374f] text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-[#b2d8dc]">
-                      <BadgeCheck size={11} /> {isAr ? "فريق الدعم الرسمي" : "Verified Support Team"}
-                    </span>
+                    <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md">
+                      <p className="text-[12px] text-zinc-500 text-center leading-relaxed">{isAr ? "تقديم الدعم الفني والتشغيلي للمشترين والبائعين، والإجابة عن الاستفسارات، والمساعدة في استخدام المنصة." : "Handles order disputes, technical issues, and merchant onboarding on the platform."}</p>
+                    </div>
                   </div>
-                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md">
-                    <p className="text-[12px] text-zinc-500 text-center leading-relaxed">{isAr ? "تقديم الدعم الفني والتشغيلي للمشترين والبائعين، والإجابة عن الاستفسارات، والمساعدة في استخدام المنصة." : "Handles order disputes, technical issues, and merchant onboarding on the platform."}</p>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {activeTab === "info" && (
-                    <div className="space-y-4">
+                ) : (
+                  <>
+                    {activeTab === "info" && (
                       <div className="space-y-4">
-                        <div className="text-center">
-                          <div className="w-14 h-14 rounded-lg border border-zinc-200 p-1.5 mx-auto mb-3 bg-white relative shadow-sm flex items-center justify-center overflow-hidden">
-                            {vendor?.storeLogo ? (
-                              <Image src={vendor.storeLogo} alt="logo" fill className="object-contain p-1" />
-                            ) : (
-                              <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">
-                                <ShoppingBag size={24} />
+                        <div className="space-y-4">
+                          <div className="text-center">
+                            <div className="w-14 h-14 rounded-lg border border-zinc-200 p-1.5 mx-auto mb-3 bg-white relative shadow-sm flex items-center justify-center overflow-hidden">
+                              {vendor?.storeLogo ? (
+                                <Image src={vendor.storeLogo} alt="logo" fill className="object-contain p-1" />
+                              ) : (
+                                <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">
+                                  <ShoppingBag size={24} />
+                                </div>
+                              )}
+                            </div>
+                            <h2 className="text-[15px] font-semibold text-zinc-900">{vendor?.storeName}</h2>
+                            <span className={`inline-flex items-center gap-1 mt-1.5 text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${vendor?.role === "customer" ? "bg-zinc-100 text-zinc-600 border-zinc-200" : "bg-[#fde7ee] text-[#be374f] border-[#b2d8dc]"}`}>
+                              <BadgeCheck size={11} /> {vendor?.role === "customer" ? (isAr ? "مشتري موثوق" : "Verified Buyer") : (isAr ? "متجر رسمي" : "Official Store")}
+                            </span>
+                          </div>
+
+                          <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md space-y-2">
+                            <div className="flex justify-between text-[12px]">
+                              <span className="text-zinc-500">{isAr ? "عضو منذ" : "Member since"}</span>
+                              <span className="text-zinc-700 font-medium">{vendor?.dateCreated ? new Date(vendor.dateCreated).getFullYear() : "2024"}</span>
+                            </div>
+                            {vendor?.role === "customer" && (
+                              <div className="flex justify-between text-[12px]">
+                                <span className="text-zinc-500">{isAr ? "إجمالي الطلبات" : "Total Orders"}</span>
+                                <span className="text-[#be374f] font-medium">{customerOrders.length}</span>
                               </div>
                             )}
                           </div>
-                          <h2 className="text-[15px] font-semibold text-zinc-900">{vendor?.storeName}</h2>
-                          <span className={`inline-flex items-center gap-1 mt-1.5 text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${vendor?.role === "customer" ? "bg-zinc-100 text-zinc-600 border-zinc-200" : "bg-[#fde7ee] text-[#be374f] border-[#b2d8dc]"}`}>
-                            <BadgeCheck size={11} /> {vendor?.role === "customer" ? (isAr ? "مشتري موثوق" : "Verified Buyer") : (isAr ? "متجر رسمي" : "Official Store")}
-                          </span>
-                        </div>
 
-                        <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md space-y-2">
-                          <div className="flex justify-between text-[12px]">
-                            <span className="text-zinc-500">{isAr ? "عضو منذ" : "Member since"}</span>
-                            <span className="text-zinc-700 font-medium">{vendor?.dateCreated ? new Date(vendor.dateCreated).getFullYear() : "2024"}</span>
-                          </div>
-                          {vendor?.role === "customer" && (
-                            <div className="flex justify-between text-[12px]">
-                              <span className="text-zinc-500">{isAr ? "إجمالي الطلبات" : "Total Orders"}</span>
-                              <span className="text-[#be374f] font-medium">{customerOrders.length}</span>
+                          {vendor?.role === "vendor" && (
+                            <div className="space-y-1.5">
+                              {isDesignatedAdmin && (
+                                <button
+                                  onClick={() => window.open(`/${locale}/vendor/${vendor.storeSlug || vendor.id}`, "_blank")}
+                                  className="w-full h-[31px] bg-[#fde7ee] border border-[#b2d8dc] rounded-md text-[12px] font-medium text-[#be374f] flex items-center justify-center gap-2 hover:bg-[#fcd0dd] transition-all"
+                                >
+                                  <Store size={14} /> {isAr ? "زيارة المتجر" : "Visit Store"}
+                                </button>
+                              )}
+                              {vendor?.whatsappNumber && vendor?.showWhatsapp && (
+                                <button
+                                  onClick={() => window.open(`https://wa.me/${vendor.whatsappNumber.replace(/[^0-9]/g, '')}`, "_blank")}
+                                  className="w-full h-[31px] bg-zinc-50 border border-zinc-300 rounded-md text-[12px] font-medium text-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-100 transition-all"
+                                >
+                                  WhatsApp
+                                </button>
+                              )}
+                              <button
+                                onClick={() => window.open("https://t.me/mahally", "_blank")}
+                                className="w-full h-[31px] bg-zinc-50 border border-zinc-300 rounded-md text-[12px] font-medium text-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-100 transition-all"
+                              >
+                                Telegram
+                              </button>
                             </div>
                           )}
                         </div>
+                      </div>
+                    )}
 
-                        {vendor?.role === "vendor" && (
-                          <div className="space-y-1.5">
-                            {isDesignatedAdmin && (
-                              <button
-                                onClick={() => window.open(`/${locale}/vendor/${vendor.storeSlug || vendor.id}`, "_blank")}
-                                className="w-full h-[31px] bg-[#fde7ee] border border-[#b2d8dc] rounded-md text-[12px] font-medium text-[#be374f] flex items-center justify-center gap-2 hover:bg-[#fcd0dd] transition-all"
-                              >
-                                <Store size={14} /> {isAr ? "زيارة المتجر" : "Visit Store"}
-                              </button>
-                            )}
-                            {vendor?.whatsappNumber && vendor?.showWhatsapp && (
-                              <button
-                                onClick={() => window.open(`https://wa.me/${vendor.whatsappNumber.replace(/[^0-9]/g, '')}`, "_blank")}
-                                className="w-full h-[31px] bg-zinc-50 border border-zinc-300 rounded-md text-[12px] font-medium text-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-100 transition-all"
-                              >
-                                WhatsApp
-                              </button>
-                            )}
+                    {activeTab === "products" && (
+                      <div className="space-y-2">
+                        <div className="relative mb-3">
+                          <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                          <input
+                            value={productSearchQuery}
+                            onChange={(e) => setProductSearchQuery(e.target.value)}
+                            placeholder={isAr ? "ابحث في منتجات المتجر..." : "Search store products..."}
+                            className="w-full h-9 border border-zinc-300 rounded-md ps-9 pe-3 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                          />
+                        </div>
+                        {productsLoading ? (
+                          <div className="flex justify-center py-8">
+                            <div className="w-6 h-6 border-4 border-zinc-200 border-t-[#febd69] rounded-full animate-spin" />
+                          </div>
+                        ) : vendorProducts.filter(p => (p.name || "").toLowerCase().includes(productSearchQuery.toLowerCase())).map((p, index) => (
+                          <div key={p.id || `prod-${index}`} className="p-2.5 border border-zinc-200 rounded-md hover:border-[#be374f] transition-all bg-white">
+                            <div className="flex gap-2.5 mb-2">
+                              <div className="w-10 h-10 bg-white rounded-md border border-zinc-200 shrink-0 relative overflow-hidden">
+                                <Image src={p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name} fill className="object-contain p-1" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[12px] font-medium text-zinc-800 truncate leading-tight">{p.name}</p>
+                                <p className="text-[12px] text-[#be374f] font-semibold mt-0.5">د.أ {p.price}</p>
+                              </div>
+                            </div>
                             <button
-                              onClick={() => window.open("https://t.me/mahally", "_blank")}
-                              className="w-full h-[31px] bg-zinc-50 border border-zinc-300 rounded-md text-[12px] font-medium text-zinc-600 flex items-center justify-center gap-2 hover:bg-zinc-100 transition-all"
+                              onClick={() => handleSend(isAr ? `استفسار عن: ${p.name}` : `Inquiry about: ${p.name}`, {
+                                type: "product",
+                                id: p.id,
+                                name: p.name,
+                                price: p.price,
+                                image: p.images?.[0]?.src,
+                                url: getProductUrl(p),
+                                slug: p.slug
+                              })}
+                              className="w-full h-[26px] bg-brand hover:bg-brand-dark border-brand rounded-md text-[11px] font-medium transition-all"
                             >
-                              Telegram
+                              {isAr ? "إرفاق بطاقة المنتج" : "Attach Product Card"}
                             </button>
                           </div>
-                        )}
+                        ))}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {activeTab === "products" && (
-                    <div className="space-y-2">
-                      <div className="relative mb-3">
-                        <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                        <input
-                          value={productSearchQuery}
-                          onChange={(e) => setProductSearchQuery(e.target.value)}
-                          placeholder={isAr ? "ابحث في منتجات المتجر..." : "Search store products..."}
-                          className="w-full h-9 border border-zinc-300 rounded-md ps-9 pe-3 text-[12px] outline-none focus:border-brand focus:ring-1 focus:ring-brand"
-                        />
-                      </div>
-                      {productsLoading ? (
-                        <div className="flex justify-center py-8">
-                          <div className="w-6 h-6 border-4 border-zinc-200 border-t-[#febd69] rounded-full animate-spin" />
-                        </div>
-                      ) : vendorProducts.filter(p => (p.name || "").toLowerCase().includes(productSearchQuery.toLowerCase())).map((p, index) => (
-                        <div key={p.id || `prod-${index}`} className="p-2.5 border border-zinc-200 rounded-md hover:border-[#be374f] transition-all bg-white">
-                          <div className="flex gap-2.5 mb-2">
-                            <div className="w-10 h-10 bg-white rounded-md border border-zinc-200 shrink-0 relative overflow-hidden">
-                              <Image src={p.images?.[0]?.src || "https://placehold.co/100"} alt={p.name} fill className="object-contain p-1" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-[12px] font-medium text-zinc-800 truncate leading-tight">{p.name}</p>
-                              <p className="text-[12px] text-[#be374f] font-semibold mt-0.5">د.أ {p.price}</p>
-                            </div>
+                    {activeTab === "orders" && (
+                      <div className="space-y-3">
+                        {ordersLoading ? (
+                          <div className="flex justify-center py-8">
+                            <div className="w-6 h-6 border-4 border-zinc-200 border-t-[#febd69] rounded-full animate-spin" />
                           </div>
-                          <button
-                            onClick={() => handleSend(isAr ? `استفسار عن: ${p.name}` : `Inquiry about: ${p.name}`, {
-                              type: "product",
-                              id: p.id,
-                              name: p.name,
-                              price: p.price,
-                              image: p.images?.[0]?.src,
-                              url: getProductUrl(p),
-                              slug: p.slug
-                            })}
-                            className="w-full h-[26px] bg-brand hover:bg-brand-dark border-brand rounded-md text-[11px] font-medium transition-all"
-                          >
-                            {isAr ? "إرفاق بطاقة المنتج" : "Attach Product Card"}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {activeTab === "orders" && (
-                    <div className="space-y-3">
-                      {ordersLoading ? (
-                        <div className="flex justify-center py-8">
-                          <div className="w-6 h-6 border-4 border-zinc-200 border-t-[#febd69] rounded-full animate-spin" />
-                        </div>
-                      ) : customerOrders.map((order, index) => {
-                        const colors = getStatusColors(order.status);
-                        return (
-                          <div key={order.id || `order-${index}`} className="border border-zinc-200 rounded-md overflow-hidden">
-                            <div className="bg-zinc-50 border-b border-zinc-200 px-3 py-2 flex items-center justify-between">
-                              <p className="text-[12px] font-medium text-zinc-700">{isAr ? `طلب رقم #${order.id}` : `Order #${order.id}`}</p>
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${colors.badge}`}>
-                                {getStatusLabel(order.status, isAr)}
-                              </span>
-                            </div>
-                            <div className="p-3 space-y-2">
-                              <div className="flex items-center gap-1.5">
-                                <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
-                                <span className="text-[12px] text-zinc-600">د.أ {parseFloat(order.total || 0).toFixed(2)}</span>
+                        ) : customerOrders.map((order, index) => {
+                          const colors = getStatusColors(order.status);
+                          return (
+                            <div key={order.id || `order-${index}`} className="border border-zinc-200 rounded-md overflow-hidden">
+                              <div className="bg-zinc-50 border-b border-zinc-200 px-3 py-2 flex items-center justify-between">
+                                <p className="text-[12px] font-medium text-zinc-700">{isAr ? `طلب رقم #${order.id}` : `Order #${order.id}`}</p>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${colors.badge}`}>
+                                  {getStatusLabel(order.status, isAr)}
+                                </span>
                               </div>
-                              <button
-                                onClick={() => handleSend(isAr ? `طلب تحديث حول الطلب #${order.id}` : `Request update for Order #${order.id}`, { type: "order", id: order.id, status: order.status, total: order.total })}
-                                className="w-full h-[28px] bg-brand hover:bg-brand-dark border-brand rounded-md text-[11px] font-medium transition-all"
-                              >
-                                {isAr ? "اطلب تحديث هذا الطلب" : "Request order update"}
-                              </button>
+                              <div className="p-3 space-y-2">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
+                                  <span className="text-[12px] text-zinc-600">د.أ {parseFloat(order.total || 0).toFixed(2)}</span>
+                                </div>
+                                <button
+                                  onClick={() => handleSend(isAr ? `طلب تحديث حول الطلب #${order.id}` : `Request update for Order #${order.id}`, { type: "order", id: order.id, status: order.status, total: order.total })}
+                                  className="w-full h-[28px] bg-brand hover:bg-brand-dark border-brand rounded-md text-[11px] font-medium transition-all"
+                                >
+                                  {isAr ? "اطلب تحديث هذا الطلب" : "Request order update"}
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </aside>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </aside>
           </>
         )}
       </div>
@@ -1680,6 +1720,122 @@ function MessagesContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── LIGHTBOX MODAL ── */}
+      {lightboxMedia && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 z-[999999] bg-black/95 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
+          onClick={() => setLightboxMedia(null)}
+        >
+          {/* Top Controls */}
+          <div className="absolute top-0 inset-x-0 p-4 flex justify-end gap-3 z-[1000000] bg-gradient-to-b from-black/50 to-transparent">
+            <a
+              href={lightboxMedia}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              onClick={e => e.stopPropagation()}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors backdrop-blur-md"
+              title={isAr ? "فتح في علامة تبويب جديدة" : "Open in new tab"}
+            >
+              <ArrowRight size={20} className={isAr ? "" : "-rotate-45"} />
+            </a>
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxMedia(null); }}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors backdrop-blur-md"
+              title={isAr ? "إغلاق" : "Close"}
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Image */}
+          <div className="w-full h-full p-4 md:p-12 flex items-center justify-center pointer-events-none">
+            <img
+              src={lightboxMedia}
+              alt="fullscreen media"
+              className="max-w-full max-h-full object-contain drop-shadow-2xl pointer-events-auto"
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── ATTACHMENT PREVIEW OVERLAY (WHATSAPP STYLE) ── */}
+      {selectedFile && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[999998] bg-[#0b141a] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+          {/* Header */}
+          <div className="h-16 px-4 flex items-center shrink-0">
+            <button
+              onClick={() => { setSelectedFile(null); setPreviewUrl(null); setFileError(null); setNewMessage(""); }}
+              className="w-10 h-10 flex items-center justify-center text-zinc-300 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Preview */}
+          <div className="flex-1 min-h-0 flex items-center justify-center p-4">
+            {previewUrl ? (
+              <img src={previewUrl} alt="preview" className="max-w-full max-h-full object-contain drop-shadow-2xl" />
+            ) : (
+              <div className="w-64 h-64 bg-[#202c33] rounded-2xl flex flex-col items-center justify-center text-zinc-300 shadow-2xl">
+                <File size={80} className="mb-6 text-brand" />
+                <span className="text-[16px] font-medium text-center px-6 break-all line-clamp-2">{selectedFile.name}</span>
+                <span className="text-[14px] text-zinc-500 mt-3">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</span>
+              </div>
+            )}
+          </div>
+
+          {/* Caption Input & Send */}
+          <div className="p-4 bg-[#202c33] flex items-center justify-center shrink-0">
+            <div className="w-full max-w-3xl flex items-end gap-3">
+              <div className="flex-1 bg-[#2a3942] rounded-xl flex items-end gap-2 px-4 py-2.5 focus-within:ring-1 focus-within:ring-[#00a884] transition-all">
+                <div className="relative shrink-0 mb-0.5">
+                  <button onClick={() => setShowEmoji(!showEmoji)} className="text-[#8696a0] hover:text-white transition-colors">
+                    <Smile size={26} />
+                  </button>
+                  {showEmoji && (
+                    <div className="absolute bottom-full start-0 bg-[#2a3942] border border-[#202c33] shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[280px] rounded-lg z-50 mb-4">
+                      {ALL_EMOJIS.map(e => (
+                        <button key={e} onClick={() => { setNewMessage(p => p + e); setShowEmoji(false); }} className="text-[22px] hover:scale-125 transition-all p-0.5">{e}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <textarea
+                  rows={1}
+                  dir={newMessage ? "auto" : (isAr ? "rtl" : "ltr")}
+                  value={newMessage}
+                  onChange={e => setNewMessage(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      if (enterToSend && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
+                      } else if (!enterToSend && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        handleSend();
+                      }
+                    }
+                  }}
+                  placeholder={isAr ? "إضافة تعليق..." : "Add a caption..."}
+                  className="flex-1 bg-transparent border-none text-[15px] text-[#d1d7db] placeholder:text-[#8696a0] outline-none resize-none max-h-[120px] custom-scrollbar py-1"
+                />
+              </div>
+              <button
+                onClick={() => handleSend()}
+                disabled={sending}
+                className="w-[50px] h-[50px] rounded-full bg-[#00a884] flex items-center justify-center text-white shrink-0 hover:bg-[#008f6f] transition-colors shadow-lg active:scale-95 disabled:opacity-50"
+              >
+                {sending ? <Loader2 size={22} className="animate-spin" /> : <Send size={20} className={isAr ? "rotate-180" : "ms-1"} />}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
