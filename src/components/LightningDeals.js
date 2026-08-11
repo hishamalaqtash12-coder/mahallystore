@@ -15,8 +15,12 @@ export default function LightningDeals({ products }) {
   const [canScrollStart, setCanScrollStart] = useState(false);
   const [canScrollEnd, setCanScrollEnd] = useState(true);
 
-  // Filter products for Flash Deals
-  const deals = (products || []).filter(p => p.on_sale).slice(0, 10);
+  // Filter products for Flash Deals (Only products with discount on price, no time limit)
+  const deals = (products || []).filter(p => {
+    const saleEndDate = p.date_on_sale_to || p.date_on_sale_to_gmt;
+    const hasActiveTimer = saleEndDate && new Date(saleEndDate) > new Date();
+    return p.on_sale && !hasActiveTimer;
+  }).slice(0, 10);
 
   const checkScroll = () => {
     if (scrollRef.current) {

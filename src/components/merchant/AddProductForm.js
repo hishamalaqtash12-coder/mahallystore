@@ -23,8 +23,11 @@ const decodeEntities = (text) => {
 
 const formatDateForInput = (dateString) => {
   if (!dateString) return "";
-  // Handles '2026-05-15T00:00:00' or similar
-  return dateString.split('T')[0];
+  // Format for datetime-local input: YYYY-MM-DDTHH:MM
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "";
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
 import { 

@@ -207,19 +207,49 @@ function AccountOrdersContent() {
                   {order.status === 'completed' && order.date_completed && (
                     <div>
                       <p className="uppercase tracking-tight mb-0.5">تاريخ الاكتمال</p>
-                      <p className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_completed)}</p>
+                      <div className="flex flex-col">
+                        <span className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_completed)}</span>
+                        <span className="text-xs text-emerald-600 font-bold mt-1">
+                          {(() => {
+                            const diffHrs = Math.abs(new Date(order.date_completed) - new Date(order.date_created)) / 36e5;
+                            if (diffHrs < 24) return `اكتمل خلال ${Math.max(1, Math.floor(diffHrs))} ساعة`;
+                            const days = Math.floor(diffHrs / 24);
+                            return `اكتمل خلال ${days} ${days === 1 ? 'يوم' : 'أيام'}`;
+                          })()}
+                        </span>
+                      </div>
                     </div>
                   )}
                   {['cancelled', 'failed'].includes(order.status) && (
                     <div>
                       <p className="uppercase tracking-tight mb-0.5">تاريخ الإلغاء</p>
-                      <p className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_modified)}</p>
+                      <div className="flex flex-col">
+                        <span className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_modified)}</span>
+                        <span className="text-xs text-rose-600 font-bold mt-1">
+                          {(() => {
+                            const diffHrs = Math.abs(new Date(order.date_modified) - new Date(order.date_created)) / 36e5;
+                            if (diffHrs < 24) return `ألغي بعد ${Math.max(1, Math.floor(diffHrs))} ساعة`;
+                            const days = Math.floor(diffHrs / 24);
+                            return `ألغي بعد ${days} ${days === 1 ? 'يوم' : 'أيام'}`;
+                          })()}
+                        </span>
+                      </div>
                     </div>
                   )}
                   {['processing'].includes(order.status) && (
                     <div>
                       <p className="uppercase tracking-tight mb-0.5">تاريخ المعالجة</p>
-                      <p className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_paid || order.date_modified)}</p>
+                      <div className="flex flex-col">
+                        <span className="text-gray-900 font-medium" dir="ltr">{formatOrderDate(order.date_modified)}</span>
+                        <span className="text-xs text-brand font-bold mt-1">
+                          {(() => {
+                            const diffHrs = Math.abs(new Date(order.date_modified) - new Date(order.date_created)) / 36e5;
+                            if (diffHrs < 24) return `قيد المعالجة منذ ${Math.max(1, Math.floor(diffHrs))} ساعة`;
+                            const days = Math.floor(diffHrs / 24);
+                            return `قيد المعالجة منذ ${days} ${days === 1 ? 'يوم' : 'أيام'}`;
+                          })()}
+                        </span>
+                      </div>
                     </div>
                   )}
                   <div>
@@ -249,8 +279,21 @@ function AccountOrdersContent() {
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-6">
-                  <div className={`w-2 h-2 rounded-full ${order.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-                  <span className="text-[15px] font-bold capitalize">{order.status}</span>
+                  <div className={`w-2 h-2 rounded-full ${order.status === 'completed' ? 'bg-emerald-500' : (order.status === 'cancelled' ? 'bg-red-500' : 'bg-amber-400')}`} />
+                  <span className={`text-[15px] font-bold capitalize ${order.status === 'cancelled' ? 'text-red-600' : ''}`}>
+                    {order.status === 'completed' ? 'مكتمل' :
+                     order.status === 'processing' ? 'قيد المعالجة' :
+                     order.status === 'cancelled' ? 'ملغى' :
+                     order.status === 'refunded' ? 'مسترجع' :
+                     order.status === 'failed' ? 'فشل' :
+                     order.status === 'on-hold' ? 'قيد الانتظار' :
+                     order.status === 'pending' ? 'معلق' : order.status}
+                  </span>
+                  {order.status === 'cancelled' && (
+                    <span className="text-[12px] text-red-500 bg-red-50 px-2 py-0.5 rounded mr-2 border border-red-100">
+                      بواسطة {order.meta_data?.find(m => m.key === '_cancelled_by_role')?.value === 'merchant' ? 'التاجر' : (order.meta_data?.find(m => m.key === '_cancelled_by_role')?.value === 'customer' ? 'العميل' : 'النظام')}
+                    </span>
+                  )}
                 </div>
                 <div className="flex gap-6">
                   <div className="flex-1 space-y-6">

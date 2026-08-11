@@ -52,10 +52,16 @@ export async function PUT(req) {
     
     // Update order via WC API (Admin keys) for better status transition handling
     const updatePayload = {};
-    if (status) updatePayload.status = status;
+    if (status) {
+      updatePayload.status = status;
+      if (status === 'cancelled') {
+        updatePayload.meta_data = meta_data || [];
+        updatePayload.meta_data.push({ key: '_cancelled_by_role', value: 'merchant' });
+      }
+    }
     if (billing) updatePayload.billing = billing;
     if (shipping) updatePayload.shipping = shipping;
-    if (meta_data) updatePayload.meta_data = meta_data;
+    if (meta_data && status !== 'cancelled') updatePayload.meta_data = meta_data;
 
     let oldStatus = 'unknown';
     try {

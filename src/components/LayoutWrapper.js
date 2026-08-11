@@ -18,13 +18,21 @@ export default function LayoutWrapper({ children }) {
     if (normalized === '/') normalized = '/';
   }
 
-  // Check if we are in the merchant dashboard, admin dashboard, or auth pages
+  // Check if we are in the merchant dashboard, admin dashboard, auth pages, or messages page
   const isDashboard = normalized.startsWith("/merchant/dashboard") || normalized.startsWith("/admin");
   const isAuthPage = normalized === "/login" || normalized === "/register";
+  const isMessagesPage = normalized.startsWith("/messages");
 
-  if (isDashboard || isAuthPage) {
+  if (isDashboard || isAuthPage || isMessagesPage) {
+    if (isMessagesPage) {
+      return (
+        <div className="fixed inset-0 flex flex-col bg-white z-50 overflow-hidden">
+          {children}
+        </div>
+      );
+    }
     return (
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {!isAuthPage && <ServiceStatusBanner />}
         {children}
       </div>

@@ -408,9 +408,14 @@ export default function OrderDetailsModal({ order, isOpen, onClose, reviewedProd
           {/* Visual Order Tracking Timeline */}
           {(() => {
             if (['cancelled', 'failed', 'refunded'].includes(order.status)) {
+              const cancelledBy = order.meta_data?.find(m => m.key === '_cancelled_by_role')?.value;
+              let cancelText = "";
+              if (cancelledBy === 'customer') cancelText = " - أُلغي من قبلك";
+              else if (cancelledBy === 'merchant') cancelText = " - أُلغي من قبل التاجر";
+
               return (
                 <div className="bg-rose-50 border border-rose-200 rounded-lg p-4">
-                  <p className="text-rose-700 text-[13px] font-bold">تتبع الطلب غير متاح لطلبات {order.status}.</p>
+                  <p className="text-rose-700 text-[13px] font-bold">تتبع الطلب غير متاح لطلبات {order.status === 'cancelled' ? 'ملغاة' : order.status}{cancelText}</p>
                 </div>
               );
             }

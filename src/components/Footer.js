@@ -100,7 +100,7 @@ export default function Footer() {
 
                      <a
                         href="tel:+962782760463"
-                        className="group inline-flex items-center gap-3 rounded-full border border-zinc-200 bg-white pl-5 pr-2 py-2
+                        className="group inline-flex w-fit items-center gap-3 rounded-full border border-zinc-200 bg-white pl-5 pr-2 py-2
                                 transition-all duration-200 hover:border-brand hover:shadow-[0_6px_16px_-4px_rgba(0,0,0,0.15)]"
                         dir="ltr"
                      >

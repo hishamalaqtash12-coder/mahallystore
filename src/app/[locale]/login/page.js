@@ -183,6 +183,7 @@ function LoginContent() {
 
   // ── OTP INPUT ──
   const handleOtpChange = (val, idx) => {
+    if (val.length > 1) return; // handled by paste
     if (!/^\d?$/.test(val)) return;
     const next = [...otp];
     next[idx] = val;
@@ -193,6 +194,17 @@ function LoginContent() {
   const handleOtpKeyDown = (e, idx) => {
     if (e.key === "Backspace" && !otp[idx] && idx > 0) {
       otpRefs.current[idx - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted) {
+      const next = [...Array(6)].map((_, i) => pasted[i] || "");
+      setOtp(next);
+      const nextFocus = Math.min(pasted.length, 5);
+      otpRefs.current[nextFocus]?.focus();
     }
   };
 
@@ -630,6 +642,7 @@ function LoginContent() {
                     value={digit}
                     onChange={e => handleOtpChange(e.target.value, i)}
                     onKeyDown={e => handleOtpKeyDown(e, i)}
+                    onPaste={handleOtpPaste}
                     className="w-10 h-[31px] text-center text-lg font-bold border border-zinc-400 rounded-[3px] bg-white focus:border-[#be374f] focus:ring-1 focus:ring-[#be374f] outline-none"
                   />
                 ))}

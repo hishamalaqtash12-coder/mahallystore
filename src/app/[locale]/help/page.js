@@ -372,15 +372,27 @@ function HelpContent() {
                             <div className="text-[11px] font-bold text-zinc-500 mb-1">{t("orderPlaced", { date: new Date(order.date_created).toLocaleDateString() })}</div>
                             <h3 className="text-sm font-bold text-zinc-900">Order #{order.id}</h3>
                           </div>
-                          <span className="px-2.5 py-1 bg-zinc-100 text-zinc-700 text-[10px] font-bold uppercase tracking-wider rounded-md border border-zinc-200">
-                            {order.status}
+                          <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md border ${order.status === 'cancelled' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-zinc-100 text-zinc-700 border-zinc-200'}`}>
+                            {order.status === 'cancelled' && isAr ? 'ملغى' : order.status}
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          <Link href={`/account/orders?id=${order.id}`} className="px-3 py-1.5 bg-brand/10 text-brand hover:bg-brand hover:text-white font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1.5">
-                            <Truck size={12} />
-                            {t("trackOrder")}
-                          </Link>
+                        {order.status === 'cancelled' && (
+                          <div className="text-[11px] font-bold text-red-500 mb-3 bg-red-50 p-2 rounded border border-red-100">
+                            {isAr ? 'تم إلغاء هذا الطلب بواسطة ' : 'Order cancelled by '}
+                            {order.meta_data?.find(m => m.key === '_cancelled_by_role')?.value === 'merchant' 
+                              ? (isAr ? 'التاجر' : 'Merchant')
+                              : (order.meta_data?.find(m => m.key === '_cancelled_by_role')?.value === 'customer' 
+                                  ? (isAr ? 'العميل' : 'Customer')
+                                  : (isAr ? 'النظام' : 'System'))}
+                          </div>
+                        )}
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {order.status !== 'cancelled' && (
+                            <Link href={`/account/orders?id=${order.id}`} className="px-3 py-1.5 bg-brand/10 text-brand hover:bg-brand hover:text-white font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1.5">
+                              <Truck size={12} />
+                              {t("trackOrder")}
+                            </Link>
+                          )}
                           <Link href="/messages?to=admin" className="px-3 py-1.5 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1.5">
                             <MessageSquare size={12} />
                             {t("chatWithSupport")}

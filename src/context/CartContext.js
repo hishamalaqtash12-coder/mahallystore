@@ -42,7 +42,7 @@ export function CartProvider({ children }) {
     setCart((prev) => {
       const varId = product.variation_id || null;
       const existingItemIndex = prev.findIndex((item) => 
-        item.id === product.id && item.variation_id === varId
+        String(item.id) === String(product.id) && String(item.variation_id) === String(varId)
       );
       
       if (existingItemIndex >= 0) {
@@ -79,7 +79,7 @@ export function CartProvider({ children }) {
   const removeFromCart = (productId, variationId = null) => {
     const varId = variationId || null;
     setCart((prev) => prev.filter((item) => 
-      !(item.id === productId && item.variation_id === varId)
+      !(String(item.id) === String(productId) && String(item.variation_id) === String(varId))
     ));
   };
 
@@ -91,7 +91,7 @@ export function CartProvider({ children }) {
     }
     setCart((prev) =>
       prev.map((item) => {
-        if (item.id === productId && item.variation_id === varId) {
+        if (String(item.id) === String(productId) && String(item.variation_id) === String(varId)) {
           // Enforce stock limit
           let finalQty = newQty;
           if (item.manage_stock && item.stock_quantity !== null && finalQty > item.stock_quantity) {
@@ -112,7 +112,7 @@ export function CartProvider({ children }) {
 
   const isInCart = (productId, variationId = null) => {
     const varId = variationId || null;
-    return cart.some((item) => item.id === productId && item.variation_id === varId);
+    return cart.some((item) => String(item.id) === String(productId) && String(item.variation_id) === String(varId));
   };
 
   return (

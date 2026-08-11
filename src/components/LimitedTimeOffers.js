@@ -15,8 +15,11 @@ export default function LimitedTimeOffers({ products }) {
   const [canScrollStart, setCanScrollStart] = useState(false);
   const [canScrollEnd, setCanScrollEnd] = useState(true);
 
-  // Today's Deals (Limited Time Offers)
-  const deals = (products || []).filter(p => p.on_sale && (p.date_on_sale_to || p.date_on_sale_to_gmt)).slice(0, 10);
+  // Today's Deals (Limited Time Offers - Any product with a time limit)
+  const deals = (products || []).filter(p => {
+    const saleEndDate = p.date_on_sale_to || p.date_on_sale_to_gmt;
+    return saleEndDate && new Date(saleEndDate) > new Date();
+  }).slice(0, 10);
 
   const checkScroll = () => {
     if (scrollRef.current) {
