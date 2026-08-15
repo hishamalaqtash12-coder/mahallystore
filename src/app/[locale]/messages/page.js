@@ -1213,7 +1213,7 @@ function MessagesContent() {
                                   <img
                                     src={msg.mediaUrl}
                                     alt="media"
-                                    onClick={() => setLightboxMedia(msg.mediaUrl)}
+                                    onClick={() => setLightboxMedia(msg)}
                                     className="max-w-full sm:max-w-[280px] max-h-[300px] object-cover cursor-pointer hover:opacity-90 transition-opacity rounded-sm bg-black/5"
                                   />
                                 )
@@ -1297,15 +1297,18 @@ function MessagesContent() {
                                 if (isAr) {
                                   // RTL: align panel right edge to bubble right edge
                                   leftPos = rect.right - panelW;
-                                  if (leftPos < 8) leftPos = 8;
                                 } else {
                                   // LTR: align panel left edge to bubble left edge
                                   leftPos = rect.left;
-                                  if (leftPos + panelW > window.innerWidth - 8)
-                                    leftPos = window.innerWidth - panelW - 8;
+                                }
+                                if (leftPos + panelW > window.innerWidth - 8) {
+                                  leftPos = window.innerWidth - panelW - 8;
+                                }
+                                if (leftPos < 8) {
+                                  leftPos = 8;
                                 }
 
-                                setReactionPickerPos({ top: topPos, left: Math.max(8, leftPos) });
+                                setReactionPickerPos({ top: topPos, left: leftPos });
                                 setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id);
                               }}
                               className={`absolute -top-2.5 ${isAr ? "-left-2.5" : "-right-2.5"
@@ -1731,7 +1734,7 @@ function MessagesContent() {
           {/* Top Controls */}
           <div className="absolute top-0 inset-x-0 p-4 flex justify-end gap-3 z-[1000000] bg-gradient-to-b from-black/50 to-transparent">
             <a
-              href={lightboxMedia}
+              href={lightboxMedia.mediaUrl}
               target="_blank"
               rel="noopener noreferrer"
               download
@@ -1750,14 +1753,21 @@ function MessagesContent() {
             </button>
           </div>
 
-          {/* Image */}
-          <div className="w-full h-full p-4 md:p-12 flex items-center justify-center pointer-events-none">
+          {/* Image and Caption */}
+          <div className="w-full h-full p-4 md:p-12 pb-24 flex flex-col items-center justify-center pointer-events-none relative">
             <img
-              src={lightboxMedia}
+              src={lightboxMedia.mediaUrl}
               alt="fullscreen media"
               className="max-w-full max-h-full object-contain drop-shadow-2xl pointer-events-auto"
               onClick={e => e.stopPropagation()}
             />
+            {lightboxMedia.text && (
+              <div className="absolute bottom-6 inset-x-4 flex justify-center pointer-events-none z-[1000000]">
+                <div className="bg-black/70 backdrop-blur-md text-white text-[15px] px-6 py-3 rounded-2xl max-w-2xl text-center shadow-2xl pointer-events-auto whitespace-pre-wrap">
+                  {lightboxMedia.text}
+                </div>
+              </div>
+            )}
           </div>
         </div>,
         document.body

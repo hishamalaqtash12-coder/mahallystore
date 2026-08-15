@@ -512,7 +512,7 @@ export default function ProductActions({
                   const msg = t("askSellerMessage", {
                     name: product.name,
                     id: getProductIdentifier(product),
-                    url: `${window.location.origin}/product/${product.slug}`,
+                    url: `${window.location.origin}/product/${decodeURIComponent(product.slug)}`,
                   });
                   router.push(
                     `/messages?to=${vendorId}&msg=${encodeURIComponent(msg)}`
@@ -542,7 +542,7 @@ export default function ProductActions({
                             .map(([k, v]) => `${k}: ${v}`)
                             .join(", ")
                           : "",
-                      url: `${window.location.origin}/product/${product.slug}`,
+                      url: `${window.location.origin}/product/${decodeURIComponent(product.slug)}`,
                     })
                   )}`
                   : "#"

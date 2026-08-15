@@ -13,6 +13,7 @@ import { useTranslations, useLocale } from "next-intl";
 import ProductCountdown from "./ProductCountdown";
 import ShippingInfoDisplay from "./ShippingInfoDisplay";
 import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
+import ReviewTooltip from "./ReviewTooltip";
 
 export default function QuickLookModal({ product: initialProduct, isOpen, onClose }) {
   const t = useTranslations("QuickLook");
@@ -259,20 +260,27 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                 <h2 className="text-[20px] font-medium text-zinc-900 leading-snug mb-1">
                   {product.name}
                 </h2>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={`${i < Math.round(avgRating) ? 'fill-[#FFA41C] text-[#FFA41C]' : 'fill-zinc-200 text-zinc-200'}`}
-                      />
-                    ))}
+                <ReviewTooltip
+                  productId={product.id}
+                  ratingCount={ratingCount}
+                  averageRating={avgRating}
+                  productUrl={`${getProductUrl(product)}#reviews`}
+                >
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          className={`${i < Math.round(avgRating) ? 'fill-[#FFA41C] text-[#FFA41C]' : 'fill-zinc-200 text-zinc-200'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[13px] text-brand hover:text-brand-dark hover:underline cursor-pointer">
+                      {ratingCount} {ratingCount === 1 ? t("ratingSingular") : t("ratingPlural")}
+                    </span>
                   </div>
-                  <span className="text-[13px] text-brand hover:text-brand-dark hover:underline cursor-pointer">
-                    {ratingCount} {ratingCount === 1 ? t("ratingSingular") : t("ratingPlural")}
-                  </span>
-                </div>
+                </ReviewTooltip>
               </div>
 
               <div className="h-px bg-zinc-100 w-full mb-4" />
