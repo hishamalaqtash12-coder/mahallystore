@@ -84,15 +84,14 @@ export default function MerchantSettings() {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("type", type);
 
     try {
-      const res = await fetch("/api/vendors/upload", {
+      const res = await fetch("/api/merchant/media", {
         method: "POST",
         body: formData,
       });
       const result = await res.json();
-      if (result.success) {
+      if (result.url) {
         setData((prev) => ({
           ...prev,
           [type === "banner" ? "storeBanner" : "storeLogo"]: result.url,
@@ -488,7 +487,7 @@ export default function MerchantSettings() {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className={`h-[40px] px-10 rounded-md text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2 ${success
+            className={`h-[40px] px-6 rounded-md text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0 ${success
                 ? "bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-600"
                 : "bg-[#febd69] hover:bg-[#f7ac44] text-zinc-900 border border-[#e5a850]"
               }`}

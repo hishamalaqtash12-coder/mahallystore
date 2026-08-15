@@ -275,8 +275,8 @@ export default function MerchantInventoryPage() {
       <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
 
         {/* Filter / Search toolbar */}
-        <div className="px-4 py-3 border-b border-zinc-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+        <div className="px-4 py-3 border-b border-zinc-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar w-full sm:w-auto max-w-full">
             {filterKeys.map(f => (
               <button
                 key={f}

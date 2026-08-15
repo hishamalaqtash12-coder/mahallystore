@@ -11,6 +11,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "ID and meta are required" }, { status: 400 });
     }
 
+    // Trim store name to avoid empty spaces at start/end
+    if (meta.mahally_store_name) {
+      meta.mahally_store_name = meta.mahally_store_name.trim();
+    }
+
     // 1. Fetch existing customer to get current Dokan settings
     const customer = await getCustomerById(id);
     if (!customer) {
@@ -141,6 +146,48 @@ export async function POST(request) {
       }
     }
 
+    // 3. Propagate new store name to all vendor products so product cards stay current
+    if (meta.mahally_store_name) {
+      try {
+        // Fetch all products belonging to this vendor (max 100 at once)
+        const productsRes = await fetch(
+          `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products?author=${id}&per_page=100&_fields=id`,
+          { headers: { Authorization: `Basic ${credentials}` } }
+        );
+
+        if (productsRes.ok) {
+          const vendorProducts = await productsRes.json();
+
+          if (Array.isArray(vendorProducts) && vendorProducts.length > 0) {
+            // Build batch update: set mahally_owner_name on every product
+            const batchPayload = {
+              update: vendorProducts.map(p => ({
+                id: p.id,
+                meta_data: [
+                  { key: "mahally_owner_name", value: meta.mahally_store_name },
+                  { key: "merchant_name",      value: meta.mahally_store_name }
+                ]
+              }))
+            };
+
+            await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products/batch`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Basic ${credentials}`
+              },
+              body: JSON.stringify(batchPayload)
+            });
+
+            console.log(`[update-profile] Propagated store name "${meta.mahally_store_name}" to ${vendorProducts.length} products.`);
+          }
+        }
+      } catch (productSyncError) {
+        // Non-fatal — products will still be accessible, just showing stale name until next cache bust
+        console.error("[update-profile] Failed to propagate store name to products:", productSyncError.message);
+      }
+    }
+
     // Bust the entire vendor cache so the next GET returns fresh data for any slug/id
     if (typeof VENDOR_CACHE.clear === 'function') {
       VENDOR_CACHE.clear();
@@ -148,6 +195,10 @@ export async function POST(request) {
     
     // Also bust the global vendors list cache (for the /vendors directory page)
     clearVendorsCache();
+
+    // Bust the products cache so product cards re-fetch with the new store name
+    const { clearProductsCache } = await import("@/lib/woocommerce");
+    clearProductsCache();
     
     // Clear Next.js cache for this customer
     revalidateTag(`customer-${id}`);

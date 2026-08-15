@@ -261,8 +261,8 @@ function MessagesContent() {
   const [showReactionPicker, setShowReactionPicker] = useState(null);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [activeFileIndex, setActiveFileIndex] = useState(0);
   const [error, setError] = useState(null);
   const [enterToSend, setEnterToSend] = useState(true);
   const [fileError, setFileError] = useState(null);   // inline file-type error
@@ -664,97 +664,120 @@ function MessagesContent() {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    // Reset
+    const files = Array.from(e.target.files);
     e.target.value = "";
     setFileError(null);
-    if (!file) return;
+    if (!files.length) return;
 
-    // 1. Check MIME type
-    if (!ALLOWED_MIME.includes(file.type)) {
-      setFileError(
-        isAr
-          ? `نوع الملف غير مدعوم. الأنواع المسموح بها: ${ALLOWED_LABEL}`
-          : `File type not supported. Allowed: ${ALLOWED_LABEL}`
-      );
-      return;
-    }
-    // 2. Check size
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      setFileError(
-        isAr
-          ? `حجم الملف كبير جداً. الحد الأقصى ${MAX_FILE_MB} ميغابايت`
-          : `File too large. Max size is ${MAX_FILE_MB} MB`
-      );
-      return;
+    const validFiles = [];
+    let errorMsg = null;
+
+    for (const file of files) {
+      if (!ALLOWED_MIME.includes(file.type)) {
+        errorMsg = isAr
+          ? `بعض الملفات غير مدعومة. الأنواع المسموح بها: ${ALLOWED_LABEL}`
+          : `Some files not supported. Allowed: ${ALLOWED_LABEL}`;
+        continue;
+      }
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        errorMsg = isAr
+          ? `حجم بعض الملفات كبير جداً. الحد الأقصى ${MAX_FILE_MB} ميغابايت`
+          : `Some files too large. Max size is ${MAX_FILE_MB} MB`;
+        continue;
+      }
+      validFiles.push({
+        file,
+        previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+      });
     }
 
-    setSelectedFile(file);
-    setPreviewUrl(file.type.startsWith("image/") ? URL.createObjectURL(file) : null);
+    if (errorMsg && validFiles.length === 0) {
+      setFileError(errorMsg);
+      return;
+    } else if (errorMsg) {
+      showToast("error", errorMsg);
+    }
+
+    setSelectedFiles((prev) => {
+      const newList = [...prev, ...validFiles];
+      if (prev.length === 0) setActiveFileIndex(0);
+      return newList;
+    });
   };
 
   const handleSend = async (text = newMessage, customMeta = null) => {
-    if ((!text.trim() && !customMeta && !selectedFile) || !vendorId) return;
+    if ((!text.trim() && !customMeta && selectedFiles.length === 0) || !vendorId) return;
 
     isSendingRef.current = true;
     setSending(true);
 
-    // ── 1. Upload media first (with progress toast) ──────────────────────────
-    let mediaUrl = null, mediaType = null;
-    const fileToSend = selectedFile;
-    if (fileToSend) {
-      showToast("uploading",
-        isAr ? "⬆️ جارٍ رفع الملف..." : "⬆️ Uploading file..."
-      );
-      const formData = new FormData();
-      formData.append("file", fileToSend);
-      try {
-        const res = await fetch("/api/merchant/media", { method: "POST", body: formData });
-        const data = await res.json();
-        if (res.ok && data.url) {
-          mediaUrl = data.url;
-          mediaType = fileToSend.type.startsWith("image/") ? "image" : "file";
-          showToast("success", isAr ? "✅ تم رفع الملف" : "✅ File uploaded", 2000);
-        } else {
-          // Upload failed — show error and ABORT sending
-          showToast("error",
-            data.error || (isAr ? "❌ فشل رفع الملف. الرجاء التحقق من نوع الملف." : "❌ Upload failed. Please check the file type.")
-          );
-          isSendingRef.current = false;
-          setSending(false);
-          return;
+    const filesToSend = [...selectedFiles];
+    setNewMessage("");
+    setReplyTo(null);
+    setSelectedFiles([]);
+    setActiveFileIndex(0);
+    setFileError(null);
+
+    let baseText = text;
+
+    if (filesToSend.length === 0) {
+      await sendSingleMessage(baseText, customMeta, null, null, replyTo);
+    } else {
+      for (let i = 0; i < filesToSend.length; i++) {
+        const item = filesToSend[i];
+        const currentText = i === 0 ? baseText : "";
+        const currentReplyTo = i === 0 ? replyTo : null;
+
+        showToast("uploading", isAr ? `⬆️ جارٍ رفع الملف ${i + 1}/${filesToSend.length}...` : `⬆️ Uploading file ${i + 1}/${filesToSend.length}...`);
+        
+        let mediaUrl = null, mediaType = null;
+        const formData = new FormData();
+        formData.append("file", item.file);
+        
+        try {
+          const res = await fetch("/api/merchant/media", { method: "POST", body: formData });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            mediaUrl = data.url;
+            mediaType = item.file.type.startsWith("image/") ? "image" : "file";
+          } else {
+            showToast("error", data.error || (isAr ? "❌ فشل رفع الملف." : "❌ Upload failed."));
+            continue;
+          }
+        } catch (err) {
+          showToast("error", isAr ? "❌ خطأ في الشبكة أثناء رفع الملف" : "❌ Network error during upload");
+          continue;
         }
-      } catch (err) {
-        showToast("error", isAr ? "❌ خطأ في الشبكة أثناء رفع الملف" : "❌ Network error during upload");
-        isSendingRef.current = false;
-        setSending(false);
-        return;
+
+        await sendSingleMessage(currentText, customMeta, mediaUrl, mediaType, currentReplyTo);
+      }
+      if (filesToSend.length > 0) {
+        showToast("success", isAr ? "✅ تم الإرسال" : "✅ Sent successfully", 2000);
       }
     }
 
-    // ── 2. Optimistic message with 'pending' status ──────────────────────────
-    const tempId = `temp-${Date.now()}`;
+    isSendingRef.current = false;
+    setSending(false);
+    fetchMessages(vendorId, true);
+  };
+
+  const sendSingleMessage = async (msgText, msgMeta, mediaUrl, mediaType, replyToObj) => {
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
     const tempMsg = {
       id: tempId,
       senderId: wooId,
-      text,
-      customMeta,
+      text: msgText,
+      customMeta: msgMeta,
       mediaUrl,
       mediaType,
-      replyTo: replyTo ? { id: replyTo.id, text: replyTo.text } : null,
+      replyTo: replyToObj ? { id: replyToObj.id, text: replyToObj.text } : null,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       timestamp: Date.now(),
-      status: "pending",  // ← WhatsApp-style: clock icon
+      status: "pending",
     };
 
     setMessages(prev => [...prev, tempMsg]);
-    setNewMessage("");
-    setReplyTo(null);
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    setFileError(null);
 
-    // ── 3. Send to API, update status ────────────────────────────────────────
     try {
       const res = await fetch("/api/messages/send", {
         method: "POST",
@@ -767,27 +790,13 @@ function MessagesContent() {
         }),
       });
       if (res.ok) {
-        // Mark as sent ✓✓
-        setMessages(prev => prev.map(m =>
-          m.id === tempId ? { ...m, status: "sent" } : m
-        ));
+        setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: "sent" } : m));
       } else {
-        // Mark as failed ✗
-        setMessages(prev => prev.map(m =>
-          m.id === tempId ? { ...m, status: "failed" } : m
-        ));
-        showToast("error", isAr ? "❌ فشل إرسال الرسالة" : "❌ Message failed to send");
+        setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: "failed" } : m));
       }
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 100));
     } catch {
-      setMessages(prev => prev.map(m =>
-        m.id === tempId ? { ...m, status: "failed" } : m
-      ));
-      showToast("error", isAr ? "❌ تعذر إرسال الرسالة" : "❌ Could not send message");
-    } finally {
-      isSendingRef.current = false;
-      setSending(false);
-      fetchMessages(vendorId, true);
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: "failed" } : m));
     }
   };
 
@@ -1223,7 +1232,7 @@ function MessagesContent() {
                           )}
 
                           {msg.text && (
-                            <p className={`whitespace-pre-wrap ${msg.isDeleted ? "italic text-zinc-400" : ""}`}>
+                            <p className={`whitespace-pre-wrap break-words break-all ${msg.isDeleted ? "italic text-zinc-400" : ""}`}>
                               {msg.isDeleted ? msg.text : formatMessageText(msg.text, isMe)}
                             </p>
                           )}
@@ -1231,22 +1240,22 @@ function MessagesContent() {
                           {msg.customMeta?.type === "product" && !msg.isDeleted && (() => {
                             const pUrl = msg.customMeta.url || getProductUrl({ id: msg.customMeta.id, name: msg.customMeta.name }, { storeName: vendor?.storeName || "", storeId: vendorId || "" });
                             return (
-                              <Link href={pUrl} className={`group mt-3 p-3 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center gap-3.5 transition-all shadow-sm hover:shadow-md ${isMe ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-white border-zinc-200 hover:border-[#be374f]"}`}>
-                                <div className="w-16 h-16 sm:w-14 sm:h-14 bg-white rounded-lg shrink-0 overflow-hidden relative border border-zinc-100 shadow-sm">
-                                  <Image src={msg.customMeta.image || "https://placehold.co/100"} alt="product" fill className="object-cover" />
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                  <p className={`text-[13px] font-semibold leading-snug line-clamp-2 ${isMe ? "text-white" : "text-zinc-900 group-hover:text-[#be374f] transition-colors"}`}>{msg.customMeta.name}</p>
-                                  <div className="flex items-center gap-2 mt-1.5">
-                                    <p className={`text-[14px] font-bold ${isMe ? "text-white" : "text-[#be374f]"}`}>د.أ {msg.customMeta.price}</p>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isMe ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-600"}`}>
-                                      {isAr ? "عرض المنتج" : "View Product"}
-                                    </span>
+                              <Link href={pUrl} className={`group mt-3 p-2.5 rounded-xl border flex flex-col gap-2.5 transition-all shadow-sm hover:shadow-md overflow-hidden ${isMe ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-white border-zinc-200 hover:border-[#be374f]"}`}>
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-12 h-12 bg-white rounded-lg shrink-0 overflow-hidden relative border border-zinc-100 shadow-sm">
+                                    <Image src={msg.customMeta.image || "https://placehold.co/100"} alt="product" fill className="object-cover" />
+                                  </div>
+                                  <div className="flex-1 min-w-0 flex flex-col justify-center overflow-hidden">
+                                    <p className={`text-[12px] font-semibold leading-snug line-clamp-2 break-words ${isMe ? "text-white" : "text-zinc-900 group-hover:text-[#be374f] transition-colors"}`}>{msg.customMeta.name}</p>
+                                    <p className={`text-[13px] font-bold mt-1 ${isMe ? "text-white" : "text-[#be374f]"}`}>د.أ {msg.customMeta.price}</p>
+                                  </div>
+                                  <div className={`flex items-center justify-center w-7 h-7 rounded-full shrink-0 ${isMe ? "bg-white/20 text-white" : "bg-zinc-50 text-zinc-400 group-hover:bg-[#be374f] group-hover:text-white"} transition-colors`}>
+                                    <ChevronRight size={14} className={isAr ? "rotate-180" : ""} />
                                   </div>
                                 </div>
-                                <div className={`hidden sm:flex items-center justify-center w-8 h-8 rounded-full shrink-0 ${isMe ? "bg-white/20 text-white" : "bg-zinc-50 text-zinc-400 group-hover:bg-[#be374f] group-hover:text-white"} transition-colors`}>
-                                  <ChevronRight size={16} className={isAr ? "rotate-180" : ""} />
-                                </div>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium w-fit ${isMe ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-600"}`}>
+                                  {isAr ? "عرض المنتج" : "View Product"}
+                                </span>
                               </Link>
                             );
                           })()}
@@ -1391,6 +1400,7 @@ function MessagesContent() {
                   </button>
                   <input
                     type="file"
+                    multiple
                     ref={fileInputRef}
                     className="hidden"
                     accept={ALLOWED_EXT.join(",")}
@@ -1404,7 +1414,7 @@ function MessagesContent() {
                     {showEmoji && (
                       <div className="absolute bottom-full start-0 bg-white border border-zinc-200 shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[240px] rounded-md z-50 mb-2">
                         {ALL_EMOJIS.map(e => (
-                          <button key={e} onClick={() => { setNewMessage(p => p + e); setShowEmoji(false); }} className="text-[20px] hover:scale-125 transition-all p-0.5">{e}</button>
+                          <button key={e} onMouseDown={(ev) => { ev.preventDefault(); ev.stopPropagation(); setNewMessage(p => p + e); setShowEmoji(false); }} className="text-[20px] hover:scale-125 transition-all p-0.5">{e}</button>
                         ))}
                       </div>
                     )}
@@ -1773,13 +1783,13 @@ function MessagesContent() {
         document.body
       )}
 
-      {/* ── ATTACHMENT PREVIEW OVERLAY (WHATSAPP STYLE) ── */}
-      {selectedFile && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-[999998] bg-[#0b141a] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      {/* ── ATTACHMENT PREVIEW OVERLAY ── */}
+      {selectedFiles.length > 0 && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[999998] bg-zinc-950/95 flex flex-col animate-in fade-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="h-16 px-4 flex items-center shrink-0">
             <button
-              onClick={() => { setSelectedFile(null); setPreviewUrl(null); setFileError(null); setNewMessage(""); }}
+              onClick={() => { setSelectedFiles([]); setActiveFileIndex(0); setFileError(null); setNewMessage(""); }}
               className="w-10 h-10 flex items-center justify-center text-zinc-300 hover:text-white rounded-full hover:bg-white/10 transition-colors"
             >
               <X size={24} />
@@ -1788,60 +1798,88 @@ function MessagesContent() {
 
           {/* Preview */}
           <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-            {previewUrl ? (
-              <img src={previewUrl} alt="preview" className="max-w-full max-h-full object-contain drop-shadow-2xl" />
+            {selectedFiles[activeFileIndex]?.previewUrl ? (
+              <img src={selectedFiles[activeFileIndex].previewUrl} alt="preview" className="max-w-full max-h-full object-contain drop-shadow-2xl" />
             ) : (
-              <div className="w-64 h-64 bg-[#202c33] rounded-2xl flex flex-col items-center justify-center text-zinc-300 shadow-2xl">
-                <File size={80} className="mb-6 text-brand" />
-                <span className="text-[16px] font-medium text-center px-6 break-all line-clamp-2">{selectedFile.name}</span>
-                <span className="text-[14px] text-zinc-500 mt-3">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</span>
+              <div className="w-64 h-64 bg-zinc-900 rounded-2xl flex flex-col items-center justify-center text-zinc-300 shadow-2xl border border-zinc-800">
+                <File size={80} className="mb-6 text-[#be374f]" />
+                <span className="text-[16px] font-medium text-center px-6 break-all line-clamp-2">{selectedFiles[activeFileIndex]?.file.name}</span>
+                <span className="text-[14px] text-zinc-500 mt-3">{((selectedFiles[activeFileIndex]?.file.size || 0) / 1024 / 1024).toFixed(1)} MB</span>
               </div>
             )}
           </div>
 
-          {/* Caption Input & Send */}
-          <div className="p-4 bg-[#202c33] flex items-center justify-center shrink-0">
-            <div className="w-full max-w-3xl flex items-end gap-3">
-              <div className="flex-1 bg-[#2a3942] rounded-xl flex items-end gap-2 px-4 py-2.5 focus-within:ring-1 focus-within:ring-[#00a884] transition-all">
-                <div className="relative shrink-0 mb-0.5">
-                  <button onClick={() => setShowEmoji(!showEmoji)} className="text-[#8696a0] hover:text-white transition-colors">
-                    <Smile size={26} />
-                  </button>
-                  {showEmoji && (
-                    <div className="absolute bottom-full start-0 bg-[#2a3942] border border-[#202c33] shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[280px] rounded-lg z-50 mb-4">
-                      {ALL_EMOJIS.map(e => (
-                        <button key={e} onClick={() => { setNewMessage(p => p + e); setShowEmoji(false); }} className="text-[22px] hover:scale-125 transition-all p-0.5">{e}</button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <textarea
-                  rows={1}
-                  dir={newMessage ? "auto" : (isAr ? "rtl" : "ltr")}
-                  value={newMessage}
-                  onChange={e => setNewMessage(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") {
-                      if (enterToSend && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend();
-                      } else if (!enterToSend && (e.ctrlKey || e.metaKey)) {
-                        e.preventDefault();
-                        handleSend();
+          {/* Caption Input & Send & Thumbnails */}
+          <div className="bg-white border-t border-zinc-200 flex flex-col shrink-0">
+            <div className="p-4 flex items-center justify-center shrink-0 border-b border-zinc-100">
+              <div className="w-full max-w-3xl flex items-end gap-3">
+                <div className="flex-1 bg-zinc-50 border border-zinc-300 rounded-md flex items-end gap-2 px-4 py-2.5 focus-within:ring-1 focus-within:ring-[#be374f] focus-within:border-[#be374f] transition-all">
+                  <div className="relative shrink-0 mb-0.5">
+                    <button onClick={() => setShowEmoji(!showEmoji)} className="text-zinc-400 hover:text-[#be374f] transition-colors">
+                      <Smile size={20} />
+                    </button>
+                    {showEmoji && (
+                      <div className="absolute bottom-full start-0 bg-white border border-zinc-200 shadow-xl p-3 grid grid-cols-6 gap-1.5 w-[280px] rounded-lg z-50 mb-4">
+                        {ALL_EMOJIS.map(e => (
+                          <button key={e} onMouseDown={(ev) => { ev.preventDefault(); ev.stopPropagation(); setNewMessage(p => p + e); setShowEmoji(false); }} className="text-[22px] hover:scale-125 transition-all p-0.5">{e}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <textarea
+                    rows={1}
+                    dir={newMessage ? "auto" : (isAr ? "rtl" : "ltr")}
+                    value={newMessage}
+                    onChange={e => setNewMessage(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") {
+                        if (enterToSend && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend();
+                        } else if (!enterToSend && (e.ctrlKey || e.metaKey)) {
+                          e.preventDefault();
+                          handleSend();
+                        }
                       }
-                    }
-                  }}
-                  placeholder={isAr ? "إضافة تعليق..." : "Add a caption..."}
-                  className="flex-1 bg-transparent border-none text-[15px] text-[#d1d7db] placeholder:text-[#8696a0] outline-none resize-none max-h-[120px] custom-scrollbar py-1"
-                />
+                    }}
+                    placeholder={isAr ? "إضافة تعليق..." : "Add a caption..."}
+                    className="flex-1 bg-transparent border-none text-[14px] text-zinc-900 placeholder:text-zinc-500 outline-none resize-none max-h-[120px] custom-scrollbar py-0.5"
+                  />
+                </div>
+                <button
+                  onClick={() => handleSend()}
+                  disabled={sending}
+                  className="w-[44px] h-[44px] rounded-md bg-[#be374f] flex items-center justify-center text-white shrink-0 hover:bg-[#a63045] transition-colors shadow-sm disabled:opacity-50"
+                >
+                  {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={18} className="rtl:-scale-x-100" />}
+                </button>
               </div>
-              <button
-                onClick={() => handleSend()}
-                disabled={sending}
-                className="w-[50px] h-[50px] rounded-full bg-[#00a884] flex items-center justify-center text-white shrink-0 hover:bg-[#008f6f] transition-colors shadow-lg active:scale-95 disabled:opacity-50"
-              >
-                {sending ? <Loader2 size={22} className="animate-spin" /> : <Send size={20} className={isAr ? "rotate-180" : "ms-1"} />}
-              </button>
+            </div>
+
+            <div className="py-4 overflow-x-auto custom-scrollbar">
+              <div className="flex items-center gap-3 px-4 max-w-3xl mx-auto min-w-max">
+                {selectedFiles.map((item, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => setActiveFileIndex(idx)}
+                    className={`w-14 h-14 rounded-lg overflow-hidden shrink-0 cursor-pointer border-2 transition-all ${activeFileIndex === idx ? "border-[#be374f] opacity-100" : "border-transparent opacity-60 hover:opacity-100"}`}
+                  >
+                    {item.previewUrl ? (
+                      <img src={item.previewUrl} alt="thumb" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-zinc-100 flex items-center justify-center">
+                        <File size={20} className="text-zinc-400" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-14 h-14 rounded-lg border-2 border-dashed border-zinc-300 shrink-0 flex items-center justify-center text-zinc-500 hover:border-[#be374f] hover:text-[#be374f] transition-all bg-zinc-50"
+                >
+                  <Plus size={24} />
+                </button>
+              </div>
             </div>
           </div>
         </div>,

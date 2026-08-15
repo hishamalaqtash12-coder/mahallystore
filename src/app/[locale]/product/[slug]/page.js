@@ -55,8 +55,9 @@ export async function generateMetadata({ params }) {
       const canonicalSlug = getProductUrl(product).split('/').pop();
       const decodedSlug = decodeURIComponent(slug);
       const decodedCanonical = decodeURIComponent(canonicalSlug);
+      // For metadata, just use the product as-is even if slug is stale
       if (decodedSlug !== decodedCanonical) {
-        product = null;
+        // Still return valid metadata — the page will redirect
       }
     }
     
@@ -119,10 +120,11 @@ export default async function ProductPage({ params }) {
       const decodedSlug = decodeURIComponent(slug);
       const decodedCanonical = decodeURIComponent(canonicalSlug);
       
-      // If the URL has been tampered with, treat the product as not found
-      // This will automatically show the "Product Not Found" UI
+      // If the URL is stale (e.g. store was renamed), redirect to the current
+      // canonical URL instead of showing "not found". The product ID at the
+      // end of the slug is the source of truth — the prefix is just cosmetic.
       if (decodedSlug !== decodedCanonical) {
-        product = null;
+        redirect(`/product/${canonicalSlug}`);
       }
     }
     

@@ -577,7 +577,7 @@ export default function MerchantProductsPage() {
                           <span className="text-[10px] font-bold text-zinc-400 uppercase">— {t.tabs[product.status] || product.status}</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity justify-end">
+                      <div className="flex items-center gap-2 text-[11px] font-bold transition-opacity justify-end text-zinc-500 mt-1">
                         {product.status === 'trash' ? (
                           <>
                             <button onClick={() => handleRestore(product.id)} className="text-[#be374f] hover:underline">{t.table.actions.restore}</button>

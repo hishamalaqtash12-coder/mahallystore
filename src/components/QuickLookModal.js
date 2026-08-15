@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "@/i18n/routing";
-import { X, ChevronRight, Star, Truck, ShieldCheck, RotateCcw, Plus, Minus, Trash2, AlertCircle, Clock } from "lucide-react";
+import { X, ChevronRight, ChevronDown, Star, Truck, ShieldCheck, RotateCcw, Plus, Minus, Trash2, AlertCircle, Clock } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { isProductOutOfStock, getProductMerchant, getProductUrl } from "@/lib/product-utils";
 import { useAuth } from "@/context/AuthContext";
@@ -276,6 +276,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                         />
                       ))}
                     </div>
+                    <ChevronDown size={13} className="text-zinc-400 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     <span className="text-[13px] text-brand hover:text-brand-dark hover:underline cursor-pointer">
                       {ratingCount} {ratingCount === 1 ? t("ratingSingular") : t("ratingPlural")}
                     </span>

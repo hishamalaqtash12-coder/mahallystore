@@ -22,23 +22,39 @@ export default function ReviewTooltip({ children, productId, ratingCount, averag
     setMounted(true);
   }, []);
 
+  const updatePosition = () => {
+    if (popoverRef.current) {
+      const rect = popoverRef.current.getBoundingClientRect();
+      
+      // Close if completely scrolled out of viewport
+      if (
+        rect.bottom < 0 ||
+        rect.top > window.innerHeight ||
+        rect.right < 0 ||
+        rect.left > window.innerWidth
+      ) {
+        setIsOpen(false);
+        return;
+      }
+
+      let calculatedLeft = isAr ? rect.right - 300 : rect.left;
+      
+      if (calculatedLeft + 300 > document.documentElement.clientWidth) {
+        calculatedLeft = document.documentElement.clientWidth - 310;
+      }
+      if (calculatedLeft < 10) calculatedLeft = 10;
+      
+      setCoords({
+        top: rect.bottom + 8,
+        left: calculatedLeft
+      });
+    }
+  };
+
   const handleMouseEnter = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      if (popoverRef.current) {
-        const rect = popoverRef.current.getBoundingClientRect();
-        let calculatedLeft = isAr ? rect.right + window.scrollX - 300 : rect.left + window.scrollX;
-        
-        if (calculatedLeft + 300 > document.documentElement.clientWidth) {
-          calculatedLeft = document.documentElement.clientWidth - 310;
-        }
-        if (calculatedLeft < 10) calculatedLeft = 10;
-        
-        setCoords({
-          top: rect.bottom + window.scrollY,
-          left: calculatedLeft
-        });
-      }
+      updatePosition();
       setIsOpen(true);
       if (!data && !loading && productId) {
         setLoading(true);
@@ -63,20 +79,38 @@ export default function ReviewTooltip({ children, productId, ratingCount, averag
   };
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (e.target.closest('.review-tooltip-portal')) return;
-      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-
     if (isOpen) {
+      updatePosition();
+      
+      let animationFrameId;
+      const handleScrollOrResize = () => {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(() => {
+          updatePosition();
+        });
+      };
+      
+      // capture: true allows catching scroll events from any scrollable child (e.g., carousels)
+      window.addEventListener("scroll", handleScrollOrResize, true);
+      window.addEventListener("resize", handleScrollOrResize, true);
+      
+      const handleClickOutside = (e) => {
+        if (e.target.closest('.review-tooltip-portal')) return;
+        if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+          setIsOpen(false);
+        }
+      };
+
       document.addEventListener("click", handleClickOutside);
+      
+      return () => {
+        window.removeEventListener("scroll", handleScrollOrResize, true);
+        window.removeEventListener("resize", handleScrollOrResize, true);
+        document.removeEventListener("click", handleClickOutside);
+        cancelAnimationFrame(animationFrameId);
+      };
     }
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, [isOpen]);
+  }, [isOpen, isAr]);
 
   const toggleOpen = (e) => {
     if (window.innerWidth < 1024) {
@@ -91,8 +125,11 @@ export default function ReviewTooltip({ children, productId, ratingCount, averag
 
   const tooltipContent = (
     <div 
-      className={`review-tooltip-portal absolute z-[9999] w-[300px] bg-white border border-zinc-200 rounded-lg shadow-xl p-4 transition duration-200 origin-top ${isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
-      style={{ top: coords.top + 8, left: coords.left, minWidth: "300px" }}
+      className={`fixed z-[85] w-[300px] bg-white border border-zinc-200 rounded-lg shadow-xl p-4 transition duration-200 origin-top review-tooltip-portal ${isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+      style={{ 
+        top: coords.top + "px", 
+        left: coords.left + "px",
+      }}
       onMouseEnter={() => {
         if (timerRef.current) clearTimeout(timerRef.current);
       }}
@@ -158,8 +195,7 @@ export default function ReviewTooltip({ children, productId, ratingCount, averag
       data-state={isOpen ? "open" : "closed"}
     >
       {children}
-      
-      {mounted ? createPortal(tooltipContent, document.body) : null}
+      {mounted && typeof document !== "undefined" ? createPortal(tooltipContent, document.body) : null}
     </div>
   );
 }

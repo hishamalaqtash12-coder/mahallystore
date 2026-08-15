@@ -55,6 +55,7 @@ const menuItems = [
     group: "STORE", arGroup: "المتجر", items: [
       { name: "Settings", arName: "الإعدادات", href: "/merchant/dashboard/settings", icon: Settings },
       { name: "Shipping", arName: "الشحن والتوصيل", href: "/merchant/dashboard/shipping", icon: Truck },
+      { name: "Account Security", arName: "أمان الحساب", href: "/account/security", icon: User },
       { name: "Help Center", arName: "مركز المساعدة", href: "/help", icon: HelpCircle },
     ]
   }
