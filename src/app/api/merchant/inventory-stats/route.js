@@ -2,6 +2,8 @@ import { wcApi } from "@/lib/woocommerce";
 import { dokanApi } from "@/lib/dokan";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -14,7 +16,8 @@ export async function GET(request) {
       try {
         const auth = Buffer.from(`${process.env.WP_ADMIN_USER}:${process.env.WP_ADMIN_APP_PASS}`).toString("base64");
         const prodRes = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wc/v3/products?author=${vendorId}&per_page=100&status=any`, {
-          headers: { Authorization: `Basic ${auth}` }
+          headers: { Authorization: `Basic ${auth}` },
+          cache: "no-store"
         });
         const allProducts = await prodRes.json();
         if (Array.isArray(allProducts)) {

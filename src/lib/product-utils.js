@@ -12,12 +12,27 @@ export function isProductOutOfStock(product) {
 
 export function getProductMerchant(product) {
   if (!product) return { name: null, id: null, slug: null };
+  
+  // Priority 1: Dokan live store data (most current)
   const name =
     product.store?.shop_name ||
     product.store?.name ||
-    product.meta_data?.find(m => m.key === "merchant_name")?.value ||
+    // Priority 2: Mahally custom meta (updated by update-profile batch sync)
     product.meta_data?.find(m => m.key === "mahally_owner_name")?.value ||
+    product.meta_data?.find(m => m.key === "merchant_name")?.value ||
+    // Priority 3: Dokan meta fields (also updated on store rename)
+    product.meta_data?.find(m => m.key === "dokan_store_name")?.value ||
+    // Priority 4: Dokan profile settings blob
+    (() => {
+      const dokanMeta = product.meta_data?.find(m => m.key === "dokan_profile_settings")?.value;
+      if (!dokanMeta) return null;
+      try {
+        const parsed = typeof dokanMeta === "string" ? JSON.parse(dokanMeta) : dokanMeta;
+        return parsed?.store_name || null;
+      } catch { return null; }
+    })() ||
     null;
+
   const id =
     product.meta_data?.find(m => m.key === "_vendor_id")?.value ||
     product.meta_data?.find(m => m.key === "mahally_owner_id")?.value ||
@@ -34,43 +49,33 @@ export function getProductMerchant(product) {
   return { name, id, slug };
 }
 
+
 export function getProductIdentifier(product, merchantOverride = null) {
   if (!product) return "";
-  let storeName = "";
   let storeId = "";
 
   if (merchantOverride) {
-    storeName = merchantOverride.storeName || "";
     storeId = merchantOverride.storeId || "";
   } else if (product.store) {
-    storeName = product.store.shop_name || product.store.name || "";
     storeId = product.store.id || "";
   } else if (product.meta_data) {
-    const mName = product.meta_data.find((m) => m.key === "merchant_name" || m.key === "mahally_owner_name");
     const mId = product.meta_data.find((m) => m.key === "_vendor_id" || m.key === "mahally_owner_id");
-    if (mName) storeName = mName.value;
     if (mId) storeId = mId.value;
   }
-  if (!storeName && product.author) {
+  if (!storeId && product.author) {
     storeId = product.author;
   }
 
-  const cleanStoreName = (storeName || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
-  const storePrefix = cleanStoreName ? cleanStoreName.substring(0, 3).padEnd(3, "X") : "";
-  const vendorIdStr = storeId || "";
   const productId = product.product_id || product.databaseId || product.id || 0;
   
-  // Use the WooCommerce SKU if it follows the MAH-... registered format
-  if (product.sku && /^MAH-/i.test(product.sku)) {
-    return product.sku.toUpperCase();
-  }
-  
-  if (storePrefix && vendorIdStr) {
-    return `MAH-${storePrefix}-${vendorIdStr}-${productId}`;
+  // Generate a stable identifier using only the immutable vendor ID (never the store name)
+  if (storeId) {
+    return `MAH-${storeId}-${productId}`;
   } else {
     return `MAH-${productId}`;
   }
 }
+
 
 export function getProductUrl(product, merchantOverride = null) {
   if (!product) return "/";

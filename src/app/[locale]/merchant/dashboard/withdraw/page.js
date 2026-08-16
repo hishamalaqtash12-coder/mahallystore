@@ -8,9 +8,13 @@ import {
   ArrowUpRight,
   Wallet,
   History,
-  Info
+  Info,
+  Lock
 } from "lucide-react";
 import Loader from "@/components/Loader";
+
+// Set to true to disable this feature temporarily
+const FEATURE_DISABLED = true;
 
 export default function WithdrawPage() {
   const locale = useLocale();
@@ -70,6 +74,7 @@ export default function WithdrawPage() {
 
   const handleRequest = async (e) => {
     e.preventDefault();
+    if (FEATURE_DISABLED) return;
     if (parseFloat(amount) < minWithdraw) {
       alert(`Minimum withdrawal amount is JOD ${minWithdraw}`);
       return;
@@ -115,7 +120,33 @@ export default function WithdrawPage() {
   }
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-8 font-sans relative">
+      {/* ── DISABLED OVERLAY ── */}
+      {FEATURE_DISABLED && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center rounded-xl" style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(2px)" }}>
+          <div className="bg-white border border-zinc-200 rounded-2xl shadow-xl px-8 py-10 flex flex-col items-center gap-4 max-w-sm text-center">
+            <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center">
+              <Lock size={28} className="text-zinc-400" />
+            </div>
+            <h3 className="text-[18px] font-bold text-zinc-900">
+              {t("Feature Unavailable", "الخاصية غير متاحة حالياً")}
+            </h3>
+            <p className="text-[13px] text-zinc-500 leading-relaxed">
+              {t(
+                "The withdrawal feature is currently disabled. Please check back later or contact support for assistance.",
+                "خاصية سحب الأرباح معطّلة مؤقتاً. يرجى المراجعة لاحقاً أو التواصل مع فريق الدعم للمساعدة."
+              )}
+            </p>
+            <a
+              href="/messages?to=1"
+              className="mt-2 h-[40px] px-6 bg-zinc-900 hover:bg-zinc-700 text-white rounded-md text-[13px] font-bold transition-all flex items-center gap-2"
+            >
+              {t("Contact Support", "تواصل مع الدعم")}
+            </a>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-[24px] font-bold text-zinc-900 tracking-tight">{t("Withdraw Earnings", "سحب الأرباح")}</h1>
@@ -186,6 +217,7 @@ export default function WithdrawPage() {
                         placeholder="0.00"
                         className="w-full h-[52px] pe-14 ps-4 bg-zinc-50 border border-zinc-200 rounded-md text-[18px] font-bold outline-none focus:border-[#be374f] focus:ring-4 focus:ring-[#be374f]/5 focus:bg-white transition-all shadow-inner"
                         required
+                        disabled={FEATURE_DISABLED}
                       />
                     </div>
                   </div>
@@ -197,12 +229,13 @@ export default function WithdrawPage() {
                         <button
                           key={m}
                           type="button"
-                          onClick={() => setMethod(m)}
+                          onClick={() => !FEATURE_DISABLED && setMethod(m)}
+                          disabled={FEATURE_DISABLED}
                           className={`flex-1 flex items-center justify-center gap-2 h-[52px] border rounded-md transition-all ${
                             method === m
                               ? 'border-[#be374f] bg-brand-light text-[#be374f] font-bold shadow-sm ring-1 ring-[#be374f]'
                               : 'border-zinc-200 text-zinc-500 hover:bg-zinc-50'
-                          }`}
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           {m === 'bank' ? <DollarSign size={16} /> : <ArrowUpRight size={16} />}
                           <span className="text-[13px] capitalize">{m}</span>
@@ -234,8 +267,8 @@ export default function WithdrawPage() {
 
               <button
                 type="submit"
-                disabled={requesting || !amount || parseFloat(amount) < minWithdraw || parseFloat(amount) > balance}
-                className="w-full h-[52px] bg-brand text-white rounded-md hover:bg-brand/90 transition-all font-bold"
+                disabled={FEATURE_DISABLED || requesting || !amount || parseFloat(amount) < minWithdraw || parseFloat(amount) > balance}
+                className="w-full h-[52px] bg-brand text-white rounded-md hover:bg-brand/90 transition-all font-bold disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {requesting ? <Loader size="sm" text="" /> : t("Request Funds Now", "طلب الأموال الآن")}
               </button>
@@ -292,3 +325,4 @@ export default function WithdrawPage() {
     </div>
   );
 }
+

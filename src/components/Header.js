@@ -1093,7 +1093,7 @@ export default function Header() {
                     <li className="border-b border-zinc-200 my-2"></li>
                   </>
                 )}
-                {!isAdmin && (
+                {!isAdmin && !isApprovedVendor && (
                   <>
                     <li><Link href="/account" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><UserCircle size={20} className="text-zinc-600" /> {t('yourProfile')}</Link></li>
                     <li><Link href="/account/security" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><ShieldCheck size={20} className="text-zinc-600" /> {t('accountSecurity')}</Link></li>

@@ -54,16 +54,26 @@ function getStoreNameFromVendor(vendor) {
   const dokanName = vendor.meta_data?.find(m => m.key === "dokan_store_name")?.value;
   if (dokanName) return dokanName;
 
-  // Priority 2: dokan_settings serialized object (older Dokan versions)
+  // Priority 2: dokan_profile_settings serialized object (current Dokan versions)
+  const profileSettingsBlob = vendor.meta_data?.find(m => m.key === "dokan_profile_settings")?.value;
+  if (profileSettingsBlob) {
+    try {
+      const parsed = typeof profileSettingsBlob === "string" ? JSON.parse(profileSettingsBlob) : profileSettingsBlob;
+      if (parsed?.store_name) return parsed.store_name;
+    } catch {}
+  }
+
+  // Priority 3: dokan_settings serialized object (older Dokan versions)
   const settings = vendor.meta_data?.find(m => m.key === "dokan_settings")?.value;
   if (settings && typeof settings === "object" && settings.store_name) return settings.store_name;
 
-  // Priority 3: our custom mahally_owner_name
+  // Priority 4: our custom mahally_owner_name
   const mahallyName = vendor.meta_data?.find(m => m.key === "mahally_owner_name")?.value;
   if (mahallyName) return mahallyName;
 
   return null; // Don't fall back to display_name — that's the user name, not the store name
 }
+
 
 /**
  * Fetch vendor profiles by their IDs, trying both 'customer' and 'seller' roles.

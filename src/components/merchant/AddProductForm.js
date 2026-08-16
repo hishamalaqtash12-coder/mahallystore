@@ -814,8 +814,8 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden">
-      <div className="bg-white w-full max-w-5xl h-[95vh] sm:max-h-[90vh] rounded-2xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" dir={isAr ? "rtl" : "ltr"}>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden">
+      <div className="bg-white w-full max-w-5xl h-[100dvh] sm:h-auto sm:max-h-[90vh] rounded-none sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" dir={isAr ? "rtl" : "ltr"}>
         {/* Header */}
         <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-50 gap-2 shrink-0">
           <div className="flex items-center justify-between w-full sm:w-auto">
