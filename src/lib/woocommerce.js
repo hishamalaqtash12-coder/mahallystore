@@ -1072,33 +1072,25 @@ export const wcApi = {
   },
   put: async (endpoint, data) => {
     if (endpoint.startsWith('products/')) {
-      const id = endpoint.split('/')[1];
-      const input = {
-        id: parseInt(id, 10),
-        ...data,
-        regularPrice: data.regularPrice ?? data.regular_price,
-        salePrice: data.salePrice ?? data.sale_price,
-      };
-
-      const dateOnSaleFrom = data.dateOnSaleFrom ?? data.date_on_sale_from;
-      const dateOnSaleTo = data.dateOnSaleTo ?? data.date_on_sale_to;
-
-      if (dateOnSaleFrom !== undefined && dateOnSaleFrom !== null) {
-        input.dateOnSaleFrom = dateOnSaleFrom;
+      // Use direct WC REST API to support all fields (stock_quantity, stock_status, manage_stock, featured, meta_data)
+      // without GraphQL schema coercion errors.
+      try {
+        const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL?.replace(/\/$/, "");
+        const auth = Buffer.from(`${process.env.WP_ADMIN_USER || process.env.WC_CONSUMER_KEY}:${process.env.WP_ADMIN_APP_PASS || process.env.WC_CONSUMER_SECRET}`).toString('base64');
+        const id = endpoint.split('/')[1];
+        const res = await fetch(`${WP_URL}/wp-json/wc/v3/products/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Basic ${auth}` },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (!res.ok) console.warn(`wcApi.put products/${id} failed:`, result.message);
+        clearProductsCache();
+        return { data: result };
+      } catch (e) {
+        console.error('wcApi.put products/ error:', e.message);
+        return { data: null };
       }
-      if (dateOnSaleTo !== undefined && dateOnSaleTo !== null) {
-        input.dateOnSaleTo = dateOnSaleTo;
-      }
-
-      delete input.regular_price;
-      delete input.sale_price;
-      delete input.date_on_sale_from;
-      delete input.date_on_sale_to;
-      delete input.brands;
-      delete input.product_brand;
-      delete input.featured; // Not a valid UpdateProductInput field in WPGraphQL
-      const result = await fetchGraphQL(UPDATE_PRODUCT, { input }, getAuthHeaders());
-      return { data: result?.updateProduct?.product || null };
     }
     if (endpoint.startsWith('orders/')) {
       try {

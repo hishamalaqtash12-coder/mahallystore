@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function UserAvatar({
@@ -11,6 +12,12 @@ export default function UserAvatar({
   className = "",
   onClick,
 }) {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [avatarUrl]);
+
   // Determine initial character
   let initial = "U";
   if (customerName) {
@@ -23,26 +30,29 @@ export default function UserAvatar({
     initial = email.charAt(0).toUpperCase();
   }
 
-  const baseClasses = "relative flex items-center justify-center shrink-0 overflow-hidden shadow-sm";
+  const showImage = Boolean(avatarUrl && !hasError);
+  const baseClasses = "relative flex items-center justify-center shrink-0 overflow-hidden shadow-sm select-none";
   
   return (
     <div 
       className={`${baseClasses} ${className}`} 
-      style={{ backgroundColor: avatarUrl ? "transparent" : avatarBgColor }}
+      style={{ backgroundColor: showImage ? "transparent" : avatarBgColor }}
       onClick={onClick}
     >
-      {avatarUrl ? (
+      {showImage ? (
         <Image 
           src={avatarUrl} 
           alt="Profile picture" 
           fill 
           className="object-cover bg-white" 
+          onError={() => setHasError(true)}
         />
       ) : (
-        <span className="text-white font-medium uppercase w-full h-full flex items-center justify-center" style={{ fontSize: "inherit" }}>
+        <span className="text-white font-bold uppercase w-full h-full flex items-center justify-center" style={{ fontSize: "inherit" }}>
           {initial}
         </span>
       )}
     </div>
   );
 }
+

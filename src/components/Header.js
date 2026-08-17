@@ -432,7 +432,7 @@ export default function Header() {
                   alt="Mahally.jo Logo"
                   width={100}
                   height={35}
-                  className="object-contain"
+                  className="h-[35px] w-auto object-contain"
                   priority
                 />
               </Link>
@@ -1054,7 +1054,7 @@ export default function Header() {
       {isMobileAccountMenuOpen && (
         <div className="fixed inset-0 z-[1000] flex sm:hidden">
           <div className="absolute inset-0 bg-black/80 animate-in fade-in duration-300" onClick={() => setIsMobileAccountMenuOpen(false)} />
-          <div className="relative w-[85vw] max-w-[365px] h-full bg-white animate-in slide-in-from-left duration-300 flex flex-col shadow-2xl overflow-hidden">
+          <div className="relative w-[85vw] max-w-[365px] h-full h-[100dvh] bg-white animate-in slide-in-from-left duration-300 flex flex-col shadow-2xl overflow-hidden">
             <div className="bg-brand-dark text-white p-4 py-5 flex items-center gap-3 shrink-0">
               <UserAvatar
                 user={user}
@@ -1112,7 +1112,7 @@ export default function Header() {
                 )}
                 <li><Link href="/account/recently-viewed" onClick={() => setIsMobileAccountMenuOpen(false)} className="flex items-center gap-3.5 hover:bg-zinc-100 py-3 px-6 transition-colors"><Clock size={20} className="text-zinc-600" /> {t('browsingHistory')}</Link></li>
               </ul>
-              <div className="p-4 border-t border-zinc-200 shrink-0 mt-auto bg-zinc-50">
+              <div className="p-4 border-t border-zinc-200 shrink-0 bg-zinc-50" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}>
                 <button onClick={() => { logout(); setIsMobileAccountMenuOpen(false); }} className="w-full flex items-center justify-center gap-2 hover:bg-red-50 text-red-600 py-3 px-4 transition-colors font-bold rounded-lg border border-red-200/50 bg-white shadow-sm">
                   <LogOut size={20} /> {t('logout')}
                 </button>

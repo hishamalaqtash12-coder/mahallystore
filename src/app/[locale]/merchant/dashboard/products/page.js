@@ -8,7 +8,7 @@ import { Link } from "@/i18n/routing";
 import AddProductForm from "@/components/merchant/AddProductForm";
 import Loader from "@/components/Loader";
 import { useLocale } from "next-intl";
-import { getProductUrl } from "@/lib/product-utils";
+import { getProductUrl, getProductIdentifier } from "@/lib/product-utils";
 
 const translations = {
   en: {
@@ -578,6 +578,14 @@ export default function MerchantProductsPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-[11px] font-bold transition-opacity justify-end text-zinc-500 mt-1">
+                        <span className="font-mono text-zinc-700 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">
+                          {getProductIdentifier(product, { storeId: wooId })}
+                        </span>
+                        <span className="text-zinc-300">•</span>
+                        <span className="font-mono text-zinc-600 bg-zinc-50 px-1 rounded border border-zinc-200">
+                          ID: {product.id}
+                        </span>
+                        <span className="text-zinc-300">•</span>
                         {product.status === 'trash' ? (
                           <>
                             <button onClick={() => handleRestore(product.id)} className="text-[#be374f] hover:underline">{t.table.actions.restore}</button>

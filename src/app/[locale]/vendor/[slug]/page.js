@@ -40,6 +40,8 @@ export default function VendorProfilePage() {
 
   const [bannerPos, setBannerPos] = useState(50);
   const [logoPos, setLogoPos] = useState(50);
+  const [bannerError, setBannerError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -283,7 +285,7 @@ export default function VendorProfilePage() {
 
       {/* ── Banner / Cover ── */}
       <div className="relative h-[200px] md:h-[260px] bg-zinc-100 overflow-hidden group">
-        {v.storeBanner ? (
+        {v.storeBanner && !bannerError ? (
           <Image
             src={v.storeBanner}
             alt={v.storeName}
@@ -291,6 +293,7 @@ export default function VendorProfilePage() {
             className="object-cover"
             style={{ objectPosition: `50% ${bannerPos}%` }}
             priority={true}
+            onError={() => setBannerError(true)}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 to-zinc-100 flex items-center justify-center">

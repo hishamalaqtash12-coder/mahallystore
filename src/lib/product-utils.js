@@ -2,6 +2,8 @@
  * Shared product utilities that can be used in both Server and Client components.
  */
 
+export const DEFAULT_FALLBACK_IMAGE = "https://www.hunleygolf.co.uk/wp-content/themes/dfd-native/assets/images/no_image_resized_675-450.jpg";
+
 export function isProductOutOfStock(product) {
   if (!product) return true;
   if (product.stock_status === "outofstock") return true;

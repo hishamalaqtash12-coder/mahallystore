@@ -5,11 +5,12 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "next-intl";
+import { DEFAULT_FALLBACK_IMAGE } from "@/lib/product-utils";
 
 export default function ProductGallery({ images, productName, isJordanian }) {
   const [activeImage, setActiveImage] = useState(0);
   const locale = useLocale();
-  const galleryImages = images?.length > 0 ? images : [{ src: `https://placehold.co/600/f5f5f5/ff6000?text=${encodeURIComponent(productName || 'Product')}` }];
+  const galleryImages = images?.length > 0 ? images : [{ src: DEFAULT_FALLBACK_IMAGE }];
 
   const nextImage = () => setActiveImage((prev) => (prev + 1) % galleryImages.length);
   const prevImage = () => setActiveImage((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
@@ -46,7 +47,7 @@ export default function ProductGallery({ images, productName, isJordanian }) {
               className={`w-[72px] h-[72px] rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-300 shrink-0 relative ${i === activeImage ? 'border-[#be374f] ring-2 ring-[#be374f]/10' : 'border-zinc-100 hover:border-zinc-300 opacity-70 hover:opacity-100'}`}
             >
               <Image 
-                src={img?.src || `https://placehold.co/80/f5f5f5/ff6000?text=${i+1}`} 
+                src={img?.src || DEFAULT_FALLBACK_IMAGE} 
                 alt={`${productName || 'Product'} thumbnail ${i + 1}`}
                 width={72} 
                 height={72} 

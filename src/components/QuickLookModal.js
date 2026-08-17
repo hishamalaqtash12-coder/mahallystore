@@ -7,7 +7,7 @@ import { Link } from "@/i18n/routing";
 import { useRouter } from "@/i18n/routing";
 import { X, ChevronRight, ChevronDown, Star, Truck, ShieldCheck, RotateCcw, Plus, Minus, Trash2, AlertCircle, Clock } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { isProductOutOfStock, getProductMerchant, getProductUrl } from "@/lib/product-utils";
+import { isProductOutOfStock, getProductMerchant, getProductUrl, getProductIdentifier, DEFAULT_FALLBACK_IMAGE } from "@/lib/product-utils";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations, useLocale } from "next-intl";
 import ProductCountdown from "./ProductCountdown";
@@ -178,7 +178,9 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
 
   const ratingCount = product.rating_count || 0;
   const avgRating = product.average_rating ? parseFloat(product.average_rating) : 0;
-  const { name: merchantName, id: merchantId, slug: merchantSlug } = getProductMerchant(product);
+  const { name: metaMerchantName, id: merchantId, slug: merchantSlug } = getProductMerchant(product);
+  // Use live storeName from vendorData (fetched from /api/vendors) when available
+  const merchantName = vendorData?.storeName || metaMerchantName;
 
 
 
@@ -231,7 +233,7 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                   </div>
                 )}
                 <Image
-                  src={displayImages[selectedImage]?.src || displayImages[0]?.src || "https://placehold.co/600"}
+                  src={displayImages[selectedImage]?.src || displayImages[0]?.src || DEFAULT_FALLBACK_IMAGE}
                   alt={product.name}
                   fill
                   className="object-contain transition-all duration-300 p-2"
@@ -282,6 +284,16 @@ export default function QuickLookModal({ product: initialProduct, isOpen, onClos
                     </span>
                   </div>
                 </ReviewTooltip>
+
+                <div className="flex items-center gap-2 mt-2 text-[12px]">
+                  <span className="text-zinc-500">{locale === "ar" ? "رقم المنتج:" : "Product ID:"}</span>
+                  <span className="font-mono text-zinc-700 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 font-bold">
+                    {getProductIdentifier(product)}
+                  </span>
+                  <span className="font-mono text-zinc-400 text-[11px]">
+                    (ID: {product.id})
+                  </span>
+                </div>
               </div>
 
               <div className="h-px bg-zinc-100 w-full mb-4" />

@@ -164,6 +164,29 @@ export default async function ProductPage({ params }) {
     console.error("Error fetching product details:", error);
   }
 
+  // ── Live store name from vendorData (overrides stale product meta_data) ──
+  // vendorData is fetched fresh from the WooCommerce customer API which always
+  // reflects the latest profile settings saved from the merchant dashboard.
+  function getLiveStoreName(vendorData) {
+    if (!vendorData) return null;
+    // Priority 1: dokan_store_name meta key
+    const dokanName = vendorData.meta_data?.find(m => m.key === "dokan_store_name")?.value;
+    if (dokanName) return dokanName;
+    // Priority 2: dokan_profile_settings blob
+    const dokanMeta = vendorData.meta_data?.find(m => m.key === "dokan_profile_settings")?.value;
+    if (dokanMeta) {
+      try {
+        const parsed = typeof dokanMeta === "string" ? JSON.parse(dokanMeta) : dokanMeta;
+        if (parsed?.store_name) return parsed.store_name;
+      } catch { }
+    }
+    // Priority 3: mahally custom name
+    const mahallyName = vendorData.meta_data?.find(m => m.key === "mahally_owner_name" || m.key === "merchant_name")?.value;
+    if (mahallyName) return mahallyName;
+    return null;
+  }
+  const liveStoreName = getLiveStoreName(vendorData);
+
   if (!product) {
     return (
       <div
@@ -323,10 +346,12 @@ export default async function ProductPage({ params }) {
 
               {(() => {
                 const {
-                  name: storeName,
+                  name: metaStoreName,
                   id: storeId,
                   slug: storeSlug,
                 } = getProductMerchant(product);
+                // Use live store name from vendorData when available, fallback to meta_data
+                const storeName = liveStoreName || metaStoreName;
                 return (
                   <div className="flex flex-col gap-1 mb-3">
                     <div className="flex items-center gap-1.5 text-[14px]">
@@ -435,8 +460,10 @@ export default async function ProductPage({ params }) {
               )}
 
               {(() => {
-                const { name: storeName, id: storeId } =
+                const { name: metaStoreName, id: storeId } =
                   getProductMerchant(product);
+                // Prefer live store name from vendorData over stale product meta
+                const storeName = liveStoreName || metaStoreName;
                 return (
                   <ShippingInfoDisplay
                     vendorId={storeId}
@@ -477,6 +504,7 @@ export default async function ProductPage({ params }) {
               variations={productVariations}
               returnPolicy={returnPolicyStr}
               whatsappNumber={showVendorWhatsapp ? vendorWhatsappNumber : null}
+              merchantName={liveStoreName}
             />
           </div>
         </div>

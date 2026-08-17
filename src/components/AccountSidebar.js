@@ -163,7 +163,8 @@ export default function AccountSidebar({
       <aside
         className={`w-72 bg-white md:min-h-screen pt-6 pb-6 shrink-0 flex flex-col
           md:sticky md:top-0 md:block md:h-fit md:z-0
-          fixed top-0 bottom-0 z-[100] transition-transform duration-300
+          fixed top-0 z-[100] transition-transform duration-300
+          h-screen h-[100dvh]
           ${dir === "rtl" ? "border-s border-gray-100" : "border-e border-gray-100"}
           ${isMobileOpen 
             ? (dir === "rtl" ? "right-0" : "left-0") 

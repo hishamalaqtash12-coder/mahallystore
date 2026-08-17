@@ -6,14 +6,16 @@ import { Star, ShoppingCart, Check, Eye, BadgeCheck, Heart, AlertCircle, Clock, 
 import { useCart } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
 import { useWishlist } from "@/context/WishlistContext";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import QuickLookModal from "./QuickLookModal";
 import ReviewTooltip from "./ReviewTooltip";
 import { useAuth } from "@/context/AuthContext";
 
-import { isProductOutOfStock, getProductMerchant, getProductUrl } from "@/lib/product-utils";
+import { isProductOutOfStock, getProductMerchant, getProductUrl, DEFAULT_FALLBACK_IMAGE } from "@/lib/product-utils";
 import { isMadeInJordanProduct } from "@/lib/made-in-jordan";
-import { useEffect, useRef } from "react";
+
+// Module-level cache so multiple cards for the same vendor share one fetch
+const vendorNameCache = new Map();
 
 function CountdownTimer({ expiryDate, discountAmount, product }) {
   const t = useTranslations("ProductCard");
@@ -93,7 +95,7 @@ export default function ProductCard({ product }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [isQuickLookOpen, setIsQuickLookOpen] = useState(false);
 
-  const imageUrl = product.images?.[0]?.src || `https://placehold.co/400x400/f5f5f5/ff6000?text=${encodeURIComponent(product.name || "Product")}`;
+  const imageUrl = product.images?.[0]?.src || DEFAULT_FALLBACK_IMAGE;
   const alreadyInCart = isInCart(product.id);
   const alreadyInWishlist = isInWishlist(product.id);
   const outOfStock = isProductOutOfStock(product);
@@ -120,10 +122,39 @@ export default function ProductCard({ product }) {
   deliveryDate.setDate(deliveryDate.getDate() + 3);
   const deliveryStr = deliveryDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-  const { name: merchantName, id: merchantId, slug: merchantSlug } = getProductMerchant(product);
+  const { name: metaMerchantName, id: merchantId, slug: merchantSlug } = getProductMerchant(product);
   const merchantLink = merchantSlug || merchantId ? `/vendor/${merchantSlug || merchantId}` : "/vendors";
   const isVerifiedMerchant = !!merchantId;
   const isJordanian = isMadeInJordanProduct(product);
+
+  // Live store name: fetch from vendor API to reflect post-rename changes
+  const [liveMerchantName, setLiveMerchantName] = useState(metaMerchantName);
+  useEffect(() => {
+    if (!merchantId) return;
+    const cacheKey = String(merchantId);
+    if (vendorNameCache.has(cacheKey)) {
+      const cached = vendorNameCache.get(cacheKey);
+      if (cached) setLiveMerchantName(cached);
+      return;
+    }
+    // Mark as in-flight
+    vendorNameCache.set(cacheKey, null);
+    fetch(`/api/vendors/${merchantId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        const name = data?.vendor?.storeName || data?.vendor?.name || null;
+        if (name) {
+          vendorNameCache.set(cacheKey, name);
+          setLiveMerchantName(name);
+        } else {
+          // Fall back to meta name and cache it
+          vendorNameCache.set(cacheKey, metaMerchantName);
+        }
+      })
+      .catch(() => { vendorNameCache.set(cacheKey, metaMerchantName); });
+  }, [merchantId]);
+
+  const merchantName = liveMerchantName || metaMerchantName;
 
   const descriptionText = product.short_description || product.description || "";
   const plainDescription = descriptionText.replace(/<[^>]+>/g, "").trim();

@@ -119,7 +119,8 @@ function MessageContextPortal({
           position: "fixed",
           top: pos.top,
           left: pos.left,
-          zIndex: 9999,
+          zIndex: 99999,
+          maxWidth: "calc(100vw - 24px)",
           opacity: show ? 1 : 0,
           transform: show ? "scale(1) translateY(0)" : "scale(0.88) translateY(8px)",
           transition: ease,
@@ -140,6 +141,8 @@ function MessageContextPortal({
           gap: 1,
           boxShadow: "0 4px 16px rgba(0,0,0,0.45)",
           direction: "ltr",
+          maxWidth: "calc(100vw - 24px)",
+          boxSizing: "border-box",
         }}>
           {emojis.map(em => (
             <button
@@ -1290,18 +1293,21 @@ function MessagesContent() {
                                 e.stopPropagation();
                                 const bubble = e.currentTarget.closest(".message-bubble-wrapper");
                                 const rect = bubble.getBoundingClientRect();
-                                const panelW = 190;
-                                // emoji pill ~42px + gap 6px + context menu ~(items*34px)
-                                const panelH = 42 + 6 + 34 * 3;
+                                const panelW = 265;
+                                const panelH = 175;
+                                const pad = 12;
 
-                                // Vertical: place ABOVE the bubble. If not enough room, place below.
+                                // Vertical: place ABOVE the bubble if there is room; otherwise below
                                 let topPos = rect.top - panelH - 8;
-                                if (topPos < 8) topPos = rect.bottom + 8;
-                                // clamp to viewport bottom
-                                if (topPos + panelH > window.innerHeight - 8)
-                                  topPos = window.innerHeight - panelH - 8;
+                                if (topPos < 65) {
+                                  topPos = rect.bottom + 8;
+                                }
+                                // Clamp to viewport
+                                if (topPos + panelH > window.innerHeight - pad) {
+                                  topPos = Math.max(pad, window.innerHeight - panelH - pad);
+                                }
 
-                                // Horizontal: align to bubble edge
+                                // Horizontal: align to bubble edge in RTL or LTR
                                 let leftPos;
                                 if (isAr) {
                                   // RTL: align panel right edge to bubble right edge
@@ -1310,11 +1316,12 @@ function MessagesContent() {
                                   // LTR: align panel left edge to bubble left edge
                                   leftPos = rect.left;
                                 }
-                                if (leftPos + panelW > window.innerWidth - 8) {
-                                  leftPos = window.innerWidth - panelW - 8;
+                                // Clamp strictly inside viewport boundaries
+                                if (leftPos + panelW > window.innerWidth - pad) {
+                                  leftPos = window.innerWidth - panelW - pad;
                                 }
-                                if (leftPos < 8) {
-                                  leftPos = 8;
+                                if (leftPos < pad) {
+                                  leftPos = pad;
                                 }
 
                                 setReactionPickerPos({ top: topPos, left: leftPos });
@@ -1738,25 +1745,14 @@ function MessagesContent() {
       {/* ── LIGHTBOX MODAL ── */}
       {lightboxMedia && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[999999] bg-black/95 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
+          className="fixed inset-0 z-[999999] bg-white flex items-center justify-center animate-in fade-in duration-200"
           onClick={() => setLightboxMedia(null)}
         >
           {/* Top Controls */}
-          <div className="absolute top-0 inset-x-0 p-4 flex justify-end gap-3 z-[1000000] bg-gradient-to-b from-black/50 to-transparent">
-            <a
-              href={lightboxMedia.mediaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              download
-              onClick={e => e.stopPropagation()}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors backdrop-blur-md"
-              title={isAr ? "فتح في علامة تبويب جديدة" : "Open in new tab"}
-            >
-              <ArrowRight size={20} className={isAr ? "" : "-rotate-45"} />
-            </a>
+          <div className="absolute top-0 inset-x-0 p-4 flex justify-end gap-3 z-[1000000] bg-gradient-to-b from-black/10 to-transparent">
             <button
               onClick={(e) => { e.stopPropagation(); setLightboxMedia(null); }}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors backdrop-blur-md"
+              className="w-10 h-10 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center text-zinc-800 transition-colors"
               title={isAr ? "إغلاق" : "Close"}
             >
               <X size={24} />
@@ -1768,7 +1764,7 @@ function MessagesContent() {
             <img
               src={lightboxMedia.mediaUrl}
               alt="fullscreen media"
-              className="max-w-full max-h-full object-contain drop-shadow-2xl pointer-events-auto"
+              className="max-w-full max-h-full object-contain drop-shadow-lg pointer-events-auto rounded-md"
               onClick={e => e.stopPropagation()}
             />
             {lightboxMedia.text && (
