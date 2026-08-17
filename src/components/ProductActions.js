@@ -28,6 +28,7 @@ export default function ProductActions({
   variations = [],
   returnPolicy = null,
   whatsappNumber = null,
+  merchantName: merchantNameProp = null,
 }) {
   const t = useTranslations("ProductActions");
   const locale = useLocale();
@@ -454,10 +455,12 @@ export default function ProductActions({
         <div className="text-[#565959]">{t("soldBy")}</div>
         {(() => {
           const {
-            name: storeName,
+            name: metaStoreName,
             id: storeId,
             slug: storeSlug,
           } = getProductMerchant(product);
+          // Use live merchantName prop (from server-fetched vendorData) when available
+          const storeName = merchantNameProp || metaStoreName;
           return (
             <Link
               href={

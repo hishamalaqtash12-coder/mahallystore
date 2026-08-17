@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { logMerchantAction } from "@/lib/merchant-logger";
 import { useAuth } from "@/context/AuthContext";
 
@@ -813,29 +814,28 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
     };
   }, []);
 
-  return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden">
-      <div className="bg-white w-full max-w-5xl h-[100dvh] sm:h-auto sm:max-h-[90vh] rounded-none sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" dir={isAr ? "rtl" : "ltr"}>
+  const modalContent = (
+    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-0 sm:p-4 md:p-6 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden">
+      <div className="bg-white w-full h-[100dvh] sm:h-[90vh] sm:max-h-[850px] sm:max-w-5xl rounded-none sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border-0 sm:border border-zinc-200" dir={isAr ? "rtl" : "ltr"}>
         {/* Header */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between bg-zinc-50 gap-2 shrink-0">
-          <div className="flex items-center justify-between w-full sm:w-auto">
-            <div>
-              <h2 className="text-base sm:text-[18px] font-bold text-zinc-900 leading-snug">{productToEdit ? l("Edit Product") : l("Add New Product")}</h2>
-              <p className="text-xs text-zinc-500 font-medium hidden sm:block">{l("Complete all sections to publish your product.")}</p>
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50 shrink-0">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-[16px] sm:text-[18px] font-bold text-zinc-900 leading-tight">{productToEdit ? l("Edit Product") : l("Add New Product")}</h2>
+              {productToEdit && (
+                <span className="text-[11px] font-mono font-bold bg-zinc-200/80 text-zinc-700 px-2 py-0.5 rounded border border-zinc-300">
+                  ID: {productToEdit.id}
+                </span>
+              )}
             </div>
-            <button onClick={onClose} className="p-1.5 sm:p-2 hover:bg-zinc-200 rounded-full transition-colors sm:hidden">
-              <X size={20} className="text-zinc-500" />
-            </button>
+            <p className="text-xs text-zinc-500 font-medium hidden sm:block mt-0.5">{l("Complete all sections to publish your product.")}</p>
           </div>
-
-          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-200/60">
-            <div className="flex items-center gap-4">
-            </div>
-
-            <button onClick={onClose} className="p-2 hover:bg-zinc-200 rounded-full transition-colors hidden sm:block">
-              <X size={20} className="text-zinc-500" />
-            </button>
-          </div>
+          <button 
+            onClick={onClose} 
+            className="w-9 h-9 flex items-center justify-center hover:bg-zinc-200/80 rounded-full transition-colors text-zinc-500 hover:text-zinc-900"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
@@ -877,7 +877,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               </div>
             )}
 
-            <form id="product-form" onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 w-full max-w-2xl">
+            <form id="product-form" onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 w-full max-w-3xl">
               {activeTab === "general" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -2043,7 +2043,10 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
         </div>
 
         {/* Footer Actions */}
-        <div className="px-4 sm:px-8 py-3 sm:py-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between bg-zinc-50 gap-3 shrink-0">
+        <div 
+          className="px-4 sm:px-8 py-3 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between bg-zinc-50 gap-3 shrink-0"
+          style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
+        >
           <div className="flex items-center gap-2 text-zinc-500 w-full sm:w-auto justify-center sm:justify-start">
             {loading && <Loader2 size={16} className="animate-spin" />}
             <span className="text-xs font-medium">
@@ -2057,6 +2060,7 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
               </span>
             )}
             <button 
+              type="button"
               onClick={onClose}
               className="flex-1 sm:flex-none h-10 px-4 sm:px-6 bg-white border border-zinc-300 rounded-lg text-xs sm:text-[13px] font-bold hover:bg-zinc-50 transition-all shadow-sm"
             >
@@ -2084,4 +2088,6 @@ export default function AddProductForm({ onClose, onProductAdded, user, productT
       </div>
     </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(modalContent, document.body) : modalContent;
 }

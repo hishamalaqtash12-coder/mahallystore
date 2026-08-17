@@ -5,7 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { X, Minus, Plus, ShoppingCart, Trash2, ChevronRight } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { DEFAULT_FALLBACK_IMAGE } from "@/lib/product-utils";
 
 export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -97,7 +98,7 @@ export default function CartDrawer() {
                   {cart.map((item) => (
                     <li key={`${item.id}-${item.variation_id || '0'}`} className="p-4 flex gap-4 hover:bg-zinc-50 transition-colors">
                       <div className="relative w-20 h-20 bg-white border border-zinc-100 rounded-sm shrink-0 overflow-hidden">
-                        <Image src={item.image || "https://placehold.co/100"} alt={item.name} fill className="object-contain p-1" />
+                        <Image src={item.image || DEFAULT_FALLBACK_IMAGE} alt={item.name} fill className="object-contain p-1" />
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
                         <div>

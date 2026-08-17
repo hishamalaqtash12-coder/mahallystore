@@ -126,19 +126,29 @@ export default function MerchantInventoryPage() {
 
   const handleQuickRefill = async () => {
     if (!refillId) return;
+    const finalQty = refillValue === "" ? 0 : Math.max(0, parseInt(refillValue, 10) || 0);
     setUpdatingStock(true);
     try {
       const res = await fetch("/api/merchant/products/stock", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: refillId, stock_quantity: refillValue, wooId })
+        body: JSON.stringify({ id: refillId, stock_quantity: finalQty, wooId })
       });
       if (res.ok) {
+        // Optimistically update local stats so change is immediately visible
+        setStats(prev => prev.map(item => item.id === refillId ? {
+          ...item,
+          currentStock: finalQty,
+          stockStatus: finalQty > 0 ? "instock" : "outofstock"
+        } : item));
         setRefillId(null);
         setRefillProduct(null);
         setSuccessMsg(t.refill.success);
         setTimeout(() => setSuccessMsg(""), 3000);
         fetchStats();
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || t.refill.error);
       }
     } catch (err) {
       alert(t.refill.error);
@@ -356,7 +366,11 @@ export default function MerchantInventoryPage() {
                           <span className="text-[13px] font-bold text-zinc-900 group-hover:text-[#be374f] transition-colors truncate max-w-[200px]">
                             {product.name}
                           </span>
-                          <span className="text-[11px] text-zinc-400 font-mono mt-0.5">SKU: {product.sku || "—"}</span>
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono mt-0.5">
+                            <span className="text-zinc-600 font-bold bg-zinc-100 px-1 rounded border border-zinc-200">ID: {product.id}</span>
+                            <span className="text-zinc-300">•</span>
+                            <span className="text-zinc-400">SKU: {product.sku || "—"}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -465,7 +479,9 @@ export default function MerchantInventoryPage() {
               <div>
                 <h2 className="text-[16px] font-bold text-zinc-900">{t.refill.title}</h2>
                 {refillProduct && (
-                  <p className="text-[12px] text-zinc-500 mt-0.5 truncate max-w-[220px]">{refillProduct.name}</p>
+                  <p className="text-[12px] text-zinc-500 mt-0.5 truncate max-w-[220px]">
+                    {refillProduct.name} <span className="font-mono text-zinc-500 font-bold bg-zinc-100 px-1 rounded border border-zinc-200 text-[10px]">ID: {refillProduct.id}</span>
+                  </p>
                 )}
               </div>
               <button
@@ -486,7 +502,12 @@ export default function MerchantInventoryPage() {
                   type="number"
                   min={0}
                   value={refillValue}
-                  onChange={e => setRefillValue(parseInt(e.target.value, 10) || 0)}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setRefillValue(v === "" ? "" : Math.max(0, parseInt(v, 10) || 0));
+                  }}
+                  onFocus={e => e.target.select()}
+                  placeholder="0"
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-[20px] font-bold text-zinc-900 outline-none focus:border-[#be374f] transition-all"
                   autoFocus
                 />

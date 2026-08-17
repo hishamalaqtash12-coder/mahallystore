@@ -20,6 +20,7 @@ import {
 import { useEffect, useState, useMemo } from "react";
 import ProductCard from "@/components/ProductCard";
 import { useLocale, useTranslations } from "next-intl";
+import { DEFAULT_FALLBACK_IMAGE } from "@/lib/product-utils";
 
 export default function CartPage() {
    const t = useTranslations("Cart");
@@ -230,7 +231,7 @@ export default function CartPage() {
                                  {/* Image */}
                                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100 shrink-0">
                                     <Image
-                                       src={item.image || "https://placehold.co/200"}
+                                       src={item.image || DEFAULT_FALLBACK_IMAGE}
                                        alt={item.name}
                                        fill
                                        className="object-contain p-1.5"

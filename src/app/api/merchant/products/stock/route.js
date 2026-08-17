@@ -22,10 +22,16 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Product not found or access denied" }, { status: 404 });
     }
 
+    const newQuantity = parseInt(stock_quantity, 10) || 0;
     const res = await wcApi.put(`products/${id}`, {
-      stock_quantity: parseInt(stock_quantity),
-      stock_status: parseInt(stock_quantity) > 0 ? 'instock' : 'outofstock'
+      manage_stock: true,
+      stock_quantity: newQuantity,
+      stock_status: newQuantity > 0 ? 'instock' : 'outofstock'
     });
+
+    if (!res?.data || res?.data?.code) {
+      throw new Error(res?.data?.message || "Failed to update product stock");
+    }
 
     return NextResponse.json(res.data);
   } catch (error) {

@@ -3,7 +3,7 @@
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { getProductUrl } from "@/lib/product-utils";
+import { getProductUrl, DEFAULT_FALLBACK_IMAGE } from "@/lib/product-utils";
 import { ChevronRight, Megaphone, Store, ExternalLink } from "lucide-react";
 import { useMemo } from "react";
 
@@ -93,7 +93,7 @@ export default function SuperBuyerSection({ products = [], vendors = [], adverti
                      return (
                         <Link key={i} href={getProductUrl(p)} className="group p-5 flex flex-col hover:bg-zinc-50 transition-colors">
                            <div className="aspect-square bg-white mb-4 relative flex items-center justify-center">
-                              <Image src={p.images?.[0]?.src || "https://placehold.co/200x200"} alt={p.name} fill className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                              <Image src={p.images?.[0]?.src || DEFAULT_FALLBACK_IMAGE} alt={p.name} fill className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
                            </div>
                            <h3 className="text-[13px] text-zinc-800 line-clamp-2 leading-snug mb-2 group-hover:text-brand transition-colors">{p.name}</h3>
                            <div className="mt-auto">

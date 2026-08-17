@@ -20,6 +20,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'placehold.co' },
       { protocol: 'https', hostname: 'secure.gravatar.com' },
       { protocol: 'https', hostname: 'whitesmoke-monkey-771359.hostingersite.com' },
+      { protocol: 'https', hostname: 'www.hunleygolf.co.uk' },
     ],
   },
 };
